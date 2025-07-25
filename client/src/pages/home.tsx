@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Package } from "lucide-react";
+import { Users, Package, Calendar } from "lucide-react";
 import Header from "@/components/header";
 import HeroSection from "@/components/hero-section";
 import ProductCard from "@/components/product-card";
@@ -9,7 +9,7 @@ import type { Product } from "@shared/schema";
 import { Link } from "wouter";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'contractors' | 'products'>('contractors');
+  const [activeTab, setActiveTab] = useState<'products' | 'maintenance' | 'contractors'>('products');
 
   const { data: featuredProducts, isLoading } = useQuery<Product[]>({
     queryKey: ['/api/products', 'featured'],
@@ -31,17 +31,6 @@ export default function Home() {
           <div className="flex justify-center">
             <div className="flex bg-muted rounded-xl p-1">
               <button
-                onClick={() => setActiveTab('contractors')}
-                className={`px-6 py-3 rounded-lg text-sm font-medium flex items-center transition-colors ${
-                  activeTab === 'contractors'
-                    ? 'bg-card text-card-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Find Contractors
-              </button>
-              <button
                 onClick={() => setActiveTab('products')}
                 className={`px-6 py-3 rounded-lg text-sm font-medium flex items-center transition-colors ${
                   activeTab === 'products'
@@ -51,6 +40,28 @@ export default function Home() {
               >
                 <Package className="mr-2 h-4 w-4" />
                 DIY Products
+              </button>
+              <button
+                onClick={() => setActiveTab('maintenance')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium flex items-center transition-colors ${
+                  activeTab === 'maintenance'
+                    ? 'bg-card text-card-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                Maintenance Schedule
+              </button>
+              <button
+                onClick={() => setActiveTab('contractors')}
+                className={`px-6 py-3 rounded-lg text-sm font-medium flex items-center transition-colors ${
+                  activeTab === 'contractors'
+                    ? 'bg-card text-card-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Users className="mr-2 h-4 w-4" />
+                Find Contractors
               </button>
             </div>
           </div>

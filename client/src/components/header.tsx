@@ -32,9 +32,6 @@ export default function Header() {
             }`}>
               Maintenance Schedule
             </Link>
-            <a href="#contractor-cta" className="text-gray-700 hover:text-primary transition-colors">
-              For Contractors
-            </a>
           </nav>
 
           <div className="flex items-center space-x-4">
