@@ -23,10 +23,6 @@ export default function HeroSection() {
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Your <span className="text-primary">Home Base</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Connect with skilled contractors specializing in gutters, drywall, custom work, 
-            and more. Plus find quality DIY products and seasonal maintenance guidance.
-          </p>
         </div>
 
         <div className="max-w-4xl mx-auto">
