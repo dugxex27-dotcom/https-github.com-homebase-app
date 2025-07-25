@@ -2,12 +2,12 @@ export default function Logo({ className = "h-8 w-auto" }: { className?: string 
   return (
     <svg
       className={className}
-      viewBox="0 0 400 100"
+      viewBox="0 0 500 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       preserveAspectRatio="xMidYMid meet"
     >
-      {/* House icon with warm colors - centered and much larger */}
+      {/* House icon with warm colors - positioned left */}
       <g transform="translate(10, 5)">
         {/* House base */}
         <rect
@@ -55,12 +55,12 @@ export default function Logo({ className = "h-8 w-auto" }: { className?: string 
         />
       </g>
 
-      {/* Text "Home Base" - centered and larger */}
+      {/* Text "Home Base" - larger font to match house height with more spacing */}
       <g fill="currentColor">
         <text
-          x="200"
-          y="60"
-          fontSize="42"
+          x="280"
+          y="50"
+          fontSize="65"
           fontWeight="700"
           fontFamily="system-ui, -apple-system, sans-serif"
           textAnchor="middle"
