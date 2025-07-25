@@ -7,60 +7,60 @@ export default function Logo({ className = "h-8 w-auto" }: { className?: string 
       xmlns="http://www.w3.org/2000/svg"
       preserveAspectRatio="xMidYMid meet"
     >
-      {/* House icon with warm colors - centered and larger */}
-      <g transform="translate(20, 10)">
+      {/* House icon with warm colors - centered and much larger */}
+      <g transform="translate(10, 5)">
         {/* House base */}
         <rect
           x="0"
-          y="40"
-          width="48"
-          height="40"
-          rx="4"
+          y="35"
+          width="70"
+          height="60"
+          rx="6"
           fill="currentColor"
           opacity="0.8"
         />
         {/* House roof */}
         <path
-          d="M-5 45 L24 15 L53 45 L47 45 L24 22 L1 45 Z"
+          d="M-8 42 L35 5 L78 42 L70 42 L35 15 L0 42 Z"
           fill="currentColor"
         />
         {/* Door */}
         <rect
-          x="18"
-          y="55"
-          width="12"
-          height="25"
-          rx="2"
+          x="26"
+          y="65"
+          width="18"
+          height="30"
+          rx="3"
           fill="white"
           opacity="0.9"
         />
         {/* Windows */}
         <rect
-          x="8"
+          x="10"
           y="48"
-          width="8"
-          height="8"
-          rx="1.5"
+          width="12"
+          height="12"
+          rx="2"
           fill="white"
           opacity="0.9"
         />
         <rect
-          x="32"
+          x="48"
           y="48"
-          width="8"
-          height="8"
-          rx="1.5"
+          width="12"
+          height="12"
+          rx="2"
           fill="white"
           opacity="0.9"
         />
       </g>
 
-      {/* Text "Home Base" - centered */}
+      {/* Text "Home Base" - centered and larger */}
       <g fill="currentColor">
         <text
           x="200"
           y="60"
-          fontSize="32"
+          fontSize="42"
           fontWeight="700"
           fontFamily="system-ui, -apple-system, sans-serif"
           textAnchor="middle"
