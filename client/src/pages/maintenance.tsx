@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Wrench, DollarSign, MapPin } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw } from "lucide-react";
 
 interface MaintenanceTask {
   id: string;
@@ -39,6 +41,62 @@ const CLIMATE_ZONES = [
 export default function Maintenance() {
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedZone, setSelectedZone] = useState<string>("pacific-northwest");
+  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
+
+  // Load completed tasks from localStorage on component mount
+  useEffect(() => {
+    const stored = localStorage.getItem('maintenance-completed-tasks');
+    if (stored) {
+      try {
+        setCompletedTasks(JSON.parse(stored));
+      } catch {
+        setCompletedTasks({});
+      }
+    }
+  }, []);
+
+  // Save completed tasks to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('maintenance-completed-tasks', JSON.stringify(completedTasks));
+  }, [completedTasks]);
+
+  // Generate storage key for task completion (includes month/year to reset monthly)
+  const getTaskKey = (taskId: string, month: number, year: number) => {
+    return `${taskId}-${month}-${year}`;
+  };
+
+  // Toggle task completion
+  const toggleTaskCompletion = (taskId: string) => {
+    const currentYear = new Date().getFullYear();
+    const taskKey = getTaskKey(taskId, selectedMonth, currentYear);
+    
+    setCompletedTasks(prev => ({
+      ...prev,
+      [taskKey]: !prev[taskKey]
+    }));
+  };
+
+  // Check if task is completed
+  const isTaskCompleted = (taskId: string) => {
+    const currentYear = new Date().getFullYear();
+    const taskKey = getTaskKey(taskId, selectedMonth, currentYear);
+    return completedTasks[taskKey] || false;
+  };
+
+  // Reset all tasks for current month/year
+  const resetMonthTasks = () => {
+    const currentYear = new Date().getFullYear();
+    const updatedTasks = { ...completedTasks };
+    
+    // Remove all completed tasks for current month/year
+    Object.keys(updatedTasks).forEach(key => {
+      if (key.includes(`-${selectedMonth}-${currentYear}`)) {
+        delete updatedTasks[key];
+      }
+    });
+    
+    setCompletedTasks(updatedTasks);
+  };
 
   // Comprehensive maintenance schedule based on professional recommendations
   const getMaintenanceTasksForMonth = (month: number): MaintenanceTask[] => {
@@ -615,6 +673,9 @@ export default function Maintenance() {
     task.climateZones.includes(selectedZone)
   );
 
+  const completedCount = filteredTasks.filter(task => isTaskCompleted(task.id)).length;
+  const totalTasks = filteredTasks.length;
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'bg-red-100 text-red-800 border-red-200';
@@ -639,12 +700,35 @@ export default function Maintenance() {
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-4">
-            Monthly Maintenance Schedule
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Stay on top of home maintenance with personalized recommendations based on your location and the season.
-          </p>
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                Monthly Maintenance Schedule
+              </h1>
+              <p className="text-muted-foreground text-lg">
+                Stay on top of home maintenance with personalized recommendations based on your location and the season.
+              </p>
+            </div>
+            {totalTasks > 0 && (
+              <div className="text-right">
+                <div className="text-2xl font-bold text-foreground mb-1">
+                  {completedCount}/{totalTasks}
+                </div>
+                <div className="text-sm text-muted-foreground mb-2">
+                  Tasks Completed
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={resetMonthTasks}
+                  className="text-xs"
+                >
+                  <RotateCcw className="w-3 h-3 mr-1" />
+                  Reset Month
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Filters */}
@@ -688,64 +772,81 @@ export default function Maintenance() {
 
         {/* Tasks Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredTasks.map((task) => (
-            <Card key={task.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg font-semibold text-foreground">
-                    {task.title}
-                  </CardTitle>
-                  <Badge className={`${getPriorityColor(task.priority)} border`}>
-                    {task.priority} priority
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground leading-relaxed">
-                  {task.description}
-                </p>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-2 text-muted-foreground" />
-                    <span>{task.estimatedTime}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Badge variant="secondary" className={getDifficultyColor(task.difficulty)}>
-                      {task.difficulty}
+          {filteredTasks.map((task) => {
+            const completed = isTaskCompleted(task.id);
+            return (
+              <Card 
+                key={task.id} 
+                className={`hover:shadow-md transition-all ${
+                  completed ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800' : ''
+                }`}
+              >
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-start space-x-3 flex-1">
+                      <Checkbox
+                        checked={completed}
+                        onCheckedChange={() => toggleTaskCompletion(task.id)}
+                        className="mt-1"
+                      />
+                      <CardTitle className={`text-lg font-semibold ${
+                        completed ? 'text-green-700 dark:text-green-300 line-through' : 'text-foreground'
+                      }`}>
+                        {task.title}
+                      </CardTitle>
+                    </div>
+                    <Badge className={`${getPriorityColor(task.priority)} border ml-2`}>
+                      {task.priority} priority
                     </Badge>
                   </div>
-                  {task.cost && (
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground leading-relaxed">
+                    {task.description}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center">
-                      <DollarSign className="w-4 h-4 mr-2 text-muted-foreground" />
-                      <span>{task.cost}</span>
+                      <Clock className="w-4 h-4 mr-2 text-muted-foreground" />
+                      <span>{task.estimatedTime}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Badge variant="secondary" className={getDifficultyColor(task.difficulty)}>
+                        {task.difficulty}
+                      </Badge>
+                    </div>
+                    {task.cost && (
+                      <div className="flex items-center">
+                        <DollarSign className="w-4 h-4 mr-2 text-muted-foreground" />
+                        <span>{task.cost}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center">
+                      <Badge variant="outline" className="text-xs">
+                        {task.category}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {task.tools && task.tools.length > 0 && (
+                    <div>
+                      <div className="flex items-center mb-2">
+                        <Wrench className="w-4 h-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm font-medium">Tools needed:</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {task.tools.map((tool, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {tool}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
                   )}
-                  <div className="flex items-center">
-                    <Badge variant="outline" className="text-xs">
-                      {task.category}
-                    </Badge>
-                  </div>
-                </div>
-
-                {task.tools && task.tools.length > 0 && (
-                  <div>
-                    <div className="flex items-center mb-2">
-                      <Wrench className="w-4 h-4 mr-2 text-muted-foreground" />
-                      <span className="text-sm font-medium">Tools needed:</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {task.tools.map((tool, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {tool}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {filteredTasks.length === 0 && (
