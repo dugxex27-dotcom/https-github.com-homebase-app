@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings } from "lucide-react";
 
 interface MaintenanceTask {
   id: string;
@@ -20,6 +21,7 @@ interface MaintenanceTask {
   category: string;
   tools: string[] | null;
   cost: string | null;
+  systemRequirements?: string[]; // New field for home system requirements
 }
 
 const MONTHS = [
@@ -38,27 +40,79 @@ const CLIMATE_ZONES = [
   { value: "great-plains", label: "Great Plains" }
 ];
 
+const HOME_SYSTEMS = {
+  heating: [
+    { value: "gas-furnace", label: "Gas Furnace" },
+    { value: "oil-furnace", label: "Oil Furnace" },
+    { value: "electric-furnace", label: "Electric Furnace" },
+    { value: "heat-pump", label: "Heat Pump" },
+    { value: "boiler", label: "Boiler" },
+    { value: "radiant-floor", label: "Radiant Floor Heating" },
+    { value: "wood-stove", label: "Wood Stove/Fireplace" }
+  ],
+  cooling: [
+    { value: "central-ac", label: "Central AC" },
+    { value: "window-ac", label: "Window AC Units" },
+    { value: "mini-split", label: "Mini-Split System" },
+    { value: "evaporative", label: "Evaporative Cooler" }
+  ],
+  water: [
+    { value: "gas-water-heater", label: "Gas Water Heater" },
+    { value: "electric-water-heater", label: "Electric Water Heater" },
+    { value: "tankless-gas", label: "Tankless Gas" },
+    { value: "tankless-electric", label: "Tankless Electric" },
+    { value: "solar-water", label: "Solar Water Heating" },
+    { value: "well-water", label: "Well Water System" },
+    { value: "water-softener", label: "Water Softener" }
+  ],
+  features: [
+    { value: "solar-panels", label: "Solar Panels" },
+    { value: "pool", label: "Swimming Pool" },
+    { value: "spa", label: "Hot Tub/Spa" },
+    { value: "generator", label: "Backup Generator" },
+    { value: "septic", label: "Septic System" },
+    { value: "sump-pump", label: "Sump Pump" },
+    { value: "security-system", label: "Security System" },
+    { value: "sprinkler-system", label: "Irrigation/Sprinkler System" }
+  ]
+};
+
 export default function Maintenance() {
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedZone, setSelectedZone] = useState<string>("pacific-northwest");
   const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
+  const [homeSystems, setHomeSystems] = useState<string[]>([]);
+  const [showSystemFilters, setShowSystemFilters] = useState(false);
 
-  // Load completed tasks from localStorage on component mount
+  // Load completed tasks and home systems from localStorage on component mount
   useEffect(() => {
-    const stored = localStorage.getItem('maintenance-completed-tasks');
-    if (stored) {
+    const storedTasks = localStorage.getItem('maintenance-completed-tasks');
+    if (storedTasks) {
       try {
-        setCompletedTasks(JSON.parse(stored));
+        setCompletedTasks(JSON.parse(storedTasks));
       } catch {
         setCompletedTasks({});
       }
     }
+
+    const storedSystems = localStorage.getItem('home-systems');
+    if (storedSystems) {
+      try {
+        setHomeSystems(JSON.parse(storedSystems));
+      } catch {
+        setHomeSystems([]);
+      }
+    }
   }, []);
 
-  // Save completed tasks to localStorage whenever it changes
+  // Save completed tasks and home systems to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('maintenance-completed-tasks', JSON.stringify(completedTasks));
   }, [completedTasks]);
+
+  useEffect(() => {
+    localStorage.setItem('home-systems', JSON.stringify(homeSystems));
+  }, [homeSystems]);
 
   // Generate storage key for task completion (includes month/year to reset monthly)
   const getTaskKey = (taskId: string, month: number, year: number) => {
@@ -96,6 +150,15 @@ export default function Maintenance() {
     });
     
     setCompletedTasks(updatedTasks);
+  };
+
+  // Toggle home system selection
+  const toggleHomeSystem = (system: string) => {
+    setHomeSystems(prev => 
+      prev.includes(system) 
+        ? prev.filter(s => s !== system)
+        : [...prev, system]
+    );
   };
 
   // Comprehensive maintenance schedule based on professional recommendations
@@ -167,6 +230,228 @@ export default function Maintenance() {
         tools: null,
         cost: "$0"
       },
+
+      // SYSTEM-SPECIFIC MONTHLY TASKS
+      {
+        id: "monthly-gas-furnace",
+        title: "Check Gas Furnace Filter and Vents",
+        description: "Inspect furnace filter for clogs and ensure all vents are unobstructed for proper airflow.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "15 minutes",
+        difficulty: "easy",
+        category: "HVAC",
+        tools: null,
+        cost: "$0",
+        systemRequirements: ["gas-furnace"]
+      },
+      {
+        id: "monthly-oil-furnace",
+        title: "Monitor Oil Furnace and Check Oil Level",
+        description: "Check oil level gauge and listen for unusual sounds during operation.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "midwest", "mountain-west"],
+        priority: "medium",
+        estimatedTime: "10 minutes",
+        difficulty: "easy",
+        category: "HVAC",
+        tools: null,
+        cost: "$0",
+        systemRequirements: ["oil-furnace"]
+      },
+      {
+        id: "monthly-heat-pump",
+        title: "Clean Heat Pump Outdoor Unit",
+        description: "Remove debris from around outdoor unit and check for ice buildup in winter.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "california"],
+        priority: "medium",
+        estimatedTime: "20 minutes",
+        difficulty: "easy",
+        category: "HVAC",
+        tools: ["Garden hose", "Soft brush"],
+        cost: "$0",
+        systemRequirements: ["heat-pump"]
+      },
+      {
+        id: "monthly-water-softener",
+        title: "Check Water Softener Salt Level",
+        description: "Replenish salt and check for salt bridges that can prevent proper operation.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "10 minutes",
+        difficulty: "easy",
+        category: "Plumbing",
+        tools: ["Water softener salt"],
+        cost: "$20-40",
+        systemRequirements: ["water-softener"]
+      },
+      {
+        id: "monthly-well-water",
+        title: "Test Well Water Quality",
+        description: "Check water pressure and test for clarity, taste, or odor changes that might indicate issues.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "15 minutes",
+        difficulty: "easy",
+        category: "Plumbing",
+        tools: ["Water test kit"],
+        cost: "$15-30",
+        systemRequirements: ["well-water"]
+      },
+      {
+        id: "monthly-generator",
+        title: "Test Backup Generator",
+        description: "Run generator for 15-30 minutes to ensure proper operation and check fuel levels.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "high",
+        estimatedTime: "30 minutes",
+        difficulty: "moderate",
+        category: "Electrical",
+        tools: null,
+        cost: "$0",
+        systemRequirements: ["generator"]
+      },
+      {
+        id: "monthly-security-system",
+        title: "Test Security System",
+        description: "Test all sensors, cameras, and alarms. Replace backup batteries as needed.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "20 minutes",
+        difficulty: "easy",
+        category: "Security",
+        tools: ["Batteries"],
+        cost: "$10-25",
+        systemRequirements: ["security-system"]
+      },
+
+      // SEASONAL SYSTEM-SPECIFIC TASKS
+      ...(month >= 6 && month <= 8 ? [
+        {
+          id: "summer-pool",
+          title: "Pool Maintenance and Chemical Balance",
+          description: "Test and balance pool chemicals, clean skimmer baskets, and brush pool walls.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "high",
+          estimatedTime: "1-2 hours",
+          difficulty: "moderate",
+          category: "Pool",
+          tools: ["Pool test kit", "Pool chemicals", "Pool brush", "Skimmer net"],
+          cost: "$30-60",
+          systemRequirements: ["pool"]
+        } as MaintenanceTask,
+        {
+          id: "summer-spa",
+          title: "Hot Tub/Spa Water Treatment",
+          description: "Test water chemistry, clean filters, and check for proper heating and circulation.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "high",
+          estimatedTime: "45 minutes",
+          difficulty: "moderate",
+          category: "Spa",
+          tools: ["Spa test strips", "Spa chemicals"],
+          cost: "$25-45",
+          systemRequirements: ["spa"]
+        } as MaintenanceTask,
+        {
+          id: "summer-solar-panels",
+          title: "Clean Solar Panels",
+          description: "Remove dust, pollen, and debris from solar panels to maintain efficiency.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "medium",
+          estimatedTime: "2-3 hours",
+          difficulty: "moderate",
+          category: "Solar",
+          tools: ["Garden hose", "Soft brush", "Squeegee"],
+          cost: "$0-20",
+          systemRequirements: ["solar-panels"]
+        } as MaintenanceTask,
+        {
+          id: "summer-sprinkler",
+          title: "Inspect and Adjust Sprinkler System",
+          description: "Check all sprinkler heads, adjust spray patterns, and test automatic timers.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "medium",
+          estimatedTime: "1-2 hours",
+          difficulty: "moderate",
+          category: "Irrigation",
+          tools: ["Screwdriver", "Sprinkler head tool"],
+          cost: "$10-30",
+          systemRequirements: ["sprinkler-system"]
+        } as MaintenanceTask
+      ] : []),
+
+      ...(month >= 10 && month <= 11 ? [
+        {
+          id: "fall-sprinkler-winterize",
+          title: "Winterize Sprinkler System",
+          description: "Drain water from sprinkler lines and shut off water supply to prevent freeze damage.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "midwest", "mountain-west"],
+          priority: "high",
+          estimatedTime: "2-3 hours",
+          difficulty: "moderate",
+          category: "Irrigation",
+          tools: ["Air compressor", "Wrench"],
+          cost: "$0-100",
+          systemRequirements: ["sprinkler-system"]
+        } as MaintenanceTask,
+        {
+          id: "fall-pool-winterize",
+          title: "Winterize Swimming Pool",
+          description: "Balance chemicals, lower water level, and cover pool for winter season.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "midwest", "mountain-west"],
+          priority: "high",
+          estimatedTime: "3-4 hours",
+          difficulty: "difficult",
+          category: "Pool",
+          tools: ["Pool cover", "Winter chemicals", "Pool vacuum"],
+          cost: "$50-100",
+          systemRequirements: ["pool"]
+        } as MaintenanceTask
+      ] : []),
+
+      ...(month === 3 || month === 9 ? [
+        {
+          id: "seasonal-solar-inspection",
+          title: "Solar Panel System Inspection",
+          description: "Check mounting hardware, wiring connections, and monitor system performance data.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "medium",
+          estimatedTime: "1 hour",
+          difficulty: "moderate",
+          category: "Solar",
+          tools: ["Multimeter", "Binoculars"],
+          cost: "$0",
+          systemRequirements: ["solar-panels"]
+        } as MaintenanceTask,
+        {
+          id: "seasonal-septic-check",
+          title: "Septic System Inspection",
+          description: "Check for proper drainage, unusual odors, and schedule pumping if needed (every 3-5 years).",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "medium",
+          estimatedTime: "30 minutes",
+          difficulty: "easy",
+          category: "Plumbing",
+          tools: null,
+          cost: "$0",
+          systemRequirements: ["septic"]
+        } as MaintenanceTask
+      ] : []),
 
       // WINTER TASKS (December - February)
       ...(month === 12 ? [
@@ -669,9 +954,20 @@ export default function Maintenance() {
 
   const maintenanceTasks = getMaintenanceTasksForMonth(selectedMonth);
 
-  const filteredTasks = maintenanceTasks.filter(task => 
-    task.climateZones.includes(selectedZone)
-  );
+  const filteredTasks = maintenanceTasks.filter(task => {
+    // Filter by climate zone
+    if (!task.climateZones.includes(selectedZone)) {
+      return false;
+    }
+    
+    // Filter by home systems - if task has system requirements, user must have at least one
+    if (task.systemRequirements && task.systemRequirements.length > 0) {
+      return task.systemRequirements.some(requirement => homeSystems.includes(requirement));
+    }
+    
+    // If no system requirements, show the task
+    return true;
+  });
 
   const completedCount = filteredTasks.filter(task => isTaskCompleted(task.id)).length;
   const totalTasks = filteredTasks.length;
@@ -732,42 +1028,85 @@ export default function Maintenance() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Month
-            </label>
-            <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {MONTHS.map((month, index) => (
-                  <SelectItem key={index + 1} value={(index + 1).toString()}>
-                    {month}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="space-y-6 mb-8">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Month
+              </label>
+              <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {MONTHS.map((month, index) => (
+                    <SelectItem key={index + 1} value={(index + 1).toString()}>
+                      {month}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                <MapPin className="inline w-4 h-4 mr-1" />
+                Climate Zone
+              </label>
+              <Select value={selectedZone} onValueChange={setSelectedZone}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CLIMATE_ZONES.map((zone) => (
+                    <SelectItem key={zone.value} value={zone.value}>
+                      {zone.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-foreground mb-2">
-              <MapPin className="inline w-4 h-4 mr-1" />
-              Climate Zone
-            </label>
-            <Select value={selectedZone} onValueChange={setSelectedZone}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CLIMATE_ZONES.map((zone) => (
-                  <SelectItem key={zone.value} value={zone.value}>
-                    {zone.label}
-                  </SelectItem>
+
+          {/* Home Systems Filter */}
+          <Collapsible open={showSystemFilters} onOpenChange={setShowSystemFilters}>
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+                <div className="flex items-center">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Home Systems & Features ({homeSystems.length} selected)
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showSystemFilters ? 'rotate-180' : ''}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4 border rounded-lg bg-muted/50">
+                {Object.entries(HOME_SYSTEMS).map(([category, systems]) => (
+                  <div key={category}>
+                    <h4 className="font-medium text-sm mb-3 capitalize text-foreground">
+                      {category === 'features' ? 'Special Features' : `${category} System`}
+                    </h4>
+                    <div className="space-y-2">
+                      {systems.map((system) => (
+                        <div key={system.value} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={system.value}
+                            checked={homeSystems.includes(system.value)}
+                            onCheckedChange={() => toggleHomeSystem(system.value)}
+                          />
+                          <label
+                            htmlFor={system.value}
+                            className="text-sm text-muted-foreground cursor-pointer"
+                          >
+                            {system.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
 
         {/* Tasks Grid */}
