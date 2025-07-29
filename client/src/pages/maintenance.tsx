@@ -658,20 +658,12 @@ export default function Maintenance() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">
-            Home Maintenance & Appliances
+            Monthly Maintenance Schedule
           </h1>
           <p className="text-lg text-muted-foreground mb-4">
-            Keep your home in perfect condition with personalized maintenance recommendations and appliance tracking
+            Keep your home in perfect condition with personalized maintenance recommendations
           </p>
         </div>
-
-        <Tabs defaultValue="maintenance" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="maintenance">Maintenance Schedule</TabsTrigger>
-            <TabsTrigger value="appliances">My Appliances</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="maintenance" className="mt-6">
             <div className="mb-6">
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                 <div className="text-sm text-muted-foreground">
