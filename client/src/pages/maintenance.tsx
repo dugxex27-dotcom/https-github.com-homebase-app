@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -664,14 +663,6 @@ export default function Maintenance() {
             Keep your home in perfect condition with personalized maintenance recommendations and appliance tracking
           </p>
         </div>
-
-        <Tabs defaultValue="maintenance" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="maintenance">Maintenance Schedule</TabsTrigger>
-            <TabsTrigger value="appliances">My Appliances</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="maintenance" className="mt-6">
             <div className="mb-6">
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                 <div className="text-sm text-muted-foreground">
@@ -870,21 +861,21 @@ export default function Maintenance() {
                 </div>
               )}
             </div>
-          </TabsContent>
 
-          <TabsContent value="appliances" className="mt-6">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">My Appliances</h3>
-                <p className="text-sm text-muted-foreground">
-                  Track your home appliances to help contractors provide better service
-                </p>
-              </div>
-              <Button onClick={handleAddNewAppliance} className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Add Appliance
-              </Button>
+        {/* My Appliances Section */}
+        <div className="mt-12">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">My Appliances</h2>
+              <p className="text-muted-foreground">
+                Track your home appliances to help contractors provide better service
+              </p>
             </div>
+            <Button onClick={handleAddNewAppliance} className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Add Appliance
+            </Button>
+          </div>
 
             {appliancesLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -983,8 +974,7 @@ export default function Maintenance() {
                 </Button>
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+        </div>
 
         {/* Appliance Form Dialog */}
         <Dialog open={isApplianceDialogOpen} onOpenChange={setIsApplianceDialogOpen}>
