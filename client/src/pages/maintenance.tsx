@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,19 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { insertHomeApplianceSchema } from "@shared/schema";
-import type { HomeAppliance } from "@shared/schema";
-import { useToast } from "@/hooks/use-toast";
-import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home } from "lucide-react";
+import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings } from "lucide-react";
 
 interface MaintenanceTask {
   id: string;
@@ -36,43 +23,7 @@ interface MaintenanceTask {
   systemRequirements?: string[];
 }
 
-// Form schema for appliance creation/editing
-const applianceFormSchema = insertHomeApplianceSchema.extend({
-  homeownerId: z.string().min(1, "Homeowner ID is required"),
-});
 
-type ApplianceFormData = z.infer<typeof applianceFormSchema>;
-
-const APPLIANCE_TYPES = [
-  { value: "hvac", label: "HVAC System" },
-  { value: "water_heater", label: "Water Heater" },
-  { value: "washer", label: "Washing Machine" },
-  { value: "dryer", label: "Dryer" },
-  { value: "dishwasher", label: "Dishwasher" },
-  { value: "refrigerator", label: "Refrigerator" },
-  { value: "oven", label: "Oven/Range" },
-  { value: "garbage_disposal", label: "Garbage Disposal" },
-  { value: "furnace", label: "Furnace" },
-  { value: "boiler", label: "Boiler" },
-  { value: "sump_pump", label: "Sump Pump" },
-  { value: "water_softener", label: "Water Softener" },
-  { value: "generator", label: "Generator" },
-  { value: "pool_equipment", label: "Pool Equipment" },
-  { value: "other", label: "Other" }
-];
-
-const APPLIANCE_LOCATIONS = [
-  { value: "kitchen", label: "Kitchen" },
-  { value: "basement", label: "Basement" },
-  { value: "garage", label: "Garage" },
-  { value: "utility_room", label: "Utility Room" },
-  { value: "laundry_room", label: "Laundry Room" },
-  { value: "attic", label: "Attic" },
-  { value: "outdoor", label: "Outdoor" },
-  { value: "main_floor", label: "Main Floor" },
-  { value: "second_floor", label: "Second Floor" },
-  { value: "other", label: "Other" }
-];
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -133,97 +84,6 @@ export default function Maintenance() {
   const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
   const [homeSystems, setHomeSystems] = useState<string[]>([]);
   const [showSystemFilters, setShowSystemFilters] = useState(false);
-  const [isApplianceDialogOpen, setIsApplianceDialogOpen] = useState(false);
-  const [editingAppliance, setEditingAppliance] = useState<HomeAppliance | null>(null);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  // For demo purposes, we'll use a default homeowner ID
-  const homeownerId = "demo-homeowner-123";
-
-  // Appliance queries and mutations
-  const { data: appliances, isLoading: appliancesLoading } = useQuery<HomeAppliance[]>({
-    queryKey: ['/api/appliances', { homeownerId }],
-    queryFn: async () => {
-      const response = await fetch(`/api/appliances?homeownerId=${homeownerId}`);
-      if (!response.ok) throw new Error('Failed to fetch appliances');
-      return response.json();
-    },
-  });
-
-  const applianceForm = useForm<ApplianceFormData>({
-    resolver: zodResolver(applianceFormSchema),
-    defaultValues: {
-      homeownerId,
-      applianceType: "",
-      brand: "",
-      model: "",
-      yearInstalled: undefined,
-      serialNumber: "",
-      notes: "",
-      location: "",
-      warrantyExpiration: "",
-      lastServiceDate: "",
-    },
-  });
-
-  const createApplianceMutation = useMutation({
-    mutationFn: async (data: ApplianceFormData) => {
-      const response = await fetch('/api/appliances', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to create appliance');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/appliances'] });
-      setIsApplianceDialogOpen(false);
-      applianceForm.reset();
-      toast({ title: "Success", description: "Appliance added successfully" });
-    },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to add appliance", variant: "destructive" });
-    },
-  });
-
-  const updateApplianceMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<ApplianceFormData> }) => {
-      const response = await fetch(`/api/appliances/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to update appliance');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/appliances'] });
-      setIsApplianceDialogOpen(false);
-      setEditingAppliance(null);
-      applianceForm.reset();
-      toast({ title: "Success", description: "Appliance updated successfully" });
-    },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to update appliance", variant: "destructive" });
-    },
-  });
-
-  const deleteApplianceMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/appliances/${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete appliance');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/appliances'] });
-      toast({ title: "Success", description: "Appliance deleted successfully" });
-    },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to delete appliance", variant: "destructive" });
-    },
-  });
 
   // Load completed tasks and home systems from localStorage on component mount
   useEffect(() => {
@@ -300,57 +160,6 @@ export default function Maintenance() {
         ? prev.filter(s => s !== system)
         : [...prev, system]
     );
-  };
-
-  // Appliance helper functions
-  const handleEditAppliance = (appliance: HomeAppliance) => {
-    setEditingAppliance(appliance);
-    applianceForm.reset({
-      homeownerId: appliance.homeownerId,
-      applianceType: appliance.applianceType,
-      brand: appliance.brand,
-      model: appliance.model,
-      yearInstalled: appliance.yearInstalled || undefined,
-      serialNumber: appliance.serialNumber ?? "",
-      notes: appliance.notes ?? "",
-      location: appliance.location ?? "",
-      warrantyExpiration: appliance.warrantyExpiration ?? "",
-      lastServiceDate: appliance.lastServiceDate ?? "",
-    });
-    setIsApplianceDialogOpen(true);
-  };
-
-  const handleAddNewAppliance = () => {
-    setEditingAppliance(null);
-    applianceForm.reset({
-      homeownerId,
-      applianceType: "",
-      brand: "",
-      model: "",
-      yearInstalled: undefined,
-      serialNumber: "",
-      notes: "",
-      location: "",
-      warrantyExpiration: "",
-      lastServiceDate: "",
-    });
-    setIsApplianceDialogOpen(true);
-  };
-
-  const onSubmitAppliance = (data: ApplianceFormData) => {
-    if (editingAppliance) {
-      updateApplianceMutation.mutate({ id: editingAppliance.id, data });
-    } else {
-      createApplianceMutation.mutate(data);
-    }
-  };
-
-  const getApplianceTypeLabel = (type: string) => {
-    return APPLIANCE_TYPES.find(t => t.value === type)?.label || type;
-  };
-
-  const getApplianceLocationLabel = (location: string) => {
-    return APPLIANCE_LOCATIONS.find(l => l.value === location)?.label || location;
   };
 
   // Generate maintenance tasks based on month and location
@@ -658,20 +467,12 @@ export default function Maintenance() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">
-            Home Maintenance & Appliances
+            Monthly Maintenance Schedule
           </h1>
           <p className="text-lg text-muted-foreground mb-4">
-            Keep your home in perfect condition with personalized maintenance recommendations and appliance tracking
+            Keep your home in perfect condition with personalized maintenance recommendations
           </p>
         </div>
-
-        <Tabs defaultValue="maintenance" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="maintenance">Maintenance Schedule</TabsTrigger>
-            <TabsTrigger value="appliances">My Appliances</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="maintenance" className="mt-6">
             <div className="mb-6">
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                 <div className="text-sm text-muted-foreground">
@@ -859,333 +660,17 @@ export default function Maintenance() {
           })}
         </div>
 
-            {filteredTasks.length === 0 && (
-              <div className="text-center py-12">
-                <Calendar className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">
-                  No tasks for this month and location
-                </h3>
-                <p className="text-muted-foreground">
-                  Try selecting a different month or climate zone to see recommended maintenance tasks.
-                </p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="appliances" className="mt-6">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-foreground">My Appliances</h2>
-                <p className="text-muted-foreground mt-1">
-                  Track your home appliances to help contractors provide better service
-                </p>
-              </div>
-              <Dialog open={isApplianceDialogOpen} onOpenChange={setIsApplianceDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button onClick={handleAddNewAppliance}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Appliance
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingAppliance ? "Edit Appliance" : "Add New Appliance"}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <Form {...applianceForm}>
-                    <form onSubmit={applianceForm.handleSubmit(onSubmitAppliance)} className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={applianceForm.control}
-                          name="applianceType"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Appliance Type</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select appliance type" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {APPLIANCE_TYPES.map((type) => (
-                                    <SelectItem key={type.value} value={type.value}>
-                                      {type.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={applianceForm.control}
-                          name="brand"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Brand</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g., Whirlpool, GE" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={applianceForm.control}
-                          name="model"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Model</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Model number" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={applianceForm.control}
-                          name="yearInstalled"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Year Installed</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  type="number" 
-                                  placeholder="e.g., 2020"
-                                  {...field}
-                                  onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                                  value={field.value || ""}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={applianceForm.control}
-                          name="location"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Location</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select location" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {APPLIANCE_LOCATIONS.map((location) => (
-                                    <SelectItem key={location.value} value={location.value}>
-                                      {location.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={applianceForm.control}
-                          name="serialNumber"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Serial Number</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Serial number" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={applianceForm.control}
-                          name="warrantyExpiration"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Warranty Expiration</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  type="date" 
-                                  {...field} 
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={applianceForm.control}
-                          name="lastServiceDate"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Last Service Date</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  type="date" 
-                                  {...field} 
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <FormField
-                        control={applianceForm.control}
-                        name="notes"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Notes</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Any additional notes, warranty info, or service history..."
-                                className="resize-none"
-                                rows={3}
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="flex justify-end space-x-2">
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={() => setIsApplianceDialogOpen(false)}
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          type="submit" 
-                          disabled={createApplianceMutation.isPending || updateApplianceMutation.isPending}
-                        >
-                          {editingAppliance ? "Update" : "Add"} Appliance
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            {appliancesLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardHeader>
-                      <div className="h-4 bg-muted rounded w-3/4"></div>
-                      <div className="h-3 bg-muted rounded w-1/2"></div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="h-3 bg-muted rounded"></div>
-                        <div className="h-3 bg-muted rounded w-2/3"></div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : appliances && appliances.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {appliances.map((appliance) => (
-                  <Card key={appliance.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-lg">{getApplianceTypeLabel(appliance.applianceType)}</CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            {appliance.brand} {appliance.model}
-                          </p>
-                        </div>
-                        <div className="flex space-x-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditAppliance(appliance)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteApplianceMutation.mutate(appliance.id)}
-                            disabled={deleteApplianceMutation.isPending}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        {appliance.yearInstalled && (
-                          <div>
-                            <span className="text-muted-foreground">Year:</span> {appliance.yearInstalled}
-                          </div>
-                        )}
-                        {appliance.location && (
-                          <div>
-                            <span className="text-muted-foreground">Location:</span> {getApplianceLocationLabel(appliance.location)}
-                          </div>
-                        )}
-                      </div>
-                      
-                      {appliance.warrantyExpiration && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Warranty expires:</span> {new Date(appliance.warrantyExpiration).toLocaleDateString()}
-                        </div>
-                      )}
-                      
-                      {appliance.lastServiceDate && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Last service:</span> {new Date(appliance.lastServiceDate).toLocaleDateString()}
-                        </div>
-                      )}
-                      
-                      {appliance.notes && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Notes:</span>
-                          <p className="mt-1 text-foreground">{appliance.notes}</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Home className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">
-                  No appliances added yet
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  Start by adding your home appliances to help contractors provide better service.
-                </p>
-                <Button onClick={handleAddNewAppliance}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Your First Appliance
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+        {filteredTasks.length === 0 && (
+          <div className="text-center py-12">
+            <Calendar className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">
+              No tasks for this month and location
+            </h3>
+            <p className="text-muted-foreground">
+              Try selecting a different month or climate zone to see recommended maintenance tasks.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
