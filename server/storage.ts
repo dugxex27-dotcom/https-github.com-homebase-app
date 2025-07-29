@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance } from "@shared/schema";
+import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -29,6 +29,13 @@ export interface IStorage {
   updateHomeAppliance(id: string, appliance: Partial<InsertHomeAppliance>): Promise<HomeAppliance | undefined>;
   deleteHomeAppliance(id: string): Promise<boolean>;
   
+  // Maintenance log methods
+  getMaintenanceLogs(homeownerId?: string): Promise<MaintenanceLog[]>;
+  getMaintenanceLog(id: string): Promise<MaintenanceLog | undefined>;
+  createMaintenanceLog(log: InsertMaintenanceLog): Promise<MaintenanceLog>;
+  updateMaintenanceLog(id: string, log: Partial<InsertMaintenanceLog>): Promise<MaintenanceLog | undefined>;
+  deleteMaintenanceLog(id: string): Promise<boolean>;
+  
   // Search methods
   searchContractors(query: string, location?: string): Promise<Contractor[]>;
   searchProducts(query: string): Promise<Product[]>;
@@ -38,11 +45,13 @@ export class MemStorage implements IStorage {
   private contractors: Map<string, Contractor>;
   private products: Map<string, Product>;
   private homeAppliances: Map<string, HomeAppliance>;
+  private maintenanceLogs: Map<string, MaintenanceLog>;
 
   constructor() {
     this.contractors = new Map();
     this.products = new Map();
     this.homeAppliances = new Map();
+    this.maintenanceLogs = new Map();
     this.seedData();
   }
 
@@ -428,6 +437,57 @@ export class MemStorage implements IStorage {
 
   async deleteHomeAppliance(id: string): Promise<boolean> {
     return this.homeAppliances.delete(id);
+  }
+
+  // Maintenance log methods
+  async getMaintenanceLogs(homeownerId?: string): Promise<MaintenanceLog[]> {
+    const logs = Array.from(this.maintenanceLogs.values());
+    
+    if (homeownerId) {
+      return logs.filter(log => log.homeownerId === homeownerId);
+    }
+    
+    return logs.sort((a, b) => new Date(b.serviceDate).getTime() - new Date(a.serviceDate).getTime());
+  }
+
+  async getMaintenanceLog(id: string): Promise<MaintenanceLog | undefined> {
+    return this.maintenanceLogs.get(id);
+  }
+
+  async createMaintenanceLog(log: InsertMaintenanceLog): Promise<MaintenanceLog> {
+    const id = randomUUID();
+    const newLog: MaintenanceLog = {
+      ...log,
+      id,
+      cost: log.cost ?? null,
+      contractorName: log.contractorName ?? null,
+      contractorCompany: log.contractorCompany ?? null,
+      contractorId: log.contractorId ?? null,
+      notes: log.notes ?? null,
+      warrantyPeriod: log.warrantyPeriod ?? null,
+      nextServiceDue: log.nextServiceDue ?? null,
+      createdAt: new Date()
+    };
+    this.maintenanceLogs.set(id, newLog);
+    return newLog;
+  }
+
+  async updateMaintenanceLog(id: string, log: Partial<InsertMaintenanceLog>): Promise<MaintenanceLog | undefined> {
+    const existing = this.maintenanceLogs.get(id);
+    if (!existing) {
+      return undefined;
+    }
+
+    const updated: MaintenanceLog = {
+      ...existing,
+      ...log
+    };
+    this.maintenanceLogs.set(id, updated);
+    return updated;
+  }
+
+  async deleteMaintenanceLog(id: string): Promise<boolean> {
+    return this.maintenanceLogs.delete(id);
   }
 }
 

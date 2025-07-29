@@ -13,10 +13,10 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { insertHomeApplianceSchema } from "@shared/schema";
-import type { HomeAppliance } from "@shared/schema";
+import { insertHomeApplianceSchema, insertMaintenanceLogSchema } from "@shared/schema";
+import type { HomeAppliance, MaintenanceLog } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home } from "lucide-react";
+import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User } from "lucide-react";
 
 interface MaintenanceTask {
   id: string;
@@ -38,7 +38,13 @@ const applianceFormSchema = insertHomeApplianceSchema.extend({
   homeownerId: z.string().min(1, "Homeowner ID is required"),
 });
 
+// Form schema for maintenance log creation/editing
+const maintenanceLogFormSchema = insertMaintenanceLogSchema.extend({
+  homeownerId: z.string().min(1, "Homeowner ID is required"),
+});
+
 type ApplianceFormData = z.infer<typeof applianceFormSchema>;
+type MaintenanceLogFormData = z.infer<typeof maintenanceLogFormSchema>;
 
 const APPLIANCE_TYPES = [
   { value: "hvac", label: "HVAC System" },
@@ -68,6 +74,42 @@ const APPLIANCE_LOCATIONS = [
   { value: "outdoor", label: "Outdoor" },
   { value: "main_floor", label: "Main Floor" },
   { value: "second_floor", label: "Second Floor" },
+  { value: "other", label: "Other" }
+];
+
+const SERVICE_TYPES = [
+  { value: "maintenance", label: "Routine Maintenance" },
+  { value: "repair", label: "Repair" },
+  { value: "installation", label: "Installation" },
+  { value: "replacement", label: "Replacement" },
+  { value: "inspection", label: "Inspection" },
+  { value: "cleaning", label: "Professional Cleaning" },
+  { value: "upgrade", label: "Upgrade/Improvement" },
+  { value: "emergency", label: "Emergency Service" },
+  { value: "other", label: "Other" }
+];
+
+const HOME_AREAS = [
+  { value: "hvac", label: "HVAC System" },
+  { value: "plumbing", label: "Plumbing" },
+  { value: "electrical", label: "Electrical" },
+  { value: "roof", label: "Roof" },
+  { value: "foundation", label: "Foundation" },
+  { value: "siding", label: "Siding/Exterior" },
+  { value: "windows", label: "Windows" },
+  { value: "doors", label: "Doors" },
+  { value: "flooring", label: "Flooring" },
+  { value: "kitchen", label: "Kitchen" },
+  { value: "bathroom", label: "Bathroom" },
+  { value: "basement", label: "Basement" },
+  { value: "attic", label: "Attic" },
+  { value: "garage", label: "Garage" },
+  { value: "landscaping", label: "Landscaping/Yard" },
+  { value: "driveway", label: "Driveway/Walkways" },
+  { value: "gutters", label: "Gutters" },
+  { value: "chimney", label: "Chimney" },
+  { value: "septic", label: "Septic System" },
+  { value: "well", label: "Well/Water System" },
   { value: "other", label: "Other" }
 ];
 
@@ -134,6 +176,8 @@ export default function Maintenance() {
   const [showSystemFilters, setShowSystemFilters] = useState(false);
   const [isApplianceDialogOpen, setIsApplianceDialogOpen] = useState(false);
   const [editingAppliance, setEditingAppliance] = useState<HomeAppliance | null>(null);
+  const [isMaintenanceLogDialogOpen, setIsMaintenanceLogDialogOpen] = useState(false);
+  const [editingMaintenanceLog, setEditingMaintenanceLog] = useState<MaintenanceLog | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -146,6 +190,16 @@ export default function Maintenance() {
     queryFn: async () => {
       const response = await fetch(`/api/appliances?homeownerId=${homeownerId}`);
       if (!response.ok) throw new Error('Failed to fetch appliances');
+      return response.json();
+    },
+  });
+
+  // Maintenance log queries and mutations
+  const { data: maintenanceLogs, isLoading: maintenanceLogsLoading } = useQuery<MaintenanceLog[]>({
+    queryKey: ['/api/maintenance-logs', { homeownerId }],
+    queryFn: async () => {
+      const response = await fetch(`/api/maintenance-logs?homeownerId=${homeownerId}`);
+      if (!response.ok) throw new Error('Failed to fetch maintenance logs');
       return response.json();
     },
   });
@@ -221,6 +275,83 @@ export default function Maintenance() {
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to delete appliance", variant: "destructive" });
+    },
+  });
+
+  // Maintenance log form handling
+  const maintenanceLogForm = useForm<MaintenanceLogFormData>({
+    resolver: zodResolver(maintenanceLogFormSchema),
+    defaultValues: {
+      homeownerId,
+      serviceType: "maintenance",
+      serviceDate: new Date().toISOString().split('T')[0],
+      homeArea: "",
+      serviceDescription: "",
+      cost: undefined,
+      contractorName: "",
+      contractorCompany: "",
+      contractorId: "",
+      notes: "",
+      warrantyPeriod: "",
+      nextServiceDue: "",
+    },
+  });
+
+  const createMaintenanceLogMutation = useMutation({
+    mutationFn: async (data: MaintenanceLogFormData) => {
+      const response = await fetch('/api/maintenance-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create maintenance log');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/maintenance-logs'] });
+      setIsMaintenanceLogDialogOpen(false);
+      maintenanceLogForm.reset();
+      toast({ title: "Success", description: "Maintenance log added successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to add maintenance log", variant: "destructive" });
+    },
+  });
+
+  const updateMaintenanceLogMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<MaintenanceLogFormData> }) => {
+      const response = await fetch(`/api/maintenance-logs/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update maintenance log');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/maintenance-logs'] });
+      setIsMaintenanceLogDialogOpen(false);
+      setEditingMaintenanceLog(null);
+      maintenanceLogForm.reset();
+      toast({ title: "Success", description: "Maintenance log updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update maintenance log", variant: "destructive" });
+    },
+  });
+
+  const deleteMaintenanceLogMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/maintenance-logs/${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete maintenance log');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/maintenance-logs'] });
+      toast({ title: "Success", description: "Maintenance log deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete maintenance log", variant: "destructive" });
     },
   });
 
@@ -319,6 +450,26 @@ export default function Maintenance() {
     setIsApplianceDialogOpen(true);
   };
 
+  // Maintenance log helper functions
+  const handleEditMaintenanceLog = (log: MaintenanceLog) => {
+    setEditingMaintenanceLog(log);
+    maintenanceLogForm.reset({
+      homeownerId: log.homeownerId,
+      serviceType: log.serviceType,
+      serviceDate: log.serviceDate,
+      homeArea: log.homeArea,
+      serviceDescription: log.serviceDescription,
+      cost: log.cost || undefined,
+      contractorName: log.contractorName ?? "",
+      contractorCompany: log.contractorCompany ?? "",
+      contractorId: log.contractorId ?? "",
+      notes: log.notes ?? "",
+      warrantyPeriod: log.warrantyPeriod ?? "",
+      nextServiceDue: log.nextServiceDue ?? "",
+    });
+    setIsMaintenanceLogDialogOpen(true);
+  };
+
   const handleAddNewAppliance = () => {
     setEditingAppliance(null);
     applianceForm.reset({
@@ -344,12 +495,47 @@ export default function Maintenance() {
     }
   };
 
+  const handleAddNewMaintenanceLog = () => {
+    setEditingMaintenanceLog(null);
+    maintenanceLogForm.reset({
+      homeownerId,
+      serviceType: "maintenance",
+      serviceDate: new Date().toISOString().split('T')[0],
+      homeArea: "",
+      serviceDescription: "",
+      cost: undefined,
+      contractorName: "",
+      contractorCompany: "",
+      contractorId: "",
+      notes: "",
+      warrantyPeriod: "",
+      nextServiceDue: "",
+    });
+    setIsMaintenanceLogDialogOpen(true);
+  };
+
+  const onSubmitMaintenanceLog = (data: MaintenanceLogFormData) => {
+    if (editingMaintenanceLog) {
+      updateMaintenanceLogMutation.mutate({ id: editingMaintenanceLog.id, data });
+    } else {
+      createMaintenanceLogMutation.mutate(data);
+    }
+  };
+
   const getApplianceTypeLabel = (type: string) => {
     return APPLIANCE_TYPES.find(t => t.value === type)?.label || type;
   };
 
   const getApplianceLocationLabel = (location: string) => {
     return APPLIANCE_LOCATIONS.find(l => l.value === location)?.label || location;
+  };
+
+  const getServiceTypeLabel = (type: string) => {
+    return SERVICE_TYPES.find(t => t.value === type)?.label || type;
+  };
+
+  const getHomeAreaLabel = (area: string) => {
+    return HOME_AREAS.find(a => a.value === area)?.label || area;
   };
 
   // Generate maintenance tasks based on month and location
@@ -976,6 +1162,137 @@ export default function Maintenance() {
             )}
         </div>
 
+        {/* Maintenance Log Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/10 p-2 rounded-lg">
+                <FileText className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-semibold text-foreground">Maintenance Log</h2>
+                <p className="text-muted-foreground">Track services performed on your home</p>
+              </div>
+            </div>
+            <Button onClick={handleAddNewMaintenanceLog}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Service Record
+            </Button>
+          </div>
+
+          {maintenanceLogsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(3)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardContent className="p-6">
+                      <div className="space-y-3">
+                        <div className="h-4 bg-muted rounded w-1/2"></div>
+                        <div className="h-3 bg-muted rounded w-3/4"></div>
+                        <div className="h-3 bg-muted rounded w-2/3"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : maintenanceLogs && maintenanceLogs.length > 0 ? (
+              <div className="space-y-4">
+                {maintenanceLogs.map((log) => (
+                  <Card key={log.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-start gap-3">
+                          <div className="bg-primary/10 p-2 rounded">
+                            <Wrench className="w-5 h-5 text-primary" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-foreground mb-1">
+                              {log.serviceDescription}
+                            </h4>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                {new Date(log.serviceDate).toLocaleDateString()}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <MapPin className="w-4 h-4" />
+                                {getHomeAreaLabel(log.homeArea)}
+                              </span>
+                              <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
+                                {getServiceTypeLabel(log.serviceType)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => handleEditMaintenanceLog(log)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => deleteMaintenanceLogMutation.mutate(log.id)}
+                            disabled={deleteMaintenanceLogMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        {log.cost && (
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="w-4 h-4 text-muted-foreground" />
+                            <span className="font-medium">${log.cost}</span>
+                          </div>
+                        )}
+                        {log.contractorName && (
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-muted-foreground" />
+                            <span>{log.contractorName}</span>
+                          </div>
+                        )}
+                        {log.contractorCompany && (
+                          <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-muted-foreground" />
+                            <span>{log.contractorCompany}</span>
+                          </div>
+                        )}
+                        {log.nextServiceDue && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-muted-foreground" />
+                            <span>Due: {new Date(log.nextServiceDue).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {log.notes && (
+                        <div className="mt-4 p-3 bg-muted rounded text-sm">
+                          <span className="text-muted-foreground">{log.notes}</span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <FileText className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">No service records yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Start tracking maintenance and repairs to build a complete home service history.
+                </p>
+                <Button onClick={handleAddNewMaintenanceLog}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Your First Service Record
+                </Button>
+              </div>
+            )}
+        </div>
+
         {/* Appliance Form Dialog */}
         <Dialog open={isApplianceDialogOpen} onOpenChange={setIsApplianceDialogOpen}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -1165,6 +1482,217 @@ export default function Maintenance() {
                     disabled={createApplianceMutation.isPending || updateApplianceMutation.isPending}
                   >
                     {createApplianceMutation.isPending || updateApplianceMutation.isPending ? 'Saving...' : editingAppliance ? 'Update' : 'Add'} Appliance
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Maintenance Log Form Dialog */}
+        <Dialog open={isMaintenanceLogDialogOpen} onOpenChange={setIsMaintenanceLogDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingMaintenanceLog ? 'Edit Service Record' : 'Add New Service Record'}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <Form {...maintenanceLogForm}>
+              <form onSubmit={maintenanceLogForm.handleSubmit(onSubmitMaintenanceLog)} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={maintenanceLogForm.control}
+                    name="serviceType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Service Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select service type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {SERVICE_TYPES.map((type) => (
+                              <SelectItem key={type.value} value={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={maintenanceLogForm.control}
+                    name="homeArea"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Home Area</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select home area" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {HOME_AREAS.map((area) => (
+                              <SelectItem key={area.value} value={area.value}>
+                                {area.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={maintenanceLogForm.control}
+                  name="serviceDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Service Description</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Annual HVAC tune-up, Gutter cleaning, Roof repair" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={maintenanceLogForm.control}
+                    name="serviceDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Service Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={maintenanceLogForm.control}
+                    name="cost"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cost</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            step="0.01"
+                            placeholder="Service cost" 
+                            {...field}
+                            onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={maintenanceLogForm.control}
+                    name="contractorName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contractor Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Contractor or technician name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={maintenanceLogForm.control}
+                    name="contractorCompany"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Company or service provider" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={maintenanceLogForm.control}
+                    name="warrantyPeriod"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Warranty Period</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., 1 year, 6 months" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={maintenanceLogForm.control}
+                    name="nextServiceDue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Next Service Due</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={maintenanceLogForm.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Notes</FormLabel>
+                      <FormControl>
+                        <textarea 
+                          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          placeholder="Any additional notes about the service..."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsMaintenanceLogDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={createMaintenanceLogMutation.isPending || updateMaintenanceLogMutation.isPending}
+                  >
+                    {createMaintenanceLogMutation.isPending || updateMaintenanceLogMutation.isPending ? 'Saving...' : editingMaintenanceLog ? 'Update' : 'Add'} Service Record
                   </Button>
                 </div>
               </form>

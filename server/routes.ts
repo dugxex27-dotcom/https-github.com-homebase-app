@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertHomeApplianceSchema } from "@shared/schema";
+import { insertHomeApplianceSchema, insertMaintenanceLogSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Contractor routes
@@ -148,6 +148,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete appliance" });
+    }
+  });
+
+  // Maintenance Log routes
+  app.get("/api/maintenance-logs", async (req, res) => {
+    try {
+      const homeownerId = req.query.homeownerId as string;
+      const logs = await storage.getMaintenanceLogs(homeownerId);
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch maintenance logs" });
+    }
+  });
+
+  app.get("/api/maintenance-logs/:id", async (req, res) => {
+    try {
+      const log = await storage.getMaintenanceLog(req.params.id);
+      if (!log) {
+        return res.status(404).json({ message: "Maintenance log not found" });
+      }
+      res.json(log);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch maintenance log" });
+    }
+  });
+
+  app.post("/api/maintenance-logs", async (req, res) => {
+    try {
+      const logData = insertMaintenanceLogSchema.parse(req.body);
+      const log = await storage.createMaintenanceLog(logData);
+      res.status(201).json(log);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid maintenance log data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create maintenance log" });
+    }
+  });
+
+  app.patch("/api/maintenance-logs/:id", async (req, res) => {
+    try {
+      const partialData = insertMaintenanceLogSchema.partial().parse(req.body);
+      const log = await storage.updateMaintenanceLog(req.params.id, partialData);
+      if (!log) {
+        return res.status(404).json({ message: "Maintenance log not found" });
+      }
+      res.json(log);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid maintenance log data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update maintenance log" });
+    }
+  });
+
+  app.delete("/api/maintenance-logs/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteMaintenanceLog(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Maintenance log not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete maintenance log" });
     }
   });
 

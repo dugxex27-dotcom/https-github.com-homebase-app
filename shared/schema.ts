@@ -67,6 +67,23 @@ export const homeAppliances = pgTable("home_appliances", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const maintenanceLogs = pgTable("maintenance_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  homeownerId: text("homeowner_id").notNull(), // In real app would be foreign key to users table
+  serviceDate: text("service_date").notNull(), // Date when service was performed
+  serviceType: text("service_type").notNull(), // Type of service performed
+  homeArea: text("home_area").notNull(), // What part of home was serviced (roof, HVAC, plumbing, etc.)
+  description: text("description").notNull(), // Description of work performed
+  cost: decimal("cost", { precision: 10, scale: 2 }), // Cost of service
+  contractorName: text("contractor_name"), // Name of contractor who performed service
+  contractorCompany: text("contractor_company"), // Contractor company
+  contractorId: text("contractor_id"), // Reference to contractor if from our platform
+  notes: text("notes"), // Additional notes about the service
+  warrantyPeriod: text("warranty_period"), // Warranty period for the work
+  nextServiceDue: text("next_service_due"), // When next service is recommended
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertContractorSchema = createInsertSchema(contractors).omit({
   id: true,
 });
@@ -84,6 +101,11 @@ export const insertHomeApplianceSchema = createInsertSchema(homeAppliances).omit
   createdAt: true,
 });
 
+export const insertMaintenanceLogSchema = createInsertSchema(maintenanceLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertContractor = z.infer<typeof insertContractorSchema>;
 export type Contractor = typeof contractors.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
@@ -92,3 +114,5 @@ export type InsertMaintenanceTask = z.infer<typeof insertMaintenanceTaskSchema>;
 export type MaintenanceTask = typeof maintenanceTasks.$inferSelect;
 export type InsertHomeAppliance = z.infer<typeof insertHomeApplianceSchema>;
 export type HomeAppliance = typeof homeAppliances.$inferSelect;
+export type InsertMaintenanceLog = z.infer<typeof insertMaintenanceLogSchema>;
+export type MaintenanceLog = typeof maintenanceLogs.$inferSelect;
