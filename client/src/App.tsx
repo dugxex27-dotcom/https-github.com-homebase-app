@@ -8,7 +8,6 @@ import Contractors from "./pages/contractors";
 import Products from "./pages/products";
 import ContractorProfile from "./pages/contractor-profile";
 import Maintenance from "./pages/maintenance";
-import Appliances from "./pages/appliances";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,7 +17,6 @@ function Router() {
       <Route path="/contractors" component={Contractors} />
       <Route path="/products" component={Products} />
       <Route path="/maintenance" component={Maintenance} />
-      <Route path="/appliances" component={Appliances} />
       <Route path="/contractor/:id" component={ContractorProfile} />
       <Route component={NotFound} />
     </Switch>
