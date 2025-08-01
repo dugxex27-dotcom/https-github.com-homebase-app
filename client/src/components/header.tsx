@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Users, Package, User as UserIcon, LogOut } from "lucide-react";
+import { Users, Package, User as UserIcon, LogOut, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/logo";
 import { Notifications } from "@/components/notifications";
@@ -61,6 +61,12 @@ export default function Header() {
                 }`}>
                   Find Contractors
                 </Link>
+                <Link href="/messages" className={`text-gray-700 hover:text-primary transition-colors ${
+                  location === '/messages' ? 'text-primary font-medium' : ''
+                }`}>
+                  <MessageCircle className="w-4 h-4 inline mr-1" />
+                  Messages
+                </Link>
               </>
             )}
             {typedUser?.role === 'contractor' && (
@@ -79,6 +85,12 @@ export default function Header() {
                   location === '/profile' ? 'text-primary font-medium' : ''
                 }`}>
                   My Profile
+                </Link>
+                <Link href="/messages" className={`text-gray-700 hover:text-primary transition-colors ${
+                  location === '/messages' ? 'text-primary font-medium' : ''
+                }`}>
+                  <MessageCircle className="w-4 h-4 inline mr-1" />
+                  Messages
                 </Link>
               </>
             )}

@@ -1,8 +1,9 @@
-import { Star, MapPin, Shield, Phone, Mail } from "lucide-react";
+import { Star, MapPin, Shield, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { Contractor } from "@shared/schema";
 import { Link } from "wouter";
+import ContactContractorButton from "@/components/contact-contractor-button";
+import type { Contractor } from "@shared/schema";
 
 interface ContractorCardProps {
   contractor: Contractor;
@@ -44,9 +45,7 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
               </span>
             </div>
           )}
-          {contractor.isAvailableThisWeek && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-card"></div>
-          )}
+
         </div>
         
         <div className="flex-1 min-w-0">
@@ -99,13 +98,10 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
           </div>
 
           <div className="flex gap-2">
-            <Button 
-              className="flex-1 bg-primary text-white hover:bg-primary/90"
-              onClick={() => window.open(`tel:${contractor.phone}`, '_self')}
-            >
-              <Phone className="mr-2 h-4 w-4" />
-              Contact Now
-            </Button>
+            <ContactContractorButton 
+              contractor={contractor}
+              className="flex-1"
+            />
             <Link href={`/contractor/${contractor.id}`}>
               <Button variant="outline" className="px-4">
                 View Profile

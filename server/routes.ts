@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireRole } from "./replitAuth";
 import { z } from "zod";
-import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema } from "@shared/schema";
+import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema } from "@shared/schema";
 
 // Extend session data interface
 declare module 'express-session' {
@@ -635,6 +635,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching customer service records:", error);
       res.status(500).json({ message: "Failed to fetch service records" });
+    }
+  });
+
+  // Messaging API endpoints
+  app.get('/api/conversations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user.id;
+      const userType = req.session.user.role;
+      const conversations = await storage.getConversations(userId, userType);
+      res.json(conversations);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
+  app.get('/api/conversations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversation = await storage.getConversation(req.params.id);
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      // Check if user has access to this conversation
+      const userId = req.session.user.id;
+      const userType = req.session.user.role;
+      
+      if (userType === 'homeowner' && conversation.homeownerId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      if (userType === 'contractor' && conversation.contractorId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      res.json(conversation);
+    } catch (error) {
+      console.error("Error fetching conversation:", error);
+      res.status(500).json({ message: "Failed to fetch conversation" });
+    }
+  });
+
+  app.post('/api/conversations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user.id;
+      const userType = req.session.user.role;
+      
+      const conversationData = insertConversationSchema.parse({
+        ...req.body,
+        [userType === 'homeowner' ? 'homeownerId' : 'contractorId']: userId
+      });
+      
+      // Check if conversation already exists between these parties
+      const existingConversations = await storage.getConversations(userId, userType);
+      const otherPartyId = userType === 'homeowner' ? conversationData.contractorId : conversationData.homeownerId;
+      const existing = existingConversations.find(conv => 
+        userType === 'homeowner' ? conv.contractorId === otherPartyId : conv.homeownerId === otherPartyId
+      );
+      
+      if (existing) {
+        return res.json(existing);
+      }
+      
+      const conversation = await storage.createConversation(conversationData);
+      res.status(201).json(conversation);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid conversation data", errors: error.errors });
+      }
+      console.error("Error creating conversation:", error);
+      res.status(500).json({ message: "Failed to create conversation" });
+    }
+  });
+
+  app.get('/api/conversations/:id/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = req.params.id;
+      const userId = req.session.user.id;
+      
+      // Verify user has access to this conversation
+      const conversation = await storage.getConversation(conversationId);
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      const userType = req.session.user.role;
+      if (userType === 'homeowner' && conversation.homeownerId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      if (userType === 'contractor' && conversation.contractorId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const messages = await storage.getMessages(conversationId);
+      
+      // Mark messages as read
+      await storage.markMessagesAsRead(conversationId, userId);
+      
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  app.post('/api/conversations/:id/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = req.params.id;
+      const userId = req.session.user.id;
+      const userType = req.session.user.role;
+      
+      // Verify user has access to this conversation
+      const conversation = await storage.getConversation(conversationId);
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      if (userType === 'homeowner' && conversation.homeownerId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      if (userType === 'contractor' && conversation.contractorId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const messageData = insertMessageSchema.parse({
+        ...req.body,
+        conversationId,
+        senderId: userId,
+        senderType: userType
+      });
+      
+      const message = await storage.createMessage(messageData);
+      res.status(201).json(message);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid message data", errors: error.errors });
+      }
+      console.error("Error creating message:", error);
+      res.status(500).json({ message: "Failed to create message" });
+    }
+  });
+
+  app.get('/api/messages/unread-count', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user.id;
+      const count = await storage.getUnreadMessageCount(userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching unread message count:", error);
+      res.status(500).json({ message: "Failed to fetch unread message count" });
     }
   });
 

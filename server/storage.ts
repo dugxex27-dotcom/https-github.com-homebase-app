@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord } from "@shared/schema";
+import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -81,6 +81,15 @@ export interface IStorage {
   
   // Customer service record operations  
   getCustomerServiceRecords(customerId?: string, customerEmail?: string, customerAddress?: string): Promise<ServiceRecord[]>;
+
+  // Messaging operations
+  getConversations(userId: string, userType: 'homeowner' | 'contractor'): Promise<(Conversation & { otherPartyName: string; unreadCount: number })[]>;
+  getConversation(id: string): Promise<Conversation | undefined>;
+  createConversation(conversation: InsertConversation): Promise<Conversation>;
+  getMessages(conversationId: string): Promise<Message[]>;
+  createMessage(message: InsertMessage): Promise<Message>;
+  markMessagesAsRead(conversationId: string, userId: string): Promise<void>;
+  getUnreadMessageCount(userId: string): Promise<number>;
 }
 
 export class MemStorage implements IStorage {
@@ -94,6 +103,8 @@ export class MemStorage implements IStorage {
   private notifications: Map<string, Notification>;
   private contractorProfiles: Map<string, any>;
   private serviceRecords: ServiceRecord[];
+  private conversations: Map<string, Conversation>;
+  private messages: Map<string, Message>;
 
   constructor() {
     this.users = new Map();
@@ -106,6 +117,8 @@ export class MemStorage implements IStorage {
     this.notifications = new Map();
     this.contractorProfiles = new Map();
     this.serviceRecords = [];
+    this.conversations = new Map();
+    this.messages = new Map();
     this.seedData();
     this.seedServiceRecords();
   }
@@ -523,33 +536,7 @@ export class MemStorage implements IStorage {
     return newProduct;
   }
 
-  async searchContractors(query: string, location?: string): Promise<Contractor[]> {
-    const contractors = Array.from(this.contractors.values());
-    
-    return contractors.filter(contractor => {
-      const matchesQuery = query === "" || 
-        contractor.name.toLowerCase().includes(query.toLowerCase()) ||
-        contractor.company.toLowerCase().includes(query.toLowerCase()) ||
-        contractor.bio.toLowerCase().includes(query.toLowerCase()) ||
-        contractor.services.some(service => service.toLowerCase().includes(query.toLowerCase()));
-      
-      const matchesLocation = !location || 
-        contractor.location.toLowerCase().includes(location.toLowerCase());
-      
-      return matchesQuery && matchesLocation;
-    });
-  }
 
-  async searchProducts(query: string): Promise<Product[]> {
-    const products = Array.from(this.products.values());
-    
-    return products.filter(product =>
-      query === "" ||
-      product.name.toLowerCase().includes(query.toLowerCase()) ||
-      product.description.toLowerCase().includes(query.toLowerCase()) ||
-      product.category.toLowerCase().includes(query.toLowerCase())
-    );
-  }
 
   async getHomeAppliances(homeownerId?: string): Promise<HomeAppliance[]> {
     const appliances = Array.from(this.homeAppliances.values());
@@ -669,6 +656,7 @@ export class MemStorage implements IStorage {
     const newHouse: House = {
       ...house,
       id,
+      isDefault: house.isDefault ?? false,
       createdAt: new Date(),
     };
     this.houses.set(id, newHouse);
@@ -723,6 +711,7 @@ export class MemStorage implements IStorage {
     const newAppointment: ContractorAppointment = {
       ...appointment,
       id,
+      contractorId: appointment.contractorId ?? null,
       contractorCompany: appointment.contractorCompany ?? null,
       contractorPhone: appointment.contractorPhone ?? null,
       estimatedDuration: appointment.estimatedDuration ?? null,
@@ -790,8 +779,13 @@ export class MemStorage implements IStorage {
     const newNotification: Notification = {
       ...notification,
       id,
+      houseId: notification.houseId ?? null,
+      appointmentId: notification.appointmentId ?? null,
+      maintenanceTaskId: notification.maintenanceTaskId ?? null,
       sentAt: notification.sentAt ?? null,
       isRead: notification.isRead ?? false,
+      priority: notification.priority ?? "medium",
+      actionUrl: notification.actionUrl ?? null,
       createdAt: new Date()
     };
     this.notifications.set(id, newNotification);
@@ -973,16 +967,26 @@ export class MemStorage implements IStorage {
   // Search methods
   async searchContractors(query: string, location?: string): Promise<Contractor[]> {
     const contractors = Array.from(this.contractors.values());
-    return contractors.filter(contractor => 
-      contractor.name.toLowerCase().includes(query.toLowerCase()) ||
-      contractor.company.toLowerCase().includes(query.toLowerCase()) ||
-      contractor.services.some(service => service.toLowerCase().includes(query.toLowerCase()))
-    );
+    
+    return contractors.filter(contractor => {
+      const matchesQuery = query === "" || 
+        contractor.name.toLowerCase().includes(query.toLowerCase()) ||
+        contractor.company.toLowerCase().includes(query.toLowerCase()) ||
+        contractor.bio.toLowerCase().includes(query.toLowerCase()) ||
+        contractor.services.some(service => service.toLowerCase().includes(query.toLowerCase()));
+      
+      const matchesLocation = !location || 
+        contractor.location.toLowerCase().includes(location.toLowerCase());
+      
+      return matchesQuery && matchesLocation;
+    });
   }
 
   async searchProducts(query: string): Promise<Product[]> {
     const products = Array.from(this.products.values());
-    return products.filter(product => 
+    
+    return products.filter(product =>
+      query === "" ||
       product.name.toLowerCase().includes(query.toLowerCase()) ||
       product.description.toLowerCase().includes(query.toLowerCase()) ||
       product.category.toLowerCase().includes(query.toLowerCase())
@@ -1015,6 +1019,11 @@ export class MemStorage implements IStorage {
     const newRecord: ServiceRecord = {
       ...serviceRecord,
       id: randomUUID(),
+      cost: serviceRecord.cost ?? "0",
+      status: serviceRecord.status ?? "completed",
+      notes: serviceRecord.notes ?? null,
+      warrantyPeriod: serviceRecord.warrantyPeriod ?? null,
+      followUpDate: serviceRecord.followUpDate ?? null,
       createdAt: new Date(),
     };
     this.serviceRecords.push(newRecord);
@@ -1047,6 +1056,106 @@ export class MemStorage implements IStorage {
       contractorName: "Mike Johnson", // Add contractor name from contractors table
       contractorCompany: "Johnson Home Services"
     } as any));
+  }
+
+  // Messaging operations
+  async getConversations(userId: string, userType: 'homeowner' | 'contractor'): Promise<(Conversation & { otherPartyName: string; unreadCount: number })[]> {
+    const conversations = Array.from(this.conversations.values());
+    const userConversations = conversations.filter(conv => 
+      userType === 'homeowner' ? conv.homeownerId === userId : conv.contractorId === userId
+    );
+
+    // Get conversation details with other party name and unread count
+    const enrichedConversations = await Promise.all(
+      userConversations.map(async (conv) => {
+        // Get other party info
+        let otherPartyName = "Unknown";
+        if (userType === 'homeowner') {
+          const contractor = this.contractors.get(conv.contractorId);
+          otherPartyName = contractor?.name || "Contractor";
+        } else {
+          const homeowner = this.users.get(conv.homeownerId);
+          otherPartyName = homeowner?.firstName || homeowner?.email || "Homeowner";
+        }
+
+        // Count unread messages
+        const messages = Array.from(this.messages.values()).filter(m => m.conversationId === conv.id);
+        const unreadCount = messages.filter(m => !m.isRead && m.senderId !== userId).length;
+
+        return {
+          ...conv,
+          otherPartyName,
+          unreadCount
+        };
+      })
+    );
+
+    return enrichedConversations.sort((a, b) => 
+      new Date(b.lastMessageAt || b.createdAt || new Date()).getTime() - 
+      new Date(a.lastMessageAt || a.createdAt || new Date()).getTime()
+    );
+  }
+
+  async getConversation(id: string): Promise<Conversation | undefined> {
+    return this.conversations.get(id);
+  }
+
+  async createConversation(conversation: InsertConversation): Promise<Conversation> {
+    const id = randomUUID();
+    const newConversation: Conversation = {
+      ...conversation,
+      id,
+      status: conversation.status ?? "active",
+      lastMessageAt: new Date(),
+      createdAt: new Date()
+    };
+    this.conversations.set(id, newConversation);
+    return newConversation;
+  }
+
+  async getMessages(conversationId: string): Promise<Message[]> {
+    const messages = Array.from(this.messages.values());
+    return messages
+      .filter(message => message.conversationId === conversationId)
+      .sort((a, b) => new Date(a.createdAt || new Date()).getTime() - new Date(b.createdAt || new Date()).getTime());
+  }
+
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const id = randomUUID();
+    const newMessage: Message = {
+      ...message,
+      id,
+      isRead: message.isRead ?? false,
+      readAt: null,
+      createdAt: new Date()
+    };
+    this.messages.set(id, newMessage);
+
+    // Update conversation's lastMessageAt
+    const conversation = this.conversations.get(message.conversationId);
+    if (conversation) {
+      conversation.lastMessageAt = new Date();
+      this.conversations.set(conversation.id, conversation);
+    }
+
+    return newMessage;
+  }
+
+  async markMessagesAsRead(conversationId: string, userId: string): Promise<void> {
+    const messages = Array.from(this.messages.values()).filter(m => 
+      m.conversationId === conversationId && m.senderId !== userId && !m.isRead
+    );
+
+    messages.forEach(message => {
+      message.isRead = true;
+      message.readAt = new Date();
+      this.messages.set(message.id, message);
+    });
+  }
+
+  async getUnreadMessageCount(userId: string): Promise<number> {
+    const messages = Array.from(this.messages.values());
+    return messages.filter(m => m.senderId !== userId && !m.isRead).length;
   }
 
   private seedServiceRecords() {

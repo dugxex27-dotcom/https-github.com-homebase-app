@@ -16,6 +16,7 @@ import SignIn from "./pages/signin";
 import ContractorSignIn from "./pages/contractor-signin";
 import SimpleContractorSignIn from "./pages/simple-contractor-signin";
 import DemoContractorSignIn from "./pages/demo-contractor-signin";
+import Messages from "./pages/messages";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -58,6 +59,7 @@ function Router() {
           <Route path="/maintenance" component={Maintenance} />
           <Route path="/contractor/:id" component={ContractorProfile} />
           <Route path="/service-records" component={CustomerServiceRecords} />
+          <Route path="/messages" component={Messages} />
         </>
       )}
       {/* Contractor routes */}
@@ -66,6 +68,7 @@ function Router() {
           <Route path="/dashboard" component={ContractorDashboard} />
           <Route path="/profile" component={ContractorProfile} />
           <Route path="/service-records" component={ServiceRecords} />
+          <Route path="/messages" component={Messages} />
         </>
       )}
       <Route path="/signin" component={SignIn} />

@@ -175,6 +175,29 @@ export const serviceRecords = pgTable("service_records", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Conversations table for messaging between homeowners and contractors
+export const conversations = pgTable("conversations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  homeownerId: text("homeowner_id").notNull(),
+  contractorId: text("contractor_id").notNull(),
+  subject: text("subject").notNull(),
+  status: text("status").notNull().default("active"), // "active", "closed", "archived"
+  lastMessageAt: timestamp("last_message_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Messages table for individual messages in conversations
+export const messages = pgTable("messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  conversationId: text("conversation_id").notNull(),
+  senderId: text("sender_id").notNull(), // user ID who sent the message
+  senderType: text("sender_type").notNull(), // "homeowner" or "contractor"
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertContractorSchema = createInsertSchema(contractors).omit({
   id: true,
 });
@@ -223,6 +246,18 @@ export const insertServiceRecordSchema = createInsertSchema(serviceRecords).omit
   createdAt: true,
 });
 
+export const insertConversationSchema = createInsertSchema(conversations).omit({
+  id: true,
+  createdAt: true,
+  lastMessageAt: true,
+});
+
+export const insertMessageSchema = createInsertSchema(messages).omit({
+  id: true,
+  createdAt: true,
+  readAt: true,
+});
+
 export type InsertContractor = z.infer<typeof insertContractorSchema>;
 export type Contractor = typeof contractors.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
@@ -244,3 +279,7 @@ export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type InsertServiceRecord = z.infer<typeof insertServiceRecordSchema>;
 export type ServiceRecord = typeof serviceRecords.$inferSelect;
+export type InsertConversation = z.infer<typeof insertConversationSchema>;
+export type Conversation = typeof conversations.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Message = typeof messages.$inferSelect;
