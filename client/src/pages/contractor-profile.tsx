@@ -1,295 +1,556 @@
-import { useRoute } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { Star, MapPin, Shield, Phone, Mail, Calendar, Clock, Award } from "lucide-react";
-import Header from "@/components/header";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AppointmentScheduler } from "@/components/appointment-scheduler";
-import type { Contractor } from "@shared/schema";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { 
+  User, 
+  Building, 
+  Phone, 
+  Mail, 
+  MapPin, 
+  FileText, 
+  Shield, 
+  Wrench, 
+  Globe, 
+  Camera,
+  Save,
+  Plus,
+  X
+} from "lucide-react";
+
+const AVAILABLE_SERVICES = [
+  "Plumbing",
+  "Electrical",
+  "HVAC",
+  "Roofing",
+  "Flooring",
+  "Painting",
+  "Drywall",
+  "Kitchen Remodeling",
+  "Bathroom Remodeling",
+  "Basement Finishing",
+  "Deck Building",
+  "Fence Installation",
+  "Landscaping",
+  "Gutters",
+  "Windows & Doors",
+  "Siding",
+  "Concrete Work",
+  "Tile Work",
+  "Carpentry",
+  "Handyman Services"
+];
 
 export default function ContractorProfile() {
-  const [, params] = useRoute("/contractor/:id");
-  const contractorId = params?.id;
-
-  const { data: contractor, isLoading, error } = useQuery<Contractor>({
-    queryKey: ['/api/contractors', contractorId],
-    enabled: !!contractorId,
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const [formData, setFormData] = useState({
+    businessName: '',
+    contactName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    licenseNumber: '',
+    licenseState: '',
+    licenseExpiry: '',
+    insuranceProvider: '',
+    insurancePolicy: '',
+    insuranceExpiry: '',
+    servicesOffered: [] as string[],
+    website: '',
+    facebook: '',
+    instagram: '',
+    linkedin: '',
+    bio: '',
+    yearsExperience: '',
+    profileImage: ''
   });
 
-  const renderStars = (rating: string) => {
-    const numRating = parseFloat(rating);
-    const fullStars = Math.floor(numRating);
-    const hasHalfStar = numRating % 1 !== 0;
-    
-    return (
-      <div className="flex text-yellow-400">
-        {[...Array(fullStars)].map((_, i) => (
-          <Star key={i} className="h-5 w-5 fill-current" />
-        ))}
-        {hasHalfStar && <Star className="h-5 w-5 fill-current opacity-50" />}
-        {[...Array(5 - Math.ceil(numRating))].map((_, i) => (
-          <Star key={`empty-${i}`} className="h-5 w-5 text-gray-300" />
-        ))}
-      </div>
-    );
+  const [customService, setCustomService] = useState('');
+
+  // Load existing profile data
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ['/api/contractor/profile'],
+  });
+
+  // Update form data when profile loads
+  React.useEffect(() => {
+    if (profile) {
+      setFormData(prev => ({ ...prev, ...profile }));
+    }
+  }, [profile]);
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      const response = await fetch('/api/contractor/profile', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profile Updated",
+        description: "Your contractor profile has been successfully updated.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/contractor/profile'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleInputChange = (field: string, value: string | string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Contractor Not Found</h2>
-            <p className="text-gray-600">Sorry, we couldn't find the contractor you're looking for.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleServiceToggle = (service: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      servicesOffered: checked 
+        ? [...prev.servicesOffered, service]
+        : prev.servicesOffered.filter(s => s !== service)
+    }));
+  };
+
+  const addCustomService = () => {
+    if (customService.trim() && !formData.servicesOffered.includes(customService.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        servicesOffered: [...prev.servicesOffered, customService.trim()]
+      }));
+      setCustomService('');
+    }
+  };
+
+  const removeService = (service: string) => {
+    setFormData(prev => ({
+      ...prev,
+      servicesOffered: prev.servicesOffered.filter(s => s !== service)
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateProfileMutation.mutate(formData);
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="animate-pulse">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
-              <div className="flex items-start space-x-6">
-                <div className="w-32 h-32 bg-gray-200 rounded-full"></div>
-                <div className="flex-1">
-                  <div className="h-8 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-6 bg-gray-200 rounded mb-4 w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!contractor) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Contractor Not Found</h2>
-            <p className="text-gray-600">Sorry, we couldn't find the contractor you're looking for.</p>
-          </div>
+      <div className="container mx-auto py-8 px-4">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Contractor Header */}
-        <Card className="mb-8 border-0 shadow-lg">
-          <CardContent className="p-8">
-            <div className="flex flex-col lg:flex-row items-start space-y-6 lg:space-y-0 lg:space-x-8">
-              <div className="relative mx-auto lg:mx-0">
-                {contractor.profileImage ? (
-                  <img
-                    src={contractor.profileImage}
-                    alt={`${contractor.name} profile photo`}
-                    className="w-32 h-32 rounded-full object-cover border-4 border-primary/10"
-                  />
-                ) : (
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border-4 border-primary/10">
-                    <span className="text-3xl font-bold text-primary">
-                      {contractor.name.split(' ').map(n => n[0]).join('')}
-                    </span>
-                  </div>
-                )}
-                {contractor.isAvailableThisWeek && (
-                  <div className="absolute -bottom-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                    Available
-                  </div>
-                )}
+    <div className="container mx-auto py-8 px-4 max-w-4xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
+        <p className="text-gray-600">
+          Manage your business information and professional credentials
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Business Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building className="w-5 h-5" />
+              Business Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="businessName">Business Name *</Label>
+                <Input
+                  id="businessName"
+                  value={formData.businessName}
+                  onChange={(e) => handleInputChange('businessName', e.target.value)}
+                  placeholder="ABC Construction LLC"
+                  required
+                />
               </div>
-              
-              <div className="flex-1 text-center lg:text-left">
-                <div className="mb-4">
-                  <h1 className="text-4xl font-bold text-foreground mb-2">
-                    {contractor.name}
-                  </h1>
-                  <h2 className="text-xl text-muted-foreground mb-3">
-                    {contractor.company}
-                  </h2>
-                </div>
-                
-                <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-3 lg:space-y-0 lg:space-x-8 mb-6">
-                  <div className="flex items-center">
-                    {renderStars(contractor.rating)}
-                    <span className="ml-2 text-lg font-semibold text-foreground">
-                      {contractor.rating}
-                    </span>
-                    <span className="ml-2 text-muted-foreground">
-                      ({contractor.reviewCount} reviews)
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center text-muted-foreground">
-                    <MapPin className="w-5 h-5 mr-2 text-primary/60" />
-                    <span>{contractor.location}</span>
-                    {contractor.distance && (
-                      <>
-                        <span className="mx-2">•</span>
-                        <span>{contractor.distance} miles away</span>
-                      </>
-                    )}
-                  </div>
-                </div>
+              <div>
+                <Label htmlFor="contactName">Contact Name *</Label>
+                <Input
+                  id="contactName"
+                  value={formData.contactName}
+                  onChange={(e) => handleInputChange('contactName', e.target.value)}
+                  placeholder="John Smith"
+                  required
+                />
+              </div>
+            </div>
 
-                <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-sm mb-8">
-                  <div className="flex items-center text-muted-foreground">
-                    <Shield className="w-5 h-5 mr-2 text-green-600" />
-                    <span>Licensed & Insured</span>
-                  </div>
-                  <div className="flex items-center text-muted-foreground">
-                    <Award className="w-5 h-5 mr-2 text-primary/60" />
-                    <span>{contractor.experience} years experience</span>
-                  </div>
-                  {contractor.isAvailableThisWeek && (
-                    <div className="flex items-center text-green-600">
-                      <Calendar className="w-5 h-5 mr-2" />
-                      <span>Available this week</span>
-                    </div>
-                  )}
-                  {contractor.hasEmergencyServices && (
-                    <div className="flex items-center text-orange-600">
-                      <Clock className="w-5 h-5 mr-2" />
-                      <span>Emergency services</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <AppointmentScheduler 
-                    triggerButtonText="Schedule Appointment"
-                    triggerButtonVariant="default"
-                    triggerButtonSize="lg"
-                    contractorName={contractor.name}
-                    contractorId={contractor.id}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="email">Email Address *</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className="pl-10"
+                    placeholder="contact@abcconstruction.com"
+                    required
                   />
-                  <Button 
-                    size="lg"
-                    className="bg-primary text-white hover:bg-primary/90 px-8"
-                    onClick={() => window.open(`tel:${contractor.phone}`, '_self')}
-                  >
-                    <Phone className="mr-2 h-5 w-5" />
-                    Call Now
-                  </Button>
-                  <Button 
-                    size="lg"
-                    variant="outline"
-                    className="px-8"
-                    onClick={() => window.open(`mailto:${contractor.email}`, '_self')}
-                  >
-                    <Mail className="mr-2 h-5 w-5" />
-                    Send Email
-                  </Button>
                 </div>
+              </div>
+              <div>
+                <Label htmlFor="phone">Phone Number *</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    className="pl-10"
+                    placeholder="(555) 123-4567"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="address">Business Address *</Label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  className="pl-10"
+                  placeholder="123 Main Street"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="city">City *</Label>
+                <Input
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) => handleInputChange('city', e.target.value)}
+                  placeholder="Springfield"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="state">State *</Label>
+                <Input
+                  id="state"
+                  value={formData.state}
+                  onChange={(e) => handleInputChange('state', e.target.value)}
+                  placeholder="IL"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="zipCode">ZIP Code *</Label>
+                <Input
+                  id="zipCode"
+                  value={formData.zipCode}
+                  onChange={(e) => handleInputChange('zipCode', e.target.value)}
+                  placeholder="62704"
+                  required
+                />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* About & Services */}
-          <div className="lg:col-span-2 space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>About</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 leading-relaxed">
-                  {contractor.bio}
-                </p>
-              </CardContent>
-            </Card>
+        {/* License Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              License Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="licenseNumber">License Number</Label>
+                <Input
+                  id="licenseNumber"
+                  value={formData.licenseNumber}
+                  onChange={(e) => handleInputChange('licenseNumber', e.target.value)}
+                  placeholder="GC123456"
+                />
+              </div>
+              <div>
+                <Label htmlFor="licenseState">License State</Label>
+                <Input
+                  id="licenseState"
+                  value={formData.licenseState}
+                  onChange={(e) => handleInputChange('licenseState', e.target.value)}
+                  placeholder="Illinois"
+                />
+              </div>
+              <div>
+                <Label htmlFor="licenseExpiry">License Expiry</Label>
+                <Input
+                  id="licenseExpiry"
+                  type="date"
+                  value={formData.licenseExpiry}
+                  onChange={(e) => handleInputChange('licenseExpiry', e.target.value)}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Services Offered</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {contractor.services.map((service, index) => (
-                    <Badge key={index} variant="secondary" className="bg-blue-50 text-blue-700">
-                      {service}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        {/* Insurance Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              Insurance Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="insuranceProvider">Insurance Provider</Label>
+                <Input
+                  id="insuranceProvider"
+                  value={formData.insuranceProvider}
+                  onChange={(e) => handleInputChange('insuranceProvider', e.target.value)}
+                  placeholder="State Farm Business"
+                />
+              </div>
+              <div>
+                <Label htmlFor="insurancePolicy">Policy Number</Label>
+                <Input
+                  id="insurancePolicy"
+                  value={formData.insurancePolicy}
+                  onChange={(e) => handleInputChange('insurancePolicy', e.target.value)}
+                  placeholder="POL123456789"
+                />
+              </div>
+              <div>
+                <Label htmlFor="insuranceExpiry">Insurance Expiry</Label>
+                <Input
+                  id="insuranceExpiry"
+                  type="date"
+                  value={formData.insuranceExpiry}
+                  onChange={(e) => handleInputChange('insuranceExpiry', e.target.value)}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* License & Insurance Info */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>License & Insurance</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-1">License Status</h4>
-                  <div className="flex items-center">
-                    <Shield className="w-4 h-4 mr-2 text-green-600" />
-                    <span className="text-sm text-gray-600">
-                      {contractor.isLicensed ? 'Licensed' : 'Not Licensed'}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    License #: {contractor.licenseNumber}
-                  </p>
+        {/* Services Offered */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wrench className="w-5 h-5" />
+              Services Offered
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+              {AVAILABLE_SERVICES.map((service) => (
+                <div key={service} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={service}
+                    checked={formData.servicesOffered.includes(service)}
+                    onCheckedChange={(checked) => handleServiceToggle(service, checked as boolean)}
+                  />
+                  <Label htmlFor={service} className="text-sm">{service}</Label>
                 </div>
+              ))}
+            </div>
 
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-1">Insurance</h4>
-                  <div className="flex items-center">
-                    <Shield className="w-4 h-4 mr-2 text-green-600" />
-                    <span className="text-sm text-gray-600">
-                      {contractor.isInsured ? 'Insured' : 'Not Insured'}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Provider: {contractor.insuranceProvider}
-                  </p>
+            {/* Custom Services */}
+            <div className="border-t pt-4">
+              <Label className="text-sm font-medium">Custom Services</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  value={customService}
+                  onChange={(e) => setCustomService(e.target.value)}
+                  placeholder="Add custom service..."
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomService())}
+                />
+                <Button type="button" onClick={addCustomService} size="sm">
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              {formData.servicesOffered.filter(s => !AVAILABLE_SERVICES.includes(s)).length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.servicesOffered
+                    .filter(s => !AVAILABLE_SERVICES.includes(s))
+                    .map((service) => (
+                      <div key={service} className="bg-amber-100 text-amber-800 px-2 py-1 rounded-md text-sm flex items-center gap-1">
+                        {service}
+                        <button
+                          type="button"
+                          onClick={() => removeService(service)}
+                          className="text-amber-600 hover:text-amber-800"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center">
-                  <Phone className="w-4 h-4 mr-3 text-gray-400" />
-                  <span className="text-sm text-gray-700">{contractor.phone}</span>
-                </div>
-                <div className="flex items-center">
-                  <Mail className="w-4 h-4 mr-3 text-gray-400" />
-                  <span className="text-sm text-gray-700">{contractor.email}</span>
-                </div>
-                <div className="flex items-start">
-                  <MapPin className="w-4 h-4 mr-3 text-gray-400 mt-0.5" />
-                  <span className="text-sm text-gray-700">{contractor.location}</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        {/* Online Presence */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5" />
+              Online Presence
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="website">Website URL</Label>
+              <Input
+                id="website"
+                type="url"
+                value={formData.website}
+                onChange={(e) => handleInputChange('website', e.target.value)}
+                placeholder="https://www.abcconstruction.com"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="facebook">Facebook Page</Label>
+                <Input
+                  id="facebook"
+                  value={formData.facebook}
+                  onChange={(e) => handleInputChange('facebook', e.target.value)}
+                  placeholder="https://facebook.com/abcconstruction"
+                />
+              </div>
+              <div>
+                <Label htmlFor="instagram">Instagram Profile</Label>
+                <Input
+                  id="instagram"
+                  value={formData.instagram}
+                  onChange={(e) => handleInputChange('instagram', e.target.value)}
+                  placeholder="https://instagram.com/abcconstruction"
+                />
+              </div>
+              <div>
+                <Label htmlFor="linkedin">LinkedIn Profile</Label>
+                <Input
+                  id="linkedin"
+                  value={formData.linkedin}
+                  onChange={(e) => handleInputChange('linkedin', e.target.value)}
+                  placeholder="https://linkedin.com/company/abcconstruction"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* About & Experience */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5" />
+              About & Experience
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="yearsExperience">Years of Experience</Label>
+              <Select value={formData.yearsExperience} onValueChange={(value) => handleInputChange('yearsExperience', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select years of experience" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1-2">1-2 years</SelectItem>
+                  <SelectItem value="3-5">3-5 years</SelectItem>
+                  <SelectItem value="6-10">6-10 years</SelectItem>
+                  <SelectItem value="11-15">11-15 years</SelectItem>
+                  <SelectItem value="16-20">16-20 years</SelectItem>
+                  <SelectItem value="20+">20+ years</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="bio">Business Description</Label>
+              <Textarea
+                id="bio"
+                value={formData.bio}
+                onChange={(e) => handleInputChange('bio', e.target.value)}
+                placeholder="Tell potential clients about your business, specialties, and what sets you apart..."
+                rows={4}
+                maxLength={500}
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                {formData.bio.length}/500 characters
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Save Button */}
+        <div className="flex justify-end">
+          <Button 
+            type="submit" 
+            disabled={updateProfileMutation.isPending}
+            className="px-8 py-2"
+          >
+            {updateProfileMutation.isPending ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Saving...
+              </div>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Save Profile
+              </>
+            )}
+          </Button>
         </div>
-      </main>
+      </form>
     </div>
   );
 }

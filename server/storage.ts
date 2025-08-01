@@ -67,6 +67,10 @@ export interface IStorage {
   // Search methods
   searchContractors(query: string, location?: string): Promise<Contractor[]>;
   searchProducts(query: string): Promise<Product[]>;
+  
+  // Contractor profile operations
+  getContractorProfile(contractorId: string): Promise<any | undefined>;
+  updateContractorProfile(contractorId: string, profileData: any): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -78,6 +82,7 @@ export class MemStorage implements IStorage {
   private houses: Map<string, House>;
   private contractorAppointments: Map<string, ContractorAppointment>;
   private notifications: Map<string, Notification>;
+  private contractorProfiles: Map<string, any>;
 
   constructor() {
     this.users = new Map();
@@ -88,6 +93,7 @@ export class MemStorage implements IStorage {
     this.houses = new Map();
     this.contractorAppointments = new Map();
     this.notifications = new Map();
+    this.contractorProfiles = new Map();
     this.seedData();
   }
 
@@ -949,6 +955,35 @@ export class MemStorage implements IStorage {
     
     // Create new notifications with updated times
     await this.createAppointmentNotifications(appointment);
+  }
+
+  // Search methods
+  async searchContractors(query: string, location?: string): Promise<Contractor[]> {
+    const contractors = Array.from(this.contractors.values());
+    return contractors.filter(contractor => 
+      contractor.name.toLowerCase().includes(query.toLowerCase()) ||
+      contractor.company.toLowerCase().includes(query.toLowerCase()) ||
+      contractor.services.some(service => service.toLowerCase().includes(query.toLowerCase()))
+    );
+  }
+
+  async searchProducts(query: string): Promise<Product[]> {
+    const products = Array.from(this.products.values());
+    return products.filter(product => 
+      product.name.toLowerCase().includes(query.toLowerCase()) ||
+      product.description.toLowerCase().includes(query.toLowerCase()) ||
+      product.category.toLowerCase().includes(query.toLowerCase())
+    );
+  }
+
+  // Contractor profile methods
+  async getContractorProfile(contractorId: string): Promise<any | undefined> {
+    return this.contractorProfiles.get(contractorId);
+  }
+
+  async updateContractorProfile(contractorId: string, profileData: any): Promise<any> {
+    this.contractorProfiles.set(contractorId, profileData);
+    return profileData;
   }
 }
 

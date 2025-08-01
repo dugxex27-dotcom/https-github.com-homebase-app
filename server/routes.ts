@@ -481,15 +481,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/houses/:id", async (req, res) => {
+  // Contractor profile routes
+  app.get('/api/contractor/profile', async (req: any, res) => {
     try {
-      const deleted = await storage.deleteHouse(req.params.id);
-      if (!deleted) {
-        return res.status(404).json({ message: "House not found" });
+      if (!req.session?.isAuthenticated || req.session?.user?.role !== 'contractor') {
+        return res.status(401).json({ message: "Unauthorized" });
       }
-      res.status(204).send();
+
+      const contractorId = req.session.user.id;
+      const profile = await storage.getContractorProfile(contractorId);
+      
+      if (!profile) {
+        // Return default profile structure
+        return res.json({
+          businessName: '',
+          contactName: req.session.user.firstName || '',
+          email: req.session.user.email || '',
+          phone: '',
+          address: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          licenseNumber: '',
+          licenseState: '',
+          licenseExpiry: '',
+          insuranceProvider: '',
+          insurancePolicy: '',
+          insuranceExpiry: '',
+          servicesOffered: [],
+          website: '',
+          facebook: '',
+          instagram: '',
+          linkedin: '',
+          bio: '',
+          yearsExperience: '',
+          profileImage: ''
+        });
+      }
+
+      res.json(profile);
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete house" });
+      console.error("Error fetching contractor profile:", error);
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  app.put('/api/contractor/profile', async (req: any, res) => {
+    try {
+      if (!req.session?.isAuthenticated || req.session?.user?.role !== 'contractor') {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const contractorId = req.session.user.id;
+      const profileData = req.body;
+
+      const updatedProfile = await storage.updateContractorProfile(contractorId, profileData);
+      res.json(updatedProfile);
+    } catch (error) {
+      console.error("Error updating contractor profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
     }
   });
 
