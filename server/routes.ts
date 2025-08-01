@@ -43,6 +43,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // GET logout endpoint for direct navigation
+  app.get('/api/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+        return res.redirect('/?error=logout-failed');
+      }
+      res.redirect('/');
+    });
+  });
+
   // Simple contractor demo login (no OAuth)
   app.post('/api/auth/contractor-demo-login', async (req, res) => {
     try {

@@ -5,12 +5,33 @@ import Logo from "@/components/logo";
 import { Notifications } from "@/components/notifications";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
+import { queryClient } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 
 export default function Header() {
   const [location] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const typedUser = user as User | undefined;
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', { 
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        // Clear all cached queries
+        queryClient.clear();
+        // Reload the page to reset the app state
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback: try the GET endpoint
+      window.location.href = '/api/logout';
+    }
+  };
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
@@ -79,7 +100,7 @@ export default function Header() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => window.location.href = '/api/logout'}
+                  onClick={handleLogout}
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
