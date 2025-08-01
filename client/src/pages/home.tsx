@@ -219,7 +219,7 @@ export default function Home() {
               <ul className="space-y-2 text-gray-400">
                 <li><Link href="/contractors" className="hover:text-white transition-colors">Find Contractors</Link></li>
                 <li><Link href="/products" className="hover:text-white transition-colors">DIY Products</Link></li>
-                <li><a href="#" className="hover:text-white transition-colors">Project Ideas</a></li>
+                <li><Link href="/service-records" className="hover:text-white transition-colors">Service History</Link></li>
                 <li><a href="#" className="hover:text-white transition-colors">Safety Tips</a></li>
               </ul>
             </div>

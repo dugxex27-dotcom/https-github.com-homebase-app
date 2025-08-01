@@ -11,6 +11,7 @@ import ContractorProfile from "./pages/contractor-profile";
 import Maintenance from "./pages/maintenance";
 import ContractorDashboard from "./pages/contractor-dashboard";
 import ServiceRecords from "./pages/service-records";
+import CustomerServiceRecords from "./pages/customer-service-records";
 import SignIn from "./pages/signin";
 import ContractorSignIn from "./pages/contractor-signin";
 import SimpleContractorSignIn from "./pages/simple-contractor-signin";
@@ -52,9 +53,11 @@ function Router() {
       {/* Homeowner routes */}
       {typedUser?.role === 'homeowner' && (
         <>
+          <Route path="/contractors" component={Contractors} />
           <Route path="/products" component={Products} />
           <Route path="/maintenance" component={Maintenance} />
           <Route path="/contractor/:id" component={ContractorProfile} />
+          <Route path="/service-records" component={CustomerServiceRecords} />
         </>
       )}
       {/* Contractor routes */}

@@ -78,6 +78,9 @@ export interface IStorage {
   createServiceRecord(serviceRecord: InsertServiceRecord): Promise<ServiceRecord>;
   updateServiceRecord(id: string, serviceRecord: Partial<InsertServiceRecord>): Promise<ServiceRecord | undefined>;
   deleteServiceRecord(id: string): Promise<boolean>;
+  
+  // Customer service record operations  
+  getCustomerServiceRecords(customerId?: string, customerEmail?: string, customerAddress?: string): Promise<ServiceRecord[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -1034,6 +1037,16 @@ export class MemStorage implements IStorage {
       return true;
     }
     return false;
+  }
+
+  async getCustomerServiceRecords(customerId?: string, customerEmail?: string, customerAddress?: string): Promise<ServiceRecord[]> {
+    // For demo purposes, return all service records with contractor details
+    // In a real app, you'd filter by customer info from the authenticated user
+    return this.serviceRecords.map(record => ({
+      ...record,
+      contractorName: "Mike Johnson", // Add contractor name from contractors table
+      contractorCompany: "Johnson Home Services"
+    } as any));
   }
 
   private seedServiceRecords() {

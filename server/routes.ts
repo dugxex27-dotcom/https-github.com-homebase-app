@@ -612,6 +612,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Customer service records routes
+  app.get('/api/customer-service-records', isAuthenticated, async (req: any, res) => {
+    try {
+      const customerId = req.user.claims.sub;
+      const customerEmail = req.user.claims.email;
+      
+      // Get service records for this customer
+      const serviceRecords = await storage.getCustomerServiceRecords(customerId, customerEmail);
+      res.json(serviceRecords);
+    } catch (error) {
+      console.error("Error fetching customer service records:", error);
+      res.status(500).json({ message: "Failed to fetch service records" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
