@@ -39,8 +39,8 @@ export default function SimpleContractorSignIn() {
       });
 
       if (response.ok) {
-        // Redirect to contractor dashboard
-        window.location.href = '/dashboard';
+        // Force page reload to update authentication state
+        window.location.reload();
       } else {
         throw new Error('Failed to sign in');
       }

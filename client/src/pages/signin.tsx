@@ -13,22 +13,31 @@ export default function SignIn() {
   const handleSignIn = async () => {
     if (!selectedRole) return;
     
+    if (selectedRole === 'contractor') {
+      // Redirect to safe contractor signin
+      window.location.href = '/contractor-signin';
+      return;
+    }
+    
     try {
-      // Send role selection to backend
-      await fetch('/api/auth/select-role', {
+      // For homeowners, create a demo session
+      const response = await fetch('/api/auth/homeowner-demo-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ role: selectedRole }),
+        body: JSON.stringify({ 
+          role: selectedRole,
+          email: 'demo@homeowner.com',
+          name: 'Demo Homeowner'
+        }),
       });
       
-      // Redirect to login with role parameter
-      window.location.href = `/api/login?role=${selectedRole}`;
+      if (response.ok) {
+        window.location.reload();
+      }
     } catch (error) {
-      console.error('Failed to set role:', error);
-      // Fallback: proceed with login anyway
-      window.location.href = '/api/login';
+      console.error('Failed to sign in:', error);
     }
   };
 

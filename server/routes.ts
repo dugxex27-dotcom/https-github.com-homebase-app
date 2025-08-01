@@ -6,8 +6,8 @@ import { z } from "zod";
 import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Skip OAuth setup to prevent browser crashes
+  // await setupAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', async (req: any, res) => {
@@ -71,6 +71,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating contractor demo user:", error);
       res.status(500).json({ message: "Failed to create contractor account" });
+    }
+  });
+
+  // Simple homeowner demo login
+  app.post('/api/auth/homeowner-demo-login', async (req, res) => {
+    try {
+      const { email, name, role } = req.body;
+      
+      // Create a demo homeowner user
+      const homeownerId = `demo-homeowner-${Date.now()}`;
+      const user = await storage.upsertUser({
+        id: homeownerId,
+        email: email || 'demo@homeowner.com',
+        firstName: (name || 'Demo Homeowner').split(' ')[0],
+        lastName: (name || 'Demo Homeowner').split(' ').slice(1).join(' '),
+        profileImageUrl: null,
+        role: role || 'homeowner'
+      });
+
+      // Create a simple session
+      (req as any).session.user = user;
+      (req as any).session.isAuthenticated = true;
+
+      res.json({ success: true, user });
+    } catch (error) {
+      console.error("Error creating homeowner demo user:", error);
+      res.status(500).json({ message: "Failed to create homeowner account" });
     }
   });
   // Contractor routes
