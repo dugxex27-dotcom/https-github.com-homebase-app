@@ -5,6 +5,7 @@ import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AppointmentScheduler } from "@/components/appointment-scheduler";
 import type { Contractor } from "@shared/schema";
 
 export default function ContractorProfile() {
@@ -91,38 +92,53 @@ export default function ContractorProfile() {
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Contractor Header */}
-        <Card className="mb-8">
+        <Card className="mb-8 border-0 shadow-lg">
           <CardContent className="p-8">
             <div className="flex flex-col lg:flex-row items-start space-y-6 lg:space-y-0 lg:space-x-8">
-              {contractor.profileImage && (
-                <img
-                  src={contractor.profileImage}
-                  alt={`${contractor.name} profile photo`}
-                  className="w-32 h-32 rounded-full object-cover mx-auto lg:mx-0"
-                />
-              )}
+              <div className="relative mx-auto lg:mx-0">
+                {contractor.profileImage ? (
+                  <img
+                    src={contractor.profileImage}
+                    alt={`${contractor.name} profile photo`}
+                    className="w-32 h-32 rounded-full object-cover border-4 border-primary/10"
+                  />
+                ) : (
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border-4 border-primary/10">
+                    <span className="text-3xl font-bold text-primary">
+                      {contractor.name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                )}
+                {contractor.isAvailableThisWeek && (
+                  <div className="absolute -bottom-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                    Available
+                  </div>
+                )}
+              </div>
               
               <div className="flex-1 text-center lg:text-left">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  {contractor.name}
-                </h1>
-                <h2 className="text-xl text-gray-600 mb-4">
-                  {contractor.company}
-                </h2>
+                <div className="mb-4">
+                  <h1 className="text-4xl font-bold text-foreground mb-2">
+                    {contractor.name}
+                  </h1>
+                  <h2 className="text-xl text-muted-foreground mb-3">
+                    {contractor.company}
+                  </h2>
+                </div>
                 
-                <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-2 lg:space-y-0 lg:space-x-6 mb-4">
+                <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-3 lg:space-y-0 lg:space-x-8 mb-6">
                   <div className="flex items-center">
                     {renderStars(contractor.rating)}
-                    <span className="ml-2 text-lg font-medium text-gray-900">
+                    <span className="ml-2 text-lg font-semibold text-foreground">
                       {contractor.rating}
                     </span>
-                    <span className="ml-1 text-gray-600">
+                    <span className="ml-2 text-muted-foreground">
                       ({contractor.reviewCount} reviews)
                     </span>
                   </div>
                   
-                  <div className="flex items-center text-gray-600">
-                    <MapPin className="w-4 h-4 mr-1" />
+                  <div className="flex items-center text-muted-foreground">
+                    <MapPin className="w-5 h-5 mr-2 text-primary/60" />
                     <span>{contractor.location}</span>
                     {contractor.distance && (
                       <>
@@ -133,44 +149,52 @@ export default function ContractorProfile() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap justify-center lg:justify-start gap-4 text-sm text-gray-600 mb-6">
-                  <div className="flex items-center">
-                    <Shield className="w-4 h-4 mr-1" />
+                <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-sm mb-8">
+                  <div className="flex items-center text-muted-foreground">
+                    <Shield className="w-5 h-5 mr-2 text-green-600" />
                     <span>Licensed & Insured</span>
                   </div>
-                  <div className="flex items-center">
-                    <Award className="w-4 h-4 mr-1" />
+                  <div className="flex items-center text-muted-foreground">
+                    <Award className="w-5 h-5 mr-2 text-primary/60" />
                     <span>{contractor.experience} years experience</span>
                   </div>
                   {contractor.isAvailableThisWeek && (
-                    <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
+                    <div className="flex items-center text-green-600">
+                      <Calendar className="w-5 h-5 mr-2" />
                       <span>Available this week</span>
                     </div>
                   )}
                   {contractor.hasEmergencyServices && (
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 mr-1" />
+                    <div className="flex items-center text-orange-600">
+                      <Clock className="w-5 h-5 mr-2" />
                       <span>Emergency services</span>
                     </div>
                   )}
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <AppointmentScheduler 
+                    triggerButtonText="Schedule Appointment"
+                    triggerButtonVariant="default"
+                    triggerButtonSize="lg"
+                    contractorName={contractor.name}
+                    contractorId={contractor.id}
+                  />
                   <Button 
                     size="lg"
-                    className="bg-primary text-white hover:bg-blue-700"
+                    className="bg-primary text-white hover:bg-primary/90 px-8"
                     onClick={() => window.open(`tel:${contractor.phone}`, '_self')}
                   >
-                    <Phone className="mr-2 h-4 w-4" />
+                    <Phone className="mr-2 h-5 w-5" />
                     Call Now
                   </Button>
                   <Button 
                     size="lg"
                     variant="outline"
+                    className="px-8"
                     onClick={() => window.open(`mailto:${contractor.email}`, '_self')}
                   >
-                    <Mail className="mr-2 h-4 w-4" />
+                    <Mail className="mr-2 h-5 w-5" />
                     Send Email
                   </Button>
                 </div>

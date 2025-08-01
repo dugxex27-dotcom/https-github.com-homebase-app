@@ -28,59 +28,79 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+    <div className="bg-card border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/20">
       <div className="flex items-start space-x-4">
-        {contractor.profileImage && (
-          <img
-            src={contractor.profileImage}
-            alt={`${contractor.name} profile photo`}
-            className="w-16 h-16 rounded-full object-cover"
-          />
-        )}
-        <div className="flex-1">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="font-semibold text-gray-900">{contractor.name}</h3>
-              <p className="text-sm text-gray-600">{contractor.company}</p>
+        <div className="relative">
+          {contractor.profileImage ? (
+            <img
+              src={contractor.profileImage}
+              alt={`${contractor.name} profile photo`}
+              className="w-20 h-20 rounded-full object-cover border-2 border-primary/10"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+              <span className="text-lg font-semibold text-primary">
+                {contractor.name.split(' ').map(n => n[0]).join('')}
+              </span>
             </div>
-            <div className="flex items-center">
+          )}
+          {contractor.isAvailableThisWeek && (
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-card"></div>
+          )}
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-start mb-3">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground text-lg mb-1 truncate">{contractor.name}</h3>
+              <p className="text-muted-foreground text-sm mb-2">{contractor.company}</p>
+            </div>
+            <div className="flex items-center ml-4 flex-shrink-0">
               {renderStars(contractor.rating)}
-              <span className="ml-1 text-sm text-gray-600">
-                {contractor.rating} ({contractor.reviewCount})
+              <span className="ml-2 text-sm font-medium text-foreground">
+                {contractor.rating}
+              </span>
+              <span className="ml-1 text-xs text-muted-foreground">
+                ({contractor.reviewCount})
               </span>
             </div>
           </div>
           
-          <div className="mt-2">
-            <div className="flex items-center text-sm text-gray-600 mb-1">
-              <MapPin className="w-4 h-4 mr-1" />
-              <span>{contractor.distance} miles away</span>
+          <div className="space-y-2 mb-3">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <MapPin className="w-4 h-4 mr-2 text-primary/60" />
+              <span>{contractor.distance} miles away • {contractor.location}</span>
             </div>
-            <div className="flex items-center text-sm text-gray-600">
-              <Shield className="w-4 h-4 mr-1" />
-              <span>Licensed & Insured</span>
-              <span className="mx-2">•</span>
-              <span>{contractor.experience} years experience</span>
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Shield className="w-4 h-4 mr-2 text-primary/60" />
+              <span>Licensed & Insured • {contractor.experience} years experience</span>
             </div>
           </div>
 
-          <div className="mt-3">
-            <p className="text-sm text-gray-700 line-clamp-2">
+          <div className="mb-3">
+            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
               {contractor.bio}
             </p>
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            {contractor.services.map((service, index) => (
-              <Badge key={index} variant="secondary" className="bg-blue-50 text-blue-700">
-                {service}
-              </Badge>
-            ))}
+          <div className="mb-4">
+            <div className="flex flex-wrap gap-1">
+              {contractor.services.slice(0, 3).map((service, index) => (
+                <Badge key={index} variant="secondary" className="text-xs bg-primary/10 text-primary hover:bg-primary/20">
+                  {service}
+                </Badge>
+              ))}
+              {contractor.services.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{contractor.services.length - 3} more
+                </Badge>
+              )}
+            </div>
           </div>
 
-          <div className="mt-4 flex space-x-2">
+          <div className="flex gap-2">
             <Button 
-              className="flex-1 bg-primary text-white hover:bg-blue-700"
+              className="flex-1 bg-primary text-white hover:bg-primary/90"
               onClick={() => window.open(`tel:${contractor.phone}`, '_self')}
             >
               <Phone className="mr-2 h-4 w-4" />

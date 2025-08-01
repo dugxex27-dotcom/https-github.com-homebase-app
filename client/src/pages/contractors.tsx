@@ -6,13 +6,15 @@ import ContractorCard from "@/components/contractor-card";
 import FilterSidebar from "@/components/filter-sidebar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import type { Contractor } from "@shared/schema";
 
 export default function Contractors() {
   const [location] = useLocation();
   const [filters, setFilters] = useState<any>({});
   const [sortBy, setSortBy] = useState('best-match');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Parse URL parameters
   useEffect(() => {
@@ -95,26 +97,45 @@ export default function Contractors() {
           <FilterSidebar onFiltersChange={handleFiltersChange} />
           
           <div className="flex-1">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Trusted Contractors Near You
-                </h2>
-                <p className="text-gray-600">
-                  {isLoading ? 'Loading...' : `Found ${sortedContractors.length} contractors in your area`}
-                </p>
+            <div className="mb-8">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                  <h2 className="text-3xl font-bold text-foreground mb-2">
+                    Trusted Home Experts
+                  </h2>
+                  <p className="text-muted-foreground text-lg">
+                    {isLoading ? 'Loading...' : `${sortedContractors.length} verified contractors specializing in niche services`}
+                  </p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-muted-foreground">
+                    Sort by:
+                  </div>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="best-match">Best Match</SelectItem>
+                      <SelectItem value="highest-rated">Highest Rated</SelectItem>
+                      <SelectItem value="most-reviews">Most Reviews</SelectItem>
+                      <SelectItem value="distance">Distance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="best-match">Best Match</SelectItem>
-                  <SelectItem value="highest-rated">Highest Rated</SelectItem>
-                  <SelectItem value="most-reviews">Most Reviews</SelectItem>
-                  <SelectItem value="distance">Distance</SelectItem>
-                </SelectContent>
-              </Select>
+              
+              {/* Search Bar */}
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Input
+                  type="text"
+                  placeholder="Search for gutter cleaning, drywall repair, custom cabinetry..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-3 text-lg border-muted"
+                />
+              </div>
             </div>
 
             {isLoading ? (

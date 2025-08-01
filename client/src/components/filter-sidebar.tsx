@@ -52,16 +52,16 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
 
   return (
     <aside className="lg:w-80">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Filters</h3>
+      <div className="bg-card rounded-xl shadow-sm border p-6 sticky top-6">
+        <h3 className="text-lg font-semibold text-foreground mb-6">Find Your Perfect Contractor</h3>
         
         <div className="space-y-6">
           {/* Distance Filter */}
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-3 block">Distance</Label>
+            <Label className="text-sm font-medium text-foreground mb-3 block">Distance from you</Label>
             <Select onValueChange={(value) => setMaxDistance(parseFloat(value))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select distance" />
+              <SelectTrigger className="border-muted">
+                <SelectValue placeholder="Any distance" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="5">Within 5 miles</SelectItem>
