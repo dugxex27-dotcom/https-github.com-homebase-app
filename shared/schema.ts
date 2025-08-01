@@ -198,6 +198,20 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Contractor reviews table
+export const contractorReviews = pgTable("contractor_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractorId: text("contractor_id").notNull(),
+  homeownerId: text("homeowner_id").notNull(),
+  rating: integer("rating").notNull(), // 1-5 stars
+  comment: text("comment"),
+  serviceDate: timestamp("service_date"),
+  serviceType: text("service_type"), // What service was provided
+  wouldRecommend: boolean("would_recommend").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertContractorSchema = createInsertSchema(contractors).omit({
   id: true,
 });
@@ -258,6 +272,12 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
   readAt: true,
 });
 
+export const insertContractorReviewSchema = createInsertSchema(contractorReviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertContractor = z.infer<typeof insertContractorSchema>;
 export type Contractor = typeof contractors.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
@@ -283,3 +303,5 @@ export type InsertConversation = z.infer<typeof insertConversationSchema>;
 export type Conversation = typeof conversations.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
+export type InsertContractorReview = z.infer<typeof insertContractorReviewSchema>;
+export type ContractorReview = typeof contractorReviews.$inferSelect;

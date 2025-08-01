@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireRole } from "./replitAuth";
 import { z } from "zod";
-import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema } from "@shared/schema";
+import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema } from "@shared/schema";
 
 // Extend session data interface
 declare module 'express-session' {
@@ -784,6 +784,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching unread message count:", error);
       res.status(500).json({ message: "Failed to fetch unread message count" });
+    }
+  });
+
+  // Review API endpoints
+  app.get('/api/contractors/:id/reviews', async (req, res) => {
+    try {
+      const reviews = await storage.getContractorReviews(req.params.id);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching contractor reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  app.get('/api/contractors/:id/rating', async (req, res) => {
+    try {
+      const rating = await storage.getContractorAverageRating(req.params.id);
+      res.json(rating);
+    } catch (error) {
+      console.error("Error fetching contractor rating:", error);
+      res.status(500).json({ message: "Failed to fetch rating" });
+    }
+  });
+
+  app.post('/api/contractors/:id/reviews', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user.id;
+      const userType = req.session.user.role;
+      
+      // Only homeowners can leave reviews
+      if (userType !== 'homeowner') {
+        return res.status(403).json({ message: "Only homeowners can leave reviews" });
+      }
+      
+      const reviewData = insertContractorReviewSchema.parse({
+        ...req.body,
+        contractorId: req.params.id,
+        homeownerId: userId
+      });
+      
+      const review = await storage.createContractorReview(reviewData);
+      res.status(201).json(review);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid review data", errors: error.errors });
+      }
+      console.error("Error creating review:", error);
+      res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+
+  app.get('/api/reviews/my-reviews', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user.id;
+      const userType = req.session.user.role;
+      
+      if (userType !== 'homeowner') {
+        return res.status(403).json({ message: "Only homeowners can view their reviews" });
+      }
+      
+      const reviews = await storage.getReviewsByHomeowner(userId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching user reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  app.put('/api/reviews/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user.id;
+      const userType = req.session.user.role;
+      
+      if (userType !== 'homeowner') {
+        return res.status(403).json({ message: "Only homeowners can edit reviews" });
+      }
+      
+      // Check if the review belongs to the user
+      const reviews = await storage.getReviewsByHomeowner(userId);
+      const existingReview = reviews.find(r => r.id === req.params.id);
+      
+      if (!existingReview) {
+        return res.status(404).json({ message: "Review not found or access denied" });
+      }
+      
+      const reviewData = insertContractorReviewSchema.partial().parse(req.body);
+      const review = await storage.updateContractorReview(req.params.id, reviewData);
+      
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      
+      res.json(review);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid review data", errors: error.errors });
+      }
+      console.error("Error updating review:", error);
+      res.status(500).json({ message: "Failed to update review" });
+    }
+  });
+
+  app.delete('/api/reviews/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user.id;
+      const userType = req.session.user.role;
+      
+      if (userType !== 'homeowner') {
+        return res.status(403).json({ message: "Only homeowners can delete reviews" });
+      }
+      
+      // Check if the review belongs to the user
+      const reviews = await storage.getReviewsByHomeowner(userId);
+      const existingReview = reviews.find(r => r.id === req.params.id);
+      
+      if (!existingReview) {
+        return res.status(404).json({ message: "Review not found or access denied" });
+      }
+      
+      const deleted = await storage.deleteContractorReview(req.params.id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      
+      res.json({ message: "Review deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      res.status(500).json({ message: "Failed to delete review" });
     }
   });
 

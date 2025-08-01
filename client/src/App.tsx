@@ -8,6 +8,7 @@ import Home from "./pages/home";
 import Contractors from "./pages/contractors";
 import Products from "./pages/products";
 import ContractorProfile from "./pages/contractor-profile";
+import ContractorDetail from "./pages/contractor-detail";
 import Maintenance from "./pages/maintenance";
 import ContractorDashboard from "./pages/contractor-dashboard";
 import ServiceRecords from "./pages/service-records";
@@ -57,7 +58,7 @@ function Router() {
           <Route path="/contractors" component={Contractors} />
           <Route path="/products" component={Products} />
           <Route path="/maintenance" component={Maintenance} />
-          <Route path="/contractor/:id" component={ContractorProfile} />
+          <Route path="/contractor/:id" component={ContractorDetail} />
           <Route path="/service-records" component={CustomerServiceRecords} />
           <Route path="/messages" component={Messages} />
         </>

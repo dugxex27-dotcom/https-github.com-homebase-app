@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage } from "@shared/schema";
+import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -90,6 +90,14 @@ export interface IStorage {
   createMessage(message: InsertMessage): Promise<Message>;
   markMessagesAsRead(conversationId: string, userId: string): Promise<void>;
   getUnreadMessageCount(userId: string): Promise<number>;
+
+  // Review operations
+  getContractorReviews(contractorId: string): Promise<ContractorReview[]>;
+  getReviewsByHomeowner(homeownerId: string): Promise<ContractorReview[]>;
+  createContractorReview(review: InsertContractorReview): Promise<ContractorReview>;
+  updateContractorReview(id: string, review: Partial<InsertContractorReview>): Promise<ContractorReview | undefined>;
+  deleteContractorReview(id: string): Promise<boolean>;
+  getContractorAverageRating(contractorId: string): Promise<{ averageRating: number; totalReviews: number }>;
 }
 
 export class MemStorage implements IStorage {
@@ -105,6 +113,7 @@ export class MemStorage implements IStorage {
   private serviceRecords: ServiceRecord[];
   private conversations: Map<string, Conversation>;
   private messages: Map<string, Message>;
+  private contractorReviews: Map<string, ContractorReview>;
 
   constructor() {
     this.users = new Map();
@@ -119,8 +128,10 @@ export class MemStorage implements IStorage {
     this.serviceRecords = [];
     this.conversations = new Map();
     this.messages = new Map();
+    this.contractorReviews = new Map();
     this.seedData();
     this.seedServiceRecords();
+    this.seedReviews();
   }
 
   // User operations (required for Replit Auth)
@@ -1158,6 +1169,106 @@ export class MemStorage implements IStorage {
     return messages.filter(m => m.senderId !== userId && !m.isRead).length;
   }
 
+  // Review methods
+  async getContractorReviews(contractorId: string): Promise<ContractorReview[]> {
+    const reviews = Array.from(this.contractorReviews.values());
+    return reviews
+      .filter(review => review.contractorId === contractorId)
+      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+  }
+
+  async getReviewsByHomeowner(homeownerId: string): Promise<ContractorReview[]> {
+    const reviews = Array.from(this.contractorReviews.values());
+    return reviews
+      .filter(review => review.homeownerId === homeownerId)
+      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+  }
+
+  async createContractorReview(reviewData: InsertContractorReview): Promise<ContractorReview> {
+    const id = randomUUID();
+    const review: ContractorReview = {
+      ...reviewData,
+      id,
+      comment: reviewData.comment || null,
+      serviceDate: reviewData.serviceDate || null,
+      serviceType: reviewData.serviceType || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.contractorReviews.set(id, review);
+    
+    // Update contractor's average rating
+    await this.updateContractorRating(reviewData.contractorId);
+    
+    return review;
+  }
+
+  async updateContractorReview(id: string, reviewData: Partial<InsertContractorReview>): Promise<ContractorReview | undefined> {
+    const existing = this.contractorReviews.get(id);
+    if (!existing) {
+      return undefined;
+    }
+
+    const updated: ContractorReview = {
+      ...existing,
+      ...reviewData,
+      updatedAt: new Date(),
+    };
+    this.contractorReviews.set(id, updated);
+    
+    // Update contractor's average rating
+    await this.updateContractorRating(existing.contractorId);
+    
+    return updated;
+  }
+
+  async deleteContractorReview(id: string): Promise<boolean> {
+    const review = this.contractorReviews.get(id);
+    if (!review) {
+      return false;
+    }
+    
+    const deleted = this.contractorReviews.delete(id);
+    if (deleted) {
+      // Update contractor's average rating
+      await this.updateContractorRating(review.contractorId);
+    }
+    
+    return deleted;
+  }
+
+  async getContractorAverageRating(contractorId: string): Promise<{ averageRating: number; totalReviews: number }> {
+    const reviews = await this.getContractorReviews(contractorId);
+    const totalReviews = reviews.length;
+    
+    if (totalReviews === 0) {
+      return { averageRating: 0, totalReviews: 0 };
+    }
+    
+    const sum = reviews.reduce((total, review) => total + review.rating, 0);
+    const averageRating = Math.round((sum / totalReviews) * 10) / 10; // Round to 1 decimal place
+    
+    return { averageRating, totalReviews };
+  }
+
+  // Helper method to update contractor's rating in the contractors table
+  private async updateContractorRating(contractorId: string): Promise<void> {
+    const contractor = this.contractors.get(contractorId);
+    if (!contractor) {
+      return;
+    }
+    
+    const { averageRating, totalReviews } = await this.getContractorAverageRating(contractorId);
+    
+    const updatedContractor: Contractor = {
+      ...contractor,
+      rating: averageRating.toString(),
+      reviewCount: totalReviews,
+    };
+    
+    this.contractors.set(contractorId, updatedContractor);
+  }
+
   private seedServiceRecords() {
     this.serviceRecords = [
       {
@@ -1199,6 +1310,68 @@ export class MemStorage implements IStorage {
         createdAt: new Date("2025-01-20T14:30:00"),
       }
     ];
+  }
+
+  private seedReviews() {
+    const reviews: ContractorReview[] = [
+      {
+        id: "review-1",
+        contractorId: "1",
+        homeownerId: "demo-homeowner-123",
+        rating: 5,
+        comment: "Mike did an excellent job installing our new gutters. He was professional, punctual, and cleaned up everything afterwards. The gutters have been working perfectly through several heavy rainstorms. Highly recommend!",
+        serviceType: "Gutter Installation",
+        serviceDate: new Date("2024-11-15"),
+        wouldRecommend: true,
+        createdAt: new Date("2024-11-20"),
+        updatedAt: new Date("2024-11-20"),
+      },
+      {
+        id: "review-2", 
+        contractorId: "1",
+        homeownerId: "demo-homeowner-456",
+        rating: 4,
+        comment: "Good work on the HVAC maintenance. Arrived on time and explained everything clearly. Only minor issue was that it took a bit longer than expected, but the quality was solid.",
+        serviceType: "HVAC Maintenance",
+        serviceDate: new Date("2024-12-02"),
+        wouldRecommend: true,
+        createdAt: new Date("2024-12-05"),
+        updatedAt: new Date("2024-12-05"),
+      },
+      {
+        id: "review-3",
+        contractorId: "2", 
+        homeownerId: "demo-homeowner-789",
+        rating: 5,
+        comment: "Sarah's drywall repair work is exceptional. You can't even tell where the damage was! She's meticulous and takes pride in her work. Will definitely hire again.",
+        serviceType: "Drywall Repair",
+        serviceDate: new Date("2024-10-28"),
+        wouldRecommend: true,
+        createdAt: new Date("2024-11-01"),
+        updatedAt: new Date("2024-11-01"),
+      },
+      {
+        id: "review-4",
+        contractorId: "3",
+        homeownerId: "demo-homeowner-321",
+        rating: 3,
+        comment: "The electrical work was done properly and safely, but communication could have been better. Had to follow up several times to get updates on the schedule.",
+        serviceType: "Electrical Repair",
+        serviceDate: new Date("2024-12-10"),
+        wouldRecommend: false,
+        createdAt: new Date("2024-12-15"),
+        updatedAt: new Date("2024-12-15"),
+      }
+    ];
+
+    reviews.forEach(review => {
+      this.contractorReviews.set(review.id, review);
+    });
+    
+    // Update contractor ratings based on reviews
+    this.updateContractorRating("1");
+    this.updateContractorRating("2");  
+    this.updateContractorRating("3");
   }
 }
 
