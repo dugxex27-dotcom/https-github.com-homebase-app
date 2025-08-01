@@ -131,47 +131,26 @@ export async function setupAuth(app: Express) {
   });
 }
 
-export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  const user = req.user as any;
-
-  if (!req.isAuthenticated() || !user.expires_at) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const now = Math.floor(Date.now() / 1000);
-  if (now <= user.expires_at) {
+export const isAuthenticated: RequestHandler = async (req: any, res, next) => {
+  // For demo purposes, use session-based authentication instead of OAuth
+  if (req.session?.isAuthenticated && req.session?.user) {
     return next();
   }
 
-  const refreshToken = user.refresh_token;
-  if (!refreshToken) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
-
-  try {
-    const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
-    updateUserSession(user, tokenResponse);
-    return next();
-  } catch (error) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
+  return res.status(401).json({ message: "Unauthorized" });
 };
 
 // Role-based authorization middleware
 export const requireRole = (role: 'homeowner' | 'contractor'): RequestHandler => {
-  return async (req, res, next) => {
-    const user = req.user as any;
-    if (!user || !user.claims) {
+  return async (req: any, res, next) => {
+    // Check if user is authenticated via session
+    if (!req.session?.isAuthenticated || !req.session?.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const userId = user.claims.sub;
-    const dbUser = await storage.getUser(userId);
+    const user = req.session.user;
     
-    if (!dbUser || dbUser.role !== role) {
+    if (!user || user.role !== role) {
       return res.status(403).json({ message: "Forbidden - insufficient permissions" });
     }
 
