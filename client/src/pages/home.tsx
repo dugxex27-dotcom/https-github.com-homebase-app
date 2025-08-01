@@ -184,30 +184,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contractor CTA Section - only show for non-contractors */}
-      {typedUser?.role !== 'contractor' && (
-        <section id="contractor-cta" className="bg-primary py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-white mb-4">
-                Are You a Contractor?
-              </h2>
-              <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-                Join our network of trusted professionals and connect with homeowners in your area. 
-                Build your business with qualified leads and showcase your expertise.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button className="bg-white text-primary hover:bg-gray-50">
-                  Join as a Contractor
-                </Button>
-                <Button variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-primary">
-                  Learn More
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
