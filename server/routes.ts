@@ -25,8 +25,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/select-role', (req, res) => {
     const { role } = req.body;
     if (role && (role === 'homeowner' || role === 'contractor')) {
-      // Store role in session
-      (req as any).session.pendingUserRole = role;
+      // Store role globally for the OAuth callback
+      (global as any).pendingUserRole = role;
       res.json({ success: true });
     } else {
       res.status(400).json({ message: "Invalid role" });

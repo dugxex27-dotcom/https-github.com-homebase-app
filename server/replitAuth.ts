@@ -57,10 +57,10 @@ function updateUserSession(
 
 async function upsertUser(
   claims: any,
-  sessionRole?: string
 ) {
-  // Get role from session or default to homeowner
-  const selectedRole = sessionRole || 'homeowner';
+  // Check if user already exists to preserve their role
+  const existingUser = await storage.getUser(claims["sub"]);
+  const role = existingUser?.role || (global as any).pendingUserRole || 'homeowner';
   
   await storage.upsertUser({
     id: claims["sub"],
@@ -68,8 +68,11 @@ async function upsertUser(
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
-    role: selectedRole,
+    role: role,
   });
+  
+  // Clear the pending role
+  delete (global as any).pendingUserRole;
 }
 
 export async function setupAuth(app: Express) {
@@ -82,21 +85,11 @@ export async function setupAuth(app: Express) {
 
   const verify: VerifyFunction = async (
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback,
-    req?: any
+    verified: passport.AuthenticateCallback
   ) => {
     const user = {};
     updateUserSession(user, tokens);
-    
-    // Get role from session if available
-    const sessionRole = req?.session?.pendingUserRole;
-    await upsertUser(tokens.claims(), sessionRole);
-    
-    // Clear the pending role from session
-    if (req?.session) {
-      delete req.session.pendingUserRole;
-    }
-    
+    await upsertUser(tokens.claims());
     verified(null, user);
   };
 
@@ -118,14 +111,8 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    // Store the role selection from sessionStorage
-    const role = req.query.role as string;
-    if (role && (role === 'homeowner' || role === 'contractor')) {
-      global.pendingUserRole = role;
-    }
-    
     passport.authenticate(`replitauth:${req.hostname}`, {
-      prompt: "login consent",
+      prompt: "login consent", 
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
