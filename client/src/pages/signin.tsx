@@ -129,11 +129,11 @@ export default function SignIn() {
               className="w-full mt-6 py-3 text-lg font-semibold"
               size="lg"
             >
-              Continue with Replit Auth
+              {selectedRole === 'contractor' ? 'Access Contractor Demo' : 'Continue as Homeowner'}
             </Button>
 
             <div className="text-center text-sm text-muted-foreground mt-4">
-              Secure authentication powered by Replit
+              Demo authentication for testing purposes
             </div>
           </CardContent>
         </Card>

@@ -13,34 +13,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', async (req: any, res) => {
     try {
       // Check for demo session first
-      if ((req as any).session?.isAuthenticated && (req as any).session?.user) {
-        return res.json((req as any).session.user);
+      if (req.session?.isAuthenticated && req.session?.user) {
+        return res.json(req.session.user);
       }
 
-      // Otherwise check OAuth authentication
-      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
+      // No authentication found
+      return res.status(401).json({ message: "Unauthorized" });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 
-  // Handle role selection before login
-  app.post('/api/auth/select-role', (req, res) => {
-    const { role } = req.body;
-    if (role && (role === 'homeowner' || role === 'contractor')) {
-      // Store role globally for the OAuth callback
-      (global as any).pendingUserRole = role;
+  // Demo logout
+  app.post('/api/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Could not log out" });
+      }
       res.json({ success: true });
-    } else {
-      res.status(400).json({ message: "Invalid role" });
-    }
+    });
   });
 
   // Simple contractor demo login (no OAuth)
@@ -64,8 +56,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Create a simple session (for demo purposes)
-      (req as any).session.user = user;
-      (req as any).session.isAuthenticated = true;
+      req.session.user = user;
+      req.session.isAuthenticated = true;
 
       res.json({ success: true, user });
     } catch (error) {
@@ -91,8 +83,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Create a simple session
-      (req as any).session.user = user;
-      (req as any).session.isAuthenticated = true;
+      req.session.user = user;
+      req.session.isAuthenticated = true;
 
       res.json({ success: true, user });
     } catch (error) {

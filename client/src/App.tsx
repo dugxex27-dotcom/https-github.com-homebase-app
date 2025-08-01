@@ -13,6 +13,7 @@ import ContractorDashboard from "./pages/contractor-dashboard";
 import SignIn from "./pages/signin";
 import ContractorSignIn from "./pages/contractor-signin";
 import SimpleContractorSignIn from "./pages/simple-contractor-signin";
+import DemoContractorSignIn from "./pages/demo-contractor-signin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -35,7 +36,7 @@ function Router() {
     // Allow access to contractor-signin page even when not authenticated
     return (
       <Switch>
-        <Route path="/contractor-signin" component={SimpleContractorSignIn} />
+        <Route path="/contractor-signin" component={DemoContractorSignIn} />
         <Route component={SignIn} />
       </Switch>
     );
