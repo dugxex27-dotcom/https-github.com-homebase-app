@@ -546,7 +546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Service records routes
   app.get('/api/service-records', isAuthenticated, async (req: any, res) => {
     try {
-      const contractorId = req.user.claims.sub;
+      const contractorId = req.session.user.id;
       const serviceRecords = await storage.getServiceRecords(contractorId);
       res.json(serviceRecords);
     } catch (error) {
@@ -571,7 +571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/service-records', isAuthenticated, async (req: any, res) => {
     try {
-      const contractorId = req.user.claims.sub;
+      const contractorId = req.session.user.id;
       const serviceRecordData = {
         ...req.body,
         contractorId,
@@ -615,8 +615,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Customer service records routes
   app.get('/api/customer-service-records', isAuthenticated, async (req: any, res) => {
     try {
-      const customerId = req.user.claims.sub;
-      const customerEmail = req.user.claims.email;
+      const customerId = req.session.user.id;
+      const customerEmail = req.session.user.email;
       
       // Get service records for this customer
       const serviceRecords = await storage.getCustomerServiceRecords(customerId, customerEmail);

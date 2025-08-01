@@ -7,10 +7,13 @@ import ProductCard from "@/components/product-card";
 import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Product } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
+import type { Product, User } from "@shared/schema";
 import { Link } from "wouter";
 
 export default function Home() {
+  const { user } = useAuth();
+  const typedUser = user as User | undefined;
   const [activeTab, setActiveTab] = useState<'products' | 'maintenance' | 'contractors'>('products');
 
   const { data: featuredProducts, isLoading } = useQuery<Product[]>({
@@ -54,17 +57,20 @@ export default function Home() {
                 <Calendar className="mr-2 h-4 w-4" />
                 Maintenance Schedule
               </button>
-              <button
-                onClick={() => setActiveTab('contractors')}
-                className={`px-6 py-3 rounded-lg text-sm font-medium flex items-center transition-colors ${
-                  activeTab === 'contractors'
-                    ? 'bg-card text-card-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Find Contractors
-              </button>
+              {/* Only show Find Contractors tab for homeowners */}
+              {typedUser?.role === 'homeowner' && (
+                <button
+                  onClick={() => setActiveTab('contractors')}
+                  className={`px-6 py-3 rounded-lg text-sm font-medium flex items-center transition-colors ${
+                    activeTab === 'contractors'
+                      ? 'bg-card text-card-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Find Contractors
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -132,7 +138,7 @@ export default function Home() {
             </div>
           )}
 
-          {activeTab === 'contractors' && (
+          {activeTab === 'contractors' && typedUser?.role === 'homeowner' && (
             <div className="max-w-4xl mx-auto">
               <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
                 <h2 className="text-3xl font-bold text-foreground mb-6 text-center">
@@ -178,28 +184,30 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contractor CTA Section */}
-      <section id="contractor-cta" className="bg-primary py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Are You a Contractor?
-            </h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-              Join our network of trusted professionals and connect with homeowners in your area. 
-              Build your business with qualified leads and showcase your expertise.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-white text-primary hover:bg-gray-50">
-                Join as a Contractor
-              </Button>
-              <Button variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-primary">
-                Learn More
-              </Button>
+      {/* Contractor CTA Section - only show for non-contractors */}
+      {typedUser?.role !== 'contractor' && (
+        <section id="contractor-cta" className="bg-primary py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Are You a Contractor?
+              </h2>
+              <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+                Join our network of trusted professionals and connect with homeowners in your area. 
+                Build your business with qualified leads and showcase your expertise.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button className="bg-white text-primary hover:bg-gray-50">
+                  Join as a Contractor
+                </Button>
+                <Button variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-primary">
+                  Learn More
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
@@ -214,15 +222,18 @@ export default function Home() {
               </p>
             </div>
 
-            <div>
-              <h4 className="text-lg font-semibold mb-4">For Homeowners</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/contractors" className="hover:text-white transition-colors">Find Contractors</Link></li>
-                <li><Link href="/products" className="hover:text-white transition-colors">DIY Products</Link></li>
-                <li><Link href="/service-records" className="hover:text-white transition-colors">Service History</Link></li>
-                <li><a href="#" className="hover:text-white transition-colors">Safety Tips</a></li>
-              </ul>
-            </div>
+            {/* Only show homeowner links for homeowners */}
+            {typedUser?.role === 'homeowner' && (
+              <div>
+                <h4 className="text-lg font-semibold mb-4">For Homeowners</h4>
+                <ul className="space-y-2 text-gray-400">
+                  <li><Link href="/contractors" className="hover:text-white transition-colors">Find Contractors</Link></li>
+                  <li><Link href="/products" className="hover:text-white transition-colors">DIY Products</Link></li>
+                  <li><Link href="/service-records" className="hover:text-white transition-colors">Service History</Link></li>
+                  <li><a href="#" className="hover:text-white transition-colors">Safety Tips</a></li>
+                </ul>
+              </div>
+            )}
 
             <div>
               <h4 className="text-lg font-semibold mb-4">For Contractors</h4>
