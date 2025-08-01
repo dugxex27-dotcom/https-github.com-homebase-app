@@ -1,14 +1,16 @@
 import { Link, useLocation } from "wouter";
-import { Users, Package, User, LogOut } from "lucide-react";
+import { Users, Package, User as UserIcon, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/logo";
 import { Notifications } from "@/components/notifications";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
+import type { User } from "@shared/schema";
 
 export default function Header() {
   const [location] = useLocation();
   const { user, isAuthenticated } = useAuth();
+  const typedUser = user as User | undefined;
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
@@ -21,7 +23,7 @@ export default function Header() {
           </div>
           
           <nav className="hidden md:flex space-x-8">
-            {user?.role === 'homeowner' && (
+            {typedUser?.role === 'homeowner' && (
               <>
                 <Link href="/products" className={`text-gray-700 hover:text-primary transition-colors ${
                   location === '/products' ? 'text-primary font-medium' : ''
@@ -40,7 +42,7 @@ export default function Header() {
                 </Link>
               </>
             )}
-            {user?.role === 'contractor' && (
+            {typedUser?.role === 'contractor' && (
               <>
                 <Link href="/dashboard" className={`text-gray-700 hover:text-primary transition-colors ${
                   location === '/dashboard' ? 'text-primary font-medium' : ''
@@ -62,16 +64,16 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center space-x-4">
-            {isAuthenticated && user?.role === 'homeowner' && <Notifications />}
+            {isAuthenticated && typedUser?.role === 'homeowner' && <Notifications />}
             
-            {isAuthenticated && user && (
+            {isAuthenticated && typedUser && (
               <>
                 <div className="flex items-center space-x-2">
-                  <Badge variant={user.role === 'homeowner' ? 'default' : 'secondary'}>
-                    {user.role === 'homeowner' ? 'Homeowner' : 'Contractor'}
+                  <Badge variant={typedUser.role === 'homeowner' ? 'default' : 'secondary'}>
+                    {typedUser.role === 'homeowner' ? 'Homeowner' : 'Contractor'}
                   </Badge>
                   <span className="text-sm text-gray-700">
-                    {user.firstName || user.email}
+                    {typedUser.firstName || typedUser.email}
                   </span>
                 </div>
                 <Button 

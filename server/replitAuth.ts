@@ -6,6 +6,7 @@ import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
+import MemoryStore from "memorystore";
 import { storage } from "./storage";
 
 if (!process.env.REPLIT_DOMAINS) {
@@ -24,21 +25,21 @@ const getOidcConfig = memoize(
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
+  
+  // Use memory store for development since we don't have PostgreSQL configured
+  const memoryStore = MemoryStore(session);
+  const sessionStore = new memoryStore({
+    checkPeriod: 86400000, // prune expired entries every 24h
   });
+  
   return session({
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || 'dev-secret-key',
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: false, // Set to false for development
       maxAge: sessionTtl,
     },
   });
@@ -56,9 +57,10 @@ function updateUserSession(
 
 async function upsertUser(
   claims: any,
+  sessionRole?: string
 ) {
-  // Get role from session storage (set during signin)
-  const selectedRole = global.pendingUserRole || 'homeowner';
+  // Get role from session or default to homeowner
+  const selectedRole = sessionRole || 'homeowner';
   
   await storage.upsertUser({
     id: claims["sub"],
@@ -68,9 +70,6 @@ async function upsertUser(
     profileImageUrl: claims["profile_image_url"],
     role: selectedRole,
   });
-  
-  // Clear the pending role
-  global.pendingUserRole = undefined;
 }
 
 export async function setupAuth(app: Express) {
@@ -83,11 +82,21 @@ export async function setupAuth(app: Express) {
 
   const verify: VerifyFunction = async (
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback
+    verified: passport.AuthenticateCallback,
+    req?: any
   ) => {
     const user = {};
     updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
+    
+    // Get role from session if available
+    const sessionRole = req?.session?.pendingUserRole;
+    await upsertUser(tokens.claims(), sessionRole);
+    
+    // Clear the pending role from session
+    if (req?.session) {
+      delete req.session.pendingUserRole;
+    }
+    
     verified(null, user);
   };
 

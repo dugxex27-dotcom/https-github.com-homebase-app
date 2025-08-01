@@ -11,6 +11,7 @@ import ContractorProfile from "./pages/contractor-profile";
 import Maintenance from "./pages/maintenance";
 import ContractorDashboard from "./pages/contractor-dashboard";
 import SignIn from "./pages/signin";
+import ContractorSignIn from "./pages/contractor-signin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -34,11 +35,13 @@ function Router() {
   }
 
   // Authenticated user routes
+  const typedUser = user as { role?: string } | undefined;
+  
   return (
     <Switch>
       <Route path="/" component={Home} />
       {/* Homeowner routes */}
-      {user?.role === 'homeowner' && (
+      {typedUser?.role === 'homeowner' && (
         <>
           <Route path="/contractors" component={Contractors} />
           <Route path="/products" component={Products} />
@@ -47,12 +50,13 @@ function Router() {
         </>
       )}
       {/* Contractor routes */}
-      {user?.role === 'contractor' && (
+      {typedUser?.role === 'contractor' && (
         <>
           <Route path="/dashboard" component={ContractorDashboard} />
         </>
       )}
       <Route path="/signin" component={SignIn} />
+      <Route path="/contractor-signin" component={ContractorSignIn} />
       <Route component={NotFound} />
     </Switch>
   );
