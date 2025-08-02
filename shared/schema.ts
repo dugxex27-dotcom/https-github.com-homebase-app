@@ -158,6 +158,7 @@ export const notifications = pgTable("notifications", {
 export const serviceRecords = pgTable("service_records", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   contractorId: varchar("contractor_id").notNull(),
+  homeownerId: text("homeowner_id"), // Added to link to homeowner
   customerName: text("customer_name").notNull(),
   customerAddress: text("customer_address").notNull(),
   customerPhone: text("customer_phone"),
@@ -172,6 +173,7 @@ export const serviceRecords = pgTable("service_records", {
   materialsUsed: text("materials_used").array().notNull().default(sql`'{}'::text[]`),
   warrantyPeriod: text("warranty_period"),
   followUpDate: text("follow_up_date"),
+  isVisibleToHomeowner: boolean("is_visible_to_homeowner").notNull().default(true), // Allow contractors to control visibility
   createdAt: timestamp("created_at").defaultNow(),
 });
 

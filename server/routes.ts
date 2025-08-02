@@ -635,6 +635,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Homeowner service records endpoint
+  app.get('/api/homeowner-service-records', isAuthenticated, async (req: any, res) => {
+    try {
+      const homeownerId = req.session.user.id;
+      const serviceRecords = await storage.getHomeownerServiceRecords(homeownerId);
+      
+      // Enrich with contractor details
+      const enrichedRecords = await Promise.all(
+        serviceRecords.map(async (record) => {
+          const contractor = await storage.getContractor(record.contractorId);
+          return {
+            ...record,
+            contractorName: contractor?.name || 'Unknown Contractor',
+            contractorCompany: contractor?.company || 'Unknown Company',
+            contractorPhone: contractor?.phone || null,
+            contractorEmail: contractor?.email || null
+          };
+        })
+      );
+      
+      res.json(enrichedRecords);
+    } catch (error) {
+      console.error("Error fetching homeowner service records:", error);
+      res.status(500).json({ message: "Failed to fetch service records" });
+    }
+  });
+
   // Customer service records routes
   app.get('/api/customer-service-records', isAuthenticated, async (req: any, res) => {
     try {

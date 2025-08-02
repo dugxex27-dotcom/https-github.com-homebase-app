@@ -73,11 +73,12 @@ export interface IStorage {
   updateContractorProfile(contractorId: string, profileData: any): Promise<any>;
 
   // Service record operations
-  getServiceRecords(contractorId?: string): Promise<ServiceRecord[]>;
+  getServiceRecords(contractorId?: string, homeownerId?: string): Promise<ServiceRecord[]>;
   getServiceRecord(id: string): Promise<ServiceRecord | undefined>;
-  createServiceRecord(serviceRecord: InsertServiceRecord): Promise<ServiceRecord>;
-  updateServiceRecord(id: string, serviceRecord: Partial<InsertServiceRecord>): Promise<ServiceRecord | undefined>;
+  createServiceRecord(record: InsertServiceRecord): Promise<ServiceRecord>;
+  updateServiceRecord(id: string, record: Partial<InsertServiceRecord>): Promise<ServiceRecord | undefined>;
   deleteServiceRecord(id: string): Promise<boolean>;
+  getHomeownerServiceRecords(homeownerId: string): Promise<ServiceRecord[]>;
   
   // Customer service record operations  
   getCustomerServiceRecords(customerId?: string, customerEmail?: string, customerAddress?: string): Promise<ServiceRecord[]>;
@@ -1015,11 +1016,24 @@ export class MemStorage implements IStorage {
   }
 
   // Service record operations
-  async getServiceRecords(contractorId?: string): Promise<ServiceRecord[]> {
+  async getServiceRecords(contractorId?: string, homeownerId?: string): Promise<ServiceRecord[]> {
+    let filtered = this.serviceRecords;
+    
     if (contractorId) {
-      return this.serviceRecords.filter(record => record.contractorId === contractorId);
+      filtered = filtered.filter(record => record.contractorId === contractorId);
     }
-    return this.serviceRecords;
+    
+    if (homeownerId) {
+      filtered = filtered.filter(record => record.homeownerId === homeownerId && record.isVisibleToHomeowner);
+    }
+    
+    return filtered;
+  }
+
+  async getHomeownerServiceRecords(homeownerId: string): Promise<ServiceRecord[]> {
+    return this.serviceRecords.filter(record => 
+      record.homeownerId === homeownerId && record.isVisibleToHomeowner !== false
+    );
   }
 
   async getServiceRecord(id: string): Promise<ServiceRecord | undefined> {
@@ -1030,11 +1044,13 @@ export class MemStorage implements IStorage {
     const newRecord: ServiceRecord = {
       ...serviceRecord,
       id: randomUUID(),
+      homeownerId: serviceRecord.homeownerId ?? null,
       cost: serviceRecord.cost ?? "0",
       status: serviceRecord.status ?? "completed",
       notes: serviceRecord.notes ?? null,
       warrantyPeriod: serviceRecord.warrantyPeriod ?? null,
       followUpDate: serviceRecord.followUpDate ?? null,
+      isVisibleToHomeowner: serviceRecord.isVisibleToHomeowner ?? true,
       createdAt: new Date(),
     };
     this.serviceRecords.push(newRecord);
@@ -1273,7 +1289,8 @@ export class MemStorage implements IStorage {
     this.serviceRecords = [
       {
         id: "service-1",
-        contractorId: "demo-contractor-1754009854143",
+        contractorId: "1",
+        homeownerId: "demo-homeowner-123",
         customerName: "John Smith",
         customerAddress: "123 Oak Street, Seattle, WA",
         customerPhone: "(555) 123-4567",
@@ -1287,16 +1304,18 @@ export class MemStorage implements IStorage {
         notes: "System running efficiently. Recommended filter replacement in 3 months.",
         materialsUsed: ["HVAC Filter", "Refrigerant R-410A"],
         warrantyPeriod: "90 days",
-        followUpDate: null,
+        followUpDate: "2025-04-15",
+        isVisibleToHomeowner: true,
         createdAt: new Date("2025-01-15T10:00:00"),
       },
       {
         id: "service-2",
-        contractorId: "demo-contractor-1754009854143",
-        customerName: "Sarah Johnson",
-        customerAddress: "456 Pine Avenue, Seattle, WA",
-        customerPhone: "(555) 987-6543",
-        customerEmail: "sarah.j@email.com",
+        contractorId: "2",
+        homeownerId: "demo-homeowner-123",
+        customerName: "John Smith",
+        customerAddress: "123 Oak Street, Seattle, WA",
+        customerPhone: "(555) 123-4567",
+        customerEmail: "john.smith@email.com",
         serviceType: "Plumbing Repair",
         serviceDescription: "Fixed leaking kitchen faucet and replaced worn-out gaskets.",
         serviceDate: "2025-01-20",
@@ -1307,7 +1326,50 @@ export class MemStorage implements IStorage {
         materialsUsed: ["Faucet Gasket", "Plumber's Tape"],
         warrantyPeriod: "1 year",
         followUpDate: null,
+        isVisibleToHomeowner: true,
         createdAt: new Date("2025-01-20T14:30:00"),
+      },
+      {
+        id: "service-3",
+        contractorId: "3",
+        homeownerId: "demo-homeowner-123",
+        customerName: "John Smith",
+        customerAddress: "123 Oak Street, Seattle, WA",
+        customerPhone: "(555) 123-4567",
+        customerEmail: "john.smith@email.com",
+        serviceType: "Electrical Inspection",
+        serviceDescription: "Complete electrical system safety inspection and code compliance check.",
+        serviceDate: "2025-01-28",
+        duration: "3 hours",
+        cost: "225.00",
+        status: "completed",
+        notes: "All systems pass inspection. Recommended upgrading two older outlets.",
+        materialsUsed: ["Testing Equipment", "Labels"],
+        warrantyPeriod: "6 months",
+        followUpDate: "2025-07-28",
+        isVisibleToHomeowner: true,
+        createdAt: new Date("2025-01-28T09:00:00"),
+      },
+      {
+        id: "service-4",
+        contractorId: "1",
+        homeownerId: "demo-homeowner-456",
+        customerName: "Emily Davis",
+        customerAddress: "789 Maple Dr, Seattle, WA",
+        customerPhone: "(555) 246-8135",
+        customerEmail: "emily.davis@email.com",
+        serviceType: "Gutter Cleaning",
+        serviceDescription: "Complete gutter cleaning and minor repair work on downspouts.",
+        serviceDate: "2025-01-25",
+        duration: "2.5 hours",
+        cost: "150.00",
+        status: "completed",
+        notes: "Gutters cleaned thoroughly. Replaced one damaged section of downspout.",
+        materialsUsed: ["Downspout Section", "Gutter Sealant"],
+        warrantyPeriod: "3 months",
+        followUpDate: null,
+        isVisibleToHomeowner: true,
+        createdAt: new Date("2025-01-25T11:00:00"),
       }
     ];
   }

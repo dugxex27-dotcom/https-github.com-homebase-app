@@ -13,6 +13,7 @@ import Maintenance from "./pages/maintenance";
 import ContractorDashboard from "./pages/contractor-dashboard";
 import ServiceRecords from "./pages/service-records";
 import CustomerServiceRecords from "./pages/customer-service-records";
+import HomeownerServiceRecords from "./pages/homeowner-service-records";
 import SignIn from "./pages/signin";
 import ContractorSignIn from "./pages/contractor-signin";
 import SimpleContractorSignIn from "./pages/simple-contractor-signin";
@@ -59,7 +60,7 @@ function Router() {
           <Route path="/products" component={Products} />
           <Route path="/maintenance" component={Maintenance} />
           <Route path="/contractor/:id" component={ContractorDetail} />
-          <Route path="/service-records" component={CustomerServiceRecords} />
+          <Route path="/service-records" component={HomeownerServiceRecords} />
           <Route path="/messages" component={Messages} />
         </>
       )}
