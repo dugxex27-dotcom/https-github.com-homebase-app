@@ -66,8 +66,8 @@ function Router() {
       {/* Contractor routes */}
       {typedUser?.role === 'contractor' && (
         <>
-          <Route path="/dashboard" component={ContractorDashboard} />
-          <Route path="/profile" component={ContractorProfile} />
+          <Route path="/contractor-dashboard" component={ContractorDashboard} />
+          <Route path="/contractor-profile" component={ContractorProfile} />
           <Route path="/service-records" component={ServiceRecords} />
           <Route path="/messages" component={Messages} />
         </>

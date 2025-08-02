@@ -305,56 +305,62 @@ export default function Home() {
                       </Card>
                     </Link>
 
-                    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
-                      <CardContent className="p-6">
-                        <div className="flex items-center mb-4">
-                          <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
-                            <Calendar className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                    <Link href="/contractor-dashboard">
+                      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
+                        <CardContent className="p-6">
+                          <div className="flex items-center mb-4">
+                            <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center group-hover:bg-amber-200 dark:group-hover:bg-amber-800/50 transition-colors">
+                              <Calendar className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <div className="ml-4">
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Active Projects</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">Current work</p>
+                            </div>
                           </div>
-                          <div className="ml-4">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Active Projects</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">Current work</p>
-                          </div>
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm">
-                          3 active projects scheduled this week
-                        </p>
-                      </CardContent>
-                    </Card>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm">
+                            3 active projects scheduled this week
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </Link>
 
-                    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
-                      <CardContent className="p-6">
-                        <div className="flex items-center mb-4">
-                          <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                            <Star className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                    <Link href="/contractor-dashboard">
+                      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
+                        <CardContent className="p-6">
+                          <div className="flex items-center mb-4">
+                            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center group-hover:bg-orange-200 dark:group-hover:bg-orange-800/50 transition-colors">
+                              <Star className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                            </div>
+                            <div className="ml-4">
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Reviews</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">Customer feedback</p>
+                            </div>
                           </div>
-                          <div className="ml-4">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Reviews</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">Customer feedback</p>
-                          </div>
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm">
-                          4.8/5 stars from 127 recent reviews
-                        </p>
-                      </CardContent>
-                    </Card>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm">
+                            4.8/5 stars from 127 recent reviews
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </Link>
 
-                    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
-                      <CardContent className="p-6">
-                        <div className="flex items-center mb-4">
-                          <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
-                            <Search className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    <Link href="/contractor-dashboard">
+                      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
+                        <CardContent className="p-6">
+                          <div className="flex items-center mb-4">
+                            <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center group-hover:bg-red-200 dark:group-hover:bg-red-800/50 transition-colors">
+                              <Search className="h-6 w-6 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div className="ml-4">
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">New Leads</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">Opportunities</p>
+                            </div>
                           </div>
-                          <div className="ml-4">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">New Leads</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">Opportunities</p>
-                          </div>
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm">
-                          5 new customer inquiries this week
-                        </p>
-                      </CardContent>
-                    </Card>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm">
+                            5 new customer inquiries this week
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </Link>
                   </>
                 )}
               </div>
@@ -391,6 +397,11 @@ export default function Home() {
                       <Link href="/messages">
                         <Button variant="outline" className="border-gray-300 dark:border-gray-600">
                           View Messages
+                        </Button>
+                      </Link>
+                      <Link href="/contractor-dashboard">
+                        <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                          Business Overview
                         </Button>
                       </Link>
                       <Link href="/products">
