@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Package, Calendar, Search, MapPin, Star, CheckCircle, TrendingUp, Shield } from "lucide-react";
+import { Users, Package, Calendar, Search, MapPin, Star, CheckCircle, TrendingUp, Shield, Home as HomeIcon, Wrench, Bell, FileText, BarChart3 } from "lucide-react";
 import Header from "@/components/header";
 import HeroSection from "@/components/hero-section";
 import ProductCard from "@/components/product-card";
@@ -16,7 +16,7 @@ import { Link } from "wouter";
 export default function Home() {
   const { user } = useAuth();
   const typedUser = user as User | undefined;
-  const [activeTab, setActiveTab] = useState<'products' | 'maintenance' | 'contractors'>('products');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'contractors'>('dashboard');
 
   const { data: featuredProducts, isLoading } = useQuery<Product[]>({
     queryKey: ['/api/products', 'featured'],
@@ -73,6 +73,20 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center">
             <div className="flex bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-lg border border-gray-200 dark:border-gray-700">
+              {/* Only show Customer Dashboard for homeowners */}
+              {typedUser?.role === 'homeowner' && (
+                <button
+                  onClick={() => setActiveTab('dashboard')}
+                  className={`px-8 py-4 rounded-xl text-sm font-medium flex items-center transition-all duration-200 ${
+                    activeTab === 'dashboard'
+                      ? 'bg-amber-500 text-white shadow-md transform scale-105'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <HomeIcon className="mr-3 h-5 w-5" />
+                  Customer Dashboard
+                </button>
+              )}
               <button
                 onClick={() => setActiveTab('products')}
                 className={`px-8 py-4 rounded-xl text-sm font-medium flex items-center transition-all duration-200 ${
@@ -83,17 +97,6 @@ export default function Home() {
               >
                 <Package className="mr-3 h-5 w-5" />
                 Featured Products
-              </button>
-              <button
-                onClick={() => setActiveTab('maintenance')}
-                className={`px-8 py-4 rounded-xl text-sm font-medium flex items-center transition-all duration-200 ${
-                  activeTab === 'maintenance'
-                    ? 'bg-amber-500 text-white shadow-md transform scale-105'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                <Calendar className="mr-3 h-5 w-5" />
-                Maintenance Schedule
               </button>
               {/* Only show Find Contractors tab for homeowners */}
               {typedUser?.role === 'homeowner' && (
@@ -117,6 +120,152 @@ export default function Home() {
       {/* Tab Content Section */}
       <section className="bg-gray-50 dark:bg-gray-900/30 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {activeTab === 'dashboard' && typedUser?.role === 'homeowner' && (
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                  Your Home Dashboard
+                </h2>
+                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                  Everything you need to manage your home in one place
+                </p>
+              </div>
+
+              {/* Dashboard Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <Link href="/maintenance">
+                  <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
+                    <CardContent className="p-6">
+                      <div className="flex items-center mb-4">
+                        <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center group-hover:bg-amber-200 dark:group-hover:bg-amber-800/50 transition-colors">
+                          <Calendar className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div className="ml-4">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Maintenance</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">Schedule & track</p>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">
+                        Manage your home maintenance schedule with climate-based recommendations
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+
+                <Link href="/service-records">
+                  <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
+                    <CardContent className="p-6">
+                      <div className="flex items-center mb-4">
+                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
+                          <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="ml-4">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Service Records</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">View history</p>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">
+                        Track all your home service history and warranty information
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+
+                <Link href="/contractors">
+                  <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
+                    <CardContent className="p-6">
+                      <div className="flex items-center mb-4">
+                        <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
+                          <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div className="ml-4">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Find Contractors</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">Get help</p>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">
+                        Connect with verified local contractors for any home project
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+
+                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                        <Bell className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Alerts</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Stay informed</p>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">
+                      Check HVAC filter replacement due next week
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                        <Wrench className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Active Projects</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">In progress</p>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">
+                      Gutter cleaning scheduled for tomorrow
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+                        <BarChart3 className="h-6 w-6 text-red-600 dark:text-red-400" />
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Home Value</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Track progress</p>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">
+                      Regular maintenance increases home value by 3-5%
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/maintenance">
+                    <Button className="bg-amber-600 hover:bg-amber-700 text-white">
+                      Schedule Maintenance
+                    </Button>
+                  </Link>
+                  <Link href="/contractors">
+                    <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                      Find Contractor
+                    </Button>
+                  </Link>
+                  <Link href="/products">
+                    <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                      Browse Products
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'products' && (
             <>
               <div className="text-center mb-12">
@@ -160,55 +309,7 @@ export default function Home() {
             </>
           )}
 
-          {activeTab === 'maintenance' && (
-            <div className="max-w-4xl mx-auto">
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-xl">
-                <CardHeader className="text-center pb-8">
-                  <div className="flex items-center justify-center w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-2xl mx-auto mb-6">
-                    <Calendar className="h-10 w-10 text-amber-600 dark:text-amber-400" />
-                  </div>
-                  <CardTitle className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Smart Maintenance Scheduling
-                  </CardTitle>
-                  <p className="text-xl text-gray-600 dark:text-gray-300">
-                    Keep your home in perfect condition with personalized maintenance schedules based on your location and home systems
-                  </p>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="text-center p-4">
-                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        <MapPin className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Climate-Based</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">Recommendations tailored to your regional climate</p>
-                    </div>
-                    <div className="text-center p-4">
-                      <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
-                      </div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Predictive</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">Prevent issues before they become costly problems</p>
-                    </div>
-                    <div className="text-center p-4">
-                      <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        <Shield className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Professional</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">Based on industry standards and best practices</p>
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <Link href="/maintenance">
-                      <Button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
-                        View Your Maintenance Schedule
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+
 
           {activeTab === 'contractors' && typedUser?.role === 'homeowner' && (
             <div className="max-w-5xl mx-auto">
