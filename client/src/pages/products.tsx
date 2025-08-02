@@ -72,31 +72,38 @@ export default function Products() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
-      {/* Search Section */}
-      <section className="bg-white border-b border-gray-200 py-8">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-950/20 dark:via-emerald-950/20 dark:to-teal-950/20 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-              Products & Supplies
+          <div className="text-center mb-12">
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+              Quality <span className="text-green-600 dark:text-green-400">DIY Products</span>
             </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+              Professional-grade tools and materials for every home project
+            </p>
+          </div>
+          
+          {/* Search Section */}
+          <div className="max-w-4xl mx-auto">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-3 text-gray-400 h-4 w-4" />
                 <Input
                   type="text"
                   placeholder="Search for tools, materials, supplies..."
-                  className="pl-10"
+                  className="pl-10 h-12 text-base bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 />
               </div>
-              <Button onClick={handleSearch} className="bg-primary text-white hover:bg-blue-700">
+              <Button onClick={handleSearch} className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 h-12 text-base rounded-xl">
                 <Search className="mr-2 h-4 w-4" />
-                Search
+                Search Products
               </Button>
             </div>
           </div>
@@ -106,12 +113,14 @@ export default function Products() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Categories */}
         <div className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
-          <div className="flex flex-wrap gap-2">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Shop by Category</h3>
+          <div className="flex flex-wrap gap-3">
             <Badge
               variant={selectedCategory === "" ? "default" : "secondary"}
-              className={`cursor-pointer ${
-                selectedCategory === "" ? "bg-primary text-white" : "hover:bg-gray-200"
+              className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
+                selectedCategory === "" 
+                  ? "bg-green-600 text-white shadow-md" 
+                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-200 dark:hover:border-green-700"
               }`}
               onClick={() => setSelectedCategory("")}
             >
@@ -121,8 +130,10 @@ export default function Products() {
               <Badge
                 key={category}
                 variant={selectedCategory === category ? "default" : "secondary"}
-                className={`cursor-pointer ${
-                  selectedCategory === category ? "bg-primary text-white" : "hover:bg-gray-200"
+                className={`cursor-pointer px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
+                  selectedCategory === category 
+                    ? "bg-green-600 text-white shadow-md" 
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-200 dark:hover:border-green-700"
                 }`}
                 onClick={() => setSelectedCategory(category)}
               >

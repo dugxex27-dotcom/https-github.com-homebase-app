@@ -1259,8 +1259,22 @@ export default function Maintenance() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-red-950/20 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+              Smart <span className="text-amber-600 dark:text-amber-400">Maintenance</span> Schedule
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+              Keep your home in perfect condition with personalized maintenance schedules based on your location and home systems
+            </p>
+          </div>
+        </div>
+      </section>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">

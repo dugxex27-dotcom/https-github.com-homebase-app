@@ -77,120 +77,158 @@ export default function ContractorDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          
-          {/* Contractor Header */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-start space-x-6">
-                <div className="relative">
-                  {contractor.profileImage ? (
-                    <img
-                      src={contractor.profileImage}
-                      alt={`${contractor.name} profile photo`}
-                      className="w-24 h-24 rounded-full object-cover border-2 border-primary/10"
-                    />
-                  ) : (
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                      <span className="text-xl font-semibold text-primary">
-                        {contractor.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                  )}
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
+            <div className="flex items-start space-x-6">
+              <div className="relative">
+                {contractor.profileImage ? (
+                  <img
+                    src={contractor.profileImage}
+                    alt={`${contractor.name} profile photo`}
+                    className="w-32 h-32 rounded-2xl object-cover border-4 border-blue-100 dark:border-blue-900/30"
+                  />
+                ) : (
+                  <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                    <span className="text-2xl font-bold text-white">
+                      {contractor.name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                )}
+                <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-2">
+                  <Shield className="h-4 w-4 text-white" />
                 </div>
-                
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h1 className="text-2xl font-bold text-foreground mb-1">{contractor.name}</h1>
-                      <p className="text-lg text-muted-foreground mb-2">{contractor.company}</p>
-                      <div className="flex items-center space-x-4 mb-2">
-                        <div className="flex items-center">
-                          {renderStars(contractor.rating)}
-                          <span className="ml-2 font-medium">{contractor.rating}</span>
-                          <span className="ml-1 text-sm text-muted-foreground">
-                            ({contractor.reviewCount} review{contractor.reviewCount !== 1 ? 's' : ''})
-                          </span>
-                        </div>
+              </div>
+              
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{contractor.name}</h1>
+                    <p className="text-xl text-gray-600 dark:text-gray-300 mb-4">{contractor.company}</p>
+                    <div className="flex items-center space-x-6 mb-4">
+                      <div className="flex items-center">
+                        {renderStars(contractor.rating)}
+                        <span className="ml-2 font-semibold text-lg">{contractor.rating}</span>
+                        <span className="ml-2 text-gray-600 dark:text-gray-400">
+                          ({contractor.reviewCount} review{contractor.reviewCount !== 1 ? 's' : ''})
+                        </span>
                       </div>
                     </div>
-                    <div className="flex space-x-2">
-                      <ContactContractorButton contractor={contractor} />
-                    </div>
                   </div>
+                  <div className="flex space-x-3">
+                    <ContactContractorButton contractor={contractor} />
+                  </div>
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center text-muted-foreground">
-                      <MapPin className="w-4 h-4 mr-2 text-primary/60" />
-                      <span>{contractor.distance} miles away • {contractor.location}</span>
-                    </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <Shield className="w-4 h-4 mr-2 text-primary/60" />
-                      <span>Licensed & Insured • {contractor.experience} years experience</span>
-                    </div>
-                    {contractor.phone && (
-                      <div className="flex items-center text-muted-foreground">
-                        <Phone className="w-4 h-4 mr-2 text-primary/60" />
-                        <span>{contractor.phone}</span>
-                      </div>
-                    )}
-                    {contractor.email && (
-                      <div className="flex items-center text-muted-foreground">
-                        <Mail className="w-4 h-4 mr-2 text-primary/60" />
-                        <span>{contractor.email}</span>
-                      </div>
-                    )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                  <div className="flex items-center text-gray-600 dark:text-gray-300">
+                    <MapPin className="h-4 w-4 mr-2 text-blue-500" />
+                    <span>{contractor.location}</span>
+                  </div>
+                  <div className="flex items-center text-gray-600 dark:text-gray-300">
+                    <Building className="h-4 w-4 mr-2 text-green-500" />
+                    <span>{contractor.experience}+ years experience</span>
+                  </div>
+                  <div className="flex items-center text-gray-600 dark:text-gray-300">
+                    <Shield className="h-4 w-4 mr-2 text-purple-500" />
+                    <span>Licensed & Insured</span>
+                  </div>
+                  <div className="flex items-center text-gray-600 dark:text-gray-300">
+                    <Wrench className="h-4 w-4 mr-2 text-orange-500" />
+                    <span>{contractor.services.length} specialties</span>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
+          
+          {/* Services */}
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                <Wrench className="h-6 w-6 mr-3 text-amber-600 dark:text-amber-400" />
+                Services Offered
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {contractor.services.map((service, index) => (
+                  <div key={index} className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 rounded-xl px-4 py-3">
+                    <span className="font-medium text-amber-800 dark:text-amber-200">{service}</span>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
 
-          {/* About Section */}
-          <Card>
+          {/* About */}
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <User className="w-5 h-5 mr-2" />
-                About
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                <User className="h-6 w-6 mr-3 text-blue-600 dark:text-blue-400" />
+                About {contractor.name}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground leading-relaxed mb-4">
-                {contractor.bio || "No description provided."}
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-base">
+                {contractor.bio}
               </p>
-              
-              <div className="mb-4">
-                <h4 className="font-semibold mb-2">Services Offered</h4>
-                <div className="flex flex-wrap gap-2">
-                  {contractor.services.map((service, index) => (
-                    <Badge key={index} variant="secondary">
-                      {service}
-                    </Badge>
-                  ))}
+            </CardContent>
+          </Card>
+
+          {/* Professional Details */}
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                <Shield className="h-6 w-6 mr-3 text-green-600 dark:text-green-400" />
+                Professional Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-center text-gray-600 dark:text-gray-300">
+                  <MapPin className="w-5 h-5 mr-3 text-blue-500" />
+                  <div>
+                    <div className="font-medium">Location</div>
+                    <div className="text-sm">{contractor.location}</div>
+                  </div>
+                </div>
+                <div className="flex items-center text-gray-600 dark:text-gray-300">
+                  <Building className="w-5 h-5 mr-3 text-green-500" />
+                  <div>
+                    <div className="font-medium">Experience</div>
+                    <div className="text-sm">{contractor.experience}+ years</div>
+                  </div>
+                </div>
+                <div className="flex items-center text-gray-600 dark:text-gray-300">
+                  <Shield className="w-5 h-5 mr-3 text-purple-500" />
+                  <div>
+                    <div className="font-medium">Licensing</div>
+                    <div className="text-sm">Licensed & Insured</div>
+                  </div>
+                </div>
+                <div className="flex items-center text-gray-600 dark:text-gray-300">
+                  <Wrench className="w-5 h-5 mr-3 text-orange-500" />
+                  <div>
+                    <div className="font-medium">Services</div>
+                    <div className="text-sm">{contractor.services.length} specialties</div>
+                  </div>
                 </div>
               </div>
-
-              {(contractor as any).website && (
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Globe className="w-4 h-4 mr-2" />
-                  <a 
-                    href={(contractor as any).website} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Visit Website
-                  </a>
-                </div>
-              )}
             </CardContent>
           </Card>
 
           {/* Reviews Section */}
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
             <CardContent className="pt-6">
               <ContractorReviews 
                 contractorId={contractor.id} 
