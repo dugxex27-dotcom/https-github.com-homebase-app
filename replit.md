@@ -189,7 +189,7 @@ The application is designed for deployment on platforms that support Node.js wit
 - **Transformed main page into role-based dashboards** (February 2, 2025)
   - Completely removed smart maintenance tab and content from main page for all users
   - Created role-based dashboard system serving as primary interface:
-    - **Homeowner Dashboard**: Maintenance, service records, contractors, alerts, projects, home value
+    - **Homeowner Dashboard**: Maintenance, service records, contractors, alerts, projects
     - **Contractor Dashboard**: Business overview, profile management, messages, active projects, reviews, leads
   - Made dashboard the default primary section for both user types with role-specific content
   - Added role-specific quick actions and features sections throughout the page
@@ -205,3 +205,4 @@ The application is designed for deployment on platforms that support Node.js wit
   - Improved page structure with proper background styling and responsive layout
   - Completed service records linking system between contractors and homeowners
   - Added comprehensive homeowner service records page with filtering, search, and detailed display
+  - Removed home value tracking feature from homeowner dashboard as requested
