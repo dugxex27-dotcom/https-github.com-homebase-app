@@ -73,20 +73,18 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center">
             <div className="flex bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-lg border border-gray-200 dark:border-gray-700">
-              {/* Only show Customer Dashboard for homeowners */}
-              {typedUser?.role === 'homeowner' && (
-                <button
-                  onClick={() => setActiveTab('dashboard')}
-                  className={`px-8 py-4 rounded-xl text-sm font-medium flex items-center transition-all duration-200 ${
-                    activeTab === 'dashboard'
-                      ? 'bg-amber-500 text-white shadow-md transform scale-105'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <HomeIcon className="mr-3 h-5 w-5" />
-                  Customer Dashboard
-                </button>
-              )}
+              {/* Dashboard tab for all users */}
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className={`px-8 py-4 rounded-xl text-sm font-medium flex items-center transition-all duration-200 ${
+                  activeTab === 'dashboard'
+                    ? 'bg-amber-500 text-white shadow-md transform scale-105'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                <HomeIcon className="mr-3 h-5 w-5" />
+                {typedUser?.role === 'homeowner' ? 'Customer Dashboard' : 'Contractor Dashboard'}
+              </button>
               <button
                 onClick={() => setActiveTab('products')}
                 className={`px-8 py-4 rounded-xl text-sm font-medium flex items-center transition-all duration-200 ${
@@ -120,19 +118,25 @@ export default function Home() {
       {/* Tab Content Section */}
       <section className="bg-gray-50 dark:bg-gray-900/30 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {activeTab === 'dashboard' && typedUser?.role === 'homeowner' && (
+          {activeTab === 'dashboard' && (
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                  Your Home Dashboard
+                  {typedUser?.role === 'homeowner' ? 'Your Home Dashboard' : 'Your Business Dashboard'}
                 </h2>
                 <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                  Everything you need to manage your home in one place
+                  {typedUser?.role === 'homeowner' 
+                    ? 'Everything you need to manage your home in one place'
+                    : 'Manage your contracting business and grow your client base'
+                  }
                 </p>
               </div>
 
               {/* Dashboard Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {typedUser?.role === 'homeowner' ? (
+                  // Homeowner Dashboard Cards
+                  <>
                 <Link href="/maintenance">
                   <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
                     <CardContent className="p-6">
@@ -240,27 +244,162 @@ export default function Home() {
                     </p>
                   </CardContent>
                 </Card>
+                  </>
+                ) : (
+                  // Contractor Dashboard Cards
+                  <>
+                    <Link href="/contractor-dashboard">
+                      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
+                        <CardContent className="p-6">
+                          <div className="flex items-center mb-4">
+                            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
+                              <BarChart3 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div className="ml-4">
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Business Overview</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">View stats</p>
+                            </div>
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm">
+                            Track your projects, earnings, and customer reviews
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Link href="/contractor-profile">
+                      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
+                        <CardContent className="p-6">
+                          <div className="flex items-center mb-4">
+                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
+                              <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
+                            </div>
+                            <div className="ml-4">
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">My Profile</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">Update info</p>
+                            </div>
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm">
+                            Manage your professional profile and service offerings
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Link href="/messages">
+                      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
+                        <CardContent className="p-6">
+                          <div className="flex items-center mb-4">
+                            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
+                              <Bell className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <div className="ml-4">
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Messages</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">Client communication</p>
+                            </div>
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm">
+                            Communicate with potential and existing clients
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
+                      <CardContent className="p-6">
+                        <div className="flex items-center mb-4">
+                          <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                            <Calendar className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                          </div>
+                          <div className="ml-4">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Active Projects</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">Current work</p>
+                          </div>
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm">
+                          3 active projects scheduled this week
+                        </p>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
+                      <CardContent className="p-6">
+                        <div className="flex items-center mb-4">
+                          <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                            <Star className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                          </div>
+                          <div className="ml-4">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Reviews</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">Customer feedback</p>
+                          </div>
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm">
+                          4.8/5 stars from 127 recent reviews
+                        </p>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
+                      <CardContent className="p-6">
+                        <div className="flex items-center mb-4">
+                          <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+                            <Search className="h-6 w-6 text-red-600 dark:text-red-400" />
+                          </div>
+                          <div className="ml-4">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">New Leads</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">Opportunities</p>
+                          </div>
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm">
+                          5 new customer inquiries this week
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </div>
 
               {/* Quick Actions */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
                 <div className="flex flex-wrap gap-3">
-                  <Link href="/maintenance">
-                    <Button className="bg-amber-600 hover:bg-amber-700 text-white">
-                      Schedule Maintenance
-                    </Button>
-                  </Link>
-                  <Link href="/contractors">
-                    <Button variant="outline" className="border-gray-300 dark:border-gray-600">
-                      Find Contractor
-                    </Button>
-                  </Link>
-                  <Link href="/products">
-                    <Button variant="outline" className="border-gray-300 dark:border-gray-600">
-                      Browse Products
-                    </Button>
-                  </Link>
+                  {typedUser?.role === 'homeowner' ? (
+                    <>
+                      <Link href="/maintenance">
+                        <Button className="bg-amber-600 hover:bg-amber-700 text-white">
+                          Schedule Maintenance
+                        </Button>
+                      </Link>
+                      <Link href="/contractors">
+                        <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                          Find Contractor
+                        </Button>
+                      </Link>
+                      <Link href="/products">
+                        <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                          Browse Products
+                        </Button>
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/contractor-profile">
+                        <Button className="bg-amber-600 hover:bg-amber-700 text-white">
+                          Update Profile
+                        </Button>
+                      </Link>
+                      <Link href="/messages">
+                        <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                          View Messages
+                        </Button>
+                      </Link>
+                      <Link href="/products">
+                        <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                          Browse Tools
+                        </Button>
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
