@@ -173,3 +173,10 @@ The application is designed for deployment on platforms that support Node.js wit
   - Sample data includes Main House and Vacation Cabin with different configurations
   - Maintenance tasks and notifications automatically filtered by selected property
   - Appointment scheduling links to specific houses for accurate record keeping
+- **Implemented automatic climate zone detection** (February 2, 2025)
+  - Climate zones are now automatically detected based on property address
+  - Uses OpenStreetMap Nominatim geocoding service for coordinate lookup
+  - Intelligent mapping of US coordinates to 8 climate regions
+  - Real-time feedback with toast notifications when zone is detected
+  - Manual override option still available if automatic detection is incorrect
+  - Comprehensive coverage of all US regions with fallback logic

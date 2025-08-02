@@ -132,6 +132,80 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December"
 ];
 
+// Climate zone mapping based on US regions
+const getClimateZoneFromCoordinates = (lat: number, lng: number): string => {
+  // Pacific Northwest: Washington, Oregon, Northern California
+  if ((lat >= 42 && lat <= 49 && lng >= -124.5 && lng <= -116.5) || 
+      (lat >= 39 && lat <= 42 && lng >= -124.5 && lng <= -120)) {
+    return "pacific-northwest";
+  }
+  
+  // California (excluding northern part already covered)
+  if (lat >= 32.5 && lat <= 42 && lng >= -124.5 && lng <= -114) {
+    return "california";
+  }
+  
+  // Southwest: Arizona, Nevada, Utah, New Mexico, parts of Colorado
+  if ((lat >= 31 && lat <= 42 && lng >= -114 && lng <= -102) ||
+      (lat >= 36.5 && lat <= 41 && lng >= -109 && lng <= -102)) {
+    return "southwest";
+  }
+  
+  // Mountain West: Montana, Idaho, Wyoming, Colorado (northern parts)
+  if (lat >= 41 && lat <= 49 && lng >= -116.5 && lng <= -102) {
+    return "mountain-west";
+  }
+  
+  // Great Plains: North Dakota, South Dakota, Nebraska, Kansas, Oklahoma, parts of Texas
+  if (lat >= 25.8 && lat <= 49 && lng >= -102 && lng <= -94) {
+    return "great-plains";
+  }
+  
+  // Midwest: Minnesota, Wisconsin, Iowa, Missouri, Illinois, Indiana, Ohio, Michigan
+  if (lat >= 36.5 && lat <= 49 && lng >= -94 && lng <= -80.5) {
+    return "midwest";
+  }
+  
+  // Southeast: Florida, Georgia, Alabama, Mississippi, Louisiana, Arkansas, Tennessee, Kentucky, South Carolina, North Carolina, Virginia, West Virginia
+  if (lat >= 24.5 && lat <= 39.5 && lng >= -94 && lng <= -75.5) {
+    return "southeast";
+  }
+  
+  // Northeast: Maine, New Hampshire, Vermont, Massachusetts, Rhode Island, Connecticut, New York, New Jersey, Pennsylvania, Delaware, Maryland
+  if (lat >= 38.5 && lat <= 47.5 && lng >= -80.5 && lng <= -66.5) {
+    return "northeast";
+  }
+  
+  // Default fallback based on latitude
+  if (lat >= 47) return "pacific-northwest";
+  if (lat >= 42) return "northeast";
+  if (lat >= 36) return "midwest";
+  if (lat >= 32) return "southeast";
+  return "southwest";
+};
+
+// Geocoding function using a free service
+const geocodeAddress = async (address: string): Promise<{ lat: number; lng: number } | null> => {
+  try {
+    // Using Nominatim (OpenStreetMap) free geocoding service
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=us`
+    );
+    const data = await response.json();
+    
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    return null;
+  }
+};
+
 const CLIMATE_ZONES = [
   { value: "pacific-northwest", label: "Pacific Northwest" },
   { value: "northeast", label: "Northeast" },
@@ -193,6 +267,7 @@ export default function Maintenance() {
   const [editingMaintenanceLog, setEditingMaintenanceLog] = useState<MaintenanceLog | null>(null);
   const [isHouseDialogOpen, setIsHouseDialogOpen] = useState(false);
   const [editingHouse, setEditingHouse] = useState<House | null>(null);
+  const [isGeocodingAddress, setIsGeocodingAddress] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -578,6 +653,30 @@ export default function Maintenance() {
       isDefault: false,
     });
     setIsHouseDialogOpen(true);
+  };
+
+  // Auto-detect climate zone from address
+  const handleAddressChange = async (address: string, onChange: (value: string) => void) => {
+    onChange(address);
+    
+    if (address.length > 10) { // Only geocode when we have a substantial address
+      setIsGeocodingAddress(true);
+      try {
+        const coords = await geocodeAddress(address);
+        if (coords) {
+          const detectedZone = getClimateZoneFromCoordinates(coords.lat, coords.lng);
+          houseForm.setValue('climateZone', detectedZone);
+          toast({
+            title: "Climate Zone Detected",
+            description: `Automatically set to ${CLIMATE_ZONES.find(z => z.value === detectedZone)?.label}`,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to detect climate zone:', error);
+      } finally {
+        setIsGeocodingAddress(false);
+      }
+    }
   };
 
   const onSubmitHouse = (data: HouseFormData) => {
@@ -2004,8 +2103,18 @@ export default function Maintenance() {
                     <FormItem>
                       <FormLabel>Address</FormLabel>
                       <FormControl>
-                        <Input placeholder="Full street address" {...field} />
+                        <Input 
+                          placeholder="Full street address" 
+                          {...field} 
+                          onChange={(e) => handleAddressChange(e.target.value, field.onChange)}
+                          disabled={isGeocodingAddress}
+                        />
                       </FormControl>
+                      {isGeocodingAddress && (
+                        <p className="text-xs text-muted-foreground">
+                          Detecting climate zone...
+                        </p>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -2020,7 +2129,7 @@ export default function Maintenance() {
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select climate zone" />
+                            <SelectValue placeholder="Will auto-detect from address" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -2031,6 +2140,9 @@ export default function Maintenance() {
                           ))}
                         </SelectContent>
                       </Select>
+                      <p className="text-xs text-muted-foreground">
+                        Climate zone will be automatically detected when you enter an address. You can manually override if needed.
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
