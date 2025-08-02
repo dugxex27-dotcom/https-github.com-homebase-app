@@ -201,7 +201,7 @@ The application is designed for deployment on platforms that support Node.js wit
   - Added Header component to contractor profile page for consistent navigation
   - Fixed header navigation links for contractors:
     - Updated My Profile link from `/profile` to `/contractor-profile` to match actual route
-    - Fixed Dashboard link to point to home page (/) where contractor dashboard is displayed
+    - Fixed Dashboard link to point to dedicated contractor dashboard page (`/contractor-dashboard`)
   - Improved page structure with proper background styling and responsive layout
   - Completed service records linking system between contractors and homeowners
   - Added comprehensive homeowner service records page with filtering, search, and detailed display
