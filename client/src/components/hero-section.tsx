@@ -31,7 +31,7 @@ export default function HeroSection() {
           </p>
 
           {/* Quick Action Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto">
+          <div className={`grid grid-cols-1 ${user?.role === 'homeowner' ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mt-12 max-w-4xl mx-auto`}>
             {user?.role === 'homeowner' ? (
               // Homeowner Quick Actions
               <>
@@ -94,18 +94,6 @@ export default function HeroSection() {
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Messages</h3>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">
                       Communicate with clients and manage project inquiries
-                    </p>
-                  </div>
-                </Link>
-
-                <Link href="/products">
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-amber-100 dark:border-amber-900/30">
-                    <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
-                      <Wrench className="h-6 w-6 text-green-600 dark:text-green-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Professional Tools</h3>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm">
-                      Browse high-quality tools and materials for your projects
                     </p>
                   </div>
                 </Link>
