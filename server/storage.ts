@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview } from "@shared/schema";
+import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -39,6 +39,13 @@ export interface IStorage {
   createMaintenanceLog(log: InsertMaintenanceLog): Promise<MaintenanceLog>;
   updateMaintenanceLog(id: string, log: Partial<InsertMaintenanceLog>): Promise<MaintenanceLog | undefined>;
   deleteMaintenanceLog(id: string): Promise<boolean>;
+  
+  // Custom maintenance task methods
+  getCustomMaintenanceTasks(homeownerId?: string, houseId?: string): Promise<CustomMaintenanceTask[]>;
+  getCustomMaintenanceTask(id: string): Promise<CustomMaintenanceTask | undefined>;
+  createCustomMaintenanceTask(task: InsertCustomMaintenanceTask): Promise<CustomMaintenanceTask>;
+  updateCustomMaintenanceTask(id: string, task: Partial<InsertCustomMaintenanceTask>): Promise<CustomMaintenanceTask | undefined>;
+  deleteCustomMaintenanceTask(id: string): Promise<boolean>;
   
   // House methods
   getHouses(homeownerId?: string): Promise<House[]>;
@@ -107,6 +114,7 @@ export class MemStorage implements IStorage {
   private products: Map<string, Product>;
   private homeAppliances: Map<string, HomeAppliance>;
   private maintenanceLogs: Map<string, MaintenanceLog>;
+  private customMaintenanceTasks: Map<string, CustomMaintenanceTask>;
   private houses: Map<string, House>;
   private contractorAppointments: Map<string, ContractorAppointment>;
   private notifications: Map<string, Notification>;
@@ -122,6 +130,7 @@ export class MemStorage implements IStorage {
     this.products = new Map();
     this.homeAppliances = new Map();
     this.maintenanceLogs = new Map();
+    this.customMaintenanceTasks = new Map();
     this.houses = new Map();
     this.contractorAppointments = new Map();
     this.notifications = new Map();
@@ -648,6 +657,52 @@ export class MemStorage implements IStorage {
 
   async deleteMaintenanceLog(id: string): Promise<boolean> {
     return this.maintenanceLogs.delete(id);
+  }
+
+  // Custom maintenance task methods
+  async getCustomMaintenanceTasks(homeownerId?: string, houseId?: string): Promise<CustomMaintenanceTask[]> {
+    const tasks = Array.from(this.customMaintenanceTasks.values());
+    return tasks.filter(task => {
+      if (homeownerId && task.homeownerId !== homeownerId) return false;
+      if (houseId && task.houseId !== houseId && task.houseId !== null) return false;
+      return true;
+    });
+  }
+
+  async getCustomMaintenanceTask(id: string): Promise<CustomMaintenanceTask | undefined> {
+    return this.customMaintenanceTasks.get(id);
+  }
+
+  async createCustomMaintenanceTask(taskData: InsertCustomMaintenanceTask): Promise<CustomMaintenanceTask> {
+    const id = randomUUID();
+    const now = new Date();
+    const task: CustomMaintenanceTask = {
+      id,
+      ...taskData,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.customMaintenanceTasks.set(id, task);
+    return task;
+  }
+
+  async updateCustomMaintenanceTask(id: string, taskData: Partial<InsertCustomMaintenanceTask>): Promise<CustomMaintenanceTask | undefined> {
+    const existingTask = this.customMaintenanceTasks.get(id);
+    if (!existingTask) {
+      return undefined;
+    }
+
+    const updated: CustomMaintenanceTask = {
+      ...existingTask,
+      ...taskData,
+      updatedAt: new Date(),
+    };
+    this.customMaintenanceTasks.set(id, updated);
+    return updated;
+  }
+
+  async deleteCustomMaintenanceTask(id: string): Promise<boolean> {
+    return this.customMaintenanceTasks.delete(id);
   }
 
   // House methods

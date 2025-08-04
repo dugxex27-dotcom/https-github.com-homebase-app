@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireRole } from "./replitAuth";
 import { z } from "zod";
-import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema } from "@shared/schema";
+import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema } from "@shared/schema";
 
 // Extend session data interface
 declare module 'express-session' {
@@ -318,6 +318,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete maintenance log" });
+    }
+  });
+
+  // Custom Maintenance Task routes
+  app.get("/api/custom-maintenance-tasks", async (req, res) => {
+    try {
+      const homeownerId = req.query.homeownerId as string;
+      const houseId = req.query.houseId as string;
+      const tasks = await storage.getCustomMaintenanceTasks(homeownerId, houseId);
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch custom maintenance tasks" });
+    }
+  });
+
+  app.get("/api/custom-maintenance-tasks/:id", async (req, res) => {
+    try {
+      const task = await storage.getCustomMaintenanceTask(req.params.id);
+      if (!task) {
+        return res.status(404).json({ message: "Custom maintenance task not found" });
+      }
+      res.json(task);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch custom maintenance task" });
+    }
+  });
+
+  app.post("/api/custom-maintenance-tasks", async (req, res) => {
+    try {
+      const taskData = insertCustomMaintenanceTaskSchema.parse(req.body);
+      const task = await storage.createCustomMaintenanceTask(taskData);
+      res.status(201).json(task);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid custom maintenance task data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create custom maintenance task" });
+    }
+  });
+
+  app.patch("/api/custom-maintenance-tasks/:id", async (req, res) => {
+    try {
+      const partialData = insertCustomMaintenanceTaskSchema.partial().parse(req.body);
+      const task = await storage.updateCustomMaintenanceTask(req.params.id, partialData);
+      if (!task) {
+        return res.status(404).json({ message: "Custom maintenance task not found" });
+      }
+      res.json(task);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid custom maintenance task data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update custom maintenance task" });
+    }
+  });
+
+  app.delete("/api/custom-maintenance-tasks/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteCustomMaintenanceTask(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Custom maintenance task not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete custom maintenance task" });
     }
   });
 

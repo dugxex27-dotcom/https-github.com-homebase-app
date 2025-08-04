@@ -13,11 +13,12 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { insertHomeApplianceSchema, insertMaintenanceLogSchema } from "@shared/schema";
-import type { HomeAppliance, MaintenanceLog, House } from "@shared/schema";
+import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertCustomMaintenanceTaskSchema } from "@shared/schema";
+import type { HomeAppliance, MaintenanceLog, House, CustomMaintenanceTask } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building } from "lucide-react";
 import { AppointmentScheduler } from "@/components/appointment-scheduler";
+import { CustomMaintenanceTasks } from "@/components/custom-maintenance-tasks";
 
 // Google Maps API type declarations
 declare global {
@@ -68,9 +69,17 @@ const houseFormSchema = z.object({
   isDefault: z.boolean().default(false),
 });
 
+// Form schema for custom maintenance task creation/editing
+const customTaskFormSchema = insertCustomMaintenanceTaskSchema.extend({
+  homeownerId: z.string().min(1, "Homeowner ID is required"),
+  tools: z.array(z.string()).optional(),
+  specificMonths: z.array(z.string()).optional(),
+});
+
 type ApplianceFormData = z.infer<typeof applianceFormSchema>;
 type MaintenanceLogFormData = z.infer<typeof maintenanceLogFormSchema>;
 type HouseFormData = z.infer<typeof houseFormSchema>;
+type CustomTaskFormData = z.infer<typeof customTaskFormSchema>;
 
 const APPLIANCE_TYPES = [
   { value: "hvac", label: "HVAC System" },
@@ -1574,6 +1583,14 @@ export default function Maintenance() {
                 </div>
               )}
             </div>
+
+        {/* Custom Maintenance Tasks Section */}
+        <div className="mt-12">
+          <CustomMaintenanceTasks 
+            homeownerId={homeownerId} 
+            houseId={selectedHouseId}
+          />
+        </div>
 
         {/* My Appliances Section */}
         <div className="mt-12">

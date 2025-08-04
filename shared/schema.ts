@@ -75,6 +75,27 @@ export const maintenanceTasks = pgTable("maintenance_tasks", {
   cost: text("cost"),
 });
 
+export const customMaintenanceTasks = pgTable("custom_maintenance_tasks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  homeownerId: text("homeowner_id").notNull(),
+  houseId: text("house_id"), // nullable, if null applies to all houses
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(),
+  priority: text("priority").notNull().default('medium'), // 'high', 'medium', 'low'
+  estimatedTime: text("estimated_time"),
+  difficulty: text("difficulty").default('easy'), // 'easy', 'moderate', 'difficult'
+  tools: text("tools").array(),
+  cost: text("cost"),
+  // Frequency settings
+  frequencyType: text("frequency_type").notNull(), // 'monthly', 'quarterly', 'biannually', 'annually', 'custom'
+  frequencyValue: integer("frequency_value"), // for custom frequency in days
+  specificMonths: text("specific_months").array(), // for annual tasks, which months (1-12)
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const homeAppliances = pgTable("home_appliances", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   homeownerId: text("homeowner_id").notNull(), // In real app would be foreign key to users table
@@ -280,6 +301,12 @@ export const insertContractorReviewSchema = createInsertSchema(contractorReviews
   updatedAt: true,
 });
 
+export const insertCustomMaintenanceTaskSchema = createInsertSchema(customMaintenanceTasks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertContractor = z.infer<typeof insertContractorSchema>;
 export type Contractor = typeof contractors.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
@@ -307,3 +334,5 @@ export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertContractorReview = z.infer<typeof insertContractorReviewSchema>;
 export type ContractorReview = typeof contractorReviews.$inferSelect;
+export type InsertCustomMaintenanceTask = z.infer<typeof insertCustomMaintenanceTaskSchema>;
+export type CustomMaintenanceTask = typeof customMaintenanceTasks.$inferSelect;
