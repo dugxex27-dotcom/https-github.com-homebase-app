@@ -16,7 +16,7 @@ export default function Products() {
 
   const categories = [
     "Hardware", 
-    "Paint Supplies",
+    "Paint & Drywall Supplies",
     "Lighting",
     "Plumbing",
     "Electrical",
