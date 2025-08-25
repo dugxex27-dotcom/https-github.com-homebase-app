@@ -15,7 +15,6 @@ export default function Products() {
   const [sortBy, setSortBy] = useState('best-match');
 
   const categories = [
-    "Power Tools",
     "Hardware", 
     "Paint Supplies",
     "Lighting",
