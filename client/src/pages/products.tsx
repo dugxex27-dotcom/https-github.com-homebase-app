@@ -18,9 +18,7 @@ export default function Products() {
     "Hardware", 
     "Paint & Drywall Supplies",
     "Lighting",
-    "Plumbing",
-    "Electrical",
-    "Building Materials"
+    "Plumbing"
   ];
 
   const { data: products, isLoading, error } = useQuery<Product[]>({
