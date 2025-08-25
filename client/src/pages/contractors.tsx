@@ -164,7 +164,7 @@ export default function Contractors() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                 <Input
                   type="text"
-                  placeholder="Search for pool installation, house cleaning, pest control, drywall..."
+                  placeholder="Search for christmas light hanging, snow removal, pool installation, house cleaning..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 pr-4 py-3 text-lg border-muted"

@@ -258,6 +258,8 @@ export function Proposals({ contractorId }: ProposalsProps) {
                                 <SelectItem value="flooring">Flooring</SelectItem>
                                 <SelectItem value="painting">Painting</SelectItem>
                                 <SelectItem value="landscaping">Landscaping</SelectItem>
+                                <SelectItem value="christmas-light-hanging">Christmas Light Hanging</SelectItem>
+                                <SelectItem value="snow-removal">Snow Removal</SelectItem>
                                 <SelectItem value="other">Other</SelectItem>
                               </SelectContent>
                             </Select>

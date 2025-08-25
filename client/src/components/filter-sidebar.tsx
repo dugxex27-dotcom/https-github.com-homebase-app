@@ -21,6 +21,7 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
     "Basement Finishing",
     "Bathroom Remodeling",
     "Carpentry",
+    "Christmas Light Hanging",
     "Concrete Work",
     "Deck Building",
     "Drywall",
@@ -46,6 +47,7 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
     "Pressure Washing",
     "Roofing",
     "Siding",
+    "Snow Removal",
     "Tile Work",
     "Windows & Doors"
   ];

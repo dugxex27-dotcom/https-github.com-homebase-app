@@ -31,6 +31,7 @@ const AVAILABLE_SERVICES = [
   "Basement Finishing",
   "Bathroom Remodeling",
   "Carpentry",
+  "Christmas Light Hanging",
   "Concrete Work",
   "Deck Building",
   "Drywall",
@@ -56,6 +57,7 @@ const AVAILABLE_SERVICES = [
   "Pressure Washing",
   "Roofing",
   "Siding",
+  "Snow Removal",
   "Tile Work",
   "Windows & Doors"
 ];
