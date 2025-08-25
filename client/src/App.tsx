@@ -18,6 +18,7 @@ import SignIn from "./pages/signin";
 import ContractorSignIn from "./pages/contractor-signin";
 import SimpleContractorSignIn from "./pages/simple-contractor-signin";
 import DemoContractorSignIn from "./pages/demo-contractor-signin";
+import HomeownerAccount from "./pages/homeowner-account";
 import Messages from "./pages/messages";
 import NotFound from "@/pages/not-found";
 
@@ -61,6 +62,7 @@ function Router() {
           <Route path="/maintenance" component={Maintenance} />
           <Route path="/contractor/:id" component={ContractorDetail} />
           <Route path="/service-records" component={HomeownerServiceRecords} />
+          <Route path="/account" component={HomeownerAccount} />
           <Route path="/messages" component={Messages} />
         </>
       )}

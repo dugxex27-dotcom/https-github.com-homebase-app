@@ -111,6 +111,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create homeowner account" });
     }
   });
+
+  // Homeowner profile routes
+  app.patch('/api/homeowner/profile', async (req: any, res) => {
+    try {
+      if (!req.session?.isAuthenticated || req.session?.user?.role !== 'homeowner') {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { firstName, lastName, email, phone, address } = req.body;
+      const userId = req.session.user.id;
+
+      // Update user profile
+      const updatedUser = await storage.upsertUser({
+        id: userId,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        profileImageUrl: req.session.user.profileImageUrl,
+        role: 'homeowner'
+      });
+
+      // Update session
+      req.session.user = updatedUser;
+
+      res.json({ success: true, user: updatedUser });
+    } catch (error) {
+      console.error("Error updating homeowner profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  app.patch('/api/homeowner/notifications/preferences', async (req: any, res) => {
+    try {
+      if (!req.session?.isAuthenticated || req.session?.user?.role !== 'homeowner') {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const preferences = req.body;
+      
+      // For now, we'll just return success since we're not persisting preferences
+      // In a real app, you'd save these to a user_preferences table
+      console.log(`Notification preferences updated for user ${req.session.user.id}:`, preferences);
+
+      res.json({ success: true, preferences });
+    } catch (error) {
+      console.error("Error updating notification preferences:", error);
+      res.status(500).json({ message: "Failed to update notification preferences" });
+    }
+  });
+
   // Contractor routes
   app.get("/api/contractors", async (req, res) => {
     try {

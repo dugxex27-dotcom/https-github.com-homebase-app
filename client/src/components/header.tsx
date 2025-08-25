@@ -67,6 +67,11 @@ export default function Header() {
                   <MessageCircle className="w-4 h-4 inline mr-1" />
                   Messages
                 </Link>
+                <Link href="/account" className={`text-gray-700 hover:text-primary transition-colors ${
+                  location === '/account' ? 'text-primary font-medium' : ''
+                }`}>
+                  Account
+                </Link>
               </>
             )}
             {typedUser?.role === 'contractor' && (
