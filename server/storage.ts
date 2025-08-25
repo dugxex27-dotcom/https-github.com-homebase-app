@@ -151,6 +151,100 @@ export class MemStorage implements IStorage {
     this.seedData();
     this.seedServiceRecords();
     this.seedReviews();
+    
+    // Add sample maintenance logs with contractor information after other data is seeded
+    this.initializeMaintenanceLogsData();
+  }
+
+  private initializeMaintenanceLogsData() {
+    // Add sample maintenance logs with contractor information for demo
+    const sampleLogs: MaintenanceLog[] = [
+      {
+        id: "maint-log-1",
+        homeownerId: "demo-homeowner-123",
+        serviceDate: "2024-08-15",
+        serviceType: "HVAC Maintenance",
+        homeArea: "HVAC",
+        serviceDescription: "Annual HVAC system maintenance including filter replacement, duct cleaning, and system inspection",
+        cost: "285.00",
+        contractorName: "Mike Thompson",
+        contractorCompany: "Thompson Construction LLC",
+        contractorId: "contractor-1",
+        notes: "System running efficiently. Recommended next service in 6 months.",
+        warrantyPeriod: "90 days",
+        nextServiceDue: "2025-02-15",
+        createdAt: new Date("2024-08-15")
+      },
+      {
+        id: "maint-log-2",
+        homeownerId: "demo-homeowner-123",
+        serviceDate: "2024-06-20",
+        serviceType: "Gutter Cleaning",
+        homeArea: "Exterior",
+        serviceDescription: "Professional gutter cleaning and minor gutter repair",
+        cost: "150.00",
+        contractorName: "Sarah Chen",
+        contractorCompany: "Premier Home Services",
+        contractorId: "contractor-2",
+        notes: "Removed leaves and debris. Fixed small leak in downspout.",
+        warrantyPeriod: "30 days",
+        nextServiceDue: "2024-12-20",
+        createdAt: new Date("2024-06-20")
+      },
+      {
+        id: "maint-log-3",
+        homeownerId: "demo-homeowner-123",
+        serviceDate: "2024-05-10",
+        serviceType: "Plumbing Repair",
+        homeArea: "Plumbing",
+        serviceDescription: "Fixed leaky faucet in kitchen and replaced worn washers",
+        cost: "125.00",
+        contractorName: "Carlos Rodriguez",
+        contractorCompany: "Rodriguez Plumbing Solutions",
+        contractorId: "contractor-3",
+        notes: "Replaced faucet washers and tightened connections. No leaks detected.",
+        warrantyPeriod: "1 year",
+        nextServiceDue: null,
+        createdAt: new Date("2024-05-10")
+      },
+      {
+        id: "maint-log-4",
+        homeownerId: "demo-homeowner-123",
+        serviceDate: "2024-03-25",
+        serviceType: "Pressure Washing",
+        homeArea: "Exterior",
+        serviceDescription: "Pressure washed driveway, sidewalks, and exterior siding",
+        cost: "200.00",
+        contractorName: "David Kim",
+        contractorCompany: "Clean Sweep Exterior Services",
+        contractorId: "contractor-4",
+        notes: "Removed all dirt and mildew. Siding looks brand new.",
+        warrantyPeriod: null,
+        nextServiceDue: "2025-03-25",
+        createdAt: new Date("2024-03-25")
+      },
+      {
+        id: "maint-log-5",
+        homeownerId: "demo-homeowner-123",
+        serviceDate: "2024-01-15",
+        serviceType: "Electrical Inspection",
+        homeArea: "Electrical",
+        serviceDescription: "Annual electrical system safety inspection and minor outlet repairs",
+        cost: "175.00",
+        contractorName: "Jennifer Wilson",
+        contractorCompany: "Wilson Electric Co.",
+        contractorId: "contractor-5",
+        notes: "All systems pass inspection. Replaced two GFCI outlets in bathroom.",
+        warrantyPeriod: "2 years",
+        nextServiceDue: "2025-01-15",
+        createdAt: new Date("2024-01-15")
+      }
+    ];
+
+    // Add all sample logs to the map
+    sampleLogs.forEach(log => {
+      this.maintenanceLogs.set(log.id, log);
+    });
   }
 
   // User operations (required for Replit Auth)

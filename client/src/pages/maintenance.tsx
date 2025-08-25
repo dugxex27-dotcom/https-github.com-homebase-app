@@ -16,7 +16,7 @@ import { z } from "zod";
 import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertCustomMaintenanceTaskSchema } from "@shared/schema";
 import type { HomeAppliance, MaintenanceLog, House, CustomMaintenanceTask } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building } from "lucide-react";
+import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare } from "lucide-react";
 import { AppointmentScheduler } from "@/components/appointment-scheduler";
 import { CustomMaintenanceTasks } from "@/components/custom-maintenance-tasks";
 
@@ -388,6 +388,50 @@ export default function Maintenance() {
       return response.json();
     },
   });
+
+  // Function to find previous contractors for similar maintenance tasks
+  const findPreviousContractor = (taskCategory: string, taskTitle: string) => {
+    if (!maintenanceLogs || maintenanceLogs.length === 0) return null;
+    
+    // Look for maintenance logs with similar service types or home areas
+    const similarServices = maintenanceLogs.filter(log => {
+      const serviceType = log.serviceType?.toLowerCase() || '';
+      const homeArea = log.homeArea?.toLowerCase() || '';
+      const category = taskCategory.toLowerCase();
+      const title = taskTitle.toLowerCase();
+      
+      return (
+        serviceType.includes(category) ||
+        homeArea.includes(category) ||
+        serviceType.includes(title.split(' ')[0]) || // First word of task title
+        (category === 'hvac' && (serviceType.includes('hvac') || serviceType.includes('heating') || serviceType.includes('cooling'))) ||
+        (category === 'plumbing' && serviceType.includes('plumbing')) ||
+        (category === 'electrical' && serviceType.includes('electrical')) ||
+        (category === 'roofing' && (serviceType.includes('roof') || serviceType.includes('gutter'))) ||
+        (category === 'exterior' && (serviceType.includes('exterior') || serviceType.includes('siding') || serviceType.includes('pressure wash'))) ||
+        (category === 'landscaping' && serviceType.includes('landscaping'))
+      );
+    });
+    
+    // Find the most recent contractor
+    if (similarServices.length > 0) {
+      const mostRecent = similarServices.sort((a, b) => 
+        new Date(b.serviceDate).getTime() - new Date(a.serviceDate).getTime()
+      )[0];
+      
+      if (mostRecent.contractorName || mostRecent.contractorCompany) {
+        return {
+          contractorName: mostRecent.contractorName,
+          contractorCompany: mostRecent.contractorCompany,
+          contractorId: mostRecent.contractorId,
+          lastServiceDate: mostRecent.serviceDate,
+          serviceType: mostRecent.serviceType
+        };
+      }
+    }
+    
+    return null;
+  };
 
   const applianceForm = useForm<ApplianceFormData>({
     resolver: zodResolver(applianceFormSchema),
@@ -1497,6 +1541,8 @@ export default function Maintenance() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredTasks.map((task) => {
                 const completed = isTaskCompleted(task.id);
+                const previousContractor = findPreviousContractor(task.category, task.title);
+                
                 return (
                   <Card 
                     key={task.id} 
@@ -1563,6 +1609,65 @@ export default function Maintenance() {
                                 {tool}
                               </Badge>
                             ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Previous Contractor Section */}
+                      {previousContractor && (
+                        <div className="border-t pt-4 mt-4">
+                          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center mb-2">
+                                  <User className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+                                  <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                                    Previous contractor used for {previousContractor.serviceType}
+                                  </span>
+                                </div>
+                                <div className="text-sm text-blue-800 dark:text-blue-200">
+                                  <div className="font-medium">
+                                    {previousContractor.contractorName}
+                                    {previousContractor.contractorCompany && (
+                                      <span className="font-normal"> - {previousContractor.contractorCompany}</span>
+                                    )}
+                                  </div>
+                                  <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                    Last service: {new Date(previousContractor.lastServiceDate).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 ml-4">
+                                {previousContractor.contractorId ? (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-950/40"
+                                    onClick={() => window.open(`/contractor-profile/${previousContractor.contractorId}`, '_blank')}
+                                    data-testid={`button-view-contractor-${task.id}`}
+                                  >
+                                    <User className="w-3 h-3 mr-1" />
+                                    View Profile
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-950/40"
+                                    onClick={() => {
+                                      toast({
+                                        title: "Contact Contractor",
+                                        description: `You can contact ${previousContractor.contractorName} for this service again. Check your previous service records for contact details.`
+                                      });
+                                    }}
+                                    data-testid={`button-contact-contractor-${task.id}`}
+                                  >
+                                    <MessageSquare className="w-3 h-3 mr-1" />
+                                    Contact Again
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}
