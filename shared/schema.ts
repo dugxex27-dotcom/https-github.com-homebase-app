@@ -235,6 +235,25 @@ export const contractorReviews = pgTable("contractor_reviews", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const proposals = pgTable("proposals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractorId: text("contractor_id").notNull(),
+  homeownerId: text("homeowner_id"), // nullable until sent
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  serviceType: text("service_type").notNull(),
+  estimatedCost: decimal("estimated_cost", { precision: 10, scale: 2 }).notNull(),
+  estimatedDuration: text("estimated_duration").notNull(), // e.g., "2-3 days", "1 week"
+  scope: text("scope").notNull(), // detailed scope of work
+  materials: text("materials").array().notNull().default(sql`'{}'::text[]`), // list of materials included
+  warrantyPeriod: text("warranty_period"), // e.g., "1 year", "6 months"
+  validUntil: text("valid_until").notNull(), // expiration date for proposal
+  status: text("status").notNull().default("draft"), // "draft", "sent", "accepted", "rejected", "expired"
+  notes: text("notes"), // internal notes for contractor
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertContractorSchema = createInsertSchema(contractors).omit({
   id: true,
 });
@@ -301,6 +320,12 @@ export const insertContractorReviewSchema = createInsertSchema(contractorReviews
   updatedAt: true,
 });
 
+export const insertProposalSchema = createInsertSchema(proposals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertCustomMaintenanceTaskSchema = createInsertSchema(customMaintenanceTasks).omit({
   id: true,
   createdAt: true,
@@ -336,3 +361,5 @@ export type InsertContractorReview = z.infer<typeof insertContractorReviewSchema
 export type ContractorReview = typeof contractorReviews.$inferSelect;
 export type InsertCustomMaintenanceTask = z.infer<typeof insertCustomMaintenanceTaskSchema>;
 export type CustomMaintenanceTask = typeof customMaintenanceTasks.$inferSelect;
+export type InsertProposal = z.infer<typeof insertProposalSchema>;
+export type Proposal = typeof proposals.$inferSelect;

@@ -2,6 +2,7 @@ import Header from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Proposals } from "@/components/proposals";
 import { Calendar, Users, Star, TrendingUp, FileText, User } from "lucide-react";
 
 export default function ContractorDashboard() {
@@ -95,6 +96,11 @@ export default function ContractorDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Proposals Section */}
+        <div className="mb-8">
+          <Proposals contractorId="demo-contractor-1756139319068" />
+        </div>
 
         {/* Quick Actions */}
         <Card>

@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask } from "@shared/schema";
+import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -106,6 +106,13 @@ export interface IStorage {
   updateContractorReview(id: string, review: Partial<InsertContractorReview>): Promise<ContractorReview | undefined>;
   deleteContractorReview(id: string): Promise<boolean>;
   getContractorAverageRating(contractorId: string): Promise<{ averageRating: number; totalReviews: number }>;
+
+  // Proposal operations
+  getProposals(contractorId?: string, homeownerId?: string): Promise<Proposal[]>;
+  getProposal(id: string): Promise<Proposal | undefined>;
+  createProposal(proposal: InsertProposal): Promise<Proposal>;
+  updateProposal(id: string, proposal: Partial<InsertProposal>): Promise<Proposal | undefined>;
+  deleteProposal(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -123,6 +130,7 @@ export class MemStorage implements IStorage {
   private conversations: Map<string, Conversation>;
   private messages: Map<string, Message>;
   private contractorReviews: Map<string, ContractorReview>;
+  private proposals: Map<string, Proposal>;
 
   constructor() {
     this.users = new Map();
@@ -139,6 +147,7 @@ export class MemStorage implements IStorage {
     this.conversations = new Map();
     this.messages = new Map();
     this.contractorReviews = new Map();
+    this.proposals = new Map();
     this.seedData();
     this.seedServiceRecords();
     this.seedReviews();
@@ -1338,6 +1347,60 @@ export class MemStorage implements IStorage {
     };
     
     this.contractors.set(contractorId, updatedContractor);
+  }
+
+  // Proposal methods
+  async getProposals(contractorId?: string, homeownerId?: string): Promise<Proposal[]> {
+    let proposals = Array.from(this.proposals.values());
+    
+    if (contractorId) {
+      proposals = proposals.filter(proposal => proposal.contractorId === contractorId);
+    }
+    
+    if (homeownerId) {
+      proposals = proposals.filter(proposal => proposal.homeownerId === homeownerId);
+    }
+    
+    return proposals.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+  }
+
+  async getProposal(id: string): Promise<Proposal | undefined> {
+    return this.proposals.get(id);
+  }
+
+  async createProposal(proposalData: InsertProposal): Promise<Proposal> {
+    const id = randomUUID();
+    const proposal: Proposal = {
+      ...proposalData,
+      id,
+      materials: proposalData.materials || [],
+      warrantyPeriod: proposalData.warrantyPeriod || null,
+      notes: proposalData.notes || null,
+      homeownerId: proposalData.homeownerId || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.proposals.set(id, proposal);
+    return proposal;
+  }
+
+  async updateProposal(id: string, proposalData: Partial<InsertProposal>): Promise<Proposal | undefined> {
+    const existing = this.proposals.get(id);
+    if (!existing) {
+      return undefined;
+    }
+
+    const updated: Proposal = {
+      ...existing,
+      ...proposalData,
+      updatedAt: new Date(),
+    };
+    this.proposals.set(id, updated);
+    return updated;
+  }
+
+  async deleteProposal(id: string): Promise<boolean> {
+    return this.proposals.delete(id);
   }
 
   private seedServiceRecords() {
