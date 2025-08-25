@@ -35,7 +35,7 @@ const AVAILABLE_SERVICES = [
   "Concrete Work",
   "Deck Building",
   "Drywall",
-  "Dumpster Rental",
+  "Dumpster Rental & Junk Removal",
   "Electrical",
   "Fence Installation",
   "Flooring",
