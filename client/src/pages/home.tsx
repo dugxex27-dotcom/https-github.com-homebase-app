@@ -535,10 +535,10 @@ export default function Home() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-300 dark:border-purple-700">
+                <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                   <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                      <Package className="h-8 w-8 text-white" />
+                    <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                      <Package className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Quality Products</h3>
                     <p className="text-gray-600 dark:text-gray-300">
