@@ -348,7 +348,7 @@ export default function Home() {
                         </Button>
                       </Link>
                       <Link href="/products">
-                        <Button variant="outline" className="border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                        <Button variant="outline" className="border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20">
                           Browse Products
                         </Button>
                       </Link>
