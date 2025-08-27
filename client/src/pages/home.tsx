@@ -350,11 +350,7 @@ export default function Home() {
                           View Messages
                         </Button>
                       </Link>
-                      <Link href="/contractor-dashboard">
-                        <Button variant="outline" className="border-red-800 text-red-800 hover:bg-red-50">
-                          Business Overview
-                        </Button>
-                      </Link>
+
                       <Link href="/products">
                         <Button variant="outline" className="border-red-800 text-red-800 hover:bg-red-50">
                           Browse Tools
