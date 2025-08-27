@@ -223,7 +223,7 @@ export default function Home() {
                         <CardContent className="p-6">
                           <div className="flex items-center mb-4">
                             <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center group-hover:bg-red-200 dark:group-hover:bg-red-800/50 transition-colors">
-                              <Users className="h-6 w-6 text-red-800 dark:text-red-400" />
+                              <Users className="h-6 w-6 text-red-800 dark:text-red-400 !text-red-800" />
                             </div>
                             <div className="ml-4">
                               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">My Profile</h3>
