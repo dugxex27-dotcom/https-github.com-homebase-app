@@ -32,41 +32,7 @@ export default function Home() {
       <Header />
       <HeroSection />
       
-      {/* Stats Section */}
-      <section className={`py-16 border-b border-gray-200 dark:border-gray-800 ${typedUser?.role === 'homeowner' ? 'bg-purple-100/30 dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-900'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl mx-auto mb-4">
-                <Users className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">500+</div>
-              <div className="text-gray-600 dark:text-gray-300">Verified Contractors</div>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl mx-auto mb-4">
-                <Package className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">1,200+</div>
-              <div className="text-gray-600 dark:text-gray-300">Quality Products</div>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl mx-auto mb-4">
-                <CheckCircle className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">10,000+</div>
-              <div className="text-gray-600 dark:text-gray-300">Projects Completed</div>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl mx-auto mb-4">
-                <Star className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">4.8/5</div>
-              <div className="text-gray-600 dark:text-gray-300">Average Rating</div>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* Category Tabs */}
       <section className={`py-8 border-b border-gray-200 dark:border-gray-800 ${typedUser?.role === 'homeowner' ? 'bg-purple-50 dark:bg-gray-900/50' : 'bg-gray-50 dark:bg-gray-900/50'}`}>
