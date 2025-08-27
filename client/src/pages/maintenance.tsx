@@ -2455,40 +2455,6 @@ export default function Maintenance() {
                   )}
                 />
 
-                <FormField
-                  control={houseForm.control}
-                  name="homeSystems"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Home Systems</FormLabel>
-                      <FormControl>
-                        <div className="grid grid-cols-2 gap-2">
-                          {[
-                            "Central Air", "Gas Heat", "Electric Heat", "Fireplace", "Pool", "Hot Tub",
-                            "Sprinkler System", "Security System", "Solar Panels", "Generator"
-                          ].map((system) => (
-                            <label key={system} className="flex items-center space-x-2 text-sm">
-                              <input
-                                type="checkbox"
-                                checked={field.value.includes(system)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    field.onChange([...field.value, system]);
-                                  } else {
-                                    field.onChange(field.value.filter((s: string) => s !== system));
-                                  }
-                                }}
-                                className="rounded border-input"
-                              />
-                              <span>{system}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
                 <FormField
                   control={houseForm.control}
