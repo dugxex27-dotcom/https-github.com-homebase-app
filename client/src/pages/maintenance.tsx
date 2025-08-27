@@ -1869,7 +1869,7 @@ export default function Maintenance() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="text-xs border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-950/40"
+                                    className="text-xs border-purple-300 text-purple-600 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-400 dark:hover:bg-purple-900/20"
                                     onClick={() => window.open(`/contractor-profile/${previousContractor.contractorId}`, '_blank')}
                                     data-testid={`button-view-contractor-${task.id}`}
                                   >
@@ -1880,7 +1880,7 @@ export default function Maintenance() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="text-xs border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-950/40"
+                                    className="text-xs border-purple-300 text-purple-600 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-400 dark:hover:bg-purple-900/20"
                                     onClick={() => {
                                       toast({
                                         title: "Contact Contractor",
