@@ -519,7 +519,7 @@ export function CustomMaintenanceTasks({ homeownerId, houseId }: CustomMaintenan
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(task.id)}
-                        className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        className="text-red-800 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/30"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

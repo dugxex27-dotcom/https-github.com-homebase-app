@@ -9,7 +9,7 @@ export default function HeroSection() {
   const typedUser = user as User | undefined;
 
   return (
-    <section className={`py-20 ${typedUser?.role === 'homeowner' ? 'bg-gradient-to-br from-gray-100 via-purple-100 to-gray-50 dark:from-gray-800 dark:via-purple-900/30 dark:to-gray-900' : 'bg-gradient-to-br from-gray-50 via-red-50 to-black/5 dark:from-gray-900 dark:via-red-950/20 dark:to-black'}`}>
+    <section className={`py-20 ${typedUser?.role === 'homeowner' ? 'bg-gradient-to-br from-gray-100 via-purple-100 to-gray-50 dark:from-gray-800 dark:via-purple-900/30 dark:to-gray-900' : 'bg-gradient-to-br from-gray-50 via-red-900/10 to-black/5 dark:from-gray-900 dark:via-red-950/30 dark:to-black'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <Logo className={`h-32 w-full mx-auto block mb-8 ${typedUser?.role === 'homeowner' ? 'text-purple-700 dark:text-purple-300' : 'text-red-900 dark:text-red-300'}`} />

@@ -19,7 +19,7 @@
   --secondary-foreground: hsl(25, 15%, 25%);
   --accent: hsl(45, 30%, 88%);
   --accent-foreground: hsl(25, 15%, 25%);
-  --destructive: hsl(0, 60%, 55%);
+  --destructive: hsl(0, 45%, 35%);
   --destructive-foreground: hsl(0, 0%, 100%);
   --ring: hsl(15, 25%, 70%);
   --radius: 0.75rem;
@@ -47,7 +47,7 @@
   --secondary-foreground: hsl(35, 25%, 92%);
   --accent: hsl(25, 10%, 18%);
   --accent-foreground: hsl(35, 25%, 92%);
-  --destructive: hsl(0, 60%, 55%);
+  --destructive: hsl(0, 45%, 35%);
   --destructive-foreground: hsl(0, 0%, 100%);
   --ring: hsl(15, 25%, 70%);
   --radius: 0.75rem;
