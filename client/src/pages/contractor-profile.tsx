@@ -400,12 +400,18 @@ export default function ContractorProfile() {
                   <SelectValue placeholder={`${formData.serviceRadius} miles`} />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="5">5 miles</SelectItem>
                   <SelectItem value="10">10 miles</SelectItem>
+                  <SelectItem value="15">15 miles</SelectItem>
+                  <SelectItem value="20">20 miles</SelectItem>
                   <SelectItem value="25">25 miles</SelectItem>
+                  <SelectItem value="30">30 miles</SelectItem>
+                  <SelectItem value="35">35 miles</SelectItem>
+                  <SelectItem value="40">40 miles</SelectItem>
+                  <SelectItem value="45">45 miles</SelectItem>
                   <SelectItem value="50">50 miles</SelectItem>
                   <SelectItem value="75">75 miles</SelectItem>
                   <SelectItem value="100">100 miles</SelectItem>
-                  <SelectItem value="150">150+ miles</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground mt-1">
