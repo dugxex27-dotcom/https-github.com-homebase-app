@@ -109,7 +109,7 @@ export default function ContractorDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Button className="h-20 flex flex-col items-center justify-center space-y-2">
+              <Button className="h-20 flex flex-col items-center justify-center space-y-2 bg-red-800 hover:bg-red-900 text-white">
                 <Calendar className="h-6 w-6" />
                 <span>View Schedule</span>
               </Button>

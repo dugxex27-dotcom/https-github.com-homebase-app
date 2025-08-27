@@ -393,7 +393,7 @@ export default function ContractorProfile() {
                   placeholder="Add custom service..."
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomService())}
                 />
-                <Button type="button" onClick={addCustomService} size="sm">
+                <Button type="button" onClick={addCustomService} size="sm" className="bg-red-800 hover:bg-red-900 text-white">
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
@@ -519,7 +519,7 @@ export default function ContractorProfile() {
           <Button 
             type="submit" 
             disabled={updateProfileMutation.isPending}
-            className="px-8 py-2"
+            className="px-8 py-2 bg-red-800 hover:bg-red-900 text-white"
           >
             {updateProfileMutation.isPending ? (
               <div className="flex items-center gap-2">
