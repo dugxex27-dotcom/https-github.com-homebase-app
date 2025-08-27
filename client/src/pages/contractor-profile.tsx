@@ -773,9 +773,7 @@ export default function ContractorProfile() {
 
         {/* Push Notifications */}
         {typedUser && (
-          <div className="mb-8">
-            <PushNotificationManager userId={typedUser.id} />
-          </div>
+          <PushNotificationManager userId={typedUser.id} />
         )}
 
         {/* Save Button */}

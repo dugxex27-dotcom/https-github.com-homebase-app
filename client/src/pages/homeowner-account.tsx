@@ -20,6 +20,7 @@ import {
   Camera,
   LogOut
 } from "lucide-react";
+import PushNotificationManager from "@/components/push-notification-manager";
 
 export default function HomeownerAccount() {
   const { user } = useAuth();
@@ -374,6 +375,11 @@ export default function HomeownerAccount() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Push Notifications */}
+            {user && (
+              <PushNotificationManager userId={(user as any).id} />
+            )}
 
             {/* Account Overview */}
             <Card>
