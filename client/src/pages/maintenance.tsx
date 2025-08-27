@@ -1660,21 +1660,42 @@ export default function Maintenance() {
                           {category === 'features' ? 'Special Features' : `${category} System`}
                         </h4>
                         <div className="space-y-2">
-                          {systems.map((system) => (
-                            <div key={system.value} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={system.value}
-                                checked={homeSystems.includes(system.value)}
-                                onCheckedChange={() => toggleHomeSystem(system.value)}
-                              />
-                              <label
-                                htmlFor={system.value}
-                                className="text-sm text-muted-foreground cursor-pointer"
-                              >
-                                {system.label}
-                              </label>
-                            </div>
-                          ))}
+                          {systems.map((system) => {
+                            const systemData = getSystemData(system.label);
+                            return (
+                              <div key={system.value} className="flex items-center justify-between space-x-2">
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox
+                                    id={system.value}
+                                    checked={homeSystems.includes(system.value)}
+                                    onCheckedChange={() => toggleHomeSystem(system.value)}
+                                  />
+                                  <label
+                                    htmlFor={system.value}
+                                    className="text-sm text-muted-foreground cursor-pointer"
+                                  >
+                                    {system.label}
+                                  </label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  {systemData && (
+                                    <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                                      {systemData.yearInstalled || 'Unknown'}
+                                    </span>
+                                  )}
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-6 w-6 p-0 text-xs"
+                                    onClick={() => systemData ? handleEditHomeSystem(systemData) : handleAddHomeSystem(system.label)}
+                                    data-testid={`button-add-date-${system.value}`}
+                                  >
+                                    {systemData ? <Edit className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                                  </Button>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     ))}
