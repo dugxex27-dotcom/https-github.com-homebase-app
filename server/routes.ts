@@ -655,6 +655,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.createMaintenanceNotifications(homeownerId, tasks);
+      
+      // Also create regional maintenance suggestions notifications
+      try {
+        const houses = await storage.getHousesByHomeowner(homeownerId);
+        if (houses.length > 0) {
+          const { US_MAINTENANCE_DATA, getCurrentMonthTasks, getRegionFromClimateZone } = await import("../shared/location-maintenance-data");
+          
+          for (const house of houses) {
+            const region = getRegionFromClimateZone(house.climateZone);
+            const regionData = US_MAINTENANCE_DATA[region];
+            const currentMonth = new Date().getMonth() + 1;
+            const currentMonthTasks = regionData ? getCurrentMonthTasks(region, currentMonth) : null;
+            
+            if (regionData && currentMonthTasks) {
+              // Create regional suggestions notifications
+              const regionalNotifications = [];
+              
+              // Add seasonal tasks as notifications
+              currentMonthTasks.seasonal.forEach((task, index) => {
+                regionalNotifications.push({
+                  id: `regional-seasonal-${homeownerId}-${currentMonth}-${index}`,
+                  homeownerId,
+                  houseId: house.id,
+                  type: "maintenance_task" as const,
+                  title: `${region} Regional Suggestion`,
+                  message: task,
+                  priority: currentMonthTasks.priority as "high" | "medium" | "low",
+                  isRead: false,
+                  actionUrl: "/maintenance",
+                  createdAt: new Date(),
+                  updatedAt: new Date()
+                });
+              });
+              
+              // Add weather-specific tasks
+              currentMonthTasks.weatherSpecific.forEach((task, index) => {
+                regionalNotifications.push({
+                  id: `regional-weather-${homeownerId}-${currentMonth}-${index}`,
+                  homeownerId,
+                  houseId: house.id,
+                  type: "maintenance_task" as const,
+                  title: `Weather-Specific Task for ${region}`,
+                  message: task,
+                  priority: "medium" as const,
+                  isRead: false,
+                  actionUrl: "/maintenance",
+                  createdAt: new Date(),
+                  updatedAt: new Date()
+                });
+              });
+              
+              // Add special considerations
+              regionData.specialConsiderations.forEach((consideration, index) => {
+                regionalNotifications.push({
+                  id: `regional-consideration-${homeownerId}-${currentMonth}-${index}`,
+                  homeownerId,
+                  houseId: house.id,
+                  type: "maintenance_task" as const,
+                  title: `${region} Regional Consideration`,
+                  message: consideration,
+                  priority: "low" as const,
+                  isRead: false,
+                  actionUrl: "/maintenance",
+                  createdAt: new Date(),
+                  updatedAt: new Date()
+                });
+              });
+              
+              // Create the notifications
+              for (const notification of regionalNotifications) {
+                await storage.createNotification(notification);
+              }
+            }
+          }
+        }
+      } catch (regionalError) {
+        console.error("Error creating regional notifications:", regionalError);
+        // Don't fail the whole request if regional notifications fail
+      }
+      
       res.json({ success: true, message: "Maintenance notifications created" });
     } catch (error) {
       res.status(500).json({ message: "Failed to create maintenance notifications" });

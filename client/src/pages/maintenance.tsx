@@ -2134,11 +2134,6 @@ export default function Maintenance() {
             const currentHouse = selectedHouseId && houses.find((h: House) => h.id === selectedHouseId);
             if (!currentHouse) return null;
             
-            const region = getRegionFromClimateZone(currentHouse.climateZone);
-            const regionData = US_MAINTENANCE_DATA[region];
-            const currentMonth = new Date().getMonth() + 1;
-            const currentMonthTasks = regionData ? getCurrentMonthTasks(region, currentMonth) : null;
-            
             return (
               <AIMaintenanceSuggestionsCard 
                 userId={homeownerId} 
