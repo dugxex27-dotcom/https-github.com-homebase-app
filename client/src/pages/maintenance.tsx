@@ -1734,7 +1734,7 @@ export default function Maintenance() {
                       </Button>
                     </div>
                     {maintenanceLogs.slice(0, 2).map((log) => (
-                      <div key={log.id} className="mt-3 p-3 bg-white dark:bg-gray-800 rounded-lg border">
+                      <div key={log.id} className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-gray-300 dark:border-gray-700">
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-medium text-sm text-foreground">{log.serviceDescription}</h4>

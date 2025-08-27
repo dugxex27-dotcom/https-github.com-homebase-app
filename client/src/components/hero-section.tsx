@@ -38,7 +38,7 @@ export default function HeroSection() {
               // Homeowner Quick Actions
               <>
                 <Link href="/maintenance">
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-200 dark:border-gray-700">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-300 dark:border-gray-700">
                     <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 dark:group-hover:bg-gray-600/50 transition-colors">
                       <Calendar className="h-6 w-6 text-gray-600 dark:text-gray-400" />
                     </div>
@@ -50,7 +50,7 @@ export default function HeroSection() {
                 </Link>
 
                 <Link href="/contractors">
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-200 dark:border-gray-700">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-300 dark:border-gray-700">
                     <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
                       <Search className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                     </div>
@@ -62,7 +62,7 @@ export default function HeroSection() {
                 </Link>
 
                 <Link href="/products">
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-200 dark:border-gray-700">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-300 dark:border-gray-700">
                     <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 dark:group-hover:bg-gray-600/50 transition-colors">
                       <Wrench className="h-6 w-6 text-gray-600 dark:text-gray-400" />
                     </div>

@@ -146,7 +146,7 @@ export default function Contractors() {
                     Sort by:
                   </div>
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-48 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                    <SelectTrigger className="w-48 bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -175,7 +175,7 @@ export default function Contractors() {
             {isLoading ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse">
+                  <div key={i} className="bg-gray-50 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-300 dark:border-gray-700 p-6 animate-pulse">
                     <div className="flex items-start space-x-4">
                       <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
                       <div className="flex-1">
