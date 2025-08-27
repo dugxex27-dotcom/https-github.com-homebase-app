@@ -574,7 +574,7 @@ export default function Home() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-red-100 to-red-50 dark:from-red-900/20 dark:to-red-800/20 border-red-300 dark:border-red-700">
+                <Card className="bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-700 border-gray-300 dark:border-gray-600">
                   <CardContent className="p-8 text-center">
                     <div className="w-16 h-16 bg-red-800 rounded-2xl flex items-center justify-center mx-auto mb-6">
                       <TrendingUp className="h-8 w-8 text-white" />
