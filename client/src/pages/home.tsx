@@ -37,22 +37,22 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl mx-auto mb-4">
-                <Users className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+              <div className="flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl mx-auto mb-4">
+                <Users className="h-8 w-8 text-purple-600 dark:text-purple-400" />
               </div>
               <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">500+</div>
               <div className="text-gray-600 dark:text-gray-300">Verified Contractors</div>
             </div>
             <div className="text-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl mx-auto mb-4">
-                <Package className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              <div className="flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl mx-auto mb-4">
+                <Package className="h-8 w-8 text-purple-600 dark:text-purple-400" />
               </div>
               <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">1,200+</div>
               <div className="text-gray-600 dark:text-gray-300">Quality Products</div>
             </div>
             <div className="text-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-2xl mx-auto mb-4">
-                <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+              <div className="flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl mx-auto mb-4">
+                <CheckCircle className="h-8 w-8 text-purple-600 dark:text-purple-400" />
               </div>
               <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">10,000+</div>
               <div className="text-gray-600 dark:text-gray-300">Projects Completed</div>
@@ -141,8 +141,8 @@ export default function Home() {
                   <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
                     <CardContent className="p-6">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-xl flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-gray-600/50 transition-colors">
-                          <Calendar className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                        <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
+                          <Calendar className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                         </div>
                         <div className="ml-4">
                           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Maintenance</h3>
@@ -178,8 +178,8 @@ export default function Home() {
                 <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-lg">
                   <CardContent className="p-6">
                     <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-xl flex items-center justify-center">
-                        <Bell className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                      <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                        <Bell className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                       </div>
                       <div className="ml-4">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Alerts</h3>
@@ -195,8 +195,8 @@ export default function Home() {
                 <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-lg">
                   <CardContent className="p-6">
                     <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-xl flex items-center justify-center">
-                        <Wrench className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                      <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                        <Wrench className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                       </div>
                       <div className="ml-4">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Active Projects</h3>

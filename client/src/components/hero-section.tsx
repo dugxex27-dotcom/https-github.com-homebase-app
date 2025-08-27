@@ -39,8 +39,8 @@ export default function HeroSection() {
               <>
                 <Link href="/maintenance">
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-300 dark:border-gray-700">
-                    <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 dark:group-hover:bg-gray-600/50 transition-colors">
-                      <Calendar className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
+                      <Calendar className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Home Maintenance</h3>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">
@@ -63,8 +63,8 @@ export default function HeroSection() {
 
                 <Link href="/products">
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-300 dark:border-gray-700">
-                    <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 dark:group-hover:bg-gray-600/50 transition-colors">
-                      <Wrench className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
+                      <Wrench className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">DIY Products</h3>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">
