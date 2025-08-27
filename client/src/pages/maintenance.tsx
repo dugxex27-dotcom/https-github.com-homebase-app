@@ -346,15 +346,8 @@ export default function Maintenance() {
     }
   }, [selectedHouseId, houses]);
 
-  // Appliance queries and mutations
-  const { data: appliances, isLoading: appliancesLoading } = useQuery<HomeAppliance[]>({
-    queryKey: ['/api/appliances', { homeownerId }],
-    queryFn: async () => {
-      const response = await fetch(`/api/appliances?homeownerId=${homeownerId}`);
-      if (!response.ok) throw new Error('Failed to fetch appliances');
-      return response.json();
-    },
-  });
+
+
 
   // Maintenance log queries and mutations
   const { data: maintenanceLogs, isLoading: maintenanceLogsLoading } = useQuery<MaintenanceLog[]>({
@@ -588,7 +581,7 @@ export default function Maintenance() {
       homeownerId,
       houseId: selectedHouseId,
       systemType: "",
-      yearInstalled: undefined,
+      installationYear: undefined,
       lastServiceYear: undefined,
       brand: "",
       model: "",
@@ -741,7 +734,7 @@ export default function Maintenance() {
       homeownerId,
       houseId: selectedHouseId,
       systemType,
-      yearInstalled: undefined,
+      installationYear: undefined,
       lastServiceYear: undefined,
       brand: "",
       model: "",
@@ -758,7 +751,7 @@ export default function Maintenance() {
       homeownerId: system.homeownerId,
       houseId: system.houseId,
       systemType: system.systemType,
-      yearInstalled: system.yearInstalled,
+      installationYear: system.installationYear,
       lastServiceYear: system.lastServiceYear,
       brand: system.brand || "",
       model: system.model || "",
@@ -914,23 +907,7 @@ export default function Maintenance() {
     }
   };
 
-  // Appliance helper functions
-  const handleEditAppliance = (appliance: HomeAppliance) => {
-    setEditingAppliance(appliance);
-    applianceForm.reset({
-      homeownerId: appliance.homeownerId,
-      applianceType: appliance.applianceType,
-      brand: appliance.brand,
-      model: appliance.model,
-      yearInstalled: appliance.yearInstalled || undefined,
-      serialNumber: appliance.serialNumber ?? "",
-      notes: appliance.notes ?? "",
-      location: appliance.location ?? "",
-      warrantyExpiration: appliance.warrantyExpiration ?? "",
-      lastServiceDate: appliance.lastServiceDate ?? "",
-    });
-    setIsApplianceDialogOpen(true);
-  };
+
 
   // Maintenance log helper functions
   const handleEditMaintenanceLog = (log: MaintenanceLog) => {
@@ -952,22 +929,7 @@ export default function Maintenance() {
     setIsMaintenanceLogDialogOpen(true);
   };
 
-  const handleAddNewAppliance = () => {
-    setEditingAppliance(null);
-    applianceForm.reset({
-      homeownerId,
-      applianceType: "",
-      brand: "",
-      model: "",
-      yearInstalled: undefined,
-      serialNumber: "",
-      notes: "",
-      location: "",
-      warrantyExpiration: "",
-      lastServiceDate: "",
-    });
-    setIsApplianceDialogOpen(true);
-  };
+
 
 
 
@@ -1068,7 +1030,7 @@ export default function Maintenance() {
       );
     }
 
-    if (aiError || !aiSuggestions || aiSuggestions.length === 0) {
+    if (aiError || !aiSuggestions || !Array.isArray(aiSuggestions) || aiSuggestions.length === 0) {
       return (
         <Card className="border-2 border-gray-200 dark:border-gray-700">
           <CardHeader>
@@ -1094,7 +1056,7 @@ export default function Maintenance() {
       );
     }
 
-    const houseSuggestions = aiSuggestions.find((s: any) => s.userId === userId);
+    const houseSuggestions = Array.isArray(aiSuggestions) ? aiSuggestions.find((s: any) => s.userId === userId) : null;
     if (!houseSuggestions) return null;
 
     return (
@@ -1776,7 +1738,7 @@ export default function Maintenance() {
                                 <div className="flex items-center space-x-2">
                                   {systemData && (
                                     <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                                      {systemData.yearInstalled || 'Unknown'}
+                                      {systemData.installationYear || 'Unknown'}
                                     </span>
                                   )}
                                   <Button 
@@ -2257,7 +2219,7 @@ export default function Maintenance() {
                       <FormItem>
                         <FormLabel>Service Date</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input type="date" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -2276,6 +2238,7 @@ export default function Maintenance() {
                             step="0.01"
                             placeholder="Service cost" 
                             {...field}
+                            value={field.value || ""}
                             onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
                           />
                         </FormControl>
@@ -2293,7 +2256,7 @@ export default function Maintenance() {
                       <FormItem>
                         <FormLabel>Contractor Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Contractor or technician name" {...field} />
+                          <Input placeholder="Contractor or technician name" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -2307,7 +2270,7 @@ export default function Maintenance() {
                       <FormItem>
                         <FormLabel>Company</FormLabel>
                         <FormControl>
-                          <Input placeholder="Company or service provider" {...field} />
+                          <Input placeholder="Company or service provider" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -2323,7 +2286,7 @@ export default function Maintenance() {
                       <FormItem>
                         <FormLabel>Warranty Period</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., 1 year, 6 months" {...field} />
+                          <Input placeholder="e.g., 1 year, 6 months" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -2337,7 +2300,7 @@ export default function Maintenance() {
                       <FormItem>
                         <FormLabel>Next Service Due</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input type="date" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -2356,6 +2319,7 @@ export default function Maintenance() {
                           className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           placeholder="Any additional notes about the service..."
                           {...field}
+                          value={field.value || ""}
                         />
                       </FormControl>
                       <FormMessage />
@@ -2544,7 +2508,7 @@ export default function Maintenance() {
               <form onSubmit={homeSystemForm.handleSubmit(onSubmitHomeSystem)} className="space-y-4">
                 <FormField
                   control={homeSystemForm.control}
-                  name="yearInstalled"
+                  name="installationYear"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Year Installed</FormLabel>
@@ -2553,6 +2517,7 @@ export default function Maintenance() {
                           type="number" 
                           placeholder="e.g., 2020" 
                           {...field}
+                          value={field.value || ""}
                           onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                         />
                       </FormControl>
@@ -2572,6 +2537,7 @@ export default function Maintenance() {
                           type="number" 
                           placeholder="e.g., 2023" 
                           {...field}
+                          value={field.value || ""}
                           onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                         />
                       </FormControl>
@@ -2588,7 +2554,7 @@ export default function Maintenance() {
                       <FormItem>
                         <FormLabel>Brand (Optional)</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Carrier" {...field} />
+                          <Input placeholder="e.g., Carrier" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -2602,7 +2568,7 @@ export default function Maintenance() {
                       <FormItem>
                         <FormLabel>Model (Optional)</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., 24ABC3" {...field} />
+                          <Input placeholder="e.g., 24ABC3" {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -2617,7 +2583,7 @@ export default function Maintenance() {
                     <FormItem>
                       <FormLabel>Notes (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="Additional information..." {...field} />
+                        <Input placeholder="Additional information..." {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
