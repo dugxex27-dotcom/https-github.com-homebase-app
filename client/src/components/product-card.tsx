@@ -26,25 +26,25 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-300 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
       <img
         src={product.image}
         alt={product.name}
         className="w-full h-48 object-cover rounded-lg mb-4"
       />
       <div>
-        <h3 className="font-semibold text-gray-900 mb-2">{product.name}</h3>
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{product.name}</h3>
         <div className="flex items-center mb-2">
           {renderStars(product.rating)}
-          <span className="ml-2 text-sm text-gray-600">
+          <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
             ({product.reviewCount} reviews)
           </span>
         </div>
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
           {product.description}
         </p>
         <div className="flex justify-between items-center">
-          <span className="text-lg font-bold text-primary">
+          <span className="text-lg font-bold text-gray-900 dark:text-white">
             ${product.price}
           </span>
           <Button 

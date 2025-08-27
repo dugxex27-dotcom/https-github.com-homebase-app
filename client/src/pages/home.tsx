@@ -72,7 +72,7 @@ export default function Home() {
       <section className={`py-8 border-b border-gray-200 dark:border-gray-800 ${typedUser?.role === 'homeowner' ? 'bg-purple-50 dark:bg-gray-900/50' : 'bg-gray-50 dark:bg-gray-900/50'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center">
-            <div className="flex bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-lg border border-gray-200 dark:border-gray-700">
+            <div className="flex bg-gray-50 dark:bg-gray-800 rounded-2xl p-2 shadow-lg border border-gray-300 dark:border-gray-700">
               {/* Dashboard tab for all users */}
               <button
                 onClick={() => setActiveTab('dashboard')}
@@ -396,7 +396,7 @@ export default function Home() {
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                   {[...Array(4)].map((_, i) => (
-                    <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
+                    <div key={i} className="bg-gray-50 dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-300 dark:border-gray-700 p-6 animate-pulse">
                       <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-xl mb-4"></div>
                       <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
                       <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-3 w-3/4"></div>
@@ -429,7 +429,7 @@ export default function Home() {
 
           {activeTab === 'contractors' && typedUser?.role === 'homeowner' && (
             <div className="max-w-5xl mx-auto">
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-xl">
+              <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-xl">
                 <CardHeader className="text-center pb-8">
                   <div className="flex items-center justify-center w-20 h-20 bg-purple-100 dark:bg-purple-900/30 rounded-2xl mx-auto mb-6">
                     <Users className="h-10 w-10 text-purple-600 dark:text-purple-400" />
