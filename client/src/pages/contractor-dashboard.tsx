@@ -4,9 +4,24 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Proposals } from "@/components/proposals";
 import PushNotificationManager from "@/components/push-notification-manager";
+import { useAuth } from "@/hooks/useAuth";
 import { Calendar, Users, Star, TrendingUp, FileText, User } from "lucide-react";
+import type { User as UserType } from "@shared/schema";
 
 export default function ContractorDashboard() {
+  const { user } = useAuth();
+  const typedUser = user as UserType | undefined;
+  
+  if (!typedUser) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl font-bold text-primary mb-2">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -100,7 +115,7 @@ export default function ContractorDashboard() {
 
         {/* Proposals Section */}
         <div className="mb-8">
-          <Proposals contractorId="demo-contractor-1756139319068" />
+          <Proposals contractorId={typedUser.id} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -141,7 +156,7 @@ export default function ContractorDashboard() {
 
           {/* Push Notifications */}
           <div className="lg:col-span-1">
-            <PushNotificationManager userId="demo-contractor-123" />
+            <PushNotificationManager userId={typedUser.id} />
           </div>
         </div>
       </main>

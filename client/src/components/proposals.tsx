@@ -17,8 +17,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { Plus, FileText, Calendar, DollarSign, Clock, Edit, Trash2 } from "lucide-react";
 
 const proposalFormSchema = insertProposalSchema.extend({
-  materials: z.string().transform((val) => val.split(',').map(item => item.trim()).filter(item => item.length > 0)),
-}).omit({ materials: true }).extend({
   materials: z.string(),
 });
 
@@ -44,7 +42,7 @@ export function Proposals({ contractorId }: ProposalsProps) {
       estimatedCost: "0.00",
       estimatedDuration: "",
       scope: "",
-      materials: [],
+      materials: "",
       warrantyPeriod: "",
       validUntil: "",
       status: "draft",
@@ -52,9 +50,8 @@ export function Proposals({ contractorId }: ProposalsProps) {
     },
   });
 
-  const { data: proposals = [], isLoading } = useQuery({
+  const { data: proposals = [], isLoading } = useQuery<Proposal[]>({
     queryKey: ["/api/proposals", contractorId],
-    queryFn: () => apiRequest(`/api/proposals?contractorId=${contractorId}`) as Promise<Proposal[]>,
   });
 
   const createMutation = useMutation({
