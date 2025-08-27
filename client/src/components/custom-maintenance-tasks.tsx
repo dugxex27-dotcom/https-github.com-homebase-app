@@ -228,7 +228,7 @@ export function CustomMaintenanceTasks({ homeownerId, houseId }: CustomMaintenan
             <Button onClick={() => {
               setEditingTask(null);
               form.reset();
-            }}>
+            }} className="bg-purple-600 hover:bg-purple-700 text-white">
               <Plus className="h-4 w-4 mr-2" />
               Add Custom Task
             </Button>
@@ -511,6 +511,7 @@ export function CustomMaintenanceTasks({ homeownerId, houseId }: CustomMaintenan
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEdit(task)}
+                        className="text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -518,6 +519,7 @@ export function CustomMaintenanceTasks({ homeownerId, houseId }: CustomMaintenan
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(task.id)}
+                        className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
