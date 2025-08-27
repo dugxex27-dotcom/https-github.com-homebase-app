@@ -189,7 +189,7 @@ export function AppointmentScheduler({
                   <FormItem>
                     <FormLabel>Company (Optional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="ABC Plumbing Co." {...field} />
+                      <Input placeholder="ABC Plumbing Co." {...field} value={field.value || ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -204,7 +204,7 @@ export function AppointmentScheduler({
                 <FormItem>
                   <FormLabel>Phone Number (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="(555) 123-4567" {...field} />
+                    <Input placeholder="(555) 123-4567" {...field} value={field.value || ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -317,6 +317,7 @@ export function AppointmentScheduler({
                         type="number" 
                         placeholder="60" 
                         {...field}
+                        value={field.value || ""}
                         onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                       />
                     </FormControl>
@@ -337,6 +338,7 @@ export function AppointmentScheduler({
                       placeholder="Any special instructions or details..."
                       className="min-h-[80px]"
                       {...field}
+                      value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />
