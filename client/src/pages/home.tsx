@@ -218,8 +218,8 @@ export default function Home() {
                       <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
                         <CardContent className="p-6">
                           <div className="flex items-center mb-4">
-                            <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-xl flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-gray-600/50 transition-colors">
-                              <BarChart3 className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                            <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center group-hover:bg-red-200 dark:group-hover:bg-red-800/50 transition-colors">
+                              <BarChart3 className="h-6 w-6 text-red-800 dark:text-red-400" />
                             </div>
                             <div className="ml-4">
                               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Business Overview</h3>
@@ -237,8 +237,8 @@ export default function Home() {
                       <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
                         <CardContent className="p-6">
                           <div className="flex items-center mb-4">
-                            <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-xl flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-gray-600/50 transition-colors">
-                              <Users className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                            <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center group-hover:bg-red-200 dark:group-hover:bg-red-800/50 transition-colors">
+                              <Users className="h-6 w-6 text-red-800 dark:text-red-400" />
                             </div>
                             <div className="ml-4">
                               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">My Profile</h3>
@@ -275,8 +275,8 @@ export default function Home() {
                       <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
                         <CardContent className="p-6">
                           <div className="flex items-center mb-4">
-                            <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-xl flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-gray-600/50 transition-colors">
-                              <Calendar className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                            <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center group-hover:bg-red-200 dark:group-hover:bg-red-800/50 transition-colors">
+                              <Calendar className="h-6 w-6 text-red-800 dark:text-red-400" />
                             </div>
                             <div className="ml-4">
                               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Active Projects</h3>
@@ -564,7 +564,7 @@ export default function Home() {
               <>
                 <Card className="bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-700 border-gray-300 dark:border-gray-600">
                   <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 bg-gray-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <div className="w-16 h-16 bg-red-800 rounded-2xl flex items-center justify-center mx-auto mb-6">
                       <Users className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Quality Leads</h3>
@@ -588,7 +588,7 @@ export default function Home() {
 
                 <Card className="bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-700 border-gray-300 dark:border-gray-600">
                   <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 bg-gray-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <div className="w-16 h-16 bg-red-800 rounded-2xl flex items-center justify-center mx-auto mb-6">
                       <Star className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Build Reputation</h3>
