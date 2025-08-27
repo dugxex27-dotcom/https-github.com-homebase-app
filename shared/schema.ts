@@ -42,6 +42,7 @@ export const contractors = pgTable("contractors", {
   licenseNumber: text("license_number").notNull(),
   licenseMunicipality: text("license_municipality").notNull(),
   isLicensed: boolean("is_licensed").notNull().default(true),
+  serviceRadius: integer("service_radius").notNull().default(25), // Service radius in miles
 
   hasEmergencyServices: boolean("has_emergency_services").notNull().default(false),
   profileImage: text("profile_image"),

@@ -15,6 +15,7 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
   const [minRating, setMinRating] = useState<number | undefined>();
   const [hasEmergencyServices, setHasEmergencyServices] = useState(false);
   const [maxDistance, setMaxDistance] = useState<number | undefined>();
+  const [serviceRadius, setServiceRadius] = useState<number | undefined>();
 
   const services = [
     "Assembly Services",
@@ -70,6 +71,7 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
       minRating,
       hasEmergencyServices: hasEmergencyServices || undefined,
       maxDistance,
+      serviceRadius,
     });
   };
 
@@ -91,6 +93,22 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
                 <SelectItem value="10">Within 10 miles</SelectItem>
                 <SelectItem value="25">Within 25 miles</SelectItem>
                 <SelectItem value="50">Within 50 miles</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Service Radius Filter */}
+          <div>
+            <Label className="text-sm font-medium text-foreground mb-3 block">Contractor Service Area</Label>
+            <Select onValueChange={(value) => setServiceRadius(parseFloat(value))}>
+              <SelectTrigger className="border-muted">
+                <SelectValue placeholder="Any service area" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">Services within 10 miles</SelectItem>
+                <SelectItem value="25">Services within 25 miles</SelectItem>
+                <SelectItem value="50">Services within 50 miles</SelectItem>
+                <SelectItem value="100">Services within 100 miles</SelectItem>
               </SelectContent>
             </Select>
           </div>

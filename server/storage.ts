@@ -13,6 +13,7 @@ export interface IStorage {
     minRating?: number;
     hasEmergencyServices?: boolean;
     maxDistance?: number;
+    serviceRadius?: number;
   }): Promise<Contractor[]>;
   getContractor(id: string): Promise<Contractor | undefined>;
   createContractor(contractor: InsertContractor): Promise<Contractor>;
@@ -296,6 +297,7 @@ export class MemStorage implements IStorage {
         licenseMunicipality: "Seattle",
         isLicensed: true,
         hasEmergencyServices: false,
+        serviceRadius: 30,
         profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
       },
       {
@@ -314,6 +316,7 @@ export class MemStorage implements IStorage {
         licenseMunicipality: "Bellevue",
         isLicensed: true,
         hasEmergencyServices: true,
+        serviceRadius: 50,
         profileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
       },
       {
@@ -332,6 +335,7 @@ export class MemStorage implements IStorage {
         licenseMunicipality: "Tacoma",
         isLicensed: true,
         hasEmergencyServices: true,
+        serviceRadius: 75,
         profileImage: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
       },
       {
@@ -350,6 +354,7 @@ export class MemStorage implements IStorage {
         licenseMunicipality: "Spokane",
         isLicensed: true,
         hasEmergencyServices: false,
+        serviceRadius: 60,
         profileImage: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
       },
       {
@@ -368,6 +373,7 @@ export class MemStorage implements IStorage {
         licenseMunicipality: "Redmond",
         isLicensed: true,
         hasEmergencyServices: false,
+        serviceRadius: 35,
         profileImage: "https://images.unsplash.com/photo-1558618739-ace2d1e8de4c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
       },
       {
@@ -386,6 +392,7 @@ export class MemStorage implements IStorage {
         licenseMunicipality: "Everett",
         isLicensed: true,
         hasEmergencyServices: true,
+        serviceRadius: 45,
         profileImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
       }
     ];
@@ -400,6 +407,7 @@ export class MemStorage implements IStorage {
         reviewCount: contractor.reviewCount || 0,
         isLicensed: contractor.isLicensed ?? true,
         hasEmergencyServices: contractor.hasEmergencyServices ?? false,
+        serviceRadius: (contractor as any).serviceRadius ?? 25,
         businessLogo: null,
         projectPhotos: []
       };
@@ -591,6 +599,12 @@ export class MemStorage implements IStorage {
           contractor.distance ? parseFloat(contractor.distance) <= filters.maxDistance! : true
         );
       }
+
+      if (filters.serviceRadius) {
+        contractors = contractors.filter(contractor =>
+          contractor.serviceRadius >= filters.serviceRadius!
+        );
+      }
     }
 
     return contractors;
@@ -610,6 +624,7 @@ export class MemStorage implements IStorage {
       reviewCount: contractor.reviewCount || 0,
       isLicensed: contractor.isLicensed ?? true,
       hasEmergencyServices: contractor.hasEmergencyServices ?? false,
+      serviceRadius: contractor.serviceRadius ?? 25,
       businessLogo: contractor.businessLogo || null,
       projectPhotos: contractor.projectPhotos || []
     };

@@ -83,6 +83,7 @@ export default function ContractorProfile() {
     licenseState: '',
     licenseExpiry: '',
     licenseMunicipality: '',
+    serviceRadius: 25,
     servicesOffered: [] as string[],
     website: '',
     facebook: '',
@@ -390,6 +391,26 @@ export default function ContractorProfile() {
                   required
                 />
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="serviceRadius">Service Radius (miles) *</Label>
+              <Select onValueChange={(value) => handleInputChange('serviceRadius', parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue placeholder={`${formData.serviceRadius} miles`} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10 miles</SelectItem>
+                  <SelectItem value="25">25 miles</SelectItem>
+                  <SelectItem value="50">50 miles</SelectItem>
+                  <SelectItem value="75">75 miles</SelectItem>
+                  <SelectItem value="100">100 miles</SelectItem>
+                  <SelectItem value="150">150+ miles</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground mt-1">
+                How far are you willing to travel for projects?
+              </p>
             </div>
           </CardContent>
         </Card>
