@@ -156,25 +156,6 @@ export default function Home() {
                   </Card>
                 </Link>
 
-                <Link href="/maintenance#service-records">
-                  <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
-                    <CardContent className="p-6">
-                      <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
-                          <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div className="ml-4">
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Service Records</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">View history</p>
-                        </div>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm">
-                        Track all your home service history and warranty information
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
-
                 <Link href="/contractors">
                   <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group">
                     <CardContent className="p-6">
