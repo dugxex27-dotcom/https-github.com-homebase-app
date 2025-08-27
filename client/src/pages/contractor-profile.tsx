@@ -505,10 +505,10 @@ export default function ContractorProfile() {
                 onChange={(e) => handleInputChange('bio', e.target.value)}
                 placeholder="Tell potential clients about your business, specialties, and what sets you apart..."
                 rows={4}
-                maxLength={500}
+                maxLength={1000}
               />
               <p className="text-sm text-gray-500 mt-1">
-                {formData.bio.length}/500 characters
+                {formData.bio.length}/1000 characters
               </p>
             </div>
           </CardContent>
