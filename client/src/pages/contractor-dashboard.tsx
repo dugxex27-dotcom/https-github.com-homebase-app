@@ -118,7 +118,7 @@ export default function ContractorDashboard() {
                 className="h-20 flex flex-col items-center justify-center space-y-2"
                 onClick={() => window.location.href = "/service-records"}
               >
-                <FileText className="h-6 w-6" />
+                <FileText className="h-6 w-6 text-red-800" />
                 <span>Service Records</span>
               </Button>
               <Button 
@@ -126,11 +126,11 @@ export default function ContractorDashboard() {
                 className="h-20 flex flex-col items-center justify-center space-y-2"
                 onClick={() => window.location.href = "/profile"}
               >
-                <User className="h-6 w-6" />
+                <User className="h-6 w-6 text-red-800" />
                 <span>Edit Profile</span>
               </Button>
               <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
-                <Star className="h-6 w-6" />
+                <Star className="h-6 w-6 text-red-800" />
                 <span>View Reviews</span>
               </Button>
             </div>
