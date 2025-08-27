@@ -115,7 +115,7 @@ export default function ContractorDashboard() {
               </Button>
               <Button 
                 variant="outline" 
-                className="h-20 flex flex-col items-center justify-center space-y-2"
+                className="h-20 flex flex-col items-center justify-center space-y-2 border-red-800 text-red-800 hover:bg-red-50"
                 onClick={() => window.location.href = "/service-records"}
               >
                 <FileText className="h-6 w-6 text-red-800" />
@@ -123,13 +123,13 @@ export default function ContractorDashboard() {
               </Button>
               <Button 
                 variant="outline" 
-                className="h-20 flex flex-col items-center justify-center space-y-2"
+                className="h-20 flex flex-col items-center justify-center space-y-2 border-red-800 text-red-800 hover:bg-red-50"
                 onClick={() => window.location.href = "/profile"}
               >
                 <User className="h-6 w-6 text-red-800" />
                 <span>Edit Profile</span>
               </Button>
-              <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
+              <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2 border-red-800 text-red-800 hover:bg-red-50">
                 <Star className="h-6 w-6 text-red-800" />
                 <span>View Reviews</span>
               </Button>
