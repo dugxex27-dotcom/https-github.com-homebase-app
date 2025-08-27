@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal } from "@shared/schema";
+import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -113,6 +113,13 @@ export interface IStorage {
   createProposal(proposal: InsertProposal): Promise<Proposal>;
   updateProposal(id: string, proposal: Partial<InsertProposal>): Promise<Proposal | undefined>;
   deleteProposal(id: string): Promise<boolean>;
+
+  // Home system operations
+  getHomeSystems(homeownerId?: string, houseId?: string): Promise<HomeSystem[]>;
+  getHomeSystem(id: string): Promise<HomeSystem | undefined>;
+  createHomeSystem(system: InsertHomeSystem): Promise<HomeSystem>;
+  updateHomeSystem(id: string, system: Partial<InsertHomeSystem>): Promise<HomeSystem | undefined>;
+  deleteHomeSystem(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -131,6 +138,7 @@ export class MemStorage implements IStorage {
   private messages: Map<string, Message>;
   private contractorReviews: Map<string, ContractorReview>;
   private proposals: Map<string, Proposal>;
+  private homeSystems: Map<string, HomeSystem>;
 
   constructor() {
     this.users = new Map();
@@ -148,6 +156,7 @@ export class MemStorage implements IStorage {
     this.messages = new Map();
     this.contractorReviews = new Map();
     this.proposals = new Map();
+    this.homeSystems = new Map();
     this.seedData();
     this.seedServiceRecords();
     this.seedReviews();
@@ -1640,6 +1649,55 @@ export class MemStorage implements IStorage {
     this.updateContractorRating("1");
     this.updateContractorRating("2");  
     this.updateContractorRating("3");
+  }
+
+  // Home System operations
+  async getHomeSystems(homeownerId?: string, houseId?: string): Promise<HomeSystem[]> {
+    const allSystems = Array.from(this.homeSystems.values());
+    let filtered = allSystems;
+
+    if (homeownerId) {
+      filtered = filtered.filter(system => system.homeownerId === homeownerId);
+    }
+
+    if (houseId) {
+      filtered = filtered.filter(system => system.houseId === houseId);
+    }
+
+    return filtered;
+  }
+
+  async getHomeSystem(id: string): Promise<HomeSystem | undefined> {
+    return this.homeSystems.get(id);
+  }
+
+  async createHomeSystem(systemData: InsertHomeSystem): Promise<HomeSystem> {
+    const id = randomUUID();
+    const system: HomeSystem = {
+      ...systemData,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.homeSystems.set(id, system);
+    return system;
+  }
+
+  async updateHomeSystem(id: string, systemData: Partial<InsertHomeSystem>): Promise<HomeSystem | undefined> {
+    const existing = this.homeSystems.get(id);
+    if (!existing) return undefined;
+
+    const updated: HomeSystem = {
+      ...existing,
+      ...systemData,
+      updatedAt: new Date(),
+    };
+    this.homeSystems.set(id, updated);
+    return updated;
+  }
+
+  async deleteHomeSystem(id: string): Promise<boolean> {
+    return this.homeSystems.delete(id);
   }
 }
 

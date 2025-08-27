@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireRole } from "./replitAuth";
 import { z } from "zod";
-import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema } from "@shared/schema";
+import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema } from "@shared/schema";
 
 // Extend session data interface
 declare module 'express-session' {
@@ -681,6 +681,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(house);
     } catch (error) {
       res.status(500).json({ message: "Failed to update house" });
+    }
+  });
+
+  // Home Systems routes
+  app.get("/api/home-systems", async (req, res) => {
+    try {
+      const { homeownerId, houseId } = req.query;
+      const systems = await storage.getHomeSystems(homeownerId as string, houseId as string);
+      res.json(systems);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch home systems" });
+    }
+  });
+
+  app.get("/api/home-systems/:id", async (req, res) => {
+    try {
+      const system = await storage.getHomeSystem(req.params.id);
+      if (!system) {
+        return res.status(404).json({ message: "Home system not found" });
+      }
+      res.json(system);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch home system" });
+    }
+  });
+
+  app.post("/api/home-systems", async (req, res) => {
+    try {
+      const systemData = insertHomeSystemSchema.parse(req.body);
+      const system = await storage.createHomeSystem(systemData);
+      res.status(201).json(system);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid home system data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create home system" });
+    }
+  });
+
+  app.patch("/api/home-systems/:id", async (req, res) => {
+    try {
+      const partialData = insertHomeSystemSchema.partial().parse(req.body);
+      const system = await storage.updateHomeSystem(req.params.id, partialData);
+      if (!system) {
+        return res.status(404).json({ message: "Home system not found" });
+      }
+      res.json(system);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid home system data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update home system" });
+    }
+  });
+
+  app.delete("/api/home-systems/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteHomeSystem(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Home system not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete home system" });
     }
   });
 

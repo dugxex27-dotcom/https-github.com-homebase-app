@@ -1537,6 +1537,98 @@ export default function Maintenance() {
               </Collapsible>
             </div>
 
+            {/* Home Systems Management Section */}
+            <div className="mb-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    Home Systems Age Tracking
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Track the age and installation dates of your home systems to plan maintenance and replacements
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* System Categories */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {/* HVAC Systems */}
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-sm text-foreground">HVAC Systems</h4>
+                        <div className="space-y-2">
+                          {["Central Air", "Gas Heat", "Electric Heat", "Heat Pump"].map((system) => (
+                            <div key={system} className="border rounded-lg p-3 bg-muted/30">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium">{system}</span>
+                                <Button variant="outline" size="sm" className="h-6 text-xs">
+                                  <Plus className="w-3 h-3 mr-1" />
+                                  Add
+                                </Button>
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                No installation date recorded
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Water Systems */}
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-sm text-foreground">Water Systems</h4>
+                        <div className="space-y-2">
+                          {["Water Heater", "Water Softener", "Sump Pump"].map((system) => (
+                            <div key={system} className="border rounded-lg p-3 bg-muted/30">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium">{system}</span>
+                                <Button variant="outline" size="sm" className="h-6 text-xs">
+                                  <Plus className="w-3 h-3 mr-1" />
+                                  Add
+                                </Button>
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                No installation date recorded
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Electrical & Safety */}
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-sm text-foreground">Electrical & Safety</h4>
+                        <div className="space-y-2">
+                          {["Electrical Panel", "Generator", "Security System"].map((system) => (
+                            <div key={system} className="border rounded-lg p-3 bg-muted/30">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium">{system}</span>
+                                <Button variant="outline" size="sm" className="h-6 text-xs">
+                                  <Plus className="w-3 h-3 mr-1" />
+                                  Add
+                                </Button>
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                No installation date recorded
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Add System Button */}
+                    <div className="pt-4 border-t">
+                      <Button variant="outline" className="w-full">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Custom System
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Tasks Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredTasks.map((task) => {

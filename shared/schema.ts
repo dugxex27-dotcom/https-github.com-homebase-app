@@ -253,6 +253,20 @@ export const proposals = pgTable("proposals", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const homeSystems = pgTable("home_systems", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  homeownerId: text("homeowner_id").notNull(),
+  houseId: text("house_id").notNull(),
+  systemType: text("system_type").notNull(), // "Central Air", "Gas Heat", etc.
+  installationYear: integer("installation_year"), // Year the system was installed
+  lastServiceYear: integer("last_service_year"), // Year of last major service
+  brand: text("brand"), // Brand/manufacturer
+  model: text("model"), // Model number
+  notes: text("notes"), // Additional notes about the system
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertContractorSchema = createInsertSchema(contractors).omit({
   id: true,
 });
@@ -331,6 +345,12 @@ export const insertCustomMaintenanceTaskSchema = createInsertSchema(customMainte
   updatedAt: true,
 });
 
+export const insertHomeSystemSchema = createInsertSchema(homeSystems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertContractor = z.infer<typeof insertContractorSchema>;
 export type Contractor = typeof contractors.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
@@ -362,3 +382,5 @@ export type InsertCustomMaintenanceTask = z.infer<typeof insertCustomMaintenance
 export type CustomMaintenanceTask = typeof customMaintenanceTasks.$inferSelect;
 export type InsertProposal = z.infer<typeof insertProposalSchema>;
 export type Proposal = typeof proposals.$inferSelect;
+export type InsertHomeSystem = z.infer<typeof insertHomeSystemSchema>;
+export type HomeSystem = typeof homeSystems.$inferSelect;
