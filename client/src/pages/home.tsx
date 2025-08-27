@@ -338,17 +338,17 @@ export default function Home() {
                   {typedUser?.role === 'homeowner' ? (
                     <>
                       <Link href="/maintenance">
-                        <Button className="bg-amber-600 hover:bg-amber-700 text-white">
+                        <Button className="bg-purple-600 hover:bg-purple-700 text-white">
                           Schedule Maintenance
                         </Button>
                       </Link>
                       <Link href="/contractors">
-                        <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                        <Button variant="outline" className="border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20">
                           Find Contractor
                         </Button>
                       </Link>
                       <Link href="/products">
-                        <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                        <Button variant="outline" className="border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                           Browse Products
                         </Button>
                       </Link>
@@ -417,7 +417,7 @@ export default function Home() {
 
               <div className="text-center mt-12">
                 <Link href="/products">
-                  <Button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
+                  <Button className={`px-8 py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 ${typedUser?.role === 'homeowner' ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'}`}>
                     Explore All Products
                   </Button>
                 </Link>
@@ -431,8 +431,8 @@ export default function Home() {
             <div className="max-w-5xl mx-auto">
               <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-xl">
                 <CardHeader className="text-center pb-8">
-                  <div className="flex items-center justify-center w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-2xl mx-auto mb-6">
-                    <Users className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+                  <div className="flex items-center justify-center w-20 h-20 bg-purple-100 dark:bg-purple-900/30 rounded-2xl mx-auto mb-6">
+                    <Users className="h-10 w-10 text-purple-600 dark:text-purple-400" />
                   </div>
                   <CardTitle className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Find Trusted Contractors
@@ -443,19 +443,19 @@ export default function Home() {
                   
                   {/* Service badges */}
                   <div className="flex flex-wrap justify-center gap-2 mb-8">
-                    <Badge variant="secondary" className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-3 py-1">
+                    <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 px-3 py-1">
                       Gutter Cleaning
                     </Badge>
-                    <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 px-3 py-1">
+                    <Badge variant="secondary" className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 px-3 py-1">
                       Drywall Repair
                     </Badge>
-                    <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-3 py-1">
+                    <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 px-3 py-1">
                       Custom Cabinetry
                     </Badge>
                     <Badge variant="secondary" className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 px-3 py-1">
                       HVAC Services
                     </Badge>
-                    <Badge variant="secondary" className="bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 px-3 py-1">
+                    <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 px-3 py-1">
                       Electrical Work
                     </Badge>
                   </div>
@@ -489,7 +489,7 @@ export default function Home() {
                       </div>
                     </div>
                     <Link href="/contractors" className="lg:self-end">
-                      <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 h-12 text-base rounded-xl font-medium transition-all duration-200 flex items-center justify-center w-full lg:w-auto">
+                      <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 h-12 text-base rounded-xl font-medium transition-all duration-200 flex items-center justify-center w-full lg:w-auto">
                         <Search className="mr-2 h-4 w-4" />
                         Find Contractors
                       </Button>
@@ -523,9 +523,9 @@ export default function Home() {
             {typedUser?.role === 'homeowner' ? (
               // Homeowner Features
               <>
-                <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-amber-200 dark:border-amber-800/30">
+                <Card className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-gray-200 dark:border-gray-600">
                   <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <div className="w-16 h-16 bg-gray-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
                       <Shield className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Verified Professionals</h3>
@@ -535,9 +535,9 @@ export default function Home() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200 dark:border-blue-800/30">
+                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700">
                   <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <div className="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
                       <Package className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Quality Products</h3>
@@ -547,9 +547,9 @@ export default function Home() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800/30">
+                <Card className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-gray-200 dark:border-gray-600">
                   <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <div className="w-16 h-16 bg-gray-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
                       <TrendingUp className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Cost Savings</h3>
@@ -609,7 +609,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="mb-6">
-                <Logo className="h-10 w-auto text-amber-400" />
+                <Logo className={`h-10 w-auto ${typedUser?.role === 'homeowner' ? 'text-purple-400' : 'text-amber-400'}`} />
               </div>
               <p className="text-gray-400 mb-6 leading-relaxed">
                 Your trusted partner for connecting with skilled contractors, discovering quality DIY products, and maintaining your home with confidence.
@@ -621,10 +621,10 @@ export default function Home() {
               <div>
                 <h4 className="text-lg font-semibold mb-6 text-white">For Homeowners</h4>
                 <ul className="space-y-3 text-gray-400">
-                  <li><Link href="/contractors" className="hover:text-amber-400 transition-colors">Find Contractors</Link></li>
-                  <li><Link href="/products" className="hover:text-amber-400 transition-colors">DIY Products</Link></li>
-                  <li><Link href="/maintenance" className="hover:text-amber-400 transition-colors">Maintenance Schedule</Link></li>
-                  <li><Link href="/maintenance#service-records" className="hover:text-amber-400 transition-colors">Service History</Link></li>
+                  <li><Link href="/contractors" className="hover:text-purple-400 transition-colors">Find Contractors</Link></li>
+                  <li><Link href="/products" className="hover:text-purple-400 transition-colors">DIY Products</Link></li>
+                  <li><Link href="/maintenance" className="hover:text-purple-400 transition-colors">Maintenance Schedule</Link></li>
+                  <li><Link href="/maintenance#service-records" className="hover:text-purple-400 transition-colors">Service History</Link></li>
                 </ul>
               </div>
             )}
