@@ -1704,6 +1704,65 @@ export default function Maintenance() {
               </Collapsible>
             </div>
 
+            {/* Service Records Quick Access */}
+            {maintenanceLogs && maintenanceLogs.length > 0 && (
+              <div className="mb-6">
+                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200 dark:border-blue-800/30">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-blue-500 p-2 rounded-lg">
+                          <FileText className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground">Recent Service History</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {maintenanceLogs.length} service record{maintenanceLogs.length !== 1 ? 's' : ''} tracked
+                          </p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          const serviceRecordsSection = document.getElementById('service-records');
+                          serviceRecordsSection?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        data-testid="button-view-service-records"
+                      >
+                        View All Records
+                      </Button>
+                    </div>
+                    {maintenanceLogs.slice(0, 2).map((log) => (
+                      <div key={log.id} className="mt-3 p-3 bg-white dark:bg-gray-800 rounded-lg border">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium text-sm text-foreground">{log.serviceDescription}</h4>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                              <span>{new Date(log.serviceDate).toLocaleDateString()}</span>
+                              <span>•</span>
+                              <span>{getHomeAreaLabel(log.homeArea)}</span>
+                              {log.contractorName && (
+                                <>
+                                  <span>•</span>
+                                  <span>{log.contractorName}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          {log.cost && (
+                            <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                              ${log.cost}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             {/* Tasks Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredTasks.map((task) => {
@@ -1986,8 +2045,8 @@ export default function Maintenance() {
                 <FileText className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h2 className="text-2xl font-semibold text-foreground">Maintenance Log</h2>
-                <p className="text-muted-foreground">Track services performed on your home</p>
+                <h2 className="text-2xl font-semibold text-foreground">Service Records</h2>
+                <p className="text-muted-foreground">Complete history of maintenance and repairs performed on your home</p>
               </div>
             </div>
             <Button onClick={handleAddNewMaintenanceLog}>
