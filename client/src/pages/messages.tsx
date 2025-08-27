@@ -142,16 +142,28 @@ export default function Messages() {
     );
   }
 
+  const bgColor = typedUser.role === 'contractor' 
+    ? 'bg-red-50 dark:bg-gray-900' 
+    : 'bg-purple-50 dark:bg-gray-900';
+  
+  const heroGradient = typedUser.role === 'contractor'
+    ? 'bg-gradient-to-br from-red-100 via-red-50 to-red-100 dark:from-red-950/20 dark:via-red-900/20 dark:to-red-950/20'
+    : 'bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 dark:from-purple-950/20 dark:via-purple-900/20 dark:to-purple-950/20';
+  
+  const accentColor = typedUser.role === 'contractor'
+    ? 'text-red-800 dark:text-red-400'
+    : 'text-purple-600 dark:text-purple-400';
+
   return (
-    <div className="min-h-screen bg-purple-50 dark:bg-gray-900">
+    <div className={`min-h-screen ${bgColor}`}>
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 dark:from-purple-950/20 dark:via-purple-900/20 dark:to-purple-950/20 py-16">
+      <section className={`${heroGradient} py-16`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-              <span className="text-purple-600 dark:text-purple-400">Messages</span>
+              <span className={accentColor}>Messages</span>
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
               {typedUser.role === 'homeowner' 
@@ -281,7 +293,11 @@ export default function Messages() {
                   <div key={conversation.id}>
                     <div
                       className={`p-4 cursor-pointer hover:bg-gray-50 ${
-                        selectedConversationId === conversation.id ? 'bg-blue-50 border-r-2 border-blue-500' : ''
+                        selectedConversationId === conversation.id 
+                          ? typedUser.role === 'contractor' 
+                            ? 'bg-red-50 border-r-2 border-red-800' 
+                            : 'bg-blue-50 border-r-2 border-blue-500'
+                          : ''
                       }`}
                       onClick={() => setSelectedConversationId(conversation.id)}
                     >
@@ -344,13 +360,19 @@ export default function Messages() {
                           <div
                             className={`max-w-[70%] p-3 rounded-lg ${
                               message.senderId === typedUser.id
-                                ? 'bg-blue-600 text-white'
+                                ? typedUser.role === 'contractor'
+                                  ? 'bg-red-800 text-white'
+                                  : 'bg-blue-600 text-white'
                                 : 'bg-gray-100 text-gray-900'
                             }`}
                           >
                             <p className="whitespace-pre-wrap">{message.message}</p>
                             <p className={`text-xs mt-1 ${
-                              message.senderId === typedUser.id ? 'text-blue-100' : 'text-gray-500'
+                              message.senderId === typedUser.id 
+                                ? typedUser.role === 'contractor'
+                                  ? 'text-red-100'
+                                  : 'text-blue-100'
+                                : 'text-gray-500'
                             }`}>
                               {new Date(message.createdAt || new Date()).toLocaleString()}
                             </p>
@@ -380,7 +402,11 @@ export default function Messages() {
                     <Button
                       onClick={handleSendMessage}
                       disabled={!newMessage.trim() || sendMessageMutation.isPending}
-                      className="self-end"
+                      className={`self-end ${
+                        typedUser.role === 'contractor'
+                          ? 'bg-red-800 hover:bg-red-900 text-white'
+                          : ''
+                      }`}
                     >
                       <Send className="h-4 w-4" />
                     </Button>
