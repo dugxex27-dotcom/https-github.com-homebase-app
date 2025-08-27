@@ -1,7 +1,7 @@
 import Logo from "@/components/logo";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { Wrench, Search, Calendar, MessageSquare, FileText } from "lucide-react";
+import { Wrench, Search, Calendar, MessageSquare } from "lucide-react";
 import type { User } from "@shared/schema";
 
 export default function HeroSection() {
@@ -16,8 +16,8 @@ export default function HeroSection() {
           
           <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
             {typedUser?.role === 'homeowner' ? (
-              <>Your Home's{" "}
-              <span className="text-amber-600 dark:text-amber-400">Command Center</span></>
+              <>Your Home{" "}
+              <span className="text-amber-600 dark:text-amber-400">Management Hub</span></>
             ) : (
               <>Your Business{" "}
               <span className="text-amber-600 dark:text-amber-400">Growth Platform</span></>
@@ -33,7 +33,7 @@ export default function HeroSection() {
           </p>
 
           {/* Quick Action Cards */}
-          <div className={`grid grid-cols-1 ${typedUser?.role === 'homeowner' ? 'md:grid-cols-4' : 'md:grid-cols-2'} gap-6 mt-12 max-w-5xl mx-auto`}>
+          <div className={`grid grid-cols-1 ${typedUser?.role === 'homeowner' ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mt-12 max-w-5xl mx-auto`}>
             {typedUser?.role === 'homeowner' ? (
               // Homeowner Quick Actions
               <>
@@ -57,18 +57,6 @@ export default function HeroSection() {
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Find Contractors</h3>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">
                       Connect with trusted local contractors for any home project
-                    </p>
-                  </div>
-                </Link>
-
-                <Link href="/service-records">
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-amber-100 dark:border-amber-900/30">
-                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
-                      <FileText className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Service Records</h3>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm">
-                      View all professional services performed on your property
                     </p>
                   </div>
                 </Link>
