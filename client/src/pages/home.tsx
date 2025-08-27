@@ -28,12 +28,12 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen ${typedUser?.role === 'homeowner' ? 'bg-purple-50 dark:bg-gray-900' : 'bg-background'}`}>
       <Header />
       <HeroSection />
       
       {/* Stats Section */}
-      <section className="bg-white dark:bg-gray-900 py-16 border-b border-gray-200 dark:border-gray-800">
+      <section className={`py-16 border-b border-gray-200 dark:border-gray-800 ${typedUser?.role === 'homeowner' ? 'bg-purple-100/30 dark:bg-gray-900' : 'bg-white dark:bg-gray-900'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
@@ -69,7 +69,7 @@ export default function Home() {
       </section>
 
       {/* Category Tabs */}
-      <section className="bg-gray-50 dark:bg-gray-900/50 py-8 border-b border-gray-200 dark:border-gray-800">
+      <section className={`py-8 border-b border-gray-200 dark:border-gray-800 ${typedUser?.role === 'homeowner' ? 'bg-purple-50 dark:bg-gray-900/50' : 'bg-gray-50 dark:bg-gray-900/50'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center">
             <div className="flex bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-lg border border-gray-200 dark:border-gray-700">
@@ -116,7 +116,7 @@ export default function Home() {
       </section>
 
       {/* Tab Content Section */}
-      <section className="bg-gray-50 dark:bg-gray-900/30 py-16">
+      <section className={`py-16 ${typedUser?.role === 'homeowner' ? 'bg-purple-50 dark:bg-gray-900/30' : 'bg-gray-50 dark:bg-gray-900/30'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {activeTab === 'dashboard' && (
             <div className="max-w-6xl mx-auto">
@@ -505,7 +505,7 @@ export default function Home() {
 
 
       {/* Additional Features Section */}
-      <section className="bg-white dark:bg-gray-900 py-16">
+      <section className={`py-16 ${typedUser?.role === 'homeowner' ? 'bg-purple-100/30 dark:bg-gray-900' : 'bg-white dark:bg-gray-900'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
