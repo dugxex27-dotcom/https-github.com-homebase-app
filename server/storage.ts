@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem } from "@shared/schema";
+import { type Contractor, type InsertContractor, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -121,6 +121,14 @@ export interface IStorage {
   createHomeSystem(system: InsertHomeSystem): Promise<HomeSystem>;
   updateHomeSystem(id: string, system: Partial<InsertHomeSystem>): Promise<HomeSystem | undefined>;
   deleteHomeSystem(id: string): Promise<boolean>;
+
+  // Push subscription operations
+  getPushSubscriptions(userId?: string): Promise<PushSubscription[]>;
+  getPushSubscription(id: string): Promise<PushSubscription | undefined>;
+  createPushSubscription(subscription: InsertPushSubscription): Promise<PushSubscription>;
+  updatePushSubscription(id: string, subscription: Partial<InsertPushSubscription>): Promise<PushSubscription | undefined>;
+  deletePushSubscription(id: string): Promise<boolean>;
+  deletePushSubscriptionByEndpoint(endpoint: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -140,6 +148,7 @@ export class MemStorage implements IStorage {
   private contractorReviews: Map<string, ContractorReview>;
   private proposals: Map<string, Proposal>;
   private homeSystems: Map<string, HomeSystem>;
+  private pushSubscriptions: Map<string, PushSubscription>;
 
   constructor() {
     this.users = new Map();
@@ -158,6 +167,7 @@ export class MemStorage implements IStorage {
     this.contractorReviews = new Map();
     this.proposals = new Map();
     this.homeSystems = new Map();
+    this.pushSubscriptions = new Map();
     this.seedData();
     this.seedServiceRecords();
     this.seedReviews();
@@ -1746,6 +1756,62 @@ export class MemStorage implements IStorage {
 
   async deleteHomeSystem(id: string): Promise<boolean> {
     return this.homeSystems.delete(id);
+  }
+
+  // Push subscription methods
+  async getPushSubscriptions(userId?: string): Promise<PushSubscription[]> {
+    const subscriptions = Array.from(this.pushSubscriptions.values());
+    if (userId) {
+      return subscriptions.filter(sub => sub.userId === userId && sub.isActive);
+    }
+    return subscriptions.filter(sub => sub.isActive);
+  }
+
+  async getPushSubscription(id: string): Promise<PushSubscription | undefined> {
+    return this.pushSubscriptions.get(id);
+  }
+
+  async createPushSubscription(subscriptionData: InsertPushSubscription): Promise<PushSubscription> {
+    const id = randomUUID();
+    const now = new Date();
+    const subscription: PushSubscription = {
+      id,
+      ...subscriptionData,
+      isActive: subscriptionData.isActive ?? true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.pushSubscriptions.set(id, subscription);
+    return subscription;
+  }
+
+  async updatePushSubscription(id: string, subscriptionData: Partial<InsertPushSubscription>): Promise<PushSubscription | undefined> {
+    const existingSubscription = this.pushSubscriptions.get(id);
+    if (!existingSubscription) {
+      return undefined;
+    }
+
+    const updated: PushSubscription = {
+      ...existingSubscription,
+      ...subscriptionData,
+      updatedAt: new Date(),
+    };
+    this.pushSubscriptions.set(id, updated);
+    return updated;
+  }
+
+  async deletePushSubscription(id: string): Promise<boolean> {
+    return this.pushSubscriptions.delete(id);
+  }
+
+  async deletePushSubscriptionByEndpoint(endpoint: string): Promise<boolean> {
+    const subscriptions = Array.from(this.pushSubscriptions.entries());
+    const subscription = subscriptions.find(([_, sub]) => sub.endpoint === endpoint);
+    
+    if (subscription) {
+      return this.pushSubscriptions.delete(subscription[0]);
+    }
+    return false;
   }
 }
 

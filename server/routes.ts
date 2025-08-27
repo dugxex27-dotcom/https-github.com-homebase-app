@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireRole } from "./replitAuth";
 import { z } from "zod";
 import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema } from "@shared/schema";
+import pushRoutes from "./push-routes";
+import { pushService } from "./push-service";
 
 // Extend session data interface
 declare module 'express-session' {
@@ -53,6 +55,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.redirect('/');
     });
   });
+
+  // Push notification routes
+  app.use('/api/push', pushRoutes);
+
+  // Push notification routes
+  app.use('/api/push', pushRoutes);
 
   // Simple contractor demo login (no OAuth)
   app.post('/api/auth/contractor-demo-login', async (req, res) => {

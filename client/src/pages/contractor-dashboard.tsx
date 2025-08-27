@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Proposals } from "@/components/proposals";
+import PushNotificationManager from "@/components/push-notification-manager";
 import { Calendar, Users, Star, TrendingUp, FileText, User } from "lucide-react";
 
 export default function ContractorDashboard() {
@@ -102,40 +103,47 @@ export default function ContractorDashboard() {
           <Proposals contractorId="demo-contractor-1756139319068" />
         </div>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Button className="h-20 flex flex-col items-center justify-center space-y-2 bg-red-800 hover:bg-red-900 text-white">
-                <Calendar className="h-6 w-6" />
-                <span>View Schedule</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                className="h-20 flex flex-col items-center justify-center space-y-2 border-red-800 text-red-800 hover:bg-red-50"
-                onClick={() => window.location.href = "/service-records"}
-              >
-                <FileText className="h-6 w-6 text-red-800" />
-                <span>Service Records</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                className="h-20 flex flex-col items-center justify-center space-y-2 border-red-800 text-red-800 hover:bg-red-50"
-                onClick={() => window.location.href = "/profile"}
-              >
-                <User className="h-6 w-6 text-red-800" />
-                <span>Edit Profile</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2 border-red-800 text-red-800 hover:bg-red-50">
-                <Star className="h-6 w-6 text-red-800" />
-                <span>View Reviews</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Quick Actions */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Button className="h-20 flex flex-col items-center justify-center space-y-2 bg-red-800 hover:bg-red-900 text-white">
+                  <Calendar className="h-6 w-6" />
+                  <span>View Schedule</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex flex-col items-center justify-center space-y-2 border-red-800 text-red-800 hover:bg-red-50"
+                  onClick={() => window.location.href = "/service-records"}
+                >
+                  <FileText className="h-6 w-6 text-red-800" />
+                  <span>Service Records</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex flex-col items-center justify-center space-y-2 border-red-800 text-red-800 hover:bg-red-50"
+                  onClick={() => window.location.href = "/profile"}
+                >
+                  <User className="h-6 w-6 text-red-800" />
+                  <span>Edit Profile</span>
+                </Button>
+                <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2 border-red-800 text-red-800 hover:bg-red-50">
+                  <Star className="h-6 w-6 text-red-800" />
+                  <span>View Reviews</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Push Notifications */}
+          <div className="lg:col-span-1">
+            <PushNotificationManager userId="demo-contractor-123" />
+          </div>
+        </div>
       </main>
     </div>
   );
