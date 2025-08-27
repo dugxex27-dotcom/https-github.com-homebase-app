@@ -39,7 +39,7 @@ const AVAILABLE_SERVICES = [
   "Electrical",
   "Fence Installation",
   "Flooring- Hardwood",
-  "Flooring- Laminate/ vinyl flooring",
+  "Flooring- Laminate/ Vinyl flooring",
   "Flooring-Epoxy",
   "General Contracting",
   "Gutter Cleaning",
