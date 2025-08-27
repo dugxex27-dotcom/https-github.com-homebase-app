@@ -194,7 +194,7 @@ export function Proposals({ contractorId }: ProposalsProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+            <FileText className="h-5 w-5 text-red-800" />
             Proposals
           </CardTitle>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -499,19 +499,19 @@ export function Proposals({ contractorId }: ProposalsProps) {
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-green-600" />
+                        <DollarSign className="h-4 w-4 text-red-800" />
                         <span data-testid={`proposal-cost-${proposal.id}`}>
                           ${parseFloat(proposal.estimatedCost).toLocaleString()}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-blue-600" />
+                        <Clock className="h-4 w-4 text-red-800" />
                         <span data-testid={`proposal-duration-${proposal.id}`}>
                           {proposal.estimatedDuration}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-orange-600" />
+                        <Calendar className="h-4 w-4 text-red-800" />
                         <span data-testid={`proposal-valid-until-${proposal.id}`}>
                           Valid until {new Date(proposal.validUntil).toLocaleDateString()}
                         </span>

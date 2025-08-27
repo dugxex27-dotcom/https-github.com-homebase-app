@@ -200,7 +200,7 @@ export default function ContractorProfile() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Building className="w-5 h-5" />
+              <Building className="w-5 h-5 text-red-800" />
               Business Information
             </CardTitle>
           </CardHeader>
@@ -232,7 +232,7 @@ export default function ContractorProfile() {
               <div>
                 <Label htmlFor="email">Email Address *</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-red-800" />
                   <Input
                     id="email"
                     type="email"
@@ -247,7 +247,7 @@ export default function ContractorProfile() {
               <div>
                 <Label htmlFor="phone">Phone Number *</Label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Phone className="absolute left-3 top-3 h-4 w-4 text-red-800" />
                   <Input
                     id="phone"
                     type="tel"
@@ -264,7 +264,7 @@ export default function ContractorProfile() {
             <div>
               <Label htmlFor="address">Business Address *</Label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <MapPin className="absolute left-3 top-3 h-4 w-4 text-red-800" />
                 <Input
                   id="address"
                   value={formData.address}
@@ -315,7 +315,7 @@ export default function ContractorProfile() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
+              <FileText className="w-5 h-5 text-red-800" />
               License Information
             </CardTitle>
           </CardHeader>
@@ -365,7 +365,7 @@ export default function ContractorProfile() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Wrench className="w-5 h-5" />
+              <Wrench className="w-5 h-5 text-red-800" />
               Services Offered
             </CardTitle>
           </CardHeader>
@@ -423,7 +423,7 @@ export default function ContractorProfile() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Globe className="w-5 h-5" />
+              <Globe className="w-5 h-5 text-red-800" />
               Online Presence
             </CardTitle>
           </CardHeader>
@@ -475,7 +475,7 @@ export default function ContractorProfile() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" />
+              <User className="w-5 h-5 text-red-800" />
               About & Experience
             </CardTitle>
           </CardHeader>
