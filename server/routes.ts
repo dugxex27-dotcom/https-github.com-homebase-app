@@ -670,7 +670,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             if (regionData && currentMonthTasks) {
               // Create regional suggestions notifications
-              const regionalNotifications = [];
+              const regionalNotifications: any[] = [];
               
               // Add seasonal tasks as notifications
               currentMonthTasks.seasonal.forEach((task, index) => {
