@@ -60,7 +60,7 @@ const AVAILABLE_SERVICES = [
   "Painting- Interior",
   "Pest Control",
   "Plumbing",
-  "Pool Cleaning",
+  "Pool Cleaning and Maintenance",
   "Pool Installation",
   "Pressure Washing",
   "Roofing",
