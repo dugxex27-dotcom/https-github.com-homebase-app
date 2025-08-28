@@ -180,7 +180,7 @@ export default function Home() {
                       Gutter Cleaning
                     </Badge>
                     <Badge variant="secondary" className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 px-3 py-1">
-                      Drywall Repair
+                      Drywall / Spackling Repair
                     </Badge>
                     <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 px-3 py-1">
                       Custom Cabinetry

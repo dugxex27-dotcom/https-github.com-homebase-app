@@ -26,7 +26,7 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
     "Christmas Light Hanging",
     "Concrete Work",
     "Deck Building",
-    "Drywall",
+    "Drywall / Spackling",
     "Dumpster Rental",
     "Electrical",
     "Fence Installation",

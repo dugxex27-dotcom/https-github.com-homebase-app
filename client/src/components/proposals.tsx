@@ -250,7 +250,7 @@ export function Proposals({ contractorId }: ProposalsProps) {
                                 <SelectItem value="electrical">Electrical</SelectItem>
                                 <SelectItem value="roofing">Roofing</SelectItem>
                                 <SelectItem value="gutters">Gutters</SelectItem>
-                                <SelectItem value="drywall">Drywall</SelectItem>
+                                <SelectItem value="drywall">Drywall / Spackling</SelectItem>
                                 <SelectItem value="custom-cabinetry">Custom Cabinetry</SelectItem>
                                 <SelectItem value="flooring">Flooring</SelectItem>
                                 <SelectItem value="painting">Painting</SelectItem>

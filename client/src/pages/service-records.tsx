@@ -51,7 +51,7 @@ const SERVICE_TYPES = [
   "Roofing",
   "Flooring Installation",
   "Painting",
-  "Drywall Repair",
+  "Drywall / Spackling Repair",
   "Kitchen Remodeling",
   "Bathroom Renovation",
   "Deck Building",
