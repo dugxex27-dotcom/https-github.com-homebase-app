@@ -18,6 +18,7 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
   const [serviceRadius, setServiceRadius] = useState<number | undefined>();
 
   const services = [
+    "Alarm / Camera installation",
     "Assembly Services",
     "Basement Finishing",
     "Bathroom Remodeling",

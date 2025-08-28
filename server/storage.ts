@@ -13,6 +13,7 @@ export interface IStorage {
     minRating?: number;
     hasEmergencyServices?: boolean;
     maxDistance?: number;
+    serviceRadius?: number;
   }): Promise<Contractor[]>;
   getContractor(id: string): Promise<Contractor | undefined>;
   createContractor(contractor: InsertContractor): Promise<Contractor>;
@@ -408,6 +409,25 @@ export class MemStorage implements IStorage {
         hasEmergencyServices: true,
         serviceRadius: 45,
         profileImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
+      },
+      {
+        name: "Alex Thompson",
+        company: "SecureHome Solutions",
+        bio: "Professional security system installer specializing in alarm systems, surveillance cameras, smart home integration, and access control. Licensed security contractor with 24/7 monitoring services.",
+        location: "Seattle, WA", 
+        distance: "2.3",
+        rating: "4.9",
+        reviewCount: 87,
+        experience: 8,
+        services: ["Alarm / Camera installation", "Electrical", "Smart Home Integration"],
+        phone: "(206) 555-0789",
+        email: "alex@securehomesolutions.com",
+        licenseNumber: "THOMP*159MN",
+        licenseMunicipality: "Seattle",
+        isLicensed: true,
+        hasEmergencyServices: true,
+        serviceRadius: 50,
+        profileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
       }
     ];
 
@@ -816,6 +836,7 @@ export class MemStorage implements IStorage {
     const task: CustomMaintenanceTask = {
       id,
       ...taskData,
+      houseId: taskData.houseId || null,
       priority: taskData.priority || 'medium',
       estimatedTime: taskData.estimatedTime || null,
       difficulty: taskData.difficulty || 'easy',
@@ -1781,6 +1802,7 @@ export class MemStorage implements IStorage {
     const subscription: PushSubscription = {
       id,
       ...subscriptionData,
+      userAgent: subscriptionData.userAgent || null,
       isActive: subscriptionData.isActive ?? true,
       createdAt: now,
       updatedAt: now,

@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 
 const AVAILABLE_SERVICES = [
+  "Alarm / Camera installation",
   "Assembly Services",
   "Basement Finishing",
   "Bathroom Remodeling",
