@@ -32,7 +32,7 @@ import {
 const AVAILABLE_SERVICES = [
   "Alarm / Camera installation",
   "Assembly Services",
-  "Basement Finishing",
+  "Basement Remodeling",
   "Bathroom Remodeling",
   "Carpentry",
   "Christmas Light Hanging",
