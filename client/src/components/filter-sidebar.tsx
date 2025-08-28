@@ -125,7 +125,7 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
           {/* Services Filter */}
           <div>
             <Label className="text-sm font-medium text-gray-700 mb-3 block">Services</Label>
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto">
               {services.map((service) => (
                 <div key={service} className="flex items-center space-x-2">
                   <Checkbox
@@ -133,7 +133,7 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
                     checked={selectedServices.includes(service)}
                     onCheckedChange={(checked) => handleServiceChange(service, checked as boolean)}
                   />
-                  <Label htmlFor={service} className="text-sm text-gray-700">
+                  <Label htmlFor={service} className="text-sm text-gray-700 leading-tight">
                     {service}
                   </Label>
                 </div>

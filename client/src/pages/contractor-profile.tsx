@@ -628,15 +628,15 @@ export default function ContractorProfile() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 max-h-80 overflow-y-auto">
               {AVAILABLE_SERVICES.map((service) => (
-                <div key={service} className="flex items-center space-x-2">
+                <div key={service} className="flex items-center space-x-2 p-1">
                   <Checkbox
                     id={service}
                     checked={formData.servicesOffered.includes(service)}
                     onCheckedChange={(checked) => handleServiceToggle(service, checked as boolean)}
                   />
-                  <Label htmlFor={service} className="text-sm">{service}</Label>
+                  <Label htmlFor={service} className="text-sm leading-tight">{service}</Label>
                 </div>
               ))}
             </div>
