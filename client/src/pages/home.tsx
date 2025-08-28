@@ -17,7 +17,7 @@ import { Link } from "wouter";
 export default function Home() {
   const { user } = useAuth();
   const typedUser = user as User | undefined;
-  const [activeTab, setActiveTab] = useState<'contractors'>('contractors');
+
 
   const { data: featuredProducts, isLoading } = useQuery<Product[]>({
     queryKey: ['/api/products', 'featured'],
@@ -149,33 +149,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* Category Tabs - only for homeowners */}
-      {typedUser?.role === 'homeowner' && (
-        <section className="py-8 border-b border-gray-200 dark:border-gray-800 bg-purple-50 dark:bg-gray-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-center">
-            <div className="flex bg-gray-50 dark:bg-gray-800 rounded-2xl p-2 shadow-lg border border-gray-300 dark:border-gray-700">
 
-
-              {/* Only show Find Contractors tab for homeowners */}
-              {typedUser?.role === 'homeowner' && (
-                <button
-                  onClick={() => setActiveTab('contractors')}
-                  className={`px-8 py-4 rounded-xl text-sm font-medium flex items-center transition-all duration-200 ${
-                    activeTab === 'contractors'
-                      ? 'bg-purple-500 text-white shadow-md transform scale-105'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <Users className="mr-3 h-5 w-5" />
-                  Find Contractors
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-        </section>
-      )}
 
       {/* Tab Content Section */}
       <section className={`py-16 ${typedUser?.role === 'homeowner' ? 'bg-purple-50 dark:bg-gray-900/30' : 'bg-gray-50 dark:bg-gray-900/30'}`}>
@@ -186,7 +160,7 @@ export default function Home() {
 
 
 
-          {activeTab === 'contractors' && typedUser?.role === 'homeowner' && (
+          {typedUser?.role === 'homeowner' && (
             <div className="max-w-5xl mx-auto">
               <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-xl">
                 <CardHeader className="text-center pb-8">
