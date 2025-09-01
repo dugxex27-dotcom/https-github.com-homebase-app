@@ -11,10 +11,11 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Design and UI/UX
-- **Aesthetic**: Anthropologie-inspired with a warm color palette (terra cotta, cream, soft browns), elegant typography, and gradient hero sections.
+- **Aesthetic**: Modern purple/blue gradient theme with the new HomeBase logo featuring a house-shaped design with blue gradient "H" on purple background. Clean, professional appearance optimized for homeowner experience.
 - **Components**: Utilizes shadcn/ui component library built on Radix UI primitives for a consistent and sophisticated look.
-- **Theming**: Supports light/dark mode with unique color themes for different pages (amber for home, green for products, blue for contractor detail).
+- **Theming**: Supports light/dark mode with purple-based color palette (primary: hsl(260, 65%, 55%)) for homeowner interface, maintaining red theme for contractor interface.
 - **Navigation**: Role-based dashboards (Homeowner and Contractor) serve as primary interfaces, offering tailored content and quick actions.
+- **Logo**: Updated to use custom HomeBase logo with house icon and gradient blue "H" design, imported from attached assets.
 
 ### Technical Implementation
 - **Frontend**: React 18 with TypeScript, Wouter for routing, TanStack Query for state management, and Tailwind CSS for styling. Vite is used for fast development and optimized builds.
