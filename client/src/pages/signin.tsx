@@ -109,8 +109,11 @@ export default function SignIn() {
                 onClick={() => handleRoleSelect('contractor')}
               >
                 <div className={`p-3 rounded-full ${
-                  selectedRole === 'contractor' ? 'bg-white/20' : 'bg-primary/10'
-                }`}>
+                  selectedRole === 'contractor' ? 'bg-white/20' : ''
+                }`}
+                style={{
+                  backgroundColor: selectedRole === 'contractor' ? undefined : '#3798ef'
+                }}>
                   <Wrench className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">
