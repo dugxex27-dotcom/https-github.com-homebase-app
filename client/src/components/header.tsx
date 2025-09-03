@@ -111,10 +111,10 @@ export default function Header() {
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="ml-2"
+                  className="ml-2 text-[#b6a6f4] hover:text-[#b6a6f4]"
                   data-testid="button-logout"
                 >
-                  <LogOut className="w-4 h-4 mr-1" />
+                  <LogOut className="w-4 h-4 mr-1 text-[#b6a6f4]" />
                   Sign Out
                 </Button>
               </div>
