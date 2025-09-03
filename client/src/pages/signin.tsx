@@ -81,9 +81,7 @@ export default function SignIn() {
                 </div>
                 <div className="flex-1">
                   <div className="font-semibold text-lg">I'm a Homeowner</div>
-                  <div className={`text-sm ${
-                    selectedRole === 'homeowner' ? 'text-white/80' : 'text-muted-foreground'
-                  }`}>
+                  <div className="text-sm" style={{ color: '#ffffff' }}>
                     Find contractors, manage maintenance, and schedule services
                   </div>
                 </div>
