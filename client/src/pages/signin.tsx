@@ -70,11 +70,8 @@ export default function SignIn() {
             <div className="space-y-3">
               <Button
                 variant={selectedRole === 'homeowner' ? 'default' : 'outline'}
-                className={`w-full h-auto p-6 flex items-center justify-start space-x-4 text-left transition-all ${
-                  selectedRole === 'homeowner' 
-                    ? 'bg-primary text-white ring-2 ring-primary/20' 
-                    : 'hover:bg-primary/5 hover:border-primary/20'
-                }`}
+                className="w-full h-auto p-6 flex items-center justify-start space-x-4 text-left transition-all hover:opacity-90"
+                style={{ background: '#1560a2' }}
                 onClick={() => handleRoleSelect('homeowner')}
               >
                 <div className={`p-3 rounded-full ${
