@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home, Wrench, ArrowRight } from "lucide-react";
+import logoImage from '@assets/homebase-logo_1756859465507.png';
 
 export default function SignIn() {
   const [selectedRole, setSelectedRole] = useState<'homeowner' | 'contractor' | null>(null);
@@ -45,7 +46,11 @@ export default function SignIn() {
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Home Base</h1>
+          <img 
+            src={logoImage} 
+            alt="Home Base" 
+            className="h-24 w-auto mx-auto mb-4"
+          />
           <p className="text-muted-foreground text-lg">
             Your trusted home services marketplace
           </p>
