@@ -198,7 +198,7 @@ export default function Home() {
                 <CardContent className="pt-0">
                   <div className="flex flex-col lg:flex-row gap-4 mb-8">
                     <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
                         What service do you need?
                       </label>
                       <div className="relative">
@@ -211,7 +211,7 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
                         Your location
                       </label>
                       <div className="relative">
