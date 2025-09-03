@@ -1,4 +1,4 @@
-import logoImage from '@assets/homebase-logo-white_1756771612688.png';
+import logoImage from '@assets/homebase-logo_1756860134028.png';
 
 export default function Logo({ className = "h-8 w-auto" }: { className?: string }) {
   return (
