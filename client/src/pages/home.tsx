@@ -178,19 +178,19 @@ export default function Home() {
                   
                   {/* Service badges */}
                   <div className="flex flex-wrap justify-center gap-2 mb-8">
-                    <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700/50 px-3 py-1" style={{ color: '#ffffff' }}>
+                    <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 px-3 py-1">
                       Gutter Cleaning
                     </Badge>
                     <Badge variant="secondary" className="px-3 py-1" style={{ background: 'linear-gradient(135deg, #a085e3, #7c5cd6)', color: 'white' }}>
                       Drywall / Spackling Repair
                     </Badge>
-                    <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700/50 px-3 py-1" style={{ color: '#ffffff' }}>
+                    <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 px-3 py-1">
                       Custom Cabinetry
                     </Badge>
                     <Badge variant="secondary" className="px-3 py-1" style={{ background: 'linear-gradient(135deg, #a085e3, #7c5cd6)', color: 'white' }}>
                       HVAC Services
                     </Badge>
-                    <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700/50 px-3 py-1" style={{ color: '#ffffff' }}>
+                    <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 px-3 py-1">
                       Electrical Work
                     </Badge>
                   </div>
@@ -206,7 +206,6 @@ export default function Home() {
                         <Input
                           type="text"
                           placeholder="Gutter cleaning, drywall repair, custom cabinetry..."
-                          style={{ color: '#ffffff' }}
                           className="pl-10 h-12 text-base border-gray-300 dark:border-gray-600"
                         />
                       </div>
@@ -220,7 +219,6 @@ export default function Home() {
                         <Input
                           type="text"
                           placeholder="City, State or ZIP code"
-                          style={{ color: '#ffffff' }}
                           className="pl-10 h-12 text-base border-gray-300 dark:border-gray-600"
                         />
                       </div>
