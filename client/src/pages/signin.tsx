@@ -76,7 +76,7 @@ export default function SignIn() {
                     : 'hover:bg-primary/5 hover:border-primary/20'
                 }`}
                 style={{ 
-                  background: selectedRole === 'homeowner' ? '#3c258e' : 'transparent'
+                  background: selectedRole === 'homeowner' ? '#3c258e' : '#2c0f5b'
                 }}
                 onClick={() => handleRoleSelect('homeowner')}
               >
