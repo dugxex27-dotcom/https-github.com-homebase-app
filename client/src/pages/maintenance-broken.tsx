@@ -242,6 +242,52 @@ export default function Maintenance() {
       });
     }
 
+    // JANUARY-SPECIFIC WINTER MAINTENANCE TASKS
+    if (month === 1) {
+      climateTasks.push({
+        id: "january-clean-humidifier",
+        title: "Clean Humidifier",
+        description: "Clean humidifier with vinegar solution to remove mineral deposits and mold. Replace filter if applicable.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "30 minutes",
+        difficulty: "easy",
+        category: "HVAC",
+        tools: ["White vinegar", "Soft brush"],
+        cost: "$5-15"
+      }, {
+        id: "january-check-mold",
+        title: "Check for Mold in Basements and Bathrooms",
+        description: "Inspect basements, bathrooms, and other humid areas for mold growth. Clean with bleach solution if found.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "45 minutes",
+        difficulty: "moderate",
+        category: "Health",
+        tools: ["Flashlight", "Bleach solution", "Rubber gloves"],
+        cost: "$10-20"
+      });
+    }
+
+    // JULY-SPECIFIC SUMMER MAINTENANCE TASK
+    if (month === 7) {
+      climateTasks.push({
+        id: "july-check-mold",
+        title: "Check for Mold in Basements and Bathrooms",
+        description: "Inspect basements, bathrooms, and other humid areas for mold growth during peak humidity season.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "45 minutes",
+        difficulty: "moderate",
+        category: "Health",
+        tools: ["Flashlight", "Bleach solution", "Rubber gloves"],
+        cost: "$10-20"
+      });
+    }
+
     // MAY-SPECIFIC LANDSCAPING TASK
     if (month === 5) {
       climateTasks.push({
@@ -273,6 +319,30 @@ export default function Maintenance() {
         category: "HVAC",
         tools: ["AC covers", "Bungee cords or tie-downs"],
         cost: "$25-50"
+      }, {
+        id: "october-insulate-pipes",
+        title: "Insulate Exposed Pipes",
+        description: "Add insulation to exposed pipes in unheated areas like basements, crawl spaces, and garages to prevent freezing.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "midwest", "mountain-west"],
+        priority: "high",
+        estimatedTime: "1-2 hours",
+        difficulty: "moderate",
+        category: "Plumbing",
+        tools: ["Pipe insulation", "Duct tape", "Utility knife"],
+        cost: "$20-40"
+      }, {
+        id: "october-ceiling-fans",
+        title: "Change Ceiling Fan Direction to Clockwise",
+        description: "Switch ceiling fans to clockwise rotation for winter to push warm air down from the ceiling.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "low",
+        estimatedTime: "15 minutes",
+        difficulty: "easy",
+        category: "HVAC",
+        tools: null,
+        cost: "$0"
       });
     }
 
@@ -470,6 +540,45 @@ export default function Maintenance() {
         category: "HVAC",
         tools: ["New air filter"],
         cost: "$15-40"
+      },
+      {
+        id: "monthly-gfci-test",
+        title: "Test GFCI Outlets",
+        description: "Press test and reset buttons on all GFCI outlets in bathrooms, kitchens, and outdoor areas to ensure proper function.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "high",
+        estimatedTime: "10 minutes",
+        difficulty: "easy",
+        category: "Safety",
+        tools: null,
+        cost: "$0"
+      },
+      {
+        id: "monthly-garbage-disposal",
+        title: "Clean Garbage Disposal",
+        description: "Run disposal with ice cubes and baking soda, followed by citrus peels for freshness and blade sharpening.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "5 minutes",
+        difficulty: "easy",
+        category: "Kitchen",
+        tools: ["Ice cubes", "Baking soda", "Citrus peels"],
+        cost: "$0-5"
+      },
+      {
+        id: "monthly-fridge-coils",
+        title: "Clean Refrigerator Coils",
+        description: "Vacuum coils on back or bottom of refrigerator to improve energy efficiency and extend appliance life.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "15 minutes",
+        difficulty: "easy",
+        category: "Appliances",
+        tools: ["Vacuum cleaner", "Coil brush"],
+        cost: "$0"
       }
     ];
 
@@ -502,6 +611,32 @@ export default function Maintenance() {
           category: "Plumbing",
           tools: ["Baking soda", "Vinegar", "Citrus peels"],
           cost: "$0-5"
+        },
+        {
+          id: "seasonal-water-heater-check",
+          title: "Check Water Heater Temperature/Pressure Relief Valve",
+          description: "Test water heater T&P relief valve and check temperature setting (120°F recommended). Inspect for leaks or corrosion.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "high",
+          estimatedTime: "15 minutes",
+          difficulty: "moderate",
+          category: "Plumbing",
+          tools: ["Bucket", "Thermometer"],
+          cost: "$0"
+        },
+        {
+          id: "seasonal-fire-extinguisher",
+          title: "Check Fire Extinguisher",
+          description: "Inspect fire extinguisher pressure gauge, ensure it's in designated location, and check for damage to hose or nozzle.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "high",
+          estimatedTime: "5 minutes",
+          difficulty: "easy",
+          category: "Safety",
+          tools: null,
+          cost: "$0"
         }
       );
     }
@@ -523,6 +658,40 @@ export default function Maintenance() {
         category: "Gutters",
         tools: ["Ladder", "Gutter scoop", "Garden hose"],
         cost: "$0-50"
+      });
+    }
+    
+    // ADDITIONAL NOVEMBER TASKS
+    if (month === 11) {
+      gutterTasks.push({
+        id: "november-dryer-vent-cleaning",
+        title: "Professional Dryer Vent Cleaning",
+        description: "Schedule professional dryer vent cleaning to prevent fire risk and improve efficiency. Critical safety task.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "high",
+        estimatedTime: "1 hour",
+        difficulty: "moderate",
+        category: "Safety",
+        tools: null,
+        cost: "$100-200"
+      });
+    }
+    
+    // APRIL CEILING FAN DIRECTION CHANGE
+    if (month === 4) {
+      gutterTasks.push({
+        id: "april-ceiling-fans",
+        title: "Change Ceiling Fan Direction to Counter-clockwise",
+        description: "Switch ceiling fans to counter-clockwise rotation for summer to create cooling airflow.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "low",
+        estimatedTime: "15 minutes",
+        difficulty: "easy",
+        category: "HVAC",
+        tools: null,
+        cost: "$0"
       });
     }
 
