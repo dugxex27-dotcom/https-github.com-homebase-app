@@ -225,6 +225,23 @@ export default function Maintenance() {
       });
     }
 
+    // SEPTEMBER-SPECIFIC FAUCET AND TOILET SHUTOFFS TASK
+    if (month === 9) {
+      climateTasks.push({
+        id: "september-shutoff-check",
+        title: "Check Faucet and Toilet Shutoffs",
+        description: "Test all faucet and toilet shutoff valves to ensure they work properly. Locate and label main water shutoff for emergency access.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "45 minutes",
+        difficulty: "easy",
+        category: "Plumbing",
+        tools: ["Flashlight", "Valve labels", "Marker"],
+        cost: "$5-15"
+      });
+    }
+
     if (isWinter) {
       climateTasks.push(
         // Mild Climate Winter Tasks
