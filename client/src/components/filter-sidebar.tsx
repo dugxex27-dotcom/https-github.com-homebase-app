@@ -19,11 +19,15 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
 
   const services = [
     "Alarm / Camera installation",
+    "Appliance Installation",
+    "Appliance Repair and Maintenance",
     "Assembly Services",
     "Basement Remodeling",
     "Bathroom Remodeling",
+    "Cabinet Installation",
     "Carpentry",
     "Christmas Light Hanging",
+    "Closet Remodeling",
     "Concrete Work",
     "Deck Building",
     "Drainage",
