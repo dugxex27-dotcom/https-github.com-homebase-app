@@ -34,6 +34,7 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
     "Flooring- Hardwood",
     "Flooring- Laminate/ Vinyl flooring",
     "Flooring-Epoxy",
+    "Garage Door Installation and Maintenance",
     "General Contracting",
     "Gutter Cleaning",
     "Gutter Installation",
