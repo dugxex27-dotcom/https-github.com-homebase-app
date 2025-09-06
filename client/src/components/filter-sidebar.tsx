@@ -36,6 +36,7 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
     "Dumpster Rental",
     "Electrical",
     "Fence Installation",
+    "Fire and Water Remediation",
     "Flooring- Hardwood",
     "Flooring- Laminate/ Vinyl flooring",
     "Flooring-Epoxy",
