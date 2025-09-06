@@ -6,6 +6,7 @@ import { z } from "zod";
 import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema } from "@shared/schema";
 import pushRoutes from "./push-routes";
 import { pushService } from "./push-service";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
 // Extend session data interface
 declare module 'express-session' {
@@ -58,6 +59,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Push notification routes
   app.use('/api/push', pushRoutes);
+
+  // File upload routes
+  const objectStorageService = new ObjectStorageService();
+
+  // Get upload URL for proposal attachments
+  app.post("/api/objects/upload", isAuthenticated, async (req: any, res) => {
+    try {
+      const { fileType = "proposal" } = req.body;
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL(fileType);
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error getting upload URL:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
+    }
+  });
+
+  // Serve uploaded files
+  app.get("/objects/:objectPath(*)", isAuthenticated, async (req: any, res) => {
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error checking object access:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
 
   // Simple contractor demo login (no OAuth)
   app.post('/api/auth/contractor-demo-login', async (req, res) => {
@@ -490,20 +520,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/proposals", async (req, res) => {
+  app.post("/api/proposals", isAuthenticated, async (req: any, res) => {
     try {
-      const proposalData = insertProposalSchema.parse(req.body);
+      const userId = req.session.user.id;
+      const proposalData = insertProposalSchema.parse({
+        ...req.body,
+        contractorId: userId
+      });
       const proposal = await storage.createProposal(proposalData);
       res.status(201).json(proposal);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid proposal data", errors: error.errors });
       }
+      console.error("Error creating proposal:", error);
       res.status(500).json({ message: "Failed to create proposal" });
     }
   });
 
-  app.patch("/api/proposals/:id", async (req, res) => {
+  app.patch("/api/proposals/:id", isAuthenticated, async (req: any, res) => {
     try {
       const partialData = insertProposalSchema.partial().parse(req.body);
       const proposal = await storage.updateProposal(req.params.id, partialData);
@@ -515,7 +550,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid proposal data", errors: error.errors });
       }
+      console.error("Error updating proposal:", error);
       res.status(500).json({ message: "Failed to update proposal" });
+    }
+  });
+
+  // E-signature route for proposals
+  app.post("/api/proposals/:id/sign", isAuthenticated, async (req: any, res) => {
+    try {
+      const proposalId = req.params.id;
+      const userId = req.session.user.id;
+      const { signature, signerName, signedAt, ipAddress } = req.body;
+
+      if (!signature || !signerName || !signedAt) {
+        return res.status(400).json({ message: "Missing required signature data" });
+      }
+
+      // Get the proposal and verify the user has permission to sign it
+      const proposal = await storage.getProposal(proposalId);
+      if (!proposal) {
+        return res.status(404).json({ message: "Proposal not found" });
+      }
+
+      // Check if user is the homeowner for this proposal
+      if (proposal.homeownerId !== userId) {
+        return res.status(403).json({ message: "Only the homeowner can sign this proposal" });
+      }
+
+      // Update proposal with signature data
+      const updatedProposal = await storage.updateProposal(proposalId, {
+        customerSignature: signature,
+        contractSignedAt: new Date(signedAt),
+        signatureIpAddress: ipAddress,
+        status: "accepted"
+      });
+
+      res.json(updatedProposal);
+    } catch (error) {
+      console.error("Error signing proposal:", error);
+      res.status(500).json({ message: "Failed to sign proposal" });
+    }
+  });
+
+  // Upload contract file for proposal
+  app.post("/api/proposals/:id/contract", isAuthenticated, async (req: any, res) => {
+    try {
+      const proposalId = req.params.id;
+      const userId = req.session.user.id;
+      const { contractFilePath } = req.body;
+
+      if (!contractFilePath) {
+        return res.status(400).json({ message: "Contract file path is required" });
+      }
+
+      // Get the proposal and verify the user is the contractor
+      const proposal = await storage.getProposal(proposalId);
+      if (!proposal) {
+        return res.status(404).json({ message: "Proposal not found" });
+      }
+
+      if (proposal.contractorId !== userId) {
+        return res.status(403).json({ message: "Only the contractor can upload contracts" });
+      }
+
+      // Normalize the file path if it's a full URL
+      const normalizedPath = objectStorageService.normalizeObjectEntityPath(contractFilePath);
+
+      // Update proposal with contract file
+      const updatedProposal = await storage.updateProposal(proposalId, {
+        contractFilePath: normalizedPath
+      });
+
+      res.json(updatedProposal);
+    } catch (error) {
+      console.error("Error uploading contract:", error);
+      res.status(500).json({ message: "Failed to upload contract" });
     }
   });
 

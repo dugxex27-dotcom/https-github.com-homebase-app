@@ -14,7 +14,9 @@ import { z } from "zod";
 import { insertProposalSchema, type Proposal } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus, FileText, Calendar, DollarSign, Clock, Edit, Trash2 } from "lucide-react";
+import { Plus, FileText, Calendar, DollarSign, Clock, Edit, Trash2, Upload, Download, PenTool } from "lucide-react";
+import { ObjectUploader } from "./ObjectUploader";
+import { ESignature } from "./ESignature";
 
 const proposalFormSchema = insertProposalSchema.extend({
   materials: z.string(),
@@ -31,6 +33,8 @@ export function Proposals({ contractorId }: ProposalsProps) {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProposal, setEditingProposal] = useState<Proposal | null>(null);
+  const [showSignature, setShowSignature] = useState(false);
+  const [signingProposal, setSigningProposal] = useState<Proposal | null>(null);
 
   const form = useForm<ProposalFormData>({
     resolver: zodResolver(proposalFormSchema),
@@ -130,11 +134,93 @@ export function Proposals({ contractorId }: ProposalsProps) {
     },
   });
 
+  const signatureMutation = useMutation({
+    mutationFn: ({ proposalId, signatureData }: { 
+      proposalId: string; 
+      signatureData: { signature: string; signerName: string; signedAt: string; ipAddress?: string } 
+    }) => apiRequest(`/api/proposals/${proposalId}/sign`, "POST", signatureData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/proposals"] });
+      setShowSignature(false);
+      setSigningProposal(null);
+      toast({
+        title: "Success",
+        description: "Contract signed successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to sign contract",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const uploadContractMutation = useMutation({
+    mutationFn: ({ proposalId, contractFilePath }: { proposalId: string; contractFilePath: string }) => 
+      apiRequest(`/api/proposals/${proposalId}/contract`, "POST", { contractFilePath }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/proposals"] });
+      toast({
+        title: "Success",
+        description: "Contract uploaded successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to upload contract",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: ProposalFormData) => {
     if (editingProposal) {
       updateMutation.mutate({ id: editingProposal.id, data });
     } else {
       createMutation.mutate(data);
+    }
+  };
+
+  const handleGetUploadParameters = async () => {
+    const response: any = await apiRequest("/api/objects/upload", "POST", { 
+      fileType: "proposal" 
+    });
+    return {
+      method: "PUT" as const,
+      url: response.uploadURL,
+    };
+  };
+
+  const handleFileUploadComplete = (uploadedFiles: any[], proposalId: string) => {
+    const filePaths = uploadedFiles.map(file => file.path);
+    // Update proposal with new attachments
+    updateMutation.mutate({ 
+      id: proposalId, 
+      data: { attachments: filePaths } 
+    });
+  };
+
+  const handleContractUpload = (uploadedFiles: any[], proposalId: string) => {
+    if (uploadedFiles.length > 0) {
+      const contractPath = uploadedFiles[0].path;
+      uploadContractMutation.mutate({ proposalId, contractFilePath: contractPath });
+    }
+  };
+
+  const handleSignContract = (proposalId: string, proposal: Proposal) => {
+    setSigningProposal(proposal);
+    setShowSignature(true);
+  };
+
+  const handleSignatureComplete = (signatureData: any) => {
+    if (signingProposal) {
+      signatureMutation.mutate({
+        proposalId: signingProposal.id,
+        signatureData
+      });
     }
   };
 
@@ -559,7 +645,7 @@ export function Proposals({ contractorId }: ProposalsProps) {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2 ml-4">
+                  <div className="flex items-center flex-wrap gap-2 ml-4">
                     <Button
                       size="sm"
                       variant="outline"
@@ -576,12 +662,86 @@ export function Proposals({ contractorId }: ProposalsProps) {
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
+                    
+                    {/* File Upload for Proposals */}
+                    <ObjectUploader
+                      maxNumberOfFiles={5}
+                      onGetUploadParameters={handleGetUploadParameters}
+                      onComplete={(files) => handleFileUploadComplete(files, proposal.id)}
+                      fileType="proposal"
+                      buttonClassName="h-8 px-3 text-xs"
+                    >
+                      <Upload className="w-3 h-3 mr-1" />
+                      Files
+                    </ObjectUploader>
+
+                    {/* Contract Upload (contractor only) */}
+                    {!proposal.contractFilePath && (
+                      <ObjectUploader
+                        maxNumberOfFiles={1}
+                        onGetUploadParameters={handleGetUploadParameters}
+                        onComplete={(files) => handleContractUpload(files, proposal.id)}
+                        fileType="contract"
+                        acceptedFileTypes={[".pdf", ".doc", ".docx"]}
+                        buttonClassName="h-8 px-3 text-xs"
+                      >
+                        <FileText className="w-3 h-3 mr-1" />
+                        Contract
+                      </ObjectUploader>
+                    )}
+
+                    {/* Show contract status if uploaded */}
+                    {proposal.contractFilePath && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => proposal.contractFilePath && window.open(proposal.contractFilePath, '_blank')}
+                        data-testid={`button-view-contract-${proposal.id}`}
+                        className="h-8 px-3 text-xs"
+                      >
+                        <Download className="w-3 h-3 mr-1" />
+                        View Contract
+                      </Button>
+                    )}
+
+                    {/* Contract Signing (homeowner only) */}
+                    {proposal.contractFilePath && !proposal.customerSignature && proposal.homeownerId && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => handleSignContract(proposal.id, proposal)}
+                        data-testid={`button-sign-${proposal.id}`}
+                        className="h-8 px-3 text-xs bg-green-600 hover:bg-green-700"
+                      >
+                        <PenTool className="w-3 h-3 mr-1" />
+                        Sign
+                      </Button>
+                    )}
+
+                    {/* Show signature status if signed */}
+                    {proposal.customerSignature && (
+                      <Badge variant="outline" className="border-green-500 text-green-700">
+                        Signed
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
             ))}
           </div>
         )}
+        
+        {/* E-Signature Modal */}
+        <ESignature
+          isOpen={showSignature}
+          onSignature={handleSignatureComplete}
+          onCancel={() => {
+            setShowSignature(false);
+            setSigningProposal(null);
+          }}
+          documentTitle={signingProposal?.title || "Contract"}
+          signerName=""
+        />
       </CardContent>
     </Card>
   );

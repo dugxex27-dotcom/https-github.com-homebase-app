@@ -253,6 +253,12 @@ export const proposals = pgTable("proposals", {
   status: text("status").notNull().default("draft"), // "draft", "sent", "accepted", "rejected", "expired"
   customerNotes: text("customer_notes"), // notes visible to customer about the job
   internalNotes: text("internal_notes"), // internal notes only contractor can see
+  attachments: text("attachments").array().default(sql`'{}'::text[]`), // array of file paths/URLs
+  contractFilePath: text("contract_file_path"), // path to uploaded contract file
+  contractSignedAt: timestamp("contract_signed_at"), // when customer signed the contract
+  customerSignature: text("customer_signature"), // customer's e-signature data
+  contractorSignature: text("contractor_signature"), // contractor's signature
+  signatureIpAddress: text("signature_ip_address"), // IP address when signed for legal purposes
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
