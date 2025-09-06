@@ -137,7 +137,7 @@ export default function SignIn() {
               disabled={!selectedRole}
               className="w-full mt-6 py-3 text-lg font-semibold"
               style={{ 
-                background: selectedRole === 'contractor' ? '#1560a2' : '#2c0f5b'
+                background: selectedRole === 'contractor' ? '#1560a2' : '#3c258e'
               }}
               size="lg"
             >
