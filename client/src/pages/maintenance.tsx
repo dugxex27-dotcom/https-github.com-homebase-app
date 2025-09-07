@@ -1598,7 +1598,7 @@ export default function Maintenance() {
                               color: log.contractorName === 'Sarah Chen' && log.serviceDate === '2024-06-19' ? '#3c258e' : 
                                      log.serviceDescription?.includes('HVAC') || log.serviceDescription?.includes('gutter') ? '#2c0f5b' : '#ffffff' 
                             }}>{log.serviceDescription}</h4>
-                            <div className="flex items-center gap-3 text-xs mt-1" style={{ color: '#b6a6f4' }}>
+                            <div className="flex items-center gap-3 text-xs mt-1" style={{ color: '#2c0f5b' }}>
                               <span>{new Date(log.serviceDate).toLocaleDateString()}</span>
                               <span>•</span>
                               <span>{getHomeAreaLabel(log.homeArea)}</span>
@@ -1833,7 +1833,7 @@ export default function Maintenance() {
                             <h4 className="font-semibold text-foreground mb-1">
                               {log.serviceDescription}
                             </h4>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-4 text-sm" style={{ color: '#2c0f5b' }}>
                               <span className="flex items-center gap-1">
                                 <Calendar className="w-4 h-4" />
                                 {new Date(log.serviceDate).toLocaleDateString()}
@@ -1842,7 +1842,7 @@ export default function Maintenance() {
                                 <MapPin className="w-4 h-4" />
                                 {getHomeAreaLabel(log.homeArea)}
                               </span>
-                              <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
+                              <span className="px-2 py-1 rounded-full text-xs" style={{ backgroundColor: '#2c0f5b20', color: '#2c0f5b' }}>
                                 {getServiceTypeLabel(log.serviceType)}
                               </span>
                             </div>
