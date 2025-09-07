@@ -56,7 +56,7 @@ export default function Home() {
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
                         <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                          <Users className="h-6 w-6 text-white" />
+                          <Users className="h-6 w-6" style={{ color: '#b6a6f4' }} />
                         </div>
                         <div className="ml-4">
                           <h3 className="text-lg font-semibold" style={{ color: 'white' }}>My Profile</h3>
@@ -75,7 +75,7 @@ export default function Home() {
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
                         <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                          <Bell className="h-6 w-6 text-white" />
+                          <Bell className="h-6 w-6" style={{ color: '#b6a6f4' }} />
                         </div>
                         <div className="ml-4">
                           <h3 className="text-lg font-semibold" style={{ color: 'white' }}>Messages</h3>
@@ -94,7 +94,7 @@ export default function Home() {
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
                         <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                          <Calendar className="h-6 w-6 text-white" />
+                          <Calendar className="h-6 w-6" style={{ color: '#b6a6f4' }} />
                         </div>
                         <div className="ml-4">
                           <h3 className="text-lg font-semibold" style={{ color: 'white' }}>Active Projects</h3>
@@ -113,7 +113,7 @@ export default function Home() {
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
                         <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                          <Star className="h-6 w-6 text-white" />
+                          <Star className="h-6 w-6" style={{ color: '#b6a6f4' }} />
                         </div>
                         <div className="ml-4">
                           <h3 className="text-lg font-semibold" style={{ color: 'white' }}>Reviews</h3>
@@ -132,7 +132,7 @@ export default function Home() {
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
                         <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                          <Search className="h-6 w-6 text-white" />
+                          <Search className="h-6 w-6" style={{ color: '#b6a6f4' }} />
                         </div>
                         <div className="ml-4">
                           <h3 className="text-lg font-semibold" style={{ color: 'white' }}>New Leads</h3>
@@ -167,7 +167,7 @@ export default function Home() {
               <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-xl">
                 <CardHeader className="text-center pb-8">
                   <div className="flex items-center justify-center w-20 h-20 rounded-2xl mx-auto mb-6" style={{ background: 'linear-gradient(135deg, #7c5cd6, #5633c1)' }}>
-                    <Users className="h-10 w-10 text-white" />
+                    <Users className="h-10 w-10" style={{ color: '#b6a6f4' }} />
                   </div>
                   <CardTitle className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Find Trusted Contractors
@@ -202,7 +202,7 @@ export default function Home() {
                         What service do you need?
                       </label>
                       <div className="relative">
-                        <Search className="absolute left-3 top-3 text-gray-400 h-4 w-4" />
+                        <Search className="absolute left-3 top-3 h-4 w-4" style={{ color: '#b6a6f4' }} />
                         <Input
                           type="text"
                           placeholder="Gutter cleaning, drywall repair, custom cabinetry..."
@@ -216,7 +216,7 @@ export default function Home() {
                         Your location
                       </label>
                       <div className="relative">
-                        <MapPin className="absolute left-3 top-3 text-gray-400 h-4 w-4" />
+                        <MapPin className="absolute left-3 top-3 h-4 w-4" style={{ color: '#b6a6f4' }} />
                         <Input
                           type="text"
                           placeholder="City, State or ZIP code"
@@ -227,7 +227,7 @@ export default function Home() {
                     </div>
                     <Link href="/contractors" className="lg:self-end">
                       <Button className="text-white px-8 py-3 h-12 text-base rounded-xl font-medium transition-all duration-200 flex items-center justify-center w-full lg:w-auto hover:opacity-90" style={{ background: 'linear-gradient(135deg, #5633c1, #7c5cd6)' }}>
-                        <Search className="mr-2 h-4 w-4" />
+                        <Search className="mr-2 h-4 w-4" style={{ color: '#b6a6f4' }} />
                         Find Contractors
                       </Button>
                     </Link>
@@ -263,7 +263,7 @@ export default function Home() {
                 <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                   <CardContent className="p-8 text-center">
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: 'linear-gradient(135deg, #a085e3, #7c5cd6)' }}>
-                      <Shield className="h-8 w-8 text-white" />
+                      <Shield className="h-8 w-8" style={{ color: '#b6a6f4' }} />
                     </div>
                     <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Verified Professionals</h3>
                     <p className="text-gray-600 dark:text-gray-300">
@@ -275,7 +275,7 @@ export default function Home() {
                 <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                   <CardContent className="p-8 text-center">
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: 'linear-gradient(135deg, #a085e3, #7c5cd6)' }}>
-                      <Package className="h-8 w-8 text-white" />
+                      <Package className="h-8 w-8" style={{ color: '#b6a6f4' }} />
                     </div>
                     <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Quality Products</h3>
                     <p className="text-gray-600 dark:text-gray-300">
@@ -287,7 +287,7 @@ export default function Home() {
                 <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                   <CardContent className="p-8 text-center">
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: 'linear-gradient(135deg, #a085e3, #7c5cd6)' }}>
-                      <TrendingUp className="h-8 w-8 text-white" />
+                      <TrendingUp className="h-8 w-8" style={{ color: '#b6a6f4' }} />
                     </div>
                     <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Cost Savings</h3>
                     <p className="text-gray-600 dark:text-gray-300">
@@ -302,7 +302,7 @@ export default function Home() {
                 <Card className="border-gray-300 dark:border-gray-600" style={{ backgroundColor: '#f2f2f2' }}>
                   <CardContent className="p-8 text-center">
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#2c0f5b' }}>
-                      <Users className="h-8 w-8 text-white" />
+                      <Users className="h-8 w-8" style={{ color: '#b6a6f4' }} />
                     </div>
                     <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Quality Leads</h3>
                     <p className="text-gray-600 dark:text-gray-300">
@@ -314,7 +314,7 @@ export default function Home() {
                 <Card className="border-gray-300 dark:border-gray-600" style={{ backgroundColor: '#f2f2f2' }}>
                   <CardContent className="p-8 text-center">
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#2c0f5b' }}>
-                      <TrendingUp className="h-8 w-8 text-white" />
+                      <TrendingUp className="h-8 w-8" style={{ color: '#b6a6f4' }} />
                     </div>
                     <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Grow Your Business</h3>
                     <p className="text-gray-600 dark:text-gray-300">
@@ -326,7 +326,7 @@ export default function Home() {
                 <Card className="border-gray-300 dark:border-gray-600" style={{ backgroundColor: '#f2f2f2' }}>
                   <CardContent className="p-8 text-center">
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#2c0f5b' }}>
-                      <Star className="h-8 w-8 text-white" />
+                      <Star className="h-8 w-8" style={{ color: '#b6a6f4' }} />
                     </div>
                     <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Build Reputation</h3>
                     <p className="text-gray-600 dark:text-gray-300">
@@ -346,7 +346,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="mb-6 flex justify-center">
-                <div className={`w-1/4 h-auto ${typedUser?.role === 'homeowner' ? 'text-purple-400' : 'text-red-400'}`}>
+                <div className="w-1/4 h-auto" style={{ color: '#b6a6f4' }}>
                   <Logo className="w-full h-auto" />
                 </div>
               </div>
