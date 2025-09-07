@@ -126,28 +126,30 @@ export default function ContractorDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Button className="h-20 flex flex-col items-center justify-center space-y-2 bg-red-800 hover:bg-red-900 text-white">
+                <Button className="h-20 flex flex-col items-center justify-center space-y-2 text-white hover:opacity-90" style={{ backgroundColor: '#1560a2' }}>
                   <Calendar className="h-6 w-6" />
                   <span>View Schedule</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-20 flex flex-col items-center justify-center space-y-2 border-red-800 text-red-800 hover:bg-red-50"
+                  className="h-20 flex flex-col items-center justify-center space-y-2 text-white hover:opacity-90"
+                  style={{ backgroundColor: '#1560a2', border: 'none' }}
                   onClick={() => window.location.href = "/service-records"}
                 >
-                  <FileText className="h-6 w-6 text-red-800" />
+                  <FileText className="h-6 w-6 text-white" />
                   <span>Service Records</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-20 flex flex-col items-center justify-center space-y-2 border-red-800 text-red-800 hover:bg-red-50"
+                  className="h-20 flex flex-col items-center justify-center space-y-2 text-white hover:opacity-90"
+                  style={{ backgroundColor: '#1560a2', border: 'none' }}
                   onClick={() => window.location.href = "/profile"}
                 >
-                  <User className="h-6 w-6 text-red-800" />
+                  <User className="h-6 w-6 text-white" />
                   <span>Edit Profile</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2 border-red-800 text-red-800 hover:bg-red-50">
-                  <Star className="h-6 w-6 text-red-800" />
+                <Button className="h-20 flex flex-col items-center justify-center space-y-2 text-white hover:opacity-90" style={{ backgroundColor: '#1560a2' }}>
+                  <Star className="h-6 w-6 text-white" />
                   <span>View Reviews</span>
                 </Button>
               </div>
