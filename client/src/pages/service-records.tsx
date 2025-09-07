@@ -268,26 +268,27 @@ export default function ServiceRecords() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ background: '#1560a2' }}>
       <Header />
       
       <main className="container mx-auto py-8 px-4 max-w-7xl">
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Service Records</h1>
-            <p className="text-gray-600">
-              Track services performed for customers and maintain detailed records
-            </p>
-          </div>
+        <div className="mb-8 p-6 rounded-lg" style={{ background: '#f2f2f2' }}>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold mb-2" style={{ color: '#1560a2' }}>Service Records</h1>
+              <p style={{ color: '#1560a2' }}>
+                Track services performed for customers and maintain detailed records
+              </p>
+            </div>
           
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={resetForm}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Service Record
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={resetForm} style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:opacity-90">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Service Record
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingRecord ? 'Edit Service Record' : 'Add New Service Record'}
@@ -450,7 +451,7 @@ export default function ServiceRecords() {
                           placeholder="Add material..."
                           onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addMaterial())}
                         />
-                        <Button type="button" onClick={addMaterial} size="sm">
+                        <Button type="button" onClick={addMaterial} size="sm" style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:opacity-90">
                           <Plus className="w-4 h-4" />
                         </Button>
                       </div>
@@ -517,6 +518,8 @@ export default function ServiceRecords() {
                   <Button 
                     type="submit" 
                     disabled={saveRecordMutation.isPending}
+                    style={{ backgroundColor: '#1560a2', color: 'white' }}
+                    className="hover:opacity-90"
                   >
                     {saveRecordMutation.isPending ? 'Saving...' : (editingRecord ? 'Update Record' : 'Create Record')}
                   </Button>
@@ -524,6 +527,7 @@ export default function ServiceRecords() {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Filters and Search */}
@@ -571,7 +575,7 @@ export default function ServiceRecords() {
                     : 'Start by creating your first service record.'}
                 </p>
                 {!searchTerm && statusFilter === 'all' && (
-                  <Button onClick={() => setIsDialogOpen(true)}>
+                  <Button onClick={() => setIsDialogOpen(true)} style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:opacity-90">
                     <Plus className="w-4 h-4 mr-2" />
                     Add First Service Record
                   </Button>
