@@ -147,7 +147,7 @@ export default function Messages() {
     : 'bg-purple-50 dark:bg-gray-900';
   
   const heroGradient = typedUser.role === 'contractor'
-    ? 'bg-gradient-to-br from-blue-100 via-blue-50 to-blue-100 dark:from-blue-950/20 dark:via-blue-900/20 dark:to-blue-950/20'
+    ? ''
     : 'bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 dark:from-purple-950/20 dark:via-purple-900/20 dark:to-purple-950/20';
   
   const accentColor = typedUser.role === 'contractor'
@@ -159,13 +159,13 @@ export default function Messages() {
       <Header />
       
       {/* Hero Section */}
-      <section className={`${heroGradient} py-16`}>
+      <section className={`${heroGradient} py-16`} style={typedUser.role === 'contractor' ? { backgroundColor: '#1560a2' } : {}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-              <span className={accentColor}>Messages</span>
+            <h1 className="text-4xl lg:text-5xl font-bold mb-6" style={typedUser.role === 'contractor' ? { color: 'white' } : { color: 'text-gray-900 dark:text-white' }}>
+              <span className={typedUser.role === 'contractor' ? '' : accentColor} style={typedUser.role === 'contractor' ? { color: 'white' } : {}}>Messages</span>
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+            <p className="text-xl max-w-3xl mx-auto mb-8" style={typedUser.role === 'contractor' ? { color: '#afd6f9' } : { color: 'text-gray-600 dark:text-gray-300' }}>
               {typedUser.role === 'homeowner' 
                 ? 'Communicate with contractors about your projects'
                 : 'Stay in touch with your homeowner clients'
