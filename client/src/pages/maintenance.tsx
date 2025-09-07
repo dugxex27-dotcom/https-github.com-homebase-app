@@ -1420,7 +1420,7 @@ export default function Maintenance() {
             </div>
           </div>
         </div>
-            <div className="mb-6">
+            <div className="mb-6 border rounded-lg p-4" style={{ backgroundColor: '#f2f2f2' }}>
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                 <div className="text-sm" style={{ color: '#b6a6f4' }}>
                   <Building className="inline w-4 h-4 mr-1" style={{ color: '#b6a6f4' }} />
