@@ -1942,7 +1942,7 @@ export default function Maintenance() {
                         <FormLabel>Service Type</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger style={{ backgroundColor: '#ffffff' }}>
                               <SelectValue placeholder="Select service type" />
                             </SelectTrigger>
                           </FormControl>
@@ -1967,7 +1967,7 @@ export default function Maintenance() {
                         <FormLabel>Home Area</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger style={{ backgroundColor: '#ffffff' }}>
                               <SelectValue placeholder="Select home area" />
                             </SelectTrigger>
                           </FormControl>
@@ -2223,7 +2223,7 @@ export default function Maintenance() {
                       <FormLabel>Climate Zone</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger style={{ backgroundColor: '#ffffff' }}>
                             <SelectValue placeholder="Will auto-detect from address" />
                           </SelectTrigger>
                         </FormControl>
