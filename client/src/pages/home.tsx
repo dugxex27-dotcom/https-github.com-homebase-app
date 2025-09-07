@@ -30,7 +30,7 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen ${typedUser?.role === 'homeowner' ? '' : 'bg-background'}`} style={typedUser?.role === 'homeowner' ? {
-      background: '#230d4c'
+      background: '#2c0f5b'
     } : {}}>
       <Header />
       <HeroSection />
