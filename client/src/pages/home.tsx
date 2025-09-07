@@ -207,7 +207,7 @@ export default function Home() {
                           type="text"
                           placeholder="Gutter cleaning, drywall repair, custom cabinetry..."
                           className="pl-10 h-12 text-base border-gray-300 dark:border-gray-600"
-                          style={{ color: '#ffffff' }}
+                          style={{ backgroundColor: '#ffffff', color: '#000000' }}
                         />
                       </div>
                     </div>
@@ -221,7 +221,7 @@ export default function Home() {
                           type="text"
                           placeholder="City, State or ZIP code"
                           className="pl-10 h-12 text-base border-gray-300 dark:border-gray-600"
-                          style={{ color: '#ffffff' }}
+                          style={{ backgroundColor: '#ffffff', color: '#000000' }}
                         />
                       </div>
                     </div>
