@@ -288,7 +288,7 @@ export default function ServiceRecords() {
                   Add Service Record
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#f2f2f2' }}>
               <DialogHeader>
                 <DialogTitle style={{ color: '#1560a2' }}>
                   {editingRecord ? 'Edit Service Record' : 'Add New Service Record'}
@@ -297,10 +297,10 @@ export default function ServiceRecords() {
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Customer Information */}
-                <Card>
+                <Card style={{ backgroundColor: '#1560a2' }}>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2" style={{ color: '#1560a2' }}>
-                      <User className="w-5 h-5" style={{ color: '#1560a2' }} />
+                    <CardTitle className="flex items-center gap-2" style={{ color: 'white' }}>
+                      <User className="w-5 h-5" style={{ color: 'white' }} />
                       Customer Information
                     </CardTitle>
                   </CardHeader>
@@ -354,10 +354,10 @@ export default function ServiceRecords() {
                 </Card>
 
                 {/* Service Details */}
-                <Card>
+                <Card style={{ backgroundColor: '#1560a2' }}>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2" style={{ color: '#1560a2' }}>
-                      <FileText className="w-5 h-5" style={{ color: '#1560a2' }} />
+                    <CardTitle className="flex items-center gap-2" style={{ color: 'white' }}>
+                      <FileText className="w-5 h-5" style={{ color: 'white' }} />
                       Service Details
                     </CardTitle>
                   </CardHeader>
