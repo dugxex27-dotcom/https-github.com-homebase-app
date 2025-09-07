@@ -1343,7 +1343,7 @@ export default function Maintenance() {
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
-                  <Building className="inline w-4 h-4 mr-1" style={{ color: '#ffffff' }} />
+                  <Building className="inline w-4 h-4 mr-1" style={{ color: '#b6a6f4' }} />
                   Select Property
                 </label>
                 <Select value={selectedHouseId} onValueChange={setSelectedHouseId}>
@@ -1460,7 +1460,7 @@ export default function Maintenance() {
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
                   <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
-                    <Calendar className="inline w-4 h-4 mr-1" style={{ color: '#ffffff' }} />
+                    <Calendar className="inline w-4 h-4 mr-1" style={{ color: '#b6a6f4' }} />
                     Month
                   </label>
                   <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
@@ -1478,7 +1478,7 @@ export default function Maintenance() {
                 </div>
                 <div className="flex-1">
                   <label className="block text-sm font-medium mb-2" style={{ color: '#ffffff' }}>
-                    <MapPin className="inline w-4 h-4 mr-1" style={{ color: '#ffffff' }} />
+                    <MapPin className="inline w-4 h-4 mr-1" style={{ color: '#b6a6f4' }} />
                     Climate Zone (auto-set by property)
                   </label>
                   <Select value={selectedZone} onValueChange={setSelectedZone} disabled>
@@ -1501,10 +1501,10 @@ export default function Maintenance() {
                 <CollapsibleTrigger asChild>
                   <Button variant="outline" className="w-full justify-between" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}>
                     <div className="flex items-center">
-                      <Settings className="w-4 h-4 mr-2" style={{ color: '#ffffff' }} />
+                      <Settings className="w-4 h-4 mr-2" style={{ color: '#b6a6f4' }} />
                       Home Systems & Features ({homeSystems.length} selected)
                     </div>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${showSystemFilters ? 'rotate-180' : ''}`} style={{ color: '#ffffff' }} />
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showSystemFilters ? 'rotate-180' : ''}`} style={{ color: '#b6a6f4' }} />
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-4">
