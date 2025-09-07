@@ -39,7 +39,7 @@ export default function HeroSection() {
               <>
                 <Link href="/maintenance">
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-300 dark:border-gray-700">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors" style={{ backgroundColor: '#b6a6f4' }}>
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors" style={{ backgroundColor: '#2c0f5b' }}>
                       <Calendar className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Home Maintenance</h3>
@@ -51,7 +51,7 @@ export default function HeroSection() {
 
                 <Link href="/contractors">
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-300 dark:border-gray-700">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors" style={{ backgroundColor: '#b6a6f4' }}>
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors" style={{ backgroundColor: '#2c0f5b' }}>
                       <Search className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Find Contractors</h3>
@@ -63,7 +63,7 @@ export default function HeroSection() {
 
                 <Link href="/products">
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-300 dark:border-gray-700">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors" style={{ backgroundColor: '#b6a6f4' }}>
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors" style={{ backgroundColor: '#2c0f5b' }}>
                       <Wrench className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">DIY Products</h3>
