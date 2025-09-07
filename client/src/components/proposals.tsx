@@ -279,7 +279,7 @@ export function Proposals({ contractorId }: ProposalsProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-red-800" />
+            <FileText className="h-5 w-5" style={{ color: '#1560a2' }} />
             Proposals
           </CardTitle>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
