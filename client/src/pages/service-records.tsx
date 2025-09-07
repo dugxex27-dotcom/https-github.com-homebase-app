@@ -370,7 +370,7 @@ export default function ServiceRecords() {
                       <div>
                         <Label htmlFor="serviceType" style={{ color: 'white' }}>Service Type *</Label>
                         <Select value={formData.serviceType} onValueChange={(value) => handleInputChange('serviceType', value)}>
-                          <SelectTrigger style={{ backgroundColor: '#1560a2', color: 'white' }}>
+                          <SelectTrigger style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:bg-[#afd6f9] hover:text-black transition-colors">
                             <SelectValue placeholder="Select service type" />
                           </SelectTrigger>
                           <SelectContent>
@@ -383,7 +383,7 @@ export default function ServiceRecords() {
                       <div>
                         <Label htmlFor="status" style={{ color: 'white' }}>Status *</Label>
                         <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value as any)}>
-                          <SelectTrigger style={{ backgroundColor: '#1560a2', color: 'white' }}>
+                          <SelectTrigger style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:bg-[#afd6f9] hover:text-black transition-colors">
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                           <SelectContent>
@@ -558,7 +558,7 @@ export default function ServiceRecords() {
               </div>
               <div className="flex gap-2">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40" style={{ backgroundColor: '#1560a2', color: 'white' }}>
+                  <SelectTrigger className="w-40 hover:bg-[#afd6f9] hover:text-black transition-colors" style={{ backgroundColor: '#1560a2', color: 'white' }}>
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent>
