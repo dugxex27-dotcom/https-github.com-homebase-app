@@ -143,7 +143,7 @@ export default function Messages() {
   }
 
   const bgColor = typedUser.role === 'contractor' 
-    ? 'bg-blue-50 dark:bg-gray-900' 
+    ? 'dark:bg-gray-900' 
     : 'bg-purple-50 dark:bg-gray-900';
   
   const heroGradient = typedUser.role === 'contractor'
@@ -155,7 +155,7 @@ export default function Messages() {
     : 'text-purple-600 dark:text-purple-400';
 
   return (
-    <div className={`min-h-screen ${bgColor}`}>
+    <div className={`min-h-screen ${bgColor}`} style={typedUser.role === 'contractor' ? { backgroundColor: '#1560a2' } : {}}>
       <Header />
       
       {/* Hero Section */}
