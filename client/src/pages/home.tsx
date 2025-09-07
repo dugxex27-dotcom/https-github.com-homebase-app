@@ -262,7 +262,7 @@ export default function Home() {
               <>
                 <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                   <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#b6a6f4' }}>
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#2c0f5b' }}>
                       <Shield className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-bold mb-3" style={{ color: '#2c0f5b' }}>Verified Professionals</h3>
@@ -274,7 +274,7 @@ export default function Home() {
 
                 <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                   <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#b6a6f4' }}>
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#2c0f5b' }}>
                       <Package className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-bold mb-3" style={{ color: '#2c0f5b' }}>Quality Products</h3>
@@ -286,7 +286,7 @@ export default function Home() {
 
                 <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                   <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#b6a6f4' }}>
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#2c0f5b' }}>
                       <TrendingUp className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-xl font-bold mb-3" style={{ color: '#2c0f5b' }}>Cost Savings</h3>
