@@ -1422,10 +1422,10 @@ export default function Maintenance() {
         </div>
             <div className="mb-6 border rounded-lg p-4" style={{ backgroundColor: '#f2f2f2' }}>
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                <div className="text-sm" style={{ color: '#b6a6f4' }}>
-                  <Building className="inline w-4 h-4 mr-1" style={{ color: '#b6a6f4' }} />
+                <div className="text-sm" style={{ color: '#2c0f5b' }}>
+                  <Building className="inline w-4 h-4 mr-1" style={{ color: '#2c0f5b' }} />
                   {houses.find((house: House) => house.id === selectedHouseId)?.name || 'Loading...'} • 
-                  <Calendar className="inline w-4 h-4 ml-2 mr-1" style={{ color: '#b6a6f4' }} />
+                  <Calendar className="inline w-4 h-4 ml-2 mr-1" style={{ color: '#2c0f5b' }} />
                   {MONTHS[selectedMonth - 1]} • {CLIMATE_ZONES.find(z => z.value === selectedZone)?.label}
                 </div>
                 
