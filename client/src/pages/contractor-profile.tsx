@@ -411,7 +411,7 @@ export default function ContractorProfile() {
             <div>
               <Label htmlFor="serviceRadius">Service Radius (miles) *</Label>
               <Select onValueChange={(value) => handleInputChange('serviceRadius', value)}>
-                <SelectTrigger style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:bg-[#afd6f9] hover:text-black transition-colors">
+                <SelectTrigger style={{ backgroundColor: '#ffffff', color: 'black' }} className="hover:bg-[#afd6f9] hover:text-black transition-colors">
                   <SelectValue placeholder={`${formData.serviceRadius} miles`} />
                 </SelectTrigger>
                 <SelectContent>
