@@ -78,7 +78,7 @@ export default function DemoContractorSignIn() {
             <Button 
               onClick={handleDemoSignIn}
               disabled={isLoading}
-              className="w-full bg-amber-600 hover:bg-amber-700 text-white h-12 text-lg font-medium"
+              className="w-full text-white h-12 text-lg font-medium" style={{ background: '#3798ef' }}
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
@@ -87,7 +87,7 @@ export default function DemoContractorSignIn() {
                 </div>
               ) : (
                 <>
-                  <Wrench className="w-5 h-5 mr-2" style={{ color: '#1560a2' }} />
+                  <Wrench className="w-5 h-5 mr-2" style={{ color: 'white' }} />
                   Access Contractor Dashboard
                 </>
               )}
