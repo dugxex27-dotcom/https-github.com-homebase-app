@@ -1499,12 +1499,12 @@ export default function Maintenance() {
               {/* Home Systems Filter */}
               <Collapsible open={showSystemFilters} onOpenChange={setShowSystemFilters}>
                 <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}>
+                  <Button variant="outline" className="w-full justify-between" style={{ backgroundColor: '#ffffff', color: '#2c0f5b', borderColor: '#2c0f5b' }}>
                     <div className="flex items-center">
-                      <Settings className="w-4 h-4 mr-2" style={{ color: '#b6a6f4' }} />
+                      <Settings className="w-4 h-4 mr-2" style={{ color: '#2c0f5b' }} />
                       Home Systems & Features ({homeSystems.length} selected)
                     </div>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${showSystemFilters ? 'rotate-180' : ''}`} style={{ color: '#b6a6f4' }} />
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showSystemFilters ? 'rotate-180' : ''}`} style={{ color: '#2c0f5b' }} />
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-4">
