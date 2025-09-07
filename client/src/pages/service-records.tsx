@@ -307,7 +307,7 @@ export default function ServiceRecords() {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="customerName">Customer Name *</Label>
+                        <Label htmlFor="customerName" style={{ color: 'white' }}>Customer Name *</Label>
                         <Input
                           id="customerName"
                           value={formData.customerName}
@@ -318,7 +318,7 @@ export default function ServiceRecords() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="customerPhone">Phone Number</Label>
+                        <Label htmlFor="customerPhone" style={{ color: 'white' }}>Phone Number</Label>
                         <Input
                           id="customerPhone"
                           type="tel"
@@ -332,7 +332,7 @@ export default function ServiceRecords() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="customerEmail">Email Address</Label>
+                        <Label htmlFor="customerEmail" style={{ color: 'white' }}>Email Address</Label>
                         <Input
                           id="customerEmail"
                           type="email"
@@ -343,7 +343,7 @@ export default function ServiceRecords() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="customerAddress">Service Address *</Label>
+                        <Label htmlFor="customerAddress" style={{ color: 'white' }}>Service Address *</Label>
                         <Input
                           id="customerAddress"
                           value={formData.customerAddress}
@@ -368,7 +368,7 @@ export default function ServiceRecords() {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="serviceType">Service Type *</Label>
+                        <Label htmlFor="serviceType" style={{ color: 'white' }}>Service Type *</Label>
                         <Select value={formData.serviceType} onValueChange={(value) => handleInputChange('serviceType', value)}>
                           <SelectTrigger style={{ backgroundColor: '#1560a2', color: 'white' }}>
                             <SelectValue placeholder="Select service type" />
@@ -381,7 +381,7 @@ export default function ServiceRecords() {
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="status">Status *</Label>
+                        <Label htmlFor="status" style={{ color: 'white' }}>Status *</Label>
                         <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value as any)}>
                           <SelectTrigger style={{ backgroundColor: '#1560a2', color: 'white' }}>
                             <SelectValue placeholder="Select status" />
@@ -396,7 +396,7 @@ export default function ServiceRecords() {
                     </div>
 
                     <div>
-                      <Label htmlFor="serviceDescription">Service Description *</Label>
+                      <Label htmlFor="serviceDescription" style={{ color: 'white' }}>Service Description *</Label>
                       <Textarea
                         id="serviceDescription"
                         value={formData.serviceDescription}
@@ -410,7 +410,7 @@ export default function ServiceRecords() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <Label htmlFor="serviceDate">Service Date *</Label>
+                        <Label htmlFor="serviceDate" style={{ color: 'white' }}>Service Date *</Label>
                         <Input
                           id="serviceDate"
                           type="date"
@@ -421,7 +421,7 @@ export default function ServiceRecords() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="duration">Duration</Label>
+                        <Label htmlFor="duration" style={{ color: 'white' }}>Duration</Label>
                         <Input
                           id="duration"
                           value={formData.duration}
@@ -431,7 +431,7 @@ export default function ServiceRecords() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="cost">Service Cost</Label>
+                        <Label htmlFor="cost" style={{ color: 'white' }}>Service Cost</Label>
                         <div className="relative">
                           <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                           <Input
@@ -451,7 +451,7 @@ export default function ServiceRecords() {
 
                     {/* Materials Used */}
                     <div>
-                      <Label style={{ color: '#1560a2' }}>Materials Used</Label>
+                      <Label style={{ color: 'white' }}>Materials Used</Label>
                       <div className="flex gap-2 mt-2">
                         <Input
                           value={materialInput}
@@ -504,7 +504,7 @@ export default function ServiceRecords() {
                     </div>
 
                     <div>
-                      <Label htmlFor="notes">Additional Notes</Label>
+                      <Label htmlFor="notes" style={{ color: 'white' }}>Additional Notes</Label>
                       <Textarea
                         id="notes"
                         value={formData.notes}
