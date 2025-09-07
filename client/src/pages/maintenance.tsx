@@ -1313,11 +1313,11 @@ export default function Maintenance() {
   };
 
   return (
-    <div className="min-h-screen bg-purple-50 dark:bg-gray-900">
+    <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 dark:from-purple-950/20 dark:via-purple-900/20 dark:to-purple-950/20 py-16">
+      <section className="py-16" style={{ background: 'linear-gradient(135deg, #c4afef40, #a085e340)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
@@ -1339,7 +1339,7 @@ export default function Maintenance() {
           </p>
           
           {/* Property Selector Card */}
-          <div className="bg-card border rounded-lg p-4 mb-6">
+          <div className="border rounded-lg p-4 mb-6" style={{ backgroundColor: '#f2f2f2' }}>
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <div className="flex-1">
                 <label className="block text-sm font-medium text-foreground mb-2">
@@ -1347,7 +1347,7 @@ export default function Maintenance() {
                   Select Property
                 </label>
                 <Select value={selectedHouseId} onValueChange={setSelectedHouseId}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full" style={{ backgroundColor: '#ffffff' }}>
                     <SelectValue placeholder="Choose a property..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -1369,7 +1369,7 @@ export default function Maintenance() {
                     variant="outline" 
                     size="sm" 
                     onClick={handleAddNewHouse}
-                    className="whitespace-nowrap border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                    className="whitespace-nowrap" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
                   >
                     <Plus className="w-4 h-4 mr-1" />
                     Add House
@@ -1382,7 +1382,7 @@ export default function Maintenance() {
                         const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
                         if (selectedHouse) handleEditHouse(selectedHouse);
                       }}
-                      className="whitespace-nowrap border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                      className="whitespace-nowrap" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
                     >
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
@@ -1438,7 +1438,7 @@ export default function Maintenance() {
                       variant="outline" 
                       size="sm" 
                       onClick={resetMonthTasks}
-                      className="text-xs border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                      className="text-xs" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
                     >
                       <RotateCcw className="w-3 h-3 mr-1" />
                       Reset Month
@@ -1464,7 +1464,7 @@ export default function Maintenance() {
                     Month
                   </label>
                   <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
-                    <SelectTrigger>
+                    <SelectTrigger style={{ backgroundColor: '#ffffff' }}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1482,7 +1482,7 @@ export default function Maintenance() {
                     Climate Zone (auto-set by property)
                   </label>
                   <Select value={selectedZone} onValueChange={setSelectedZone} disabled>
-                    <SelectTrigger className="opacity-60">
+                    <SelectTrigger className="opacity-60" style={{ backgroundColor: '#ffffff' }}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1499,7 +1499,7 @@ export default function Maintenance() {
               {/* Home Systems Filter */}
               <Collapsible open={showSystemFilters} onOpenChange={setShowSystemFilters}>
                 <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                  <Button variant="outline" className="w-full justify-between" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}>
                     <div className="flex items-center">
                       <Settings className="w-4 h-4 mr-2" />
                       Home Systems & Features ({homeSystems.length} selected)
@@ -1562,7 +1562,7 @@ export default function Maintenance() {
             {/* Service Records Quick Access */}
             {maintenanceLogs && maintenanceLogs.length > 0 && (
               <div className="mb-6">
-                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200 dark:border-blue-800/30">
+                <Card className="border-blue-200 dark:border-blue-800/30" style={{ backgroundColor: '#f2f2f2' }}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -1584,13 +1584,13 @@ export default function Maintenance() {
                           serviceRecordsSection?.scrollIntoView({ behavior: 'smooth' });
                         }}
                         data-testid="button-view-service-records"
-                        className="border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                        style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
                       >
                         View All Records
                       </Button>
                     </div>
                     {maintenanceLogs.slice(0, 2).map((log) => (
-                      <div key={log.id} className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-gray-300 dark:border-gray-700">
+                      <div key={log.id} className="mt-3 p-3 rounded-lg border-gray-300 dark:border-gray-700" style={{ backgroundColor: '#f2f2f2' }}>
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-medium text-sm text-foreground">{log.serviceDescription}</h4>
@@ -1629,8 +1629,9 @@ export default function Maintenance() {
                   <Card 
                     key={task.id} 
                     className={`hover:shadow-md transition-all ${
-                      completed ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700'
+                      completed ? 'border-green-200 dark:border-green-800' : 'border-gray-300 dark:border-gray-700'
                     }`}
+                    style={{ backgroundColor: completed ? '#dcfce7' : '#f2f2f2' }}
                   >
                     <CardHeader>
                       <div className="flex justify-between items-start">
@@ -1794,7 +1795,7 @@ export default function Maintenance() {
                 <p className="text-muted-foreground">Complete history of maintenance and repairs performed on your home</p>
               </div>
             </div>
-            <Button onClick={handleAddNewMaintenanceLog} className="bg-purple-600 hover:bg-purple-700 text-white">
+            <Button onClick={handleAddNewMaintenanceLog} style={{ backgroundColor: '#2c0f5b', color: 'white' }} className="hover:opacity-90">
               <Plus className="w-4 h-4 mr-2" />
               Add Service Record
             </Button>
@@ -1817,7 +1818,7 @@ export default function Maintenance() {
             ) : maintenanceLogs && maintenanceLogs.length > 0 ? (
               <div className="space-y-4">
                 {maintenanceLogs.map((log) => (
-                  <Card key={log.id} className="hover:shadow-md transition-shadow">
+                  <Card key={log.id} className="hover:shadow-md transition-shadow" style={{ backgroundColor: '#f2f2f2' }}>
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-start gap-3">
@@ -1848,7 +1849,8 @@ export default function Maintenance() {
                             size="sm" 
                             variant="ghost" 
                             onClick={() => handleEditMaintenanceLog(log)}
-                            className="text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                            style={{ color: '#2c0f5b' }}
+                            className="hover:opacity-90"
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -1906,7 +1908,7 @@ export default function Maintenance() {
                 <p className="text-muted-foreground mb-4">
                   Start tracking maintenance and repairs to build a complete home service history.
                 </p>
-                <Button onClick={handleAddNewMaintenanceLog}>
+                <Button onClick={handleAddNewMaintenanceLog} style={{ backgroundColor: '#2c0f5b', color: 'white' }} className="hover:opacity-90">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Your First Service Record
                 </Button>
@@ -2120,6 +2122,8 @@ export default function Maintenance() {
                   <Button 
                     type="submit" 
                     disabled={createMaintenanceLogMutation.isPending || updateMaintenanceLogMutation.isPending}
+                    style={{ backgroundColor: '#2c0f5b', color: 'white' }}
+                    className="hover:opacity-90"
                   >
                     {createMaintenanceLogMutation.isPending || updateMaintenanceLogMutation.isPending ? 'Saving...' : editingMaintenanceLog ? 'Update' : 'Add'} Service Record
                   </Button>
@@ -2268,6 +2272,8 @@ export default function Maintenance() {
                   <Button 
                     type="submit" 
                     disabled={createHouseMutation.isPending || updateHouseMutation.isPending}
+                    style={{ backgroundColor: '#2c0f5b', color: 'white' }}
+                    className="hover:opacity-90"
                   >
                     {createHouseMutation.isPending || updateHouseMutation.isPending ? 'Saving...' : editingHouse ? 'Update' : 'Add'} House
                   </Button>
@@ -2383,6 +2389,8 @@ export default function Maintenance() {
                   <Button 
                     type="submit" 
                     disabled={createHomeSystemMutation.isPending || updateHomeSystemMutation.isPending}
+                    style={{ backgroundColor: '#2c0f5b', color: 'white' }}
+                    className="hover:opacity-90"
                   >
                     {createHomeSystemMutation.isPending || updateHomeSystemMutation.isPending ? (
                       "Saving..."
