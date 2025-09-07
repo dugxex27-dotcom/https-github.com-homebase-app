@@ -280,8 +280,8 @@ export default function ContractorProfile() {
       <Header />
       <div className="container mx-auto py-8 px-4 max-w-4xl">
       <div className="mb-8" style={{ backgroundColor: '#f2f2f2', borderRadius: '8px', padding: '24px' }}>
-        <h1 className="text-3xl font-bold mb-2" style={{ color: '#ffffff' }}>My Profile</h1>
-        <p style={{ color: '#afd6f9' }}>
+        <h1 className="text-3xl font-bold mb-2" style={{ color: '#1560a2' }}>My Profile</h1>
+        <p style={{ color: 'black' }}>
           Manage your business information and professional credentials
         </p>
       </div>
