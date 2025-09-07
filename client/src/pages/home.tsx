@@ -265,7 +265,7 @@ export default function Home() {
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: 'linear-gradient(135deg, #a085e3, #7c5cd6)' }}>
                       <Shield className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Verified Professionals</h3>
+                    <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Verified Professionals</h3>
                     <p className="text-gray-600 dark:text-gray-300">
                       All contractors are thoroughly vetted with background checks, license verification, and customer reviews
                     </p>
@@ -277,7 +277,7 @@ export default function Home() {
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: 'linear-gradient(135deg, #a085e3, #7c5cd6)' }}>
                       <Package className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Quality Products</h3>
+                    <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Quality Products</h3>
                     <p className="text-gray-600 dark:text-gray-300">
                       Browse professional-grade tools and materials for your home improvement projects
                     </p>
@@ -289,7 +289,7 @@ export default function Home() {
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: 'linear-gradient(135deg, #a085e3, #7c5cd6)' }}>
                       <TrendingUp className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Cost Savings</h3>
+                    <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Cost Savings</h3>
                     <p className="text-gray-600 dark:text-gray-300">
                       Preventive maintenance and competitive contractor pricing help you save thousands on home repairs
                     </p>
@@ -304,7 +304,7 @@ export default function Home() {
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#1560a2' }}>
                       <Users className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Quality Leads</h3>
+                    <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Quality Leads</h3>
                     <p className="text-gray-600 dark:text-gray-300">
                       Connect with motivated homeowners who value professional service and quality workmanship
                     </p>
@@ -316,7 +316,7 @@ export default function Home() {
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#1560a2' }}>
                       <TrendingUp className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Grow Your Business</h3>
+                    <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Grow Your Business</h3>
                     <p className="text-gray-600 dark:text-gray-300">
                       Tools and features designed to help you manage projects, track earnings, and expand your client base
                     </p>
@@ -328,7 +328,7 @@ export default function Home() {
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#1560a2' }}>
                       <Star className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Build Reputation</h3>
+                    <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Build Reputation</h3>
                     <p className="text-gray-600 dark:text-gray-300">
                       Showcase your expertise through customer reviews and build a trusted reputation in your community
                     </p>
