@@ -237,6 +237,20 @@ export const contractorReviews = pgTable("contractor_reviews", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Contractor licenses table for multiple licenses per contractor
+export const contractorLicenses = pgTable("contractor_licenses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractorId: text("contractor_id").notNull(),
+  licenseNumber: text("license_number").notNull(),
+  municipality: text("municipality").notNull(),
+  state: text("state").notNull(),
+  expiryDate: text("expiry_date"), // Date when license expires
+  licenseType: text("license_type").notNull().default("General Contractor"), // Type of license
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const proposals = pgTable("proposals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   contractorId: text("contractor_id").notNull(),
@@ -383,6 +397,12 @@ export const insertHomeSystemSchema = createInsertSchema(homeSystems).omit({
   updatedAt: true,
 });
 
+export const insertContractorLicenseSchema = createInsertSchema(contractorLicenses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertContractor = z.infer<typeof insertContractorSchema>;
 export type Contractor = typeof contractors.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
@@ -416,3 +436,5 @@ export type InsertProposal = z.infer<typeof insertProposalSchema>;
 export type Proposal = typeof proposals.$inferSelect;
 export type InsertHomeSystem = z.infer<typeof insertHomeSystemSchema>;
 export type HomeSystem = typeof homeSystems.$inferSelect;
+export type InsertContractorLicense = z.infer<typeof insertContractorLicenseSchema>;
+export type ContractorLicense = typeof contractorLicenses.$inferSelect;
