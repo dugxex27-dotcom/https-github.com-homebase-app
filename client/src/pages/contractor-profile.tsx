@@ -545,7 +545,7 @@ export default function ContractorProfile() {
                 id="logo-upload"
               />
               <label htmlFor="logo-upload">
-                <Button type="button" variant="outline" className="cursor-pointer" asChild>
+                <Button type="button" variant="outline" className="cursor-pointer hover:opacity-90" style={{ backgroundColor: '#1560a2', color: 'white' }} asChild>
                   <span className="flex items-center gap-2">
                     <Plus className="w-4 h-4" />
                     {logoPreview || formData.businessLogo ? 'Change Logo' : 'Upload Logo'}
@@ -606,7 +606,7 @@ export default function ContractorProfile() {
                   id="photos-upload"
                 />
                 <label htmlFor="photos-upload">
-                  <Button type="button" variant="outline" className="cursor-pointer" asChild>
+                  <Button type="button" variant="outline" className="cursor-pointer hover:opacity-90" style={{ backgroundColor: '#1560a2', color: 'white' }} asChild>
                     <span className="flex items-center gap-2">
                       <Plus className="w-4 h-4" />
                       Add Project Photos
