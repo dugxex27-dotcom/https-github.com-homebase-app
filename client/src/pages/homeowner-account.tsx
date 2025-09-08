@@ -251,7 +251,7 @@ export default function HomeownerAccount() {
                     <h4 className="font-medium" style={{ color: '#2c0f5b' }}>Two-Factor Authentication</h4>
                     <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
                   </div>
-                  <Button variant="outline" size="sm" data-testid="button-setup-2fa">
+                  <Button variant="outline" size="sm" data-testid="button-setup-2fa" style={{ color: 'white' }}>
                     Setup
                   </Button>
                 </div>
@@ -263,7 +263,7 @@ export default function HomeownerAccount() {
                     <h4 className="font-medium" style={{ color: '#2c0f5b' }}>Change Password</h4>
                     <p className="text-sm text-gray-600">Update your account password</p>
                   </div>
-                  <Button variant="outline" size="sm" data-testid="button-change-password">
+                  <Button variant="outline" size="sm" data-testid="button-change-password" style={{ color: 'white' }}>
                     Change
                   </Button>
                 </div>
