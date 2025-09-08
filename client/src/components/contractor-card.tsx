@@ -103,7 +103,7 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
               className="flex-1"
             />
             <Link href={`/contractor/${contractor.id}`}>
-              <Button variant="outline" className="px-4">
+              <Button variant="outline" className="px-4" style={{ color: '#ffffff' }}>
                 View Profile
               </Button>
             </Link>
