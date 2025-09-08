@@ -189,7 +189,7 @@ export default function Messages() {
               {typedUser?.role === 'homeowner' && (
                 <Dialog open={isComposeDialogOpen} onOpenChange={setIsComposeDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm" data-testid="button-compose-message" style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:opacity-90">
+                    <Button size="sm" data-testid="button-compose-message" style={{ backgroundColor: '#2c0f5b', color: 'white' }} className="hover:opacity-90">
                       <Plus className="h-4 w-4 mr-1" />
                       New
                     </Button>
