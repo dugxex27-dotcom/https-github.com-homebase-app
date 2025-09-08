@@ -121,7 +121,8 @@ export default function ContactContractorButton({
         <Button 
           variant={variant} 
           size={size}
-          className={`${variant === "default" ? "bg-purple-600 hover:bg-purple-700 text-white" : variant === "outline" ? "border-purple-300 text-purple-600 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-400 dark:hover:bg-purple-900/20" : ""} ${className}`}
+          className={`${variant === "default" ? "text-white hover:opacity-90" : variant === "outline" ? "border-purple-300 text-purple-600 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-400 dark:hover:bg-purple-900/20" : ""} ${className}`}
+          style={variant === "default" ? { backgroundColor: '#3c258e' } : {}}
         >
           <MessageCircle className="h-4 w-4 mr-2" />
           Contact
