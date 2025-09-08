@@ -54,18 +54,18 @@ export default function Home() {
               {/* Contractor Dashboard Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-4 items-stretch" style={{ marginBottom: '-100px' }}>
                 <Link href="/contractor-profile" className="h-full">
-                  <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#1560a2' }}>
+                  <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                          <Users className="h-6 w-6" style={{ color: '#b6a6f4' }} />
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
+                          <Users className="h-6 w-6" style={{ color: 'white' }} />
                         </div>
                         <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: 'white' }}>My Profile</h3>
-                          <p className="text-sm" style={{ color: 'white' }}>Update info</p>
+                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>My Profile</h3>
+                          <p className="text-sm" style={{ color: '#1560a2' }}>Update info</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: 'white' }}>
+                      <p className="text-sm" style={{ color: '#1560a2' }}>
                         Manage your professional profile and service offerings
                       </p>
                     </CardContent>
@@ -73,18 +73,18 @@ export default function Home() {
                 </Link>
 
                 <Link href="/messages" className="h-full">
-                  <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#1560a2' }}>
+                  <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                          <Bell className="h-6 w-6" style={{ color: '#b6a6f4' }} />
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
+                          <Bell className="h-6 w-6" style={{ color: 'white' }} />
                         </div>
                         <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: 'white' }}>Messages</h3>
-                          <p className="text-sm" style={{ color: 'white' }}>Client communication</p>
+                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>Messages</h3>
+                          <p className="text-sm" style={{ color: '#1560a2' }}>Client communication</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: 'white' }}>
+                      <p className="text-sm" style={{ color: '#1560a2' }}>
                         Communicate with potential and existing clients
                       </p>
                     </CardContent>
@@ -92,18 +92,18 @@ export default function Home() {
                 </Link>
 
                 <Link href="/contractor-dashboard" className="h-full">
-                  <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#1560a2' }}>
+                  <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                          <Calendar className="h-6 w-6" style={{ color: '#b6a6f4' }} />
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
+                          <Calendar className="h-6 w-6" style={{ color: 'white' }} />
                         </div>
                         <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: 'white' }}>Active Projects</h3>
-                          <p className="text-sm" style={{ color: 'white' }}>Current work</p>
+                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>Active Projects</h3>
+                          <p className="text-sm" style={{ color: '#1560a2' }}>Current work</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: 'white' }}>
+                      <p className="text-sm" style={{ color: '#1560a2' }}>
                         3 active projects scheduled this week
                       </p>
                     </CardContent>
@@ -111,18 +111,18 @@ export default function Home() {
                 </Link>
 
                 <Link href="/contractor-dashboard" className="h-full">
-                  <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#1560a2' }}>
+                  <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                          <Star className="h-6 w-6" style={{ color: '#b6a6f4' }} />
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
+                          <Star className="h-6 w-6" style={{ color: 'white' }} />
                         </div>
                         <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: 'white' }}>Reviews</h3>
-                          <p className="text-sm" style={{ color: 'white' }}>Customer feedback</p>
+                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>Reviews</h3>
+                          <p className="text-sm" style={{ color: '#1560a2' }}>Customer feedback</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: 'white' }}>
+                      <p className="text-sm" style={{ color: '#1560a2' }}>
                         4.8/5 stars from 127 recent reviews
                       </p>
                     </CardContent>
@@ -130,18 +130,18 @@ export default function Home() {
                 </Link>
 
                 <Link href="/contractor-dashboard" className="h-full">
-                  <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#1560a2' }}>
+                  <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                          <Search className="h-6 w-6" style={{ color: '#b6a6f4' }} />
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
+                          <Search className="h-6 w-6" style={{ color: 'white' }} />
                         </div>
                         <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: 'white' }}>New Leads</h3>
-                          <p className="text-sm" style={{ color: 'white' }}>Opportunities</p>
+                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>New Leads</h3>
+                          <p className="text-sm" style={{ color: '#1560a2' }}>Opportunities</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: 'white' }}>
+                      <p className="text-sm" style={{ color: '#1560a2' }}>
                         5 new client inquiries this week
                       </p>
                     </CardContent>
