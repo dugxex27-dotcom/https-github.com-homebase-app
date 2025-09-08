@@ -182,7 +182,8 @@ export default function FilterSidebar({ onFiltersChange }: FilterSidebarProps) {
 
         <Button 
           onClick={applyFilters}
-          className="w-full mt-6 bg-purple-600 text-white hover:bg-purple-700"
+          className="w-full mt-6 text-white hover:opacity-90"
+          style={{ backgroundColor: '#3c258e' }}
         >
           Apply Filters
         </Button>
