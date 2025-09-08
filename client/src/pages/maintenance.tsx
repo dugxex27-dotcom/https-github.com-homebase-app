@@ -1321,7 +1321,7 @@ export default function Maintenance() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-6">
             <h1 className="text-4xl lg:text-5xl font-bold mb-6" style={{ color: '#ffffff' }}>
-              Smart <span style={{ color: '#b6a6f4' }}>Maintenance</span> Schedule
+              Smart Maintenance Schedule
             </h1>
             <p className="text-xl max-w-3xl mx-auto mb-8" style={{ color: '#b6a6f4' }}>
               Keep your home in perfect condition with personalized maintenance schedules based on your location and home systems
