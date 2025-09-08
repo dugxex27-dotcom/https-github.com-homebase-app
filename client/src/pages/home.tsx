@@ -346,7 +346,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="text-white py-16" style={{ backgroundColor: typedUser?.role === 'homeowner' ? '#1f2937' : '#1560a2' }}>
+      <footer className="text-white py-16" style={{ backgroundColor: '#000000' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
