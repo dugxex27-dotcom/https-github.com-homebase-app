@@ -99,7 +99,7 @@ export default function Products() {
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 />
               </div>
-              <Button onClick={handleSearch} className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 h-12 text-base rounded-xl">
+              <Button onClick={handleSearch} className="text-white px-8 py-3 h-12 text-base rounded-xl" style={{ backgroundColor: '#3c258e' }}>
                 <Search className="mr-2 h-4 w-4" />
                 Search Products
               </Button>
