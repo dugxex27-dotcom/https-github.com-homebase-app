@@ -11,7 +11,7 @@ export default function HeroSection() {
   return (
     <section style={typedUser?.role === 'homeowner' ? { background: '#2c0f5b', paddingTop: '20px', paddingBottom: '2px' } : { background: '#1560a2', paddingTop: '20px', paddingBottom: '2px' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-2">
           <Logo className={`h-32 w-full mx-auto block mb-8`} />
           
           <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight" style={typedUser?.role === 'homeowner' ? { color: '#ffffff' } : { color: 'white' }}>
@@ -33,7 +33,7 @@ export default function HeroSection() {
           </p>
 
           {/* Quick Action Cards */}
-          <div className={`grid grid-cols-1 ${typedUser?.role === 'homeowner' ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mt-12 max-w-5xl mx-auto`}>
+          <div className={`grid grid-cols-1 ${typedUser?.role === 'homeowner' ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 mt-2 max-w-5xl mx-auto`}>
             {typedUser?.role === 'homeowner' ? (
               // Homeowner Quick Actions
               <>
