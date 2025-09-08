@@ -214,15 +214,15 @@ export default function Contractors() {
                 <div className="mt-8 flex justify-center">
                   <nav className="flex items-center space-x-2">
                     <Button variant="outline" size="sm" disabled>
-                      <ChevronLeft className="h-4 w-4" />
+                      <ChevronLeft className="h-4 w-4" style={{ color: '#b6a6f4' }} />
                     </Button>
-                    <Button size="sm" className="bg-primary text-white">1</Button>
-                    <Button variant="outline" size="sm">2</Button>
-                    <Button variant="outline" size="sm">3</Button>
+                    <Button size="sm" style={{ backgroundColor: '#b6a6f4', color: '#2c0f5b' }}>1</Button>
+                    <Button variant="outline" size="sm" style={{ color: '#b6a6f4' }}>2</Button>
+                    <Button variant="outline" size="sm" style={{ color: '#b6a6f4' }}>3</Button>
                     <span className="px-3 py-2 text-gray-500">...</span>
-                    <Button variant="outline" size="sm">8</Button>
+                    <Button variant="outline" size="sm" style={{ color: '#b6a6f4' }}>8</Button>
                     <Button variant="outline" size="sm">
-                      <ChevronRight className="h-4 w-4" />
+                      <ChevronRight className="h-4 w-4" style={{ color: '#b6a6f4' }} />
                     </Button>
                   </nav>
                 </div>
