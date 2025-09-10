@@ -307,6 +307,24 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const contractorBoosts = pgTable("contractor_boosts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractorId: text("contractor_id").notNull(), // links to contractors table
+  serviceCategory: text("service_category").notNull(), // the specific service being boosted
+  businessAddress: text("business_address").notNull(), // contractor's business address for radius calculation
+  businessLatitude: decimal("business_latitude", { precision: 10, scale: 8 }).notNull(),
+  businessLongitude: decimal("business_longitude", { precision: 11, scale: 8 }).notNull(),
+  boostRadius: integer("boost_radius").notNull().default(10), // radius in miles (fixed at 10)
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(), // amount paid for boost
+  stripePaymentIntentId: text("stripe_payment_intent_id"), // Stripe payment tracking
+  status: text("status").notNull().default("active"), // "active", "expired", "cancelled"
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Push subscription types
 export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions).omit({
   id: true,
@@ -407,6 +425,12 @@ export const insertContractorLicenseSchema = createInsertSchema(contractorLicens
   updatedAt: true,
 });
 
+export const insertContractorBoostSchema = createInsertSchema(contractorBoosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertContractor = z.infer<typeof insertContractorSchema>;
 export type Contractor = typeof contractors.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
@@ -442,3 +466,5 @@ export type InsertHomeSystem = z.infer<typeof insertHomeSystemSchema>;
 export type HomeSystem = typeof homeSystems.$inferSelect;
 export type InsertContractorLicense = z.infer<typeof insertContractorLicenseSchema>;
 export type ContractorLicense = typeof contractorLicenses.$inferSelect;
+export type InsertContractorBoost = z.infer<typeof insertContractorBoostSchema>;
+export type ContractorBoost = typeof contractorBoosts.$inferSelect;
