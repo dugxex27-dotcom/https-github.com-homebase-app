@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireRole } from "./replitAuth";
 import { z } from "zod";
-import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema } from "@shared/schema";
+import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema } from "@shared/schema";
 import pushRoutes from "./push-routes";
 import { pushService } from "./push-service";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
@@ -236,6 +236,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(contractor);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch contractor" });
+    }
+  });
+
+  // Contractor boost routes
+  app.post("/api/contractors/boost", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      const userRole = req.session?.user?.role;
+      
+      if (userRole !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can create boosts" });
+      }
+
+      const boostData = insertContractorBoostSchema.parse({
+        ...req.body,
+        contractorId: userId
+      });
+
+      const boost = await storage.createContractorBoost(boostData);
+      res.json(boost);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid boost data", errors: error.errors });
+      }
+      console.error("Error creating boost:", error);
+      res.status(500).json({ message: "Failed to create boost" });
+    }
+  });
+
+  app.get("/api/contractors/boost/check", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      const userRole = req.session?.user?.role;
+      
+      if (userRole !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can check boost availability" });
+      }
+
+      const { serviceCategory, businessAddress } = req.query;
+      
+      if (!serviceCategory || !businessAddress) {
+        return res.status(400).json({ message: "Service category and business address are required" });
+      }
+
+      // For now, we'll check if there are any conflicts by checking existing boosts
+      // This is a simplified version - in a real app, we'd geocode the business address
+      const existingBoosts = await storage.getContractorBoosts(userId as string);
+      const hasActiveBoost = existingBoosts.some(boost => 
+        boost.serviceCategory === serviceCategory && 
+        boost.status === 'active' && 
+        boost.isActive &&
+        new Date(boost.endDate) > new Date()
+      );
+      
+      res.json({ canBoost: !hasActiveBoost });
+    } catch (error) {
+      console.error("Error checking boost availability:", error);
+      res.status(500).json({ message: "Failed to check boost availability" });
+    }
+  });
+
+  app.delete("/api/contractors/boost/:boostId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      const userRole = req.session?.user?.role;
+      
+      if (userRole !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can delete boosts" });
+      }
+
+      const userBoosts = await storage.getContractorBoosts(userId as string);
+      const boost = userBoosts.find(b => b.id === req.params.boostId);
+      
+      if (!boost) {
+        return res.status(404).json({ message: "Boost not found or access denied" });
+      }
+
+      await storage.deleteContractorBoost(req.params.boostId);
+      res.json({ message: "Boost deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting boost:", error);
+      res.status(500).json({ message: "Failed to delete boost" });
     }
   });
 
