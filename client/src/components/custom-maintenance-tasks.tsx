@@ -169,7 +169,8 @@ export function CustomMaintenanceTasks({ homeownerId, houseId }: CustomMaintenan
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/custom-maintenance-tasks/${id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete custom maintenance task');
-      return response.json();
+      // DELETE typically returns 204 with no content, so don't try to parse JSON
+      return;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/custom-maintenance-tasks'] });
