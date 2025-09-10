@@ -1,4 +1,4 @@
-import { Star, MapPin, Shield, Mail } from "lucide-react";
+import { Star, MapPin, Shield, Mail, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
@@ -6,7 +6,7 @@ import ContactContractorButton from "@/components/contact-contractor-button";
 import type { Contractor } from "@shared/schema";
 
 interface ContractorCardProps {
-  contractor: Contractor;
+  contractor: Contractor & { isBoosted?: boolean };
 }
 
 export default function ContractorCard({ contractor }: ContractorCardProps) {
@@ -51,7 +51,15 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground text-lg mb-1 truncate">{contractor.name}</h3>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-foreground text-lg truncate">{contractor.name}</h3>
+                {contractor.isBoosted && (
+                  <Badge className="text-xs px-2 py-1 text-white font-medium" style={{ background: 'linear-gradient(135deg, #ffd700, #ff8c00)' }}>
+                    <TrendingUp className="w-3 h-3 mr-1" />
+                    Boosted
+                  </Badge>
+                )}
+              </div>
               <p className="text-muted-foreground text-sm mb-2">{contractor.company}</p>
             </div>
             <div className="flex items-center ml-4 flex-shrink-0">
