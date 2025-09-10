@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription } from "@shared/schema";
+import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -141,6 +141,14 @@ export interface IStorage {
   getHousesByHomeowner(homeownerId: string): Promise<House[]>;
   getHomeSystemsByHomeowner(homeownerId: string): Promise<HomeSystem[]>;
   getMaintenanceLogsByHomeowner(homeownerId: string): Promise<MaintenanceLog[]>;
+
+  // Contractor boost operations
+  getActiveBoosts(serviceCategory?: string, latitude?: number, longitude?: number): Promise<ContractorBoost[]>;
+  getContractorBoosts(contractorId: string): Promise<ContractorBoost[]>;
+  createContractorBoost(boost: InsertContractorBoost): Promise<ContractorBoost>;
+  updateContractorBoost(id: string, boost: Partial<InsertContractorBoost>): Promise<ContractorBoost | undefined>;
+  deleteContractorBoost(id: string): Promise<boolean>;
+  checkBoostConflict(serviceCategory: string, latitude: number, longitude: number, radius: number): Promise<ContractorBoost | null>;
 }
 
 export class MemStorage implements IStorage {
@@ -162,6 +170,7 @@ export class MemStorage implements IStorage {
   private proposals: Map<string, Proposal>;
   private homeSystems: Map<string, HomeSystem>;
   private pushSubscriptions: Map<string, PushSubscription>;
+  private contractorBoosts: Map<string, ContractorBoost>;
 
   constructor() {
     this.users = new Map();
@@ -182,6 +191,7 @@ export class MemStorage implements IStorage {
     this.proposals = new Map();
     this.homeSystems = new Map();
     this.pushSubscriptions = new Map();
+    this.contractorBoosts = new Map();
     this.seedData();
     this.seedServiceRecords();
     this.seedReviews();
@@ -1936,6 +1946,99 @@ export class MemStorage implements IStorage {
 
   async getMaintenanceLogsByHomeowner(homeownerId: string): Promise<MaintenanceLog[]> {
     return Array.from(this.maintenanceLogs.values()).filter(log => log.homeownerId === homeownerId);
+  }
+
+  // Contractor boost operations
+  async getActiveBoosts(serviceCategory?: string, latitude?: number, longitude?: number): Promise<ContractorBoost[]> {
+    const now = new Date();
+    return Array.from(this.contractorBoosts.values()).filter(boost => {
+      // Only return active boosts that haven't expired
+      if (boost.status !== 'active' || !boost.isActive || new Date(boost.endDate) < now) {
+        return false;
+      }
+
+      // If filtering by service category
+      if (serviceCategory && boost.serviceCategory !== serviceCategory) {
+        return false;
+      }
+
+      // If filtering by location (within radius)
+      if (latitude !== undefined && longitude !== undefined) {
+        const distance = this.calculateDistance(
+          latitude, longitude,
+          parseFloat(boost.businessLatitude), parseFloat(boost.businessLongitude)
+        );
+        if (distance > boost.boostRadius) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }
+
+  async getContractorBoosts(contractorId: string): Promise<ContractorBoost[]> {
+    return Array.from(this.contractorBoosts.values()).filter(boost => boost.contractorId === contractorId);
+  }
+
+  async createContractorBoost(boostData: InsertContractorBoost): Promise<ContractorBoost> {
+    const boost: ContractorBoost = {
+      id: randomUUID(),
+      ...boostData,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.contractorBoosts.set(boost.id, boost);
+    return boost;
+  }
+
+  async updateContractorBoost(id: string, boostData: Partial<InsertContractorBoost>): Promise<ContractorBoost | undefined> {
+    const existingBoost = this.contractorBoosts.get(id);
+    if (!existingBoost) {
+      return undefined;
+    }
+
+    const updated: ContractorBoost = {
+      ...existingBoost,
+      ...boostData,
+      updatedAt: new Date(),
+    };
+    this.contractorBoosts.set(id, updated);
+    return updated;
+  }
+
+  async deleteContractorBoost(id: string): Promise<boolean> {
+    return this.contractorBoosts.delete(id);
+  }
+
+  async checkBoostConflict(serviceCategory: string, latitude: number, longitude: number, radius: number): Promise<ContractorBoost | null> {
+    const activeBoosts = await this.getActiveBoosts(serviceCategory);
+    
+    for (const boost of activeBoosts) {
+      const distance = this.calculateDistance(
+        latitude, longitude,
+        parseFloat(boost.businessLatitude), parseFloat(boost.businessLongitude)
+      );
+      
+      // Check if the areas overlap (sum of radii > distance between centers)
+      if ((radius + boost.boostRadius) > distance) {
+        return boost;
+      }
+    }
+    
+    return null;
+  }
+
+  // Helper method to calculate distance between two points using Haversine formula
+  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
   }
 }
 
