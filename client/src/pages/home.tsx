@@ -168,7 +168,7 @@ export default function Home() {
             <div className="max-w-5xl mx-auto">
               <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-xl">
                 <CardHeader className="text-center pb-8">
-                  <div className="flex items-center justify-center w-20 h-20 rounded-2xl mx-auto mb-6" style={{ backgroundColor: '#b6a6f4' }}>
+                  <div className="flex items-center justify-center w-20 h-20 rounded-2xl mx-auto mb-6" style={{ backgroundColor: '#2c0f5b' }}>
                     <Users className="h-10 w-10 text-white" />
                   </div>
                   <CardTitle className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
