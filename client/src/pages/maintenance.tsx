@@ -1926,9 +1926,9 @@ export default function Maintenance() {
 
         {/* Maintenance Log Form Dialog */}
         <Dialog open={isMaintenanceLogDialogOpen} onOpenChange={setIsMaintenanceLogDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#2c0f5b' }}>
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle style={{ color: 'white' }}>
                 {editingMaintenanceLog ? 'Edit Service Record' : 'Add New Service Record'}
               </DialogTitle>
             </DialogHeader>
@@ -1941,7 +1941,7 @@ export default function Maintenance() {
                     name="serviceType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Service Type</FormLabel>
+                        <FormLabel style={{ color: 'white' }}>Service Type</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger style={{ backgroundColor: '#ffffff' }}>
@@ -1966,7 +1966,7 @@ export default function Maintenance() {
                     name="homeArea"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Home Area</FormLabel>
+                        <FormLabel style={{ color: 'white' }}>Home Area</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger style={{ backgroundColor: '#ffffff' }}>
@@ -1992,9 +1992,9 @@ export default function Maintenance() {
                   name="serviceDescription"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Service Description</FormLabel>
+                      <FormLabel style={{ color: 'white' }}>Service Description</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Annual HVAC tune-up, Gutter cleaning, Roof repair" {...field} />
+                        <Input placeholder="e.g., Annual HVAC tune-up, Gutter cleaning, Roof repair" {...field} style={{ backgroundColor: 'white' }} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -2007,9 +2007,9 @@ export default function Maintenance() {
                     name="serviceDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Service Date</FormLabel>
+                        <FormLabel style={{ color: 'white' }}>Service Date</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} value={field.value || ""} />
+                          <Input type="date" {...field} value={field.value || ""} style={{ backgroundColor: 'white' }} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -2021,7 +2021,7 @@ export default function Maintenance() {
                     name="cost"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cost</FormLabel>
+                        <FormLabel style={{ color: 'white' }}>Cost</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -2030,6 +2030,7 @@ export default function Maintenance() {
                             {...field}
                             value={field.value || ""}
                             onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                            style={{ backgroundColor: 'white' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -2044,9 +2045,9 @@ export default function Maintenance() {
                     name="contractorName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Contractor Name</FormLabel>
+                        <FormLabel style={{ color: 'white' }}>Contractor Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Contractor or technician name" {...field} value={field.value || ""} />
+                          <Input placeholder="Contractor or technician name" {...field} value={field.value || ""} style={{ backgroundColor: 'white' }} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -2058,9 +2059,9 @@ export default function Maintenance() {
                     name="contractorCompany"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Company</FormLabel>
+                        <FormLabel style={{ color: 'white' }}>Company</FormLabel>
                         <FormControl>
-                          <Input placeholder="Company or service provider" {...field} value={field.value || ""} />
+                          <Input placeholder="Company or service provider" {...field} value={field.value || ""} style={{ backgroundColor: 'white' }} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -2074,9 +2075,9 @@ export default function Maintenance() {
                     name="warrantyPeriod"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Warranty Period</FormLabel>
+                        <FormLabel style={{ color: 'white' }}>Warranty Period</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., 1 year, 6 months" {...field} value={field.value || ""} />
+                          <Input placeholder="e.g., 1 year, 6 months" {...field} value={field.value || ""} style={{ backgroundColor: 'white' }} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -2088,9 +2089,9 @@ export default function Maintenance() {
                     name="nextServiceDue"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Next Service Due</FormLabel>
+                        <FormLabel style={{ color: 'white' }}>Next Service Due</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} value={field.value || ""} />
+                          <Input type="date" {...field} value={field.value || ""} style={{ backgroundColor: 'white' }} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -2103,10 +2104,11 @@ export default function Maintenance() {
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notes</FormLabel>
+                      <FormLabel style={{ color: 'white' }}>Notes</FormLabel>
                       <FormControl>
                         <textarea 
-                          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="flex min-h-[80px] w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          style={{ backgroundColor: 'white' }}
                           placeholder="Any additional notes about the service..."
                           {...field}
                           value={field.value || ""}
@@ -2120,16 +2122,19 @@ export default function Maintenance() {
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button 
                     type="button" 
-                    variant="outline" 
                     onClick={() => setIsMaintenanceLogDialogOpen(false)}
+                    style={{ backgroundColor: 'white', color: '#2c0f5b' }}
+                    className="hover:opacity-90"
+                    data-testid="button-cancel"
                   >
                     Cancel
                   </Button>
                   <Button 
                     type="submit" 
                     disabled={createMaintenanceLogMutation.isPending || updateMaintenanceLogMutation.isPending}
-                    style={{ backgroundColor: '#2c0f5b', color: 'white' }}
+                    style={{ backgroundColor: '#b6a6f4', color: 'white' }}
                     className="hover:opacity-90"
+                    data-testid="button-add-service-record"
                   >
                     {createMaintenanceLogMutation.isPending || updateMaintenanceLogMutation.isPending ? 'Saving...' : editingMaintenanceLog ? 'Update' : 'Add'} Service Record
                   </Button>
