@@ -228,8 +228,8 @@ export default function Home() {
                       </div>
                     </div>
                     <Link href="/contractors" className="lg:self-end">
-                      <Button className="text-white px-8 py-3 h-12 text-base rounded-xl font-medium transition-all duration-200 flex items-center justify-center w-full lg:w-auto hover:opacity-90" style={{ background: 'linear-gradient(135deg, #5633c1, #7c5cd6)' }}>
-                        <Search className="mr-2 h-4 w-4" style={{ color: '#b6a6f4' }} />
+                      <Button className="text-white px-8 py-3 h-12 text-base rounded-xl font-medium transition-all duration-200 flex items-center justify-center w-full lg:w-auto hover:opacity-90" style={{ backgroundColor: '#2c0f5b' }}>
+                        <Search className="mr-2 h-4 w-4" style={{ color: 'white' }} />
                         Find Contractors
                       </Button>
                     </Link>
