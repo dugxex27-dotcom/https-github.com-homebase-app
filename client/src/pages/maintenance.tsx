@@ -1527,96 +1527,155 @@ export default function Maintenance() {
             Keep your home in perfect condition with personalized maintenance recommendations and appliance tracking
           </p>
           
-          {/* Property Selector Card */}
-          <div className="border rounded-lg p-4 mb-6" style={{ backgroundColor: '#f2f2f2' }}>
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-              <div className="flex-1">
-                <label className="block text-sm font-medium mb-2" style={{ color: '#2c0f5b' }}>
-                  <Building className="inline w-4 h-4 mr-1" style={{ color: '#2c0f5b' }} />
-                  Select Property
-                </label>
-                <Select value={selectedHouseId} onValueChange={setSelectedHouseId}>
-                  <SelectTrigger className="w-full" style={{ backgroundColor: '#ffffff' }}>
-                    <SelectValue placeholder="Choose a property..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {houses.map((house: House) => (
-                      <SelectItem key={house.id} value={house.id}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{house.name}</span>
-                          <span className="text-xs text-muted-foreground">{house.address}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex flex-col gap-2">
-                {/* Contractor constraint message */}
-                {userRole === 'contractor' && houses.length >= 1 && (
-                  <div className="text-xs p-2 rounded bg-blue-50 border border-blue-200 text-blue-700 mb-2">
-                    Contractors can track maintenance for one personal property
+          {/* Contractor No Properties Onboarding */}
+          {userRole === 'contractor' && houses.length === 0 && (
+            <Card className="mb-6 border-2 border-dashed" style={{ backgroundColor: '#f8fafc', borderColor: '#b6a6f4' }}>
+              <CardHeader className="text-center pb-4">
+                <div className="mx-auto mb-4 p-3 rounded-full" style={{ backgroundColor: '#2c0f5b' }}>
+                  <Building className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl font-bold" style={{ color: '#2c0f5b' }}>
+                  Add Your Property to Get Started
+                </CardTitle>
+                <p className="text-lg" style={{ color: '#6b7280' }}>
+                  Track maintenance for your personal property and stay on top of important home care tasks
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-3 gap-4 text-center">
+                  <div className="space-y-2">
+                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#e0f2fe' }}>
+                      <Calendar className="w-6 h-6" style={{ color: '#0369a1' }} />
+                    </div>
+                    <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>Smart Scheduling</h3>
+                    <p className="text-sm text-gray-600">Get personalized maintenance schedules based on your location and home systems</p>
                   </div>
-                )}
-                <div className="flex gap-2">
-                  {/* Only show Add House button for homeowners or contractors with no houses */}
-                  {((userRole === 'homeowner') || (userRole === 'contractor' && houses.length === 0)) && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={handleAddNewHouse}
-                      className="whitespace-nowrap" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Add {userRole === 'contractor' ? 'Property' : 'House'}
-                    </Button>
-                  )}
-                  {selectedHouseId && houses.length > 0 && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => {
-                        const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
-                        if (selectedHouse) handleEditHouse(selectedHouse);
-                      }}
-                      className="whitespace-nowrap" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
-                    >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                  )}
-                  {selectedHouseId && houses.length > 1 && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => {
-                        const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
-                        if (selectedHouse) handleDeleteHouse(selectedHouse);
-                      }}
-                      className="whitespace-nowrap" style={{ backgroundColor: '#dc2626', color: 'white', borderColor: '#dc2626' }}
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete
-                    </Button>
-                  )}
+                  <div className="space-y-2">
+                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#f0f9ff' }}>
+                      <Wrench className="w-6 h-6" style={{ color: '#0369a1' }} />
+                    </div>
+                    <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>Track Maintenance</h3>
+                    <p className="text-sm text-gray-600">Log completed maintenance, repairs, and improvements to keep detailed records</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#ede9fe' }}>
+                      <Lightbulb className="w-6 h-6" style={{ color: '#7c3aed' }} />
+                    </div>
+                    <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>AI Suggestions</h3>
+                    <p className="text-sm text-gray-600">Receive intelligent maintenance recommendations tailored to your property</p>
+                  </div>
+                </div>
+                <div className="text-center pt-4">
+                  <Button 
+                    onClick={handleAddNewHouse}
+                    size="lg"
+                    className="px-8 py-3 text-lg font-semibold"
+                    style={{ backgroundColor: '#2c0f5b', color: 'white' }}
+                    data-testid="button-add-first-property"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Add My Property
+                  </Button>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Contractors can track maintenance for one personal property
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Property Selector Card - Only show when properties exist */}
+          {houses.length > 0 && (
+            <div className="border rounded-lg p-4 mb-6" style={{ backgroundColor: '#f2f2f2' }}>
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#2c0f5b' }}>
+                    <Building className="inline w-4 h-4 mr-1" style={{ color: '#2c0f5b' }} />
+                    Select Property
+                  </label>
+                  <Select value={selectedHouseId} onValueChange={setSelectedHouseId}>
+                    <SelectTrigger className="w-full" style={{ backgroundColor: '#ffffff' }}>
+                      <SelectValue placeholder="Choose a property..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {houses.map((house: House) => (
+                        <SelectItem key={house.id} value={house.id}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{house.name}</span>
+                            <span className="text-xs text-muted-foreground">{house.address}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
-                {selectedHouseId && houses.length > 0 && (
-                  <div className="text-sm" style={{ color: '#b6a6f4' }}>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" style={{ color: '#2c0f5b' }} />
-                      <span style={{ color: '#2c0f5b' }}>Pacific Northwest</span>
+                <div className="flex flex-col gap-2">
+                  {/* Contractor constraint message */}
+                  {userRole === 'contractor' && houses.length >= 1 && (
+                    <div className="text-xs p-2 rounded bg-blue-50 border border-blue-200 text-blue-700 mb-2">
+                      Contractors can track maintenance for one personal property
                     </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Home className="w-4 h-4" style={{ color: '#2c0f5b' }} />
-                      <span style={{ color: '#2c0f5b' }}>5 systems configured</span>
-                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    {/* Only show Add House button for homeowners or contractors with no houses */}
+                    {userRole === 'homeowner' && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleAddNewHouse}
+                        className="whitespace-nowrap" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Add House
+                      </Button>
+                    )}
+                    {selectedHouseId && houses.length > 0 && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
+                          if (selectedHouse) handleEditHouse(selectedHouse);
+                        }}
+                        className="whitespace-nowrap" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
+                    )}
+                    {selectedHouseId && houses.length > 1 && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
+                          if (selectedHouse) handleDeleteHouse(selectedHouse);
+                        }}
+                        className="whitespace-nowrap" style={{ backgroundColor: '#dc2626', color: 'white', borderColor: '#dc2626' }}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    )}
                   </div>
-                )}
+                  
+                  {selectedHouseId && houses.length > 0 && (
+                    <div className="text-sm" style={{ color: '#b6a6f4' }}>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" style={{ color: '#2c0f5b' }} />
+                        <span style={{ color: '#2c0f5b' }}>Pacific Northwest</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Home className="w-4 h-4" style={{ color: '#2c0f5b' }} />
+                        <span style={{ color: '#2c0f5b' }}>5 systems configured</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
             <div className="mb-6 border rounded-lg p-4" style={{ backgroundColor: '#f2f2f2' }}>
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
