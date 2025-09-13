@@ -54,32 +54,37 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      {/* Homeowner routes */}
+      
+      {/* Common routes available to all authenticated users */}
+      <Route path="/maintenance" component={Maintenance} />
+      <Route path="/messages" component={Messages} />
+      <Route path="/my-home" component={MyHome} />
+      
+      {/* Homeowner-specific routes */}
       {typedUser?.role === 'homeowner' && (
         <>
           <Route path="/contractors" component={Contractors} />
           <Route path="/products" component={Products} />
-          <Route path="/maintenance" component={Maintenance} />
           <Route path="/contractor/:id" component={ContractorDetail} />
           <Route path="/service-records" component={HomeownerServiceRecords} />
           <Route path="/account" component={HomeownerAccount} />
-          <Route path="/messages" component={Messages} />
         </>
       )}
-      {/* Contractor routes */}
+      
+      {/* Contractor-specific routes */}
       {typedUser?.role === 'contractor' && (
         <>
           <Route path="/contractor-dashboard" component={ContractorDashboard} />
-          <Route path="/maintenance" component={Maintenance} />
           <Route path="/contractor-profile" component={ContractorProfile} />
           <Route path="/service-records" component={ServiceRecords} />
-          <Route path="/messages" component={Messages} />
         </>
       )}
-      {/* My Home route - always available but with internal auth check */}
-      <Route path="/my-home" component={MyHome} />
+      
+      {/* Authentication routes */}
       <Route path="/signin" component={SignIn} />
       <Route path="/contractor-signin" component={ContractorSignIn} />
+      
+      {/* 404 fallback */}
       <Route component={NotFound} />
     </Switch>
   );
