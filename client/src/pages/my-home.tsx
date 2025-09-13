@@ -90,9 +90,9 @@ export default function MyHome() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Check authentication and role
+  // Check authentication and role - allow both homeowners and contractors
   useEffect(() => {
-    if (!authLoading && (!isAuthenticated || (user as any)?.role !== 'homeowner')) {
+    if (!authLoading && (!isAuthenticated || !['homeowner', 'contractor'].includes((user as any)?.role))) {
       setLocation('/');
     }
   }, [authLoading, isAuthenticated, user, setLocation]);
@@ -111,16 +111,16 @@ export default function MyHome() {
     );
   }
 
-  // Don't render if not authenticated as homeowner
-  if (!isAuthenticated || (user as any)?.role !== 'homeowner') {
+  // Don't render if not authenticated as homeowner or contractor
+  if (!isAuthenticated || !['homeowner', 'contractor'].includes((user as any)?.role)) {
     return null;
   }
 
-  // Fetch homeowner's houses
+  // Fetch user's houses
   const { data: houses = [], isLoading: housesLoading } = useQuery<House[]>({
     queryKey: ['/api/houses'],
     queryFn: async () => {
-      const response = await fetch('/api/houses?homeownerId=' + (user as any)?.id);
+      const response = await fetch('/api/houses');
       if (!response.ok) throw new Error('Failed to fetch houses');
       return response.json();
     },
