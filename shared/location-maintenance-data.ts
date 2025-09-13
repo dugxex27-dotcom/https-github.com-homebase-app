@@ -177,6 +177,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Service heating system for winter',
           'Clean gutters and install leaf guards',
           'Winterize outdoor water systems',
+          'Turn off outside water sources',
           'Check and seal exterior gaps'
         ],
         weatherSpecific: [
@@ -624,6 +625,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Complete fall preparation',
           'Service heating system for winter',
           'Winterize outdoor water systems',
+          'Turn off outside water sources',
           'Clean and maintain gutters',
           'Check storm windows and doors'
         ],
@@ -1297,7 +1299,8 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Complete fall preparation',
           'Service heating system for winter',
           'Check insulation and weatherproofing',
-          'Winterize outdoor water systems'
+          'Winterize outdoor water systems',
+          'Turn off outside water sources'
         ],
         weatherSpecific: [
           'Prepare for rapid temperature drops',
