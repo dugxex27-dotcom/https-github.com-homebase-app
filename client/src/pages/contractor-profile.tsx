@@ -52,7 +52,7 @@ const AVAILABLE_SERVICES = [
   "Furniture Assembly",
   "Garage Door Services",
   "General Contracting",
-  "Gutter Cleaning",
+  "Gutter Cleaning and Repair",
   "Gutter Installation",
   "Handyman Services",
   "Hardwood Flooring",
