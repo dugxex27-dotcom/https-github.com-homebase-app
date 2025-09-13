@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated, requireRole } from "./replitAuth";
+import { setupAuth, isAuthenticated, requireRole, requirePropertyOwner } from "./replitAuth";
 import { z } from "zod";
 import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema } from "@shared/schema";
 import pushRoutes from "./push-routes";
@@ -430,7 +430,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Maintenance Log routes
-  app.get("/api/maintenance-logs", async (req, res) => {
+  app.get("/api/maintenance-logs", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const homeownerId = req.query.homeownerId as string;
       const logs = await storage.getMaintenanceLogs(homeownerId);
@@ -440,7 +440,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/maintenance-logs/:id", async (req, res) => {
+  app.get("/api/maintenance-logs/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const log = await storage.getMaintenanceLog(req.params.id);
       if (!log) {
@@ -452,7 +452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/maintenance-logs", async (req, res) => {
+  app.post("/api/maintenance-logs", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const logData = insertMaintenanceLogSchema.parse(req.body);
       const log = await storage.createMaintenanceLog(logData);
@@ -465,7 +465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/maintenance-logs/:id", async (req, res) => {
+  app.patch("/api/maintenance-logs/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const partialData = insertMaintenanceLogSchema.partial().parse(req.body);
       const log = await storage.updateMaintenanceLog(req.params.id, partialData);
@@ -481,7 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/maintenance-logs/:id", async (req, res) => {
+  app.delete("/api/maintenance-logs/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const deleted = await storage.deleteMaintenanceLog(req.params.id);
       if (!deleted) {
@@ -494,7 +494,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Custom Maintenance Task routes
-  app.get("/api/custom-maintenance-tasks", async (req, res) => {
+  app.get("/api/custom-maintenance-tasks", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const homeownerId = req.query.homeownerId as string;
       const houseId = req.query.houseId as string;
@@ -505,7 +505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/custom-maintenance-tasks/:id", async (req, res) => {
+  app.get("/api/custom-maintenance-tasks/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const task = await storage.getCustomMaintenanceTask(req.params.id);
       if (!task) {
@@ -517,7 +517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/custom-maintenance-tasks", async (req, res) => {
+  app.post("/api/custom-maintenance-tasks", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const taskData = insertCustomMaintenanceTaskSchema.parse(req.body);
       const task = await storage.createCustomMaintenanceTask(taskData);
@@ -530,7 +530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/custom-maintenance-tasks/:id", async (req, res) => {
+  app.patch("/api/custom-maintenance-tasks/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const partialData = insertCustomMaintenanceTaskSchema.partial().parse(req.body);
       const task = await storage.updateCustomMaintenanceTask(req.params.id, partialData);
@@ -546,7 +546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/custom-maintenance-tasks/:id", async (req, res) => {
+  app.delete("/api/custom-maintenance-tasks/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const deleted = await storage.deleteCustomMaintenanceTask(req.params.id);
       if (!deleted) {
@@ -559,7 +559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Maintenance Suggestions Routes
-  app.get("/api/ai-maintenance-suggestions/:userId", async (req, res) => {
+  app.get("/api/ai-maintenance-suggestions/:userId", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const { userId } = req.params;
       const { aiMaintenanceService } = await import("./ai-maintenance-service");
@@ -840,7 +840,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate maintenance notifications for current month
-  app.post("/api/notifications/maintenance", async (req, res) => {
+  app.post("/api/notifications/maintenance", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const { homeownerId, tasks } = req.body;
       if (!homeownerId || !Array.isArray(tasks)) {
@@ -935,7 +935,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // House management routes
-  app.get("/api/houses", isAuthenticated, requireRole('homeowner'), async (req: any, res) => {
+  app.get("/api/houses", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       // Always use authenticated user's ID, ignore query params
       const homeownerId = req.session.user.id;
@@ -946,7 +946,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/houses/:id", isAuthenticated, requireRole('homeowner'), async (req: any, res) => {
+  app.get("/api/houses/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const house = await storage.getHouse(req.params.id);
       if (!house || house.homeownerId !== req.session.user.id) {
@@ -958,7 +958,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/houses", isAuthenticated, requireRole('homeowner'), async (req: any, res) => {  
+  app.post("/api/houses", isAuthenticated, requirePropertyOwner, async (req: any, res) => {  
     try {
       // Validate request body (excluding homeownerId which we set from session)
       const validatedData = insertHouseSchema.omit({ homeownerId: true }).parse(req.body);
@@ -994,7 +994,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/houses/:id", isAuthenticated, requireRole('homeowner'), async (req: any, res) => {
+  app.delete("/api/houses/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       // Verify the house belongs to the authenticated user
       const house = await storage.getHouse(req.params.id);
@@ -1012,7 +1012,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/houses/:id", isAuthenticated, requireRole('homeowner'), async (req: any, res) => {
+  app.put("/api/houses/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       // Verify the house belongs to the authenticated user
       const existingHouse = await storage.getHouse(req.params.id);
@@ -1037,7 +1037,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get maintenance tasks for a specific house
-  app.get("/api/houses/:id/maintenance-tasks", isAuthenticated, requireRole('homeowner'), async (req: any, res) => {
+  app.get("/api/houses/:id/maintenance-tasks", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const house = await storage.getHouse(req.params.id);
       if (!house || house.homeownerId !== req.session.user.id) {
@@ -1076,7 +1076,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Home Systems routes
-  app.get("/api/home-systems", async (req, res) => {
+  app.get("/api/home-systems", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const { homeownerId, houseId } = req.query;
       const systems = await storage.getHomeSystems(homeownerId as string, houseId as string);
@@ -1086,7 +1086,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/home-systems/:id", async (req, res) => {
+  app.get("/api/home-systems/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const system = await storage.getHomeSystem(req.params.id);
       if (!system) {
@@ -1098,7 +1098,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/home-systems", async (req, res) => {
+  app.post("/api/home-systems", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const systemData = insertHomeSystemSchema.parse(req.body);
       const system = await storage.createHomeSystem(systemData);
@@ -1111,7 +1111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/home-systems/:id", async (req, res) => {
+  app.patch("/api/home-systems/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const partialData = insertHomeSystemSchema.partial().parse(req.body);
       const system = await storage.updateHomeSystem(req.params.id, partialData);
@@ -1127,7 +1127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/home-systems/:id", async (req, res) => {
+  app.delete("/api/home-systems/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const deleted = await storage.deleteHomeSystem(req.params.id);
       if (!deleted) {

@@ -158,6 +158,23 @@ export const requireRole = (role: 'homeowner' | 'contractor'): RequestHandler =>
   };
 };
 
+// Middleware that allows both homeowners and contractors access to maintenance features
+export const requirePropertyOwner: RequestHandler = async (req: any, res, next) => {
+  // Check if user is authenticated via session
+  if (!req.session?.isAuthenticated || !req.session?.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const user = req.session.user;
+  
+  // Allow both homeowners and contractors to manage their own properties for maintenance
+  if (!user || (user.role !== 'homeowner' && user.role !== 'contractor')) {
+    return res.status(403).json({ message: "Forbidden - insufficient permissions" });
+  }
+
+  next();
+};
+
 declare global {
   var pendingUserRole: string | undefined;
 }
