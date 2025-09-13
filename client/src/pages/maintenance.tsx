@@ -306,7 +306,7 @@ const HOME_SYSTEMS = {
 export default function Maintenance() {
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedZone, setSelectedZone] = useState<string>("pacific-northwest");
-  const [selectedHouseId, setSelectedHouseId] = useState<string>("house-1");
+  const [selectedHouseId, setSelectedHouseId] = useState<string>("");
   const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
   const [homeSystems, setHomeSystems] = useState<string[]>([]);
   const [showSystemFilters, setShowSystemFilters] = useState(false);
@@ -343,6 +343,13 @@ export default function Maintenance() {
     },
     enabled: isAuthenticated && !!homeownerId
   });
+
+  // Auto-select first house when houses are loaded
+  useEffect(() => {
+    if (houses.length > 0 && !selectedHouseId) {
+      setSelectedHouseId(houses[0].id);
+    }
+  }, [houses, selectedHouseId]);
 
   // Update home systems and climate zone when house changes
   useEffect(() => {
