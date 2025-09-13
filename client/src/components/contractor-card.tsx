@@ -108,10 +108,11 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
           <div className="flex gap-2">
             <ContactContractorButton 
               contractor={contractor}
+              size="sm"
               className="flex-1"
             />
-            <Link href={`/contractor/${contractor.id}`}>
-              <Button variant="outline" className="px-4" style={{ color: '#ffffff' }}>
+            <Link href={`/contractor/${contractor.id}`} className="flex-shrink-0">
+              <Button variant="outline" size="sm" className="px-3 whitespace-nowrap" style={{ color: '#ffffff' }}>
                 View Profile
               </Button>
             </Link>
