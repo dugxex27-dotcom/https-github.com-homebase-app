@@ -967,15 +967,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const homeownerId = req.session.user.id;
       const user = req.session.user;
       
-      // Check property limit for non-premium users
+      // Check property limits based on user role
       const existingHouses = await storage.getHouses(homeownerId);
       
-      // Non-premium users are limited to 2 properties
-      if (!user?.isPremium && existingHouses.length >= 2) {
-        return res.status(403).json({ 
-          message: "Property limit reached. Upgrade to Premium to add unlimited properties.",
-          code: "PLAN_LIMIT_EXCEEDED"
-        });
+      if (user?.role === 'contractor') {
+        // Contractors are limited to 1 home for personal maintenance tracking
+        if (existingHouses.length >= 1) {
+          return res.status(403).json({ 
+            message: "Property limit reached. Contractors can track maintenance for one personal property.",
+            code: "CONTRACTOR_LIMIT_EXCEEDED"
+          });
+        }
+      } else if (user?.role === 'homeowner') {
+        // Non-premium homeowners are limited to 2 properties
+        if (!user?.isPremium && existingHouses.length >= 2) {
+          return res.status(403).json({ 
+            message: "Property limit reached. Upgrade to Premium to add unlimited properties.",
+            code: "PLAN_LIMIT_EXCEEDED"
+          });
+        }
       }
       
       // Create house with authenticated user's ID

@@ -81,6 +81,11 @@ export default function Header() {
                 }`}>
                   Dashboard
                 </Link>
+                <Link href="/maintenance" className={`text-gray-700 hover:text-primary transition-colors ${
+                  location === '/maintenance' ? 'text-primary font-medium' : ''
+                }`}>
+                  Maintenance Schedule
+                </Link>
                 <Link href="/messages" className={`text-gray-700 hover:text-primary transition-colors ${
                   location === '/messages' ? 'text-primary font-medium' : ''
                 }`}>

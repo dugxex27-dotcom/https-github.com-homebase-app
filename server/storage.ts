@@ -310,6 +310,9 @@ export class MemStorage implements IStorage {
       referralCount: userData.referralCount || 0,
       createdAt: existingUser?.createdAt || new Date(),
       updatedAt: new Date(),
+      isPremium: userData.isPremium ?? existingUser?.isPremium ?? false,
+      stripeCustomerId: userData.stripeCustomerId ?? existingUser?.stripeCustomerId ?? null,
+      stripeSubscriptionId: userData.stripeSubscriptionId ?? existingUser?.stripeSubscriptionId ?? null,
     };
     this.users.set(user.id, user);
     return user;
