@@ -73,9 +73,10 @@ function Router() {
           <Route path="/contractor-profile" component={ContractorProfile} />
           <Route path="/service-records" component={ServiceRecords} />
           <Route path="/messages" component={Messages} />
-          <Route path="/my-home" component={MyHome} />
         </>
       )}
+      {/* My Home route - always available but with internal auth check */}
+      <Route path="/my-home" component={MyHome} />
       <Route path="/signin" component={SignIn} />
       <Route path="/contractor-signin" component={ContractorSignIn} />
       <Route component={NotFound} />

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,11 +78,39 @@ interface MaintenanceTasksResponse {
 }
 
 export default function MyHome() {
+  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingHouse, setEditingHouse] = useState<House | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Check authentication and role
+  useEffect(() => {
+    if (!authLoading && (!isAuthenticated || (user as any)?.role !== 'contractor')) {
+      setLocation('/');
+    }
+  }, [authLoading, isAuthenticated, user, setLocation]);
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen" style={{ background: '#2c0f5b' }}>
+        <Header />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-white mb-2">Loading...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated as contractor
+  if (!isAuthenticated || (user as any)?.role !== 'contractor') {
+    return null;
+  }
 
   // Fetch contractor's houses
   const { data: houses = [], isLoading: housesLoading } = useQuery<House[]>({
