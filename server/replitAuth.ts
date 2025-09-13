@@ -158,6 +158,48 @@ export const requireRole = (role: 'homeowner' | 'contractor'): RequestHandler =>
   };
 };
 
+// Helper function to validate house ownership
+export const validateHouseOwnership = async (houseId: string, userId: string): Promise<boolean> => {
+  try {
+    const house = await storage.getHouse(houseId);
+    return house?.homeownerId === userId;
+  } catch {
+    return false;
+  }
+};
+
+// Helper function to validate maintenance log ownership
+export const validateMaintenanceLogOwnership = async (logId: string, userId: string): Promise<boolean> => {
+  try {
+    const log = await storage.getMaintenanceLog(logId);
+    return log?.homeownerId === userId;
+  } catch {
+    return false;
+  }
+};
+
+// Helper function to validate custom maintenance task ownership
+export const validateCustomMaintenanceTaskOwnership = async (taskId: string, userId: string): Promise<boolean> => {
+  try {
+    const task = await storage.getCustomMaintenanceTask(taskId);
+    return task?.homeownerId === userId;
+  } catch {
+    return false;
+  }
+};
+
+// Helper function to validate home system ownership
+export const validateHomeSystemOwnership = async (systemId: string, userId: string): Promise<boolean> => {
+  try {
+    const system = await storage.getHomeSystem(systemId);
+    // Home systems belong to houses, so we need to check the house ownership
+    if (!system?.houseId) return false;
+    return await validateHouseOwnership(system.houseId, userId);
+  } catch {
+    return false;
+  }
+};
+
 // Middleware that allows both homeowners and contractors access to maintenance features
 export const requirePropertyOwner: RequestHandler = async (req: any, res, next) => {
   // Check if user is authenticated via session
@@ -173,6 +215,46 @@ export const requirePropertyOwner: RequestHandler = async (req: any, res, next) 
   }
 
   next();
+};
+
+// Middleware to validate resource ownership for specific resources
+export const requireResourceOwnership = (resourceType: 'house' | 'maintenanceLog' | 'customMaintenanceTask' | 'homeSystem') => {
+  return async (req: any, res: any, next: any) => {
+    const userId = req.session?.user?.id;
+    const resourceId = req.params.id;
+    
+    if (!userId || !resourceId) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+
+    let isOwner = false;
+    
+    try {
+      switch (resourceType) {
+        case 'house':
+          isOwner = await validateHouseOwnership(resourceId, userId);
+          break;
+        case 'maintenanceLog':
+          isOwner = await validateMaintenanceLogOwnership(resourceId, userId);
+          break;
+        case 'customMaintenanceTask':
+          isOwner = await validateCustomMaintenanceTaskOwnership(resourceId, userId);
+          break;
+        case 'homeSystem':
+          isOwner = await validateHomeSystemOwnership(resourceId, userId);
+          break;
+      }
+    } catch (error) {
+      console.error(`Error validating ${resourceType} ownership:`, error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    
+    if (!isOwner) {
+      return res.status(404).json({ message: `${resourceType.charAt(0).toUpperCase() + resourceType.slice(1)} not found` });
+    }
+    
+    next();
+  };
 };
 
 declare global {

@@ -16,7 +16,8 @@ import { z } from "zod";
 import { insertMaintenanceLogSchema, insertCustomMaintenanceTaskSchema, insertHomeSystemSchema } from "@shared/schema";
 import type { MaintenanceLog, House, CustomMaintenanceTask, HomeSystem } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud, Lightbulb } from "lucide-react";
 import { AppointmentScheduler } from "@/components/appointment-scheduler";
 import { CustomMaintenanceTasks } from "@/components/custom-maintenance-tasks";
 import { US_MAINTENANCE_DATA, getRegionFromClimateZone, getCurrentMonthTasks } from "@shared/location-maintenance-data";
@@ -326,14 +327,21 @@ export default function Maintenance() {
   const [suggestionDebounceTimer, setSuggestionDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
-  // For demo purposes, we'll use a default homeowner ID
-  const homeownerId = "demo-homeowner-123";
+  // Use authenticated user's ID  
+  const homeownerId = user?.id;
+  const userRole = user?.role;
 
-  // Fetch houses for the current user
+  // Fetch houses for the authenticated user
   const { data: houses = [], isLoading: housesLoading } = useQuery({
     queryKey: ['/api/houses'],
-    queryFn: () => fetch('/api/houses?homeownerId=demo-homeowner-123').then(res => res.json())
+    queryFn: async () => {
+      const response = await fetch('/api/houses');
+      if (!response.ok) throw new Error('Failed to fetch houses');
+      return response.json();
+    },
+    enabled: isAuthenticated && !!homeownerId
   });
 
   // Update home systems and climate zone when house changes
@@ -352,20 +360,33 @@ export default function Maintenance() {
   const { data: maintenanceLogs, isLoading: maintenanceLogsLoading } = useQuery<MaintenanceLog[]>({
     queryKey: ['/api/maintenance-logs', { homeownerId }],
     queryFn: async () => {
-      const response = await fetch(`/api/maintenance-logs?homeownerId=${homeownerId}`);
+      const response = await fetch('/api/maintenance-logs');
       if (!response.ok) throw new Error('Failed to fetch maintenance logs');
       return response.json();
     },
+    enabled: isAuthenticated && !!homeownerId
   });
 
   // Home systems queries
   const { data: homeSystemsData, isLoading: homeSystemsLoading } = useQuery<HomeSystem[]>({
     queryKey: ['/api/home-systems', { homeownerId, houseId: selectedHouseId }],
     queryFn: async () => {
-      const response = await fetch(`/api/home-systems?homeownerId=${homeownerId}&houseId=${selectedHouseId}`);
+      const response = await fetch(`/api/home-systems?houseId=${selectedHouseId}`);
       if (!response.ok) throw new Error('Failed to fetch home systems');
       return response.json();
     },
+    enabled: isAuthenticated && !!homeownerId && !!selectedHouseId
+  });
+
+  // AI Maintenance Suggestions Query
+  const { data: aiSuggestions, isLoading: aiSuggestionsLoading } = useQuery({
+    queryKey: ['/api/ai-maintenance-suggestions'],
+    queryFn: async () => {
+      const response = await fetch('/api/ai-maintenance-suggestions');
+      if (!response.ok) throw new Error('Failed to fetch AI suggestions');
+      return response.json();
+    },
+    enabled: isAuthenticated && !!homeownerId && houses.length > 0
   });
 
   // Function to find previous contractors for similar maintenance tasks
@@ -969,13 +990,134 @@ export default function Maintenance() {
 
 
 
-  // AI Suggestions functionality removed
+  // AI Suggestions Component
   const AIMaintenanceSuggestionsCard = ({ userId, currentHouse, homeSystems }: { 
     userId: string; 
     currentHouse: House; 
     homeSystems: string[];
   }) => {
-    return null;
+    if (aiSuggestionsLoading) {
+      return (
+        <Card className="w-full">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/10 p-2 rounded-lg">
+                <Lightbulb className="w-6 h-6" style={{ color: '#b6a6f4' }} />
+              </div>
+              <div>
+                <CardTitle className="text-2xl font-semibold" style={{ color: '#ffffff' }}>
+                  AI Maintenance Suggestions
+                </CardTitle>
+                <p style={{ color: '#b6a6f4' }}>Loading personalized recommendations...</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <Card key={i} className="animate-pulse" style={{ backgroundColor: '#f2f2f2' }}>
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-300 rounded w-full"></div>
+                      <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (!aiSuggestions || aiSuggestions.length === 0) {
+      return (
+        <Card className="w-full" style={{ backgroundColor: '#f2f2f2' }}>
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/10 p-2 rounded-lg">
+                <Lightbulb className="w-6 h-6" style={{ color: '#b6a6f4' }} />
+              </div>
+              <div>
+                <CardTitle className="text-2xl font-semibold" style={{ color: '#2c0f5b' }}>
+                  AI Maintenance Suggestions
+                </CardTitle>
+                <p style={{ color: '#666666' }}>No suggestions available at this time</p>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+      );
+    }
+
+    // Show suggestions for the current house
+    const currentHouseSuggestions = aiSuggestions.find(
+      (suggestion: any) => suggestion.climateZone === currentHouse?.climateZone
+    );
+
+    return (
+      <Card className="w-full" style={{ backgroundColor: '#f2f2f2' }}>
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="bg-primary/10 p-2 rounded-lg">
+              <Lightbulb className="w-6 h-6" style={{ color: '#b6a6f4' }} />
+            </div>
+            <div>
+              <CardTitle className="text-2xl font-semibold" style={{ color: '#2c0f5b' }}>
+                AI Maintenance Suggestions
+              </CardTitle>
+              <p style={{ color: '#666666' }}>
+                Personalized recommendations for {currentHouse?.name || 'your property'}
+              </p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {currentHouseSuggestions?.suggestions && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {currentHouseSuggestions.suggestions.slice(0, 4).map((suggestion: any) => (
+                <Card key={suggestion.id} className="hover:shadow-md transition-all border-gray-300" style={{ backgroundColor: '#ffffff' }}>
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-semibold text-sm" style={{ color: '#2c0f5b' }}>
+                        {suggestion.title}
+                      </h4>
+                      <Badge className={`ml-2 ${
+                        suggestion.priority === 'critical' ? 'bg-red-100 text-red-800 border-red-200' :
+                        suggestion.priority === 'high' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                        suggestion.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                        'bg-blue-100 text-blue-800 border-blue-200'
+                      }`}>
+                        {suggestion.priority}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-3 leading-relaxed">
+                      {suggestion.description}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="flex items-center">
+                        <Clock className="w-3 h-3 mr-1 text-gray-500" />
+                        <span>{suggestion.timeRequired}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <DollarSign className="w-3 h-3 mr-1 text-gray-500" />
+                        <span>{suggestion.estimatedCost}</span>
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <Badge variant="outline" className="text-xs" style={{ color: '#666666', borderColor: '#666666' }}>
+                        {suggestion.category}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
   };
 
   const getServiceTypeLabel = (type: string) => {
@@ -1271,7 +1413,7 @@ export default function Maintenance() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          homeownerId: "demo-homeowner-123",
+          homeownerId: homeownerId,
           tasks: tasks
         }),
       });
@@ -1311,6 +1453,46 @@ export default function Maintenance() {
       default: return 'text-gray-600 dark:text-gray-400';
     }
   };
+
+  // Authentication guards
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#2c0f5b' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#2c0f5b' }}>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Authentication Required</h1>
+          <p className="text-gray-300 mb-6">Please sign in to access maintenance features.</p>
+          <Button onClick={() => window.location.href = '/signin'} className="bg-white text-purple-900 hover:bg-gray-100">
+            Sign In
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userRole || (userRole !== 'homeowner' && userRole !== 'contractor')) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#2c0f5b' }}>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Access Denied</h1>
+          <p className="text-gray-300 mb-6">This feature is only available to homeowners and contractors.</p>
+          <Button onClick={() => window.location.href = '/'} className="bg-white text-purple-900 hover:bg-gray-100">
+            Go Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
@@ -1364,16 +1546,25 @@ export default function Maintenance() {
               </div>
               
               <div className="flex flex-col gap-2">
+                {/* Contractor constraint message */}
+                {userRole === 'contractor' && houses.length >= 1 && (
+                  <div className="text-xs p-2 rounded bg-blue-50 border border-blue-200 text-blue-700 mb-2">
+                    Contractors can track maintenance for one personal property
+                  </div>
+                )}
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleAddNewHouse}
-                    className="whitespace-nowrap" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add House
-                  </Button>
+                  {/* Only show Add House button for homeowners or contractors with no houses */}
+                  {((userRole === 'homeowner') || (userRole === 'contractor' && houses.length === 0)) && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleAddNewHouse}
+                      className="whitespace-nowrap" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add {userRole === 'contractor' ? 'Property' : 'House'}
+                    </Button>
+                  )}
                   {selectedHouseId && houses.length > 0 && (
                     <Button 
                       variant="outline" 
@@ -1778,6 +1969,17 @@ export default function Maintenance() {
               )}
             </div>
 
+
+        {/* AI Maintenance Suggestions Section */}
+        {selectedHouseId && (
+          <div className="mt-12">
+            <AIMaintenanceSuggestionsCard 
+              userId={homeownerId || ''} 
+              currentHouse={houses.find((h: House) => h.id === selectedHouseId) || {} as House}
+              homeSystems={homeSystems}
+            />
+          </div>
+        )}
 
         {/* Custom Maintenance Tasks Section */}
         <div className="mt-12">

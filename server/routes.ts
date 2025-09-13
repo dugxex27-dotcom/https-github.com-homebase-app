@@ -432,7 +432,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Maintenance Log routes
   app.get("/api/maintenance-logs", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
-      const homeownerId = req.query.homeownerId as string;
+      // Always use authenticated user's ID, ignore query params to prevent IDOR
+      const homeownerId = req.session.user.id;
       const logs = await storage.getMaintenanceLogs(homeownerId);
       res.json(logs);
     } catch (error) {
@@ -443,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/maintenance-logs/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const log = await storage.getMaintenanceLog(req.params.id);
-      if (!log) {
+      if (!log || log.homeownerId !== req.session.user.id) {
         return res.status(404).json({ message: "Maintenance log not found" });
       }
       res.json(log);
@@ -454,7 +455,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/maintenance-logs", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
-      const logData = insertMaintenanceLogSchema.parse(req.body);
+      // Validate request body (excluding homeownerId which we set from session)
+      const validatedData = insertMaintenanceLogSchema.omit({ homeownerId: true }).parse(req.body);
+      
+      // Use authenticated user's ID, never trust client input
+      const logData = {
+        ...validatedData,
+        homeownerId: req.session.user.id
+      };
+      
       const log = await storage.createMaintenanceLog(logData);
       res.status(201).json(log);
     } catch (error) {
@@ -467,7 +476,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/maintenance-logs/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
-      const partialData = insertMaintenanceLogSchema.partial().parse(req.body);
+      // Verify the maintenance log belongs to the authenticated user
+      const existingLog = await storage.getMaintenanceLog(req.params.id);
+      if (!existingLog || existingLog.homeownerId !== req.session.user.id) {
+        return res.status(404).json({ message: "Maintenance log not found" });
+      }
+      
+      // Validate request body (excluding homeownerId which cannot be changed)
+      const partialData = insertMaintenanceLogSchema.omit({ homeownerId: true }).partial().parse(req.body);
+      
       const log = await storage.updateMaintenanceLog(req.params.id, partialData);
       if (!log) {
         return res.status(404).json({ message: "Maintenance log not found" });
@@ -483,6 +500,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/maintenance-logs/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
+      // Verify the maintenance log belongs to the authenticated user
+      const existingLog = await storage.getMaintenanceLog(req.params.id);
+      if (!existingLog || existingLog.homeownerId !== req.session.user.id) {
+        return res.status(404).json({ message: "Maintenance log not found" });
+      }
+      
       const deleted = await storage.deleteMaintenanceLog(req.params.id);
       if (!deleted) {
         return res.status(404).json({ message: "Maintenance log not found" });
@@ -496,8 +519,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Custom Maintenance Task routes
   app.get("/api/custom-maintenance-tasks", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
-      const homeownerId = req.query.homeownerId as string;
+      // Always use authenticated user's ID, ignore query params to prevent IDOR
+      const homeownerId = req.session.user.id;
       const houseId = req.query.houseId as string;
+      
+      // If houseId is provided, verify it belongs to the user
+      if (houseId) {
+        const house = await storage.getHouse(houseId);
+        if (!house || house.homeownerId !== homeownerId) {
+          return res.status(403).json({ message: "Access denied to house" });
+        }
+      }
+      
       const tasks = await storage.getCustomMaintenanceTasks(homeownerId, houseId);
       res.json(tasks);
     } catch (error) {
@@ -508,7 +541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/custom-maintenance-tasks/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const task = await storage.getCustomMaintenanceTask(req.params.id);
-      if (!task) {
+      if (!task || task.homeownerId !== req.session.user.id) {
         return res.status(404).json({ message: "Custom maintenance task not found" });
       }
       res.json(task);
@@ -519,7 +552,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/custom-maintenance-tasks", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
-      const taskData = insertCustomMaintenanceTaskSchema.parse(req.body);
+      // Validate request body (excluding homeownerId which we set from session)
+      const validatedData = insertCustomMaintenanceTaskSchema.omit({ homeownerId: true }).parse(req.body);
+      
+      // If houseId is provided, verify it belongs to the user
+      if (validatedData.houseId) {
+        const house = await storage.getHouse(validatedData.houseId);
+        if (!house || house.homeownerId !== req.session.user.id) {
+          return res.status(403).json({ message: "Access denied to house" });
+        }
+      }
+      
+      // Use authenticated user's ID, never trust client input
+      const taskData = {
+        ...validatedData,
+        homeownerId: req.session.user.id
+      };
+      
       const task = await storage.createCustomMaintenanceTask(taskData);
       res.status(201).json(task);
     } catch (error) {
@@ -532,7 +581,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/custom-maintenance-tasks/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
-      const partialData = insertCustomMaintenanceTaskSchema.partial().parse(req.body);
+      // Verify the custom maintenance task belongs to the authenticated user
+      const existingTask = await storage.getCustomMaintenanceTask(req.params.id);
+      if (!existingTask || existingTask.homeownerId !== req.session.user.id) {
+        return res.status(404).json({ message: "Custom maintenance task not found" });
+      }
+      
+      // Validate request body (excluding homeownerId which cannot be changed)
+      const partialData = insertCustomMaintenanceTaskSchema.omit({ homeownerId: true }).partial().parse(req.body);
+      
+      // If houseId is being updated, verify it belongs to the user
+      if (partialData.houseId) {
+        const house = await storage.getHouse(partialData.houseId);
+        if (!house || house.homeownerId !== req.session.user.id) {
+          return res.status(403).json({ message: "Access denied to house" });
+        }
+      }
+      
       const task = await storage.updateCustomMaintenanceTask(req.params.id, partialData);
       if (!task) {
         return res.status(404).json({ message: "Custom maintenance task not found" });
@@ -548,6 +613,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/custom-maintenance-tasks/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
+      // Verify the custom maintenance task belongs to the authenticated user
+      const existingTask = await storage.getCustomMaintenanceTask(req.params.id);
+      if (!existingTask || existingTask.homeownerId !== req.session.user.id) {
+        return res.status(404).json({ message: "Custom maintenance task not found" });
+      }
+      
       const deleted = await storage.deleteCustomMaintenanceTask(req.params.id);
       if (!deleted) {
         return res.status(404).json({ message: "Custom maintenance task not found" });
@@ -559,9 +630,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Maintenance Suggestions Routes
-  app.get("/api/ai-maintenance-suggestions/:userId", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
+  app.get("/api/ai-maintenance-suggestions", isAuthenticated, async (req: any, res) => {
     try {
-      const { userId } = req.params;
+      // Use authenticated user's ID from session for security
+      const userId = req.session.user.id;
       const { aiMaintenanceService } = await import("./ai-maintenance-service");
       
       // Get user's houses and home systems
@@ -1088,8 +1160,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Home Systems routes
   app.get("/api/home-systems", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
-      const { homeownerId, houseId } = req.query;
-      const systems = await storage.getHomeSystems(homeownerId as string, houseId as string);
+      // Always use authenticated user's ID, ignore query params to prevent IDOR
+      const homeownerId = req.session.user.id;
+      const houseId = req.query.houseId as string;
+      
+      // If houseId is provided, verify it belongs to the user
+      if (houseId) {
+        const house = await storage.getHouse(houseId);
+        if (!house || house.homeownerId !== homeownerId) {
+          return res.status(403).json({ message: "Access denied to house" });
+        }
+      }
+      
+      const systems = await storage.getHomeSystems(homeownerId, houseId);
       res.json(systems);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch home systems" });
@@ -1102,6 +1185,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!system) {
         return res.status(404).json({ message: "Home system not found" });
       }
+      
+      // Home systems belong to houses, so verify the house belongs to the user
+      if (system.houseId) {
+        const house = await storage.getHouse(system.houseId);
+        if (!house || house.homeownerId !== req.session.user.id) {
+          return res.status(404).json({ message: "Home system not found" });
+        }
+      } else {
+        // If no houseId, this is a security issue - home systems should always belong to a house
+        return res.status(404).json({ message: "Home system not found" });
+      }
+      
       res.json(system);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch home system" });
@@ -1111,6 +1206,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/home-systems", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
       const systemData = insertHomeSystemSchema.parse(req.body);
+      
+      // Verify the house belongs to the authenticated user
+      if (!systemData.houseId) {
+        return res.status(400).json({ message: "House ID is required for home systems" });
+      }
+      
+      const house = await storage.getHouse(systemData.houseId);
+      if (!house || house.homeownerId !== req.session.user.id) {
+        return res.status(403).json({ message: "Access denied to house" });
+      }
+      
       const system = await storage.createHomeSystem(systemData);
       res.status(201).json(system);
     } catch (error) {
@@ -1123,7 +1229,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/home-systems/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
+      // Verify the home system belongs to a house owned by the authenticated user
+      const existingSystem = await storage.getHomeSystem(req.params.id);
+      if (!existingSystem) {
+        return res.status(404).json({ message: "Home system not found" });
+      }
+      
+      if (existingSystem.houseId) {
+        const house = await storage.getHouse(existingSystem.houseId);
+        if (!house || house.homeownerId !== req.session.user.id) {
+          return res.status(404).json({ message: "Home system not found" });
+        }
+      } else {
+        return res.status(404).json({ message: "Home system not found" });
+      }
+      
       const partialData = insertHomeSystemSchema.partial().parse(req.body);
+      
+      // If houseId is being updated, verify the new house also belongs to the user
+      if (partialData.houseId && partialData.houseId !== existingSystem.houseId) {
+        const newHouse = await storage.getHouse(partialData.houseId);
+        if (!newHouse || newHouse.homeownerId !== req.session.user.id) {
+          return res.status(403).json({ message: "Access denied to house" });
+        }
+      }
+      
       const system = await storage.updateHomeSystem(req.params.id, partialData);
       if (!system) {
         return res.status(404).json({ message: "Home system not found" });
@@ -1139,6 +1269,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/home-systems/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
     try {
+      // Verify the home system belongs to a house owned by the authenticated user
+      const existingSystem = await storage.getHomeSystem(req.params.id);
+      if (!existingSystem) {
+        return res.status(404).json({ message: "Home system not found" });
+      }
+      
+      if (existingSystem.houseId) {
+        const house = await storage.getHouse(existingSystem.houseId);
+        if (!house || house.homeownerId !== req.session.user.id) {
+          return res.status(404).json({ message: "Home system not found" });
+        }
+      } else {
+        return res.status(404).json({ message: "Home system not found" });
+      }
+      
       const deleted = await storage.deleteHomeSystem(req.params.id);
       if (!deleted) {
         return res.status(404).json({ message: "Home system not found" });
@@ -1172,6 +1317,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const contractorId = req.session.user.id;
+      
+      // CRITICAL SECURITY: Enforce 1-home limit for contractors
+      const existingHouses = await storage.getHouses(contractorId);
+      if (existingHouses.length >= 1) {
+        return res.status(403).json({ 
+          message: "Property limit reached. Contractors can track maintenance for one personal property.",
+          code: "CONTRACTOR_LIMIT_EXCEEDED"
+        });
+      }
+      
       const houseData = insertHouseSchema.parse({
         ...req.body,
         homeownerId: contractorId
