@@ -70,6 +70,7 @@ function Router() {
       {typedUser?.role === 'contractor' && (
         <>
           <Route path="/contractor-dashboard" component={ContractorDashboard} />
+          <Route path="/maintenance" component={Maintenance} />
           <Route path="/contractor-profile" component={ContractorProfile} />
           <Route path="/service-records" component={ServiceRecords} />
           <Route path="/messages" component={Messages} />
