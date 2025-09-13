@@ -25,7 +25,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Check for demo session first
       if (req.session?.isAuthenticated && req.session?.user) {
-        return res.json(req.session.user);
+        // Ensure isPremium is included in the response
+        const user = req.session.user;
+        if (!user.hasOwnProperty('isPremium')) {
+          user.isPremium = false; // Default for demo users
+        }
+        return res.json(user);
       }
 
       // No authentication found
@@ -930,20 +935,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // House management routes
-  app.get("/api/houses", async (req, res) => {
+  app.get("/api/houses", isAuthenticated, requireRole('homeowner'), async (req: any, res) => {
     try {
-      const { homeownerId } = req.query;
-      const houses = await storage.getHouses(homeownerId as string);
+      // Always use authenticated user's ID, ignore query params
+      const homeownerId = req.session.user.id;
+      const houses = await storage.getHouses(homeownerId);
       res.json(houses);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch houses" });
     }
   });
 
-  app.get("/api/houses/:id", async (req, res) => {
+  app.get("/api/houses/:id", isAuthenticated, requireRole('homeowner'), async (req: any, res) => {
     try {
       const house = await storage.getHouse(req.params.id);
-      if (!house) {
+      if (!house || house.homeownerId !== req.session.user.id) {
         return res.status(404).json({ message: "House not found" });
       }
       res.json(house);
@@ -952,17 +958,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/houses", async (req, res) => {  
+  app.post("/api/houses", isAuthenticated, requireRole('homeowner'), async (req: any, res) => {  
     try {
-      const house = await storage.createHouse(req.body);
+      // Validate request body (excluding homeownerId which we set from session)
+      const validatedData = insertHouseSchema.omit({ homeownerId: true }).parse(req.body);
+      
+      // Use authenticated user's ID, never trust client input
+      const homeownerId = req.session.user.id;
+      const user = req.session.user;
+      
+      // Check property limit for non-premium users
+      const existingHouses = await storage.getHouses(homeownerId);
+      
+      // Non-premium users are limited to 2 properties
+      if (!user?.isPremium && existingHouses.length >= 2) {
+        return res.status(403).json({ 
+          message: "Property limit reached. Upgrade to Premium to add unlimited properties.",
+          code: "PLAN_LIMIT_EXCEEDED"
+        });
+      }
+      
+      // Create house with authenticated user's ID
+      const houseData = {
+        ...validatedData,
+        homeownerId
+      };
+      
+      const house = await storage.createHouse(houseData);
       res.status(201).json(house);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid request data", errors: error.errors });
+      }
       res.status(500).json({ message: "Failed to create house" });
     }
   });
 
-  app.delete("/api/houses/:id", async (req, res) => {
+  app.delete("/api/houses/:id", isAuthenticated, requireRole('homeowner'), async (req: any, res) => {
     try {
+      // Verify the house belongs to the authenticated user
+      const house = await storage.getHouse(req.params.id);
+      if (!house || house.homeownerId !== req.session.user.id) {
+        return res.status(404).json({ message: "House not found" });
+      }
+      
       const success = await storage.deleteHouse(req.params.id);
       if (!success) {
         return res.status(404).json({ message: "House not found" });
@@ -973,23 +1012,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/houses/:id", async (req, res) => {
+  app.put("/api/houses/:id", isAuthenticated, requireRole('homeowner'), async (req: any, res) => {
     try {
-      const house = await storage.updateHouse(req.params.id, req.body);
+      // Verify the house belongs to the authenticated user
+      const existingHouse = await storage.getHouse(req.params.id);
+      if (!existingHouse || existingHouse.homeownerId !== req.session.user.id) {
+        return res.status(404).json({ message: "House not found" });
+      }
+      
+      // Validate request body (excluding homeownerId which cannot be changed)
+      const validatedData = insertHouseSchema.omit({ homeownerId: true }).partial().parse(req.body);
+      
+      const house = await storage.updateHouse(req.params.id, validatedData);
       if (!house) {
         return res.status(404).json({ message: "House not found" });
       }
       res.json(house);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid request data", errors: error.errors });
+      }
       res.status(500).json({ message: "Failed to update house" });
     }
   });
 
   // Get maintenance tasks for a specific house
-  app.get("/api/houses/:id/maintenance-tasks", async (req, res) => {
+  app.get("/api/houses/:id/maintenance-tasks", isAuthenticated, requireRole('homeowner'), async (req: any, res) => {
     try {
       const house = await storage.getHouse(req.params.id);
-      if (!house) {
+      if (!house || house.homeownerId !== req.session.user.id) {
         return res.status(404).json({ message: "House not found" });
       }
 

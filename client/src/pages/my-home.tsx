@@ -183,7 +183,14 @@ export default function MyHome() {
       });
       form.reset();
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      // Handle property limit errors
+      if (error.status === 403 && error.body?.code === "PLAN_LIMIT_EXCEEDED") {
+        setShowCreateDialog(false);
+        setShowUpgradeDialog(true);
+        return;
+      }
+      
       toast({
         title: "Error",
         description: "Failed to create house. Please try again.",
@@ -276,6 +283,13 @@ export default function MyHome() {
   };
 
   const createPropertyFromTemplate = async (templateHouse: House) => {
+    // Check property limit before attempting to create
+    if (hasReachedLimit) {
+      setShowTemplateDialog(false);
+      setShowUpgradeDialog(true);
+      return;
+    }
+    
     const templateData = {
       name: `${templateHouse.name} - Copy`,
       address: "",
