@@ -330,8 +330,8 @@ export default function Maintenance() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
   // Use authenticated user's ID  
-  const homeownerId = user?.id;
-  const userRole = user?.role;
+  const homeownerId = (user as any)?.id;
+  const userRole = (user as any)?.role;
 
   // Fetch houses for the authenticated user
   const { data: houses = [], isLoading: housesLoading } = useQuery({
