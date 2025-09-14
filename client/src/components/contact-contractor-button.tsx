@@ -156,6 +156,7 @@ export default function ContactContractorButton({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
+              style={{ color: '#ffffff' }}
             />
           </div>
         </div>
