@@ -138,7 +138,7 @@ export default function ContactContractorButton({
         
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="subject">Subject</Label>
+            <Label htmlFor="subject" className="text-foreground dark:text-white">Subject</Label>
             <Input
               id="subject"
               placeholder="What would you like to discuss?"
@@ -148,7 +148,7 @@ export default function ContactContractorButton({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="message">Message</Label>
+            <Label htmlFor="message" className="text-foreground dark:text-white">Message</Label>
             <Textarea
               id="message"
               placeholder="Describe your project needs, timeline, budget, or any questions you have..."
