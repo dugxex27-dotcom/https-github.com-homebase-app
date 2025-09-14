@@ -1714,6 +1714,16 @@ export class MemStorage implements IStorage {
     return this.proposals.delete(id);
   }
 
+  // Check if homeowner has accepted proposals with contractor
+  async hasAcceptedProposalWithContractor(homeownerId: string, contractorId: string): Promise<boolean> {
+    const proposals = Array.from(this.proposals.values());
+    return proposals.some(proposal => 
+      proposal.homeownerId === homeownerId && 
+      proposal.contractorId === contractorId && 
+      proposal.status === 'accepted'
+    );
+  }
+
   private seedServiceRecords() {
     this.serviceRecords = [
       {
