@@ -1582,6 +1582,63 @@ export default function Maintenance() {
             </Card>
           )}
 
+          {/* Homeowner No Properties Onboarding */}
+          {userRole === 'homeowner' && houses.length === 0 && (
+            <Card className="mb-6 border-2 border-dashed" style={{ backgroundColor: '#f8fafc', borderColor: '#b6a6f4' }}>
+              <CardHeader className="text-center pb-4">
+                <div className="mx-auto mb-4 p-3 rounded-full" style={{ backgroundColor: '#2c0f5b' }}>
+                  <Building className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl font-bold" style={{ color: '#2c0f5b' }}>
+                  Add Your First Property to Get Started
+                </CardTitle>
+                <p className="text-lg" style={{ color: '#6b7280' }}>
+                  Start tracking maintenance for your home and get personalized recommendations based on your location and systems
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-3 gap-4 text-center">
+                  <div className="space-y-2">
+                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#e0f2fe' }}>
+                      <Calendar className="w-6 h-6" style={{ color: '#0369a1' }} />
+                    </div>
+                    <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>Smart Scheduling</h3>
+                    <p className="text-sm text-gray-600">Get personalized maintenance schedules based on your location and home systems</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#f0f9ff' }}>
+                      <Wrench className="w-6 h-6" style={{ color: '#0369a1' }} />
+                    </div>
+                    <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>Track Maintenance</h3>
+                    <p className="text-sm text-gray-600">Log completed maintenance, repairs, and improvements to keep detailed records</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#ede9fe' }}>
+                      <Lightbulb className="w-6 h-6" style={{ color: '#7c3aed' }} />
+                    </div>
+                    <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>AI Suggestions</h3>
+                    <p className="text-sm text-gray-600">Receive intelligent maintenance recommendations tailored to your property</p>
+                  </div>
+                </div>
+                <div className="text-center pt-4">
+                  <Button 
+                    onClick={handleAddNewHouse}
+                    size="lg"
+                    className="px-8 py-3 text-lg font-semibold"
+                    style={{ backgroundColor: '#2c0f5b', color: 'white' }}
+                    data-testid="button-add-first-property"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Add My Property
+                  </Button>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Add multiple properties and track maintenance for each
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Property Selector Card - Only show when properties exist */}
           {houses.length > 0 && (
             <div className="border rounded-lg p-4 mb-6" style={{ backgroundColor: '#f2f2f2' }}>
