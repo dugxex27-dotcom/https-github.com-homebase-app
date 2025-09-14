@@ -1054,7 +1054,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Non-premium homeowners are limited to 2 properties
         if (!user?.isPremium && existingHouses.length >= 2) {
           return res.status(403).json({ 
-            message: "Property limit reached. Upgrade to Premium to add unlimited properties.",
+            message: "Property limit reached. Upgrade to Platinum to add unlimited properties.",
             code: "PLAN_LIMIT_EXCEEDED"
           });
         }

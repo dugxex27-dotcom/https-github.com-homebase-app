@@ -882,7 +882,7 @@ export default function MyHome() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-purple-900">
                 <Crown className="h-6 w-6 text-purple-600" />
-                Upgrade to Premium
+                Upgrade to Platinum
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
@@ -893,7 +893,7 @@ export default function MyHome() {
                     Manage Multiple Properties
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    You've reached the limit of 2 properties on the free plan. Upgrade to Premium to add unlimited properties and unlock advanced features.
+                    You've reached the limit of 2 properties on the free plan. Upgrade to Platinum to add unlimited properties and unlock advanced features.
                   </p>
                   <div className="space-y-2 text-left bg-white p-4 rounded border">
                     <div className="flex items-center gap-2">
@@ -930,7 +930,7 @@ export default function MyHome() {
                     // TODO: Navigate to subscription page when available
                     toast({
                       title: "Upgrade Coming Soon",
-                      description: "Premium subscription will be available soon!",
+                      description: "Platinum subscription will be available soon!",
                     });
                   }}
                   style={{ backgroundColor: '#2c0f5b', color: 'white' }}
