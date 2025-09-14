@@ -1785,7 +1785,7 @@ export default function Maintenance() {
                           window.location.href = `/contractors?location=${encodedAddress}`;
                         }
                       }}
-                      className="whitespace-nowrap text-[#ffffff]" 
+                      className="whitespace-nowrap px-8 py-3 text-lg font-semibold text-[#ffffff]" 
                       style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
                       data-testid="button-find-contractors"
                     >
