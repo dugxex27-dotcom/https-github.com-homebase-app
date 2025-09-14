@@ -2249,7 +2249,7 @@ export default function Maintenance() {
 
         {/* Maintenance Log Form Dialog */}
         <Dialog open={isMaintenanceLogDialogOpen} onOpenChange={setIsMaintenanceLogDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#2c0f5b' }}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto text-white" style={{ backgroundColor: '#2c0f5b' }}>
             <DialogHeader>
               <DialogTitle style={{ color: 'white' }}>
                 {editingMaintenanceLog ? 'Edit Service Record' : 'Add New Service Record'}
