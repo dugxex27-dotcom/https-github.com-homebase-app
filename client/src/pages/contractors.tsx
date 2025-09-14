@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronLeft, ChevronRight, Search, ChevronDown, X } from "lucide-react";
-import type { Contractor } from "@shared/schema";
+import { ChevronLeft, ChevronRight, Search, ChevronDown, X, Home } from "lucide-react";
+import type { Contractor, House } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Contractors() {
   const [location] = useLocation();
@@ -16,13 +17,32 @@ export default function Contractors() {
   const [sortBy, setSortBy] = useState('best-match');
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Authentication
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const homeownerId = (user as any)?.id;
+  const userRole = (user as any)?.role;
+  
   // Local state for form controls
   const [selectedDistance, setSelectedDistance] = useState<string>('');
   const [selectedRating, setSelectedRating] = useState<string>('');
   const [hasEmergencyServices, setHasEmergencyServices] = useState<boolean>(false);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState<boolean>(false);
+  const [selectedHouseId, setSelectedHouseId] = useState<string>('');
   const servicesDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch houses for authenticated homeowners
+  const { data: houses = [], isLoading: housesLoading } = useQuery<House[]>({
+    queryKey: ['/api/houses', { homeownerId }],
+    enabled: isAuthenticated && !!homeownerId && userRole === 'homeowner'
+  });
+
+  // Auto-select first house when houses are loaded
+  useEffect(() => {
+    if (houses.length > 0 && !selectedHouseId) {
+      setSelectedHouseId(houses[0].id);
+    }
+  }, [houses, selectedHouseId]);
 
   // Services list from FilterSidebar
   const services = [
@@ -81,8 +101,13 @@ export default function Contractors() {
     "Windows & Door Installation"
   ];
 
-  // Parse URL parameters
+  // Track if we've already initialized filters from URL to prevent resets
+  const hasInitializedFromUrl = useRef(false);
+
+  // Parse URL parameters on initial load only
   useEffect(() => {
+    if (hasInitializedFromUrl.current) return;
+    
     const params = new URLSearchParams(location.split('?')[1] || '');
     const searchQuery = params.get('q') || '';
     const searchLocation = params.get('location') || '';
@@ -90,8 +115,41 @@ export default function Contractors() {
     if (searchQuery || searchLocation) {
       // Use search endpoint when there are search parameters
       setFilters({ searchQuery, searchLocation });
+      hasInitializedFromUrl.current = true;
     }
   }, [location]);
+
+  // Separate effect to handle house matching from URL location parameter
+  useEffect(() => {
+    if (!hasInitializedFromUrl.current) return;
+    
+    const params = new URLSearchParams(location.split('?')[1] || '');
+    const searchLocation = params.get('location') || '';
+    
+    // If location parameter exists and houses are loaded, try to find matching house
+    if (searchLocation && houses.length > 0 && !selectedHouseId) {
+      const matchingHouse = houses.find((house: House) => 
+        house.address.toLowerCase().includes(searchLocation.toLowerCase()) ||
+        searchLocation.toLowerCase().includes(house.address.toLowerCase())
+      );
+      if (matchingHouse) {
+        setSelectedHouseId(matchingHouse.id);
+      }
+    }
+  }, [houses, selectedHouseId]);
+
+  // Auto-set location filter when a house is initially selected
+  useEffect(() => {
+    if (selectedHouseId && houses.length > 0) {
+      const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
+      if (selectedHouse && !filters.searchLocation) {
+        setFilters((prev: any) => ({ 
+          ...prev, 
+          searchLocation: selectedHouse.address 
+        }));
+      }
+    }
+  }, [selectedHouseId, houses]);
 
   // Handle click outside to close services dropdown
   useEffect(() => {
@@ -230,7 +288,46 @@ export default function Contractors() {
           <div className="bg-card rounded-xl shadow-sm border p-6 mb-8">
             <h3 className="text-lg font-semibold text-foreground mb-6">Find Your Perfect Contractor</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
+              {/* Home Selector - Only show for authenticated homeowners with houses */}
+              {isAuthenticated && userRole === 'homeowner' && houses.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-3 block">
+                    <Home className="inline w-4 h-4 mr-1" style={{ color: '#b6a6f4' }} />
+                    Choose Home
+                  </label>
+                  <Select 
+                    value={selectedHouseId} 
+                    onValueChange={(value) => {
+                      setSelectedHouseId(value);
+                      // Update location filter when home changes
+                      const selectedHouse = houses.find((h: House) => h.id === value);
+                      if (selectedHouse) {
+                        setFilters((prev: any) => ({ 
+                          ...prev, 
+                          searchLocation: selectedHouse.address 
+                        }));
+                      }
+                    }}
+                    data-testid="filter-home"
+                  >
+                    <SelectTrigger className="w-full" style={{ backgroundColor: '#374151', color: '#ffffff' }}>
+                      <SelectValue placeholder="Select a property..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {houses.map((house: House) => (
+                        <SelectItem key={house.id} value={house.id}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{house.name}</span>
+                            <span className="text-xs text-muted-foreground">{house.address}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               {/* Distance Filter */}
               <div>
                 <label className="text-sm font-medium text-foreground mb-3 block">Distance from you</label>
