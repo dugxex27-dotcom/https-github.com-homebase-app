@@ -81,7 +81,7 @@ export default function ContractorDetail() {
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 py-12">
+      <section className="py-12" style={{ backgroundColor: '#3c258e' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
             <div className="flex items-start space-x-6">
