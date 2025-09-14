@@ -77,7 +77,7 @@ export default function ContractorDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen dark:bg-gray-900 bg-[#3c258e]">
       <Header />
       {/* Hero Section */}
       <section className="py-12" style={{ backgroundColor: '#3c258e' }}>
