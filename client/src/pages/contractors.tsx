@@ -186,7 +186,6 @@ export default function Contractors() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
       <Header />
-      
       {/* Hero Section */}
       <section className="py-16" style={{ background: '#2c0f5b' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -220,7 +219,6 @@ export default function Contractors() {
           </div>
         </div>
       </section>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Find Contractor Section */}
         <div className="mb-8">
@@ -445,7 +443,7 @@ export default function Contractors() {
               </div>
             ) : sortedContractors.length === 0 ? (
               <div className="text-center py-12">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No contractors found</h3>
+                <h3 className="text-lg font-medium mb-2 text-[#ffffff]">No contractors found</h3>
                 <p className="text-gray-600">Try adjusting your filters or search criteria.</p>
               </div>
             ) : (
