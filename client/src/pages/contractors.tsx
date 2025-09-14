@@ -131,6 +131,13 @@ export default function Contractors() {
           <FilterSidebar onFiltersChange={handleFiltersChange} />
           
           <div className="flex-1">
+            {/* Find Contractor Section */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold mb-4" style={{ color: '#ffffff' }}>
+                Find Contractor
+              </h2>
+            </div>
+
             <div className="mb-8">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
