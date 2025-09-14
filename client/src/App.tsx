@@ -58,7 +58,7 @@ function Router() {
       
       {/* Always available routes */}
       <Route path="/maintenance" component={Maintenance} />
-      <Route path="/contractor-maintenance" component={Maintenance} />
+      <Route path="/contractor-maintenance" component={ContractorMaintenance} />
       <Route path="/messages" component={Messages} />
       <Route path="/my-home" component={MyHome} />
       <Route path="/signin" component={SignIn} />
