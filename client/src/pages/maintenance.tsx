@@ -1620,19 +1620,32 @@ export default function Maintenance() {
                     <p className="text-sm text-gray-600">Receive intelligent maintenance recommendations tailored to your property</p>
                   </div>
                 </div>
-                <div className="text-center pt-4">
-                  <Button 
-                    onClick={handleAddNewHouse}
-                    size="lg"
-                    className="px-8 py-3 text-lg font-semibold"
-                    style={{ backgroundColor: '#2c0f5b', color: 'white' }}
-                    data-testid="button-add-first-property"
-                  >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Add My Property
-                  </Button>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Add multiple properties and track maintenance for each
+                <div className="text-center pt-4 space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button 
+                      onClick={handleAddNewHouse}
+                      size="lg"
+                      className="px-8 py-3 text-lg font-semibold"
+                      style={{ backgroundColor: '#2c0f5b', color: 'white' }}
+                      data-testid="button-add-first-property"
+                    >
+                      <Plus className="w-5 h-5 mr-2" />
+                      Add My Property
+                    </Button>
+                    <Button 
+                      onClick={() => window.location.href = '/contractors'}
+                      size="lg"
+                      variant="outline"
+                      className="px-8 py-3 text-lg font-semibold"
+                      style={{ borderColor: '#2c0f5b', color: '#2c0f5b' }}
+                      data-testid="button-find-contractors-general"
+                    >
+                      <MapPin className="w-5 h-5 mr-2" />
+                      Find Contractors
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Add your property for personalized maintenance, or find contractors for immediate help
                   </p>
                 </div>
               </CardContent>
@@ -1758,7 +1771,28 @@ export default function Maintenance() {
                   </div>
                 )}
                 
-                <div className="ml-auto">
+                <div className="flex gap-2 ml-auto">
+                  {/* Find Contractors Button */}
+                  {selectedHouseId && houses.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
+                        if (selectedHouse) {
+                          // Navigate to contractors page with house address as location
+                          const encodedAddress = encodeURIComponent(selectedHouse.address);
+                          window.location.href = `/contractors?location=${encodedAddress}`;
+                        }
+                      }}
+                      className="whitespace-nowrap text-[#ffffff]" 
+                      style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                      data-testid="button-find-contractors"
+                    >
+                      <MapPin className="w-4 h-4 mr-1" />
+                      Find Contractors
+                    </Button>
+                  )}
                   <AppointmentScheduler 
                     triggerButtonText="Schedule Visit" 
                     triggerButtonVariant="outline"
