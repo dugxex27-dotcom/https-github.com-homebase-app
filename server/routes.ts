@@ -1918,6 +1918,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if homeowner can review contractor (requires accepted proposals)
+  app.get('/api/contractors/:id/can-review', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user.id;
+      const userType = req.session.user.role;
+      const contractorId = req.params.id;
+      
+      // Only homeowners can review
+      if (userType !== 'homeowner') {
+        return res.json({ canReview: false, reason: "Only homeowners can review contractors" });
+      }
+      
+      // Check if homeowner has accepted proposals with this contractor
+      const hasAcceptedProposal = await storage.hasAcceptedProposalWithContractor(userId, contractorId);
+      
+      if (!hasAcceptedProposal) {
+        return res.json({ canReview: false, reason: "You can only review contractors after accepting their proposals" });
+      }
+      
+      res.json({ canReview: true });
+    } catch (error) {
+      console.error("Error checking review eligibility:", error);
+      res.status(500).json({ message: "Failed to check review eligibility" });
+    }
+  });
+
   app.post('/api/contractors/:id/reviews', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.user.id;
