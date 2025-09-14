@@ -17,7 +17,7 @@ import { insertMaintenanceLogSchema, insertCustomMaintenanceTaskSchema, insertHo
 import type { MaintenanceLog, House, CustomMaintenanceTask, HomeSystem } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud, Lightbulb } from "lucide-react";
+import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud } from "lucide-react";
 import { AppointmentScheduler } from "@/components/appointment-scheduler";
 import { CustomMaintenanceTasks } from "@/components/custom-maintenance-tasks";
 import { US_MAINTENANCE_DATA, getRegionFromClimateZone, getCurrentMonthTasks } from "@shared/location-maintenance-data";
@@ -386,16 +386,6 @@ export default function Maintenance() {
     enabled: isAuthenticated && !!homeownerId && !!selectedHouseId && !isContractor
   });
 
-  // AI Maintenance Suggestions Query (only for homeowners)
-  const { data: aiSuggestions, isLoading: aiSuggestionsLoading } = useQuery({
-    queryKey: ['/api/ai-maintenance-suggestions'],
-    queryFn: async () => {
-      const response = await fetch('/api/ai-maintenance-suggestions');
-      if (!response.ok) throw new Error('Failed to fetch AI suggestions');
-      return response.json();
-    },
-    enabled: isAuthenticated && !!homeownerId && houses.length > 0 && !isContractor
-  });
 
   // Function to find previous contractors for similar maintenance tasks
   const findPreviousContractor = (taskCategory: string, taskTitle: string) => {
@@ -998,135 +988,6 @@ export default function Maintenance() {
 
 
 
-  // AI Suggestions Component
-  const AIMaintenanceSuggestionsCard = ({ userId, currentHouse, homeSystems }: { 
-    userId: string; 
-    currentHouse: House; 
-    homeSystems: string[];
-  }) => {
-    if (aiSuggestionsLoading) {
-      return (
-        <Card className="w-full">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/10 p-2 rounded-lg">
-                <Lightbulb className="w-6 h-6" style={{ color: '#b6a6f4' }} />
-              </div>
-              <div>
-                <CardTitle className="text-2xl font-semibold" style={{ color: '#ffffff' }}>
-                  AI Maintenance Suggestions
-                </CardTitle>
-                <p style={{ color: '#b6a6f4' }}>Loading personalized recommendations...</p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i} className="animate-pulse" style={{ backgroundColor: '#f2f2f2' }}>
-                  <CardContent className="p-4">
-                    <div className="space-y-3">
-                      <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-300 rounded w-full"></div>
-                      <div className="h-3 bg-gray-300 rounded w-2/3"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    if (!aiSuggestions || aiSuggestions.length === 0) {
-      return (
-        <Card className="w-full" style={{ backgroundColor: '#f2f2f2' }}>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/10 p-2 rounded-lg">
-                <Lightbulb className="w-6 h-6" style={{ color: '#b6a6f4' }} />
-              </div>
-              <div>
-                <CardTitle className="text-2xl font-semibold" style={{ color: '#2c0f5b' }}>
-                  AI Maintenance Suggestions
-                </CardTitle>
-                <p style={{ color: '#666666' }}>No suggestions available at this time</p>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
-      );
-    }
-
-    // Show suggestions for the current house
-    const currentHouseSuggestions = aiSuggestions.find(
-      (suggestion: any) => suggestion.climateZone === currentHouse?.climateZone
-    );
-
-    return (
-      <Card className="w-full" style={{ backgroundColor: '#f2f2f2' }}>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/10 p-2 rounded-lg">
-              <Lightbulb className="w-6 h-6" style={{ color: '#b6a6f4' }} />
-            </div>
-            <div>
-              <CardTitle className="text-2xl font-semibold" style={{ color: '#2c0f5b' }}>
-                AI Maintenance Suggestions
-              </CardTitle>
-              <p style={{ color: '#666666' }}>
-                Personalized recommendations for {currentHouse?.name || 'your property'}
-              </p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {currentHouseSuggestions?.suggestions && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {currentHouseSuggestions.suggestions.slice(0, 4).map((suggestion: any) => (
-                <Card key={suggestion.id} className="hover:shadow-md transition-all border-gray-300" style={{ backgroundColor: '#ffffff' }}>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-semibold text-sm" style={{ color: '#2c0f5b' }}>
-                        {suggestion.title}
-                      </h4>
-                      <Badge className={`ml-2 ${
-                        suggestion.priority === 'critical' ? 'bg-red-100 text-red-800 border-red-200' :
-                        suggestion.priority === 'high' ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                        suggestion.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                        'bg-blue-100 text-blue-800 border-blue-200'
-                      }`}>
-                        {suggestion.priority}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-gray-600 mb-3 leading-relaxed">
-                      {suggestion.description}
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="flex items-center">
-                        <Clock className="w-3 h-3 mr-1 text-gray-500" />
-                        <span>{suggestion.timeRequired}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <DollarSign className="w-3 h-3 mr-1 text-gray-500" />
-                        <span>{suggestion.estimatedCost}</span>
-                      </div>
-                    </div>
-                    <div className="mt-2">
-                      <Badge variant="outline" className="text-xs" style={{ color: '#666666', borderColor: '#666666' }}>
-                        {suggestion.category}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
 
   const getServiceTypeLabel = (type: string) => {
     return SERVICE_TYPES.find(t => t.value === type)?.label || type;
@@ -1540,7 +1401,7 @@ export default function Maintenance() {
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-3 gap-4 text-center">
+                <div className="grid md:grid-cols-2 gap-4 text-center">
                   <div className="space-y-2">
                     <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#e0f2fe' }}>
                       <Calendar className="w-6 h-6" style={{ color: '#0369a1' }} />
@@ -1554,13 +1415,6 @@ export default function Maintenance() {
                     </div>
                     <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>Track Maintenance</h3>
                     <p className="text-sm text-gray-600">Log completed maintenance, repairs, and improvements to keep detailed records</p>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#ede9fe' }}>
-                      <Lightbulb className="w-6 h-6" style={{ color: '#7c3aed' }} />
-                    </div>
-                    <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>AI Suggestions</h3>
-                    <p className="text-sm text-gray-600">Receive intelligent maintenance recommendations tailored to your property</p>
                   </div>
                 </div>
                 <div className="text-center pt-4">
@@ -1597,7 +1451,7 @@ export default function Maintenance() {
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-3 gap-4 text-center">
+                <div className="grid md:grid-cols-2 gap-4 text-center">
                   <div className="space-y-2">
                     <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#e0f2fe' }}>
                       <Calendar className="w-6 h-6" style={{ color: '#0369a1' }} />
@@ -1611,13 +1465,6 @@ export default function Maintenance() {
                     </div>
                     <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>Track Maintenance</h3>
                     <p className="text-sm text-gray-600">Log completed maintenance, repairs, and improvements to keep detailed records</p>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#ede9fe' }}>
-                      <Lightbulb className="w-6 h-6" style={{ color: '#7c3aed' }} />
-                    </div>
-                    <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>AI Suggestions</h3>
-                    <p className="text-sm text-gray-600">Receive intelligent maintenance recommendations tailored to your property</p>
                   </div>
                 </div>
                 <div className="text-center pt-4 space-y-4">
@@ -1636,7 +1483,7 @@ export default function Maintenance() {
                       onClick={() => window.location.href = '/contractors'}
                       size="lg"
                       variant="outline"
-                      className="px-8 py-3 text-lg font-semibold"
+                      className="px-8 py-3 text-lg font-semibold text-[#ffffff]"
                       style={{ borderColor: '#2c0f5b', color: '#2c0f5b' }}
                       data-testid="button-find-contractors-general"
                     >
@@ -2125,16 +1972,6 @@ export default function Maintenance() {
             </div>
 
 
-        {/* AI Maintenance Suggestions Section */}
-        {selectedHouseId && (
-          <div className="mt-12">
-            <AIMaintenanceSuggestionsCard 
-              userId={homeownerId || ''} 
-              currentHouse={houses.find((h: House) => h.id === selectedHouseId) || {} as House}
-              homeSystems={homeSystems}
-            />
-          </div>
-        )}
 
         {/* Custom Maintenance Tasks Section */}
         <div className="mt-12">

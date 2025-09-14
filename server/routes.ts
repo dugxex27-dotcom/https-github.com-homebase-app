@@ -629,31 +629,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Maintenance Suggestions Routes
-  app.get("/api/ai-maintenance-suggestions", isAuthenticated, async (req: any, res) => {
-    try {
-      // Use authenticated user's ID from session for security
-      const userId = req.session.user.id;
-      const { aiMaintenanceService } = await import("./ai-maintenance-service");
-      
-      // Get user's houses and home systems
-      const houses = await storage.getHousesByHomeowner(userId);
-      const homeSystems = await storage.getHomeSystemsByHomeowner(userId);
-      const maintenanceLogs = await storage.getMaintenanceLogsByHomeowner(userId);
-      
-      const suggestions = await aiMaintenanceService.getMonthlyMaintenanceSuggestions(
-        userId,
-        houses,
-        homeSystems.map((system: any) => system.systemType),
-        maintenanceLogs
-      );
-      
-      res.json(suggestions);
-    } catch (error) {
-      console.error("Error generating AI maintenance suggestions:", error);
-      res.status(500).json({ message: "Failed to generate maintenance suggestions" });
-    }
-  });
 
   // Proposal routes
   app.get("/api/proposals", async (req, res) => {
