@@ -131,7 +131,7 @@ export default function ContactContractorButton({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle style={{ color: '#ffffff' }}>Contact {contractor.name}</DialogTitle>
-          <DialogDescription>
+          <DialogDescription style={{ color: '#ffffff' }}>
             Send a message to {contractor.name} from {contractor.company} to discuss your project needs.
           </DialogDescription>
         </DialogHeader>
