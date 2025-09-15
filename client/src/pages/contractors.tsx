@@ -33,7 +33,7 @@ export default function Contractors() {
 
   // Fetch houses for authenticated homeowners
   const { data: houses = [], isLoading: housesLoading } = useQuery<House[]>({
-    queryKey: ['/api/houses', { homeownerId }],
+    queryKey: ['/api/houses'],
     enabled: isAuthenticated && !!homeownerId && userRole === 'homeowner'
   });
 
