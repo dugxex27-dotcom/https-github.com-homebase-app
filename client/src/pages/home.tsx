@@ -117,7 +117,7 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen" style={{ background: '#1560a2' }}>
+    <div className="min-h-screen" style={{ background: typedUser?.role === 'homeowner' ? '#2c0f5b' : '#1560a2' }}>
       <Header />
       <HeroSection />
       
@@ -241,7 +241,7 @@ export default function Home() {
 
 
       {/* Tab Content Section */}
-      <section className="py-16" style={{ background: '#2c0f5b' }}>
+      <section className="py-16" style={{ background: typedUser?.role === 'homeowner' ? '#2c0f5b' : '#1560a2' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
 
@@ -413,7 +413,7 @@ export default function Home() {
 
 
       {/* Additional Features Section */}
-      <section style={{ background: '#2c0f5b', paddingTop: '14px', paddingBottom: '30px' }}>
+      <section style={{ background: typedUser?.role === 'homeowner' ? '#2c0f5b' : '#1560a2', paddingTop: '14px', paddingBottom: '30px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4" style={{ color: '#ffffff' }}>
@@ -424,7 +424,7 @@ export default function Home() {
                 We've designed every feature to make home management simple, reliable, and efficient
               </p>
             ) : (
-              <p className="text-xl max-w-3xl mx-auto" style={{ color: '#b6a6f4' }}>
+              <p className="text-xl max-w-3xl mx-auto" style={{ color: '#3798ef' }}>
                 The platform contractors trust to grow their business and connect with quality clients
               </p>
             )}
@@ -475,10 +475,10 @@ export default function Home() {
               <>
                 <Card className="border-gray-300 dark:border-gray-600" style={{ backgroundColor: '#f2f2f2' }}>
                   <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#2c0f5b' }}>
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#1560a2' }}>
                       <Users className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3" style={{ color: '#2c0f5b' }}>Quality Leads</h3>
+                    <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Quality Leads</h3>
                     <p className="text-gray-600 dark:text-gray-300">
                       Connect with motivated homeowners who value professional service and quality workmanship
                     </p>
@@ -487,10 +487,10 @@ export default function Home() {
 
                 <Card className="border-gray-300 dark:border-gray-600" style={{ backgroundColor: '#f2f2f2' }}>
                   <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#2c0f5b' }}>
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#1560a2' }}>
                       <TrendingUp className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3" style={{ color: '#2c0f5b' }}>Grow Your Business</h3>
+                    <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Grow Your Business</h3>
                     <p className="text-gray-600 dark:text-gray-300">
                       Tools and features designed to help you manage projects, track earnings, and expand your client base
                     </p>
@@ -499,10 +499,10 @@ export default function Home() {
 
                 <Card className="border-gray-300 dark:border-gray-600" style={{ backgroundColor: '#f2f2f2' }}>
                   <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#2c0f5b' }}>
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#1560a2' }}>
                       <Star className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3" style={{ color: '#2c0f5b' }}>Build Reputation</h3>
+                    <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Build Reputation</h3>
                     <p className="text-gray-600 dark:text-gray-300">
                       Showcase your expertise through customer reviews and build a trusted reputation in your community
                     </p>

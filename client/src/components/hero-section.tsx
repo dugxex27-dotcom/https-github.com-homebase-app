@@ -9,7 +9,7 @@ export default function HeroSection() {
   const typedUser = user as User | undefined;
 
   return (
-    <section style={{ background: '#2c0f5b', paddingTop: '20px', paddingBottom: '2px' }}>
+    <section style={{ background: typedUser?.role === 'homeowner' ? '#2c0f5b' : '#1560a2', paddingTop: '20px', paddingBottom: '2px' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-2">
           <Logo className={`h-32 w-full mx-auto block mb-8`} />
@@ -24,7 +24,7 @@ export default function HeroSection() {
             )}
           </h1>
           
-          <p className="text-xl mb-8 max-w-3xl mx-auto leading-relaxed" style={{ color: '#b6a6f4' }}>
+          <p className="text-xl mb-8 max-w-3xl mx-auto leading-relaxed" style={{ color: typedUser?.role === 'homeowner' ? '#b6a6f4' : '#3798ef' }}>
             {typedUser?.role === 'homeowner' ? (
               'Connect with skilled contractors, discover quality DIY products, and keep your home running smoothly with our intelligent maintenance scheduling system.'
             ) : (
