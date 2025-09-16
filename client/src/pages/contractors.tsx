@@ -311,7 +311,7 @@ export default function Contractors() {
                     }}
                     data-testid="filter-home"
                   >
-                    <SelectTrigger className="w-full" style={{ backgroundColor: '#374151', color: '#ffffff' }}>
+                    <SelectTrigger className="w-full" style={{ backgroundColor: '#1e1e20', color: '#ffffff' }}>
                       <SelectValue placeholder="Select a property..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -333,7 +333,7 @@ export default function Contractors() {
                 <label className="text-sm font-medium text-foreground mb-3 block">Distance from you</label>
                 <select 
                   className="w-full px-3 py-2 border border-muted rounded-md"
-                  style={{ color: '#ffffff', backgroundColor: '#374151' }}
+                  style={{ color: '#ffffff', backgroundColor: '#1e1e20' }}
                   value={selectedDistance}
                   onChange={(e) => {
                     setSelectedDistance(e.target.value);
@@ -353,7 +353,7 @@ export default function Contractors() {
                 <label className="text-sm font-medium text-foreground mb-3 block">Minimum Rating</label>
                 <select 
                   className="w-full px-3 py-2 border border-muted rounded-md"
-                  style={{ color: '#ffffff', backgroundColor: '#374151' }}
+                  style={{ color: '#ffffff', backgroundColor: '#1e1e20' }}
                   value={selectedRating}
                   onChange={(e) => {
                     setSelectedRating(e.target.value);
@@ -373,7 +373,7 @@ export default function Contractors() {
                 <button
                   type="button"
                   className="w-full px-3 py-2 border border-muted rounded-md text-left flex items-center justify-between"
-                  style={{ color: '#ffffff', backgroundColor: '#374151' }}
+                  style={{ color: '#ffffff', backgroundColor: '#1e1e20' }}
                   onClick={() => setServicesDropdownOpen(!servicesDropdownOpen)}
                   data-testid="filter-services"
                 >
