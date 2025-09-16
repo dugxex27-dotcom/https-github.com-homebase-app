@@ -117,20 +117,20 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen" style={{ background: '#2c0f5b' }}>
+    <div className="min-h-screen" style={{ background: '#1560a2' }}>
       <Header />
       <HeroSection />
       
       {/* Contractor Dashboard - shown directly after hero for contractors */}
       {typedUser?.role === 'contractor' && (
-        <section className="py-16" style={{ backgroundColor: '#2c0f5b' }}>
+        <section className="py-16" style={{ backgroundColor: '#1560a2' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-4xl font-bold mb-4" style={{ color: 'white' }}>
                   Your Business Dashboard
                 </h2>
-                <p className="text-xl max-w-2xl mx-auto" style={{ color: '#b6a6f4' }}>
+                <p className="text-xl max-w-2xl mx-auto" style={{ color: '#3798ef' }}>
                   Manage your contracting business and grow your client base
                 </p>
               </div>
@@ -141,15 +141,15 @@ export default function Home() {
                   <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#2c0f5b' }}>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
                           <Users className="h-6 w-6" style={{ color: 'white' }} />
                         </div>
                         <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: '#2c0f5b' }}>My Profile</h3>
-                          <p className="text-sm" style={{ color: '#2c0f5b' }}>Update info</p>
+                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>My Profile</h3>
+                          <p className="text-sm" style={{ color: '#1560a2' }}>Update info</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: '#2c0f5b' }}>
+                      <p className="text-sm" style={{ color: '#1560a2' }}>
                         Manage your professional profile and service offerings
                       </p>
                     </CardContent>
@@ -160,15 +160,15 @@ export default function Home() {
                   <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#2c0f5b' }}>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
                           <Bell className="h-6 w-6" style={{ color: 'white' }} />
                         </div>
                         <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: '#2c0f5b' }}>Messages</h3>
-                          <p className="text-sm" style={{ color: '#2c0f5b' }}>Client communication</p>
+                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>Messages</h3>
+                          <p className="text-sm" style={{ color: '#1560a2' }}>Client communication</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: '#2c0f5b' }}>
+                      <p className="text-sm" style={{ color: '#1560a2' }}>
                         Communicate with potential and existing clients
                       </p>
                     </CardContent>
@@ -180,15 +180,15 @@ export default function Home() {
                   <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#2c0f5b' }}>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
                           <Calendar className="h-6 w-6" style={{ color: 'white' }} />
                         </div>
                         <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: '#2c0f5b' }}>Active Projects</h3>
-                          <p className="text-sm" style={{ color: '#2c0f5b' }}>Current work</p>
+                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>Active Projects</h3>
+                          <p className="text-sm" style={{ color: '#1560a2' }}>Current work</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: '#2c0f5b' }}>
+                      <p className="text-sm" style={{ color: '#1560a2' }}>
                         3 active projects scheduled this week
                       </p>
                     </CardContent>
@@ -199,15 +199,15 @@ export default function Home() {
                   <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#2c0f5b' }}>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
                           <Star className="h-6 w-6" style={{ color: 'white' }} />
                         </div>
                         <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: '#2c0f5b' }}>Reviews</h3>
-                          <p className="text-sm" style={{ color: '#2c0f5b' }}>Customer feedback</p>
+                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>Reviews</h3>
+                          <p className="text-sm" style={{ color: '#1560a2' }}>Customer feedback</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: '#2c0f5b' }}>
+                      <p className="text-sm" style={{ color: '#1560a2' }}>
                         4.8/5 stars from 127 recent reviews
                       </p>
                     </CardContent>
@@ -218,15 +218,15 @@ export default function Home() {
                   <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
                     <CardContent className="p-6 flex-1 flex flex-col">
                       <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#2c0f5b' }}>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
                           <Search className="h-6 w-6" style={{ color: 'white' }} />
                         </div>
                         <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: '#2c0f5b' }}>New Leads</h3>
-                          <p className="text-sm" style={{ color: '#2c0f5b' }}>Opportunities</p>
+                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>New Leads</h3>
+                          <p className="text-sm" style={{ color: '#1560a2' }}>Opportunities</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: '#2c0f5b' }}>
+                      <p className="text-sm" style={{ color: '#1560a2' }}>
                         5 new client inquiries this week
                       </p>
                     </CardContent>
