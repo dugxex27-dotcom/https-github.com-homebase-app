@@ -1403,15 +1403,15 @@ export default function Maintenance() {
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-4 text-center">
                   <div className="space-y-2">
-                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#e0f2fe' }}>
-                      <Calendar className="w-6 h-6" style={{ color: '#0369a1' }} />
+                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#f3e8ff' }}>
+                      <Calendar className="w-6 h-6" style={{ color: '#6b46c1' }} />
                     </div>
                     <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>Smart Scheduling</h3>
                     <p className="text-sm text-gray-600">Get personalized maintenance schedules based on your location and home systems</p>
                   </div>
                   <div className="space-y-2">
-                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#f0f9ff' }}>
-                      <Wrench className="w-6 h-6" style={{ color: '#0369a1' }} />
+                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#f3e8ff' }}>
+                      <Wrench className="w-6 h-6" style={{ color: '#6b46c1' }} />
                     </div>
                     <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>Track Maintenance</h3>
                     <p className="text-sm text-gray-600">Log completed maintenance, repairs, and improvements to keep detailed records</p>
@@ -1453,15 +1453,15 @@ export default function Maintenance() {
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-4 text-center">
                   <div className="space-y-2">
-                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#e0f2fe' }}>
-                      <Calendar className="w-6 h-6" style={{ color: '#0369a1' }} />
+                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#f3e8ff' }}>
+                      <Calendar className="w-6 h-6" style={{ color: '#6b46c1' }} />
                     </div>
                     <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>Smart Scheduling</h3>
                     <p className="text-sm text-gray-600">Get personalized maintenance schedules based on your location and home systems</p>
                   </div>
                   <div className="space-y-2">
-                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#f0f9ff' }}>
-                      <Wrench className="w-6 h-6" style={{ color: '#0369a1' }} />
+                    <div className="p-2 rounded-lg mx-auto w-fit" style={{ backgroundColor: '#f3e8ff' }}>
+                      <Wrench className="w-6 h-6" style={{ color: '#6b46c1' }} />
                     </div>
                     <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>Track Maintenance</h3>
                     <p className="text-sm text-gray-600">Log completed maintenance, repairs, and improvements to keep detailed records</p>

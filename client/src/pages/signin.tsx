@@ -80,11 +80,13 @@ export default function SignIn() {
                 }}
                 onClick={() => handleRoleSelect('homeowner')}
               >
-                <div className="p-3 rounded-full"
+                <div className={`p-3 rounded-full ${
+                  selectedRole === 'homeowner' ? 'bg-white/20' : ''
+                }`}
                 style={{
-                  backgroundColor: '#f3e8ff'
+                  backgroundColor: selectedRole === 'homeowner' ? undefined : '#3c258e'
                 }}>
-                  <Home className="w-6 h-6" style={{ color: '#6b46c1' }} />
+                  <Home className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1" style={{ paddingRight: '10px' }}>
                   <div className="font-semibold text-left text-[20px]" style={{ color: '#ffffff' }}>I'm a Homeowner</div>
@@ -110,11 +112,13 @@ export default function SignIn() {
                 }}
                 onClick={() => handleRoleSelect('contractor')}
               >
-                <div className="p-3 rounded-full"
+                <div className={`p-3 rounded-full ${
+                  selectedRole === 'contractor' ? 'bg-white/20' : ''
+                }`}
                 style={{
-                  backgroundColor: '#f3e8ff'
+                  backgroundColor: selectedRole === 'contractor' ? undefined : '#3798ef'
                 }}>
-                  <Wrench className="w-6 h-6" style={{ color: '#6b46c1' }} />
+                  <Wrench className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1" style={{ paddingRight: '10px' }}>
                   <div className="font-semibold text-left text-[20px]" style={{ color: '#ffffff' }}>I'm a Contractor</div>
