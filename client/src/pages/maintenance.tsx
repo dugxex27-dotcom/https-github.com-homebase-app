@@ -1109,6 +1109,39 @@ export default function Maintenance() {
               ["Window cleaner", "Squeegee", "Repair kit"],
         cost: month === 3 ? "$0-50" : month === 4 ? "$20-40" : "$15-35"
       });
+
+      // Additional spring tasks
+      if (month === 3) {
+        tasks.push({
+          id: "spring-hvac-transition",
+          title: "HVAC System Transition",
+          description: "Schedule professional HVAC maintenance to transition from heating to cooling season. Change filters, test air conditioning operation, and clean outdoor unit.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "high",
+          estimatedTime: "2-3 hours",
+          difficulty: "moderate",
+          category: "HVAC",
+          tools: ["New air filter", "Garden hose", "Cleaning supplies"],
+          cost: "$100-200"
+        });
+      }
+
+      if (month === 5) {
+        tasks.push({
+          id: "spring-lawn-equipment",
+          title: "Lawn Equipment Preparation",
+          description: "Service lawn mower and garden tools for summer season. Change oil, sharpen blades, check spark plug, and clean air filter. Test all equipment before first use.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "medium",
+          estimatedTime: "2-3 hours",
+          difficulty: "moderate",
+          category: "Landscaping",
+          tools: ["Motor oil", "Spark plug", "Air filter", "Blade sharpener"],
+          cost: "$30-60"
+        });
+      }
     }
 
     // Summer tasks (June, July, August)
@@ -1129,6 +1162,24 @@ export default function Maintenance() {
           category: "HVAC",
           tools: ["New air filter", "Vacuum", "Cleaning supplies"],
           cost: month === 6 ? "$50-100" : "$0-25"
+        });
+      }
+
+      // Annual water heater maintenance (June)
+      if (month === 6) {
+        tasks.push({
+          id: "annual-water-heater-flush",
+          title: "Flush Water Heater",
+          description: "Drain and flush water heater tank to remove sediment buildup, improving efficiency and extending lifespan. Turn off power/gas, connect hose to drain valve, and flush until water runs clear.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "medium",
+          estimatedTime: "2-3 hours",
+          difficulty: "moderate",
+          category: "Plumbing",
+          tools: ["Garden hose", "Bucket", "Pipe wrench", "Safety gloves"],
+          cost: "$0-25",
+          systemRequirements: ["gas-water-heater", "electric-water-heater"]
         });
       }
     }
@@ -1153,6 +1204,41 @@ export default function Maintenance() {
           cost: "$25-75"
         });
       }
+
+      // Gutter maintenance for all climates
+      if (month === 10) {
+        tasks.push({
+          id: "fall-gutter-cleaning",
+          title: "Clean and Inspect Gutters",
+          description: "Remove leaves and debris from gutters and downspouts. Check for proper drainage, loose brackets, and leaks. Install gutter guards if needed to prevent future clogs.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "high",
+          estimatedTime: "3-4 hours",
+          difficulty: "moderate",
+          category: "Exterior",
+          tools: ["Ladder", "Garden hose", "Gutter scoop", "Work gloves", "Bucket"],
+          cost: "$10-30"
+        });
+      }
+
+      // Chimney and fireplace preparation
+      if (month === 11) {
+        tasks.push({
+          id: "fall-chimney-prep",
+          title: "Chimney and Fireplace Inspection",
+          description: "Inspect chimney for cracks, loose mortar, or animal nests. Clean fireplace, check damper operation, and test smoke and carbon monoxide detectors near fireplace.",
+          month: month,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+          priority: "high",
+          estimatedTime: "1-2 hours",
+          difficulty: "moderate",
+          category: "Safety",
+          tools: ["Flashlight", "Cleaning supplies", "Ladder", "Drop cloth"],
+          cost: "$0-50",
+          systemRequirements: ["wood-stove"]
+        });
+      }
     }
 
     // System-specific tasks
@@ -1160,16 +1246,100 @@ export default function Maintenance() {
       {
         id: "monthly-gas-furnace",
         title: "Check Gas Furnace Filter and Vents",
-        description: "Inspect furnace filter for clogs and ensure all vents are unobstructed for proper airflow.",
+        description: "Inspect furnace filter for clogs and ensure all vents are unobstructed for proper airflow. Check thermostat settings and listen for unusual noises. Replace filter every 1-3 months depending on usage.",
         month: month,
         climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
         priority: "medium",
         estimatedTime: "15 minutes",
         difficulty: "easy",
         category: "HVAC",
+        tools: ["Replacement filter (if needed)"],
+        cost: "$0-25",
+        systemRequirements: ["gas-furnace"]
+      },
+      {
+        id: "monthly-electric-furnace",
+        title: "Electric Furnace Maintenance Check",
+        description: "Inspect electric furnace filter and heating elements. Check electrical connections for corrosion or loose wires. Ensure proper airflow and thermostat operation.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "20 minutes",
+        difficulty: "easy",
+        category: "HVAC",
+        tools: ["Flashlight", "Replacement filter"],
+        cost: "$0-25",
+        systemRequirements: ["electric-furnace"]
+      },
+      {
+        id: "monthly-central-ac",
+        title: "Central Air Conditioning Maintenance",
+        description: "Clean or replace AC filter, check outdoor unit for debris, and inspect thermostat settings. During cooling season, monitor indoor temperature consistency and energy usage.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "high",
+        estimatedTime: "30 minutes",
+        difficulty: "easy",
+        category: "HVAC",
+        tools: ["New filter", "Garden hose", "Soft brush"],
+        cost: "$15-40",
+        systemRequirements: ["central-ac"]
+      },
+      {
+        id: "monthly-septic-system",
+        title: "Septic System Inspection",
+        description: "Check septic tank area for odors, wet spots, or lush grass growth. Avoid excessive water usage and never flush non-biodegradable items. Schedule pumping every 3-5 years.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "15 minutes",
+        difficulty: "easy",
+        category: "Plumbing",
         tools: null,
         cost: "$0",
-        systemRequirements: ["gas-furnace"]
+        systemRequirements: ["septic"]
+      },
+      {
+        id: "monthly-sump-pump",
+        title: "Sump Pump Operation Test",
+        description: "Pour water into sump pit to test pump activation. Check discharge pipe for clogs and ensure pump removes water efficiently. Test backup power source if equipped.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "high",
+        estimatedTime: "10 minutes",
+        difficulty: "easy",
+        category: "Plumbing",
+        tools: ["Bucket of water"],
+        cost: "$0",
+        systemRequirements: ["sump-pump"]
+      },
+      {
+        id: "monthly-water-softener",
+        title: "Water Softener Salt Level Check",
+        description: "Check salt level in brine tank and refill when salt is below 1/3 full. Clean salt bridge if present and ensure proper water softener regeneration cycle operation.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "medium",
+        estimatedTime: "10 minutes",
+        difficulty: "easy",
+        category: "Plumbing",
+        tools: ["Water softener salt"],
+        cost: "$5-15",
+        systemRequirements: ["water-softener"]
+      },
+      {
+        id: "monthly-security-system",
+        title: "Security System Check",
+        description: "Test all sensors, cameras, and alarm functions. Check battery levels in wireless devices and clean camera lenses. Review access codes and ensure system is properly armed.",
+        month: month,
+        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
+        priority: "high",
+        estimatedTime: "20 minutes",
+        difficulty: "easy",
+        category: "Security",
+        tools: ["Replacement batteries", "Cleaning cloth"],
+        cost: "$10-20",
+        systemRequirements: ["security-system"]
       },
       {
         id: "monthly-heat-pump",
