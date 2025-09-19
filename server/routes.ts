@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireRole, requirePropertyOwner } from "./replitAuth";
 import { z } from "zod";
-import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema } from "@shared/schema";
+import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema, insertHouseTransferSchema } from "@shared/schema";
 import pushRoutes from "./push-routes";
 import { pushService } from "./push-service";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
@@ -1194,6 +1194,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(response);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch maintenance tasks" });
+    }
+  });
+
+  // House Transfer routes
+  app.post("/api/house-transfers", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
+    try {
+      const homeownerId = req.session.user.id;
+      
+      // Validate request body  
+      const validatedData = insertHouseTransferSchema.omit({ 
+        fromHomeownerId: true
+      }).parse(req.body);
+      
+      // Verify house ownership
+      const house = await storage.getHouse(validatedData.houseId);
+      if (!house || house.homeownerId !== homeownerId) {
+        return res.status(404).json({ message: "House not found or access denied" });
+      }
+      
+      // Create transfer request with homeowner ID from session
+      const transfer = await storage.createHouseTransfer({
+        ...validatedData,
+        fromHomeownerId: homeownerId,
+      });
+      
+      res.status(201).json(transfer);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid request data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create house transfer request" });
+    }
+  });
+
+  app.get("/api/house-transfers", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
+    try {
+      const homeownerId = req.session.user.id;
+      const transfers = await storage.getHouseTransfersForUser(homeownerId);
+      res.json(transfers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch house transfers" });
+    }
+  });
+
+  app.get("/api/house-transfers/:id", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
+    try {
+      const homeownerId = req.session.user.id;
+      const transfer = await storage.getHouseTransfer(req.params.id);
+      
+      if (!transfer) {
+        return res.status(404).json({ message: "Transfer not found" });
+      }
+      
+      // Verify user is involved in this transfer
+      if (transfer.fromHomeownerId !== homeownerId && transfer.toHomeownerId !== homeownerId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      res.json(transfer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch house transfer" });
+    }
+  });
+
+  app.get("/api/house-transfers/token/:token", async (req: any, res) => {
+    try {
+      const transfer = await storage.getHouseTransferByToken(req.params.token);
+      
+      if (!transfer) {
+        return res.status(404).json({ message: "Transfer not found" });
+      }
+      
+      // Check if token is still valid (7 days)
+      const tokenExpiry = new Date(transfer.createdAt || transfer.expiresAt);
+      tokenExpiry.setDate(tokenExpiry.getDate() + 7);
+      
+      if (new Date() > tokenExpiry) {
+        return res.status(410).json({ message: "Transfer token has expired" });
+      }
+      
+      res.json(transfer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch house transfer" });
+    }
+  });
+
+  app.post("/api/house-transfers/:id/accept", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
+    try {
+      const homeownerId = req.session.user.id;
+      const transfer = await storage.getHouseTransfer(req.params.id);
+      
+      if (!transfer) {
+        return res.status(404).json({ message: "Transfer not found" });
+      }
+      
+      // Verify this user is the intended recipient
+      if (transfer.toHomeownerId !== homeownerId) {
+        return res.status(403).json({ message: "Access denied - you are not the intended recipient" });
+      }
+      
+      if (transfer.status !== 'pending') {
+        return res.status(400).json({ message: "Transfer is no longer pending" });
+      }
+      
+      // Check subscription limits for recipient
+      const housesCount = await storage.getHousesCount(homeownerId);
+      const user = await storage.getUser(homeownerId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check subscription limits
+      const maxHouses = user.maxHousesAllowed || 2; // Default to basic plan limit
+      if (housesCount >= maxHouses) {
+        return res.status(400).json({ 
+          message: `Cannot accept transfer. Your subscription plan allows maximum ${maxHouses} houses.` 
+        });
+      }
+      
+      // Update transfer status to accepted
+      const updatedTransfer = await storage.updateHouseTransfer(req.params.id, {
+        status: 'accepted'
+      });
+      
+      res.json(updatedTransfer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to accept house transfer" });
+    }
+  });
+
+  app.post("/api/house-transfers/:id/confirm", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
+    try {
+      const homeownerId = req.session.user.id;
+      const transfer = await storage.getHouseTransfer(req.params.id);
+      
+      if (!transfer) {
+        return res.status(404).json({ message: "Transfer not found" });
+      }
+      
+      // Verify this is the original owner confirming the transfer
+      if (transfer.fromHomeownerId !== homeownerId) {
+        return res.status(403).json({ message: "Access denied - only the original owner can confirm" });
+      }
+      
+      if (transfer.status !== 'accepted') {
+        return res.status(400).json({ message: "Transfer must be accepted before confirmation" });
+      }
+      
+      // Perform the actual ownership transfer
+      if (!transfer.toHomeownerId) {
+        return res.status(400).json({ message: "Transfer recipient not set" });
+      }
+      
+      const transferResults = await storage.transferHouseOwnership(
+        transfer.houseId,
+        transfer.fromHomeownerId,
+        transfer.toHomeownerId
+      );
+      
+      // Update transfer record with completion details
+      const completedTransfer = await storage.updateHouseTransfer(req.params.id, {
+        status: 'completed',
+        completedAt: new Date(),
+        maintenanceLogsTransferred: transferResults.maintenanceLogsTransferred,
+        appliancesTransferred: transferResults.appliancesTransferred,
+        appointmentsTransferred: transferResults.appointmentsTransferred,
+        customTasksTransferred: transferResults.customTasksTransferred,
+        homeSystemsTransferred: transferResults.homeSystemsTransferred,
+      });
+      
+      res.json({
+        transfer: completedTransfer,
+        transferResults
+      });
+    } catch (error) {
+      console.error("Transfer confirmation error:", error);
+      res.status(500).json({ message: "Failed to confirm house transfer" });
     }
   });
 
