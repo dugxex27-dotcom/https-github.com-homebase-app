@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireRole, requirePropertyOwner } from "./replitAuth";
 import { z } from "zod";
 import { randomUUID } from "crypto";
-import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema, insertHouseTransferSchema, insertContractorAnalyticsSchema } from "@shared/schema";
+import { insertHomeApplianceSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema, insertHouseTransferSchema } from "@shared/schema";
 import pushRoutes from "./push-routes";
 import { pushService } from "./push-service";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
@@ -1203,12 +1203,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const homeownerId = req.session.user.id;
       
-      // Validate request body (only accept client-provided fields)
-      const validatedData = insertHouseTransferSchema.omit({
+      // Validate request body (exclude server-generated fields)
+      const validatedData = insertHouseTransferSchema.omit({ 
         fromHomeownerId: true,
         token: true,
         expiresAt: true,
-        status: true
+        status: true,
+        maintenanceLogsTransferred: true,
+        appliancesTransferred: true,
+        appointmentsTransferred: true,
+        customTasksTransferred: true,
+        homeSystemsTransferred: true,
+        createdAt: true,
+        completedAt: true
       }).parse(req.body);
       
       // Verify house ownership
@@ -1279,7 +1286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if token is still valid
       const tokenExpiry = transfer.expiresAt ? 
         new Date(transfer.expiresAt) : 
-        new Date(new Date(transfer.createdAt || new Date()).getTime() + 7*24*60*60*1000);
+        new Date(new Date(transfer.createdAt).getTime() + 7*24*60*60*1000);
       
       if (new Date() > tokenExpiry) {
         return res.status(410).json({ message: "Transfer token has expired" });
@@ -1809,82 +1816,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting contractor license:", error);
       res.status(500).json({ message: "Failed to delete license" });
-    }
-  });
-
-  // Contractor analytics routes
-  app.post('/api/contractor/analytics/track', async (req: any, res) => {
-    try {
-      const { contractorId, clickType, sessionId, userAgent, ipAddress, referrerUrl } = req.body;
-      
-      // Basic validation
-      if (!contractorId || !clickType) {
-        return res.status(400).json({ message: "contractorId and clickType are required" });
-      }
-
-      // Valid click types
-      const validClickTypes = ['profile_view', 'website', 'facebook', 'instagram', 'linkedin', 'google_business'];
-      if (!validClickTypes.includes(clickType)) {
-        return res.status(400).json({ message: "Invalid click type" });
-      }
-
-      const homeownerId = req.session?.isAuthenticated ? req.session?.user?.id : null;
-
-      const analyticsData = {
-        contractorId,
-        homeownerId,
-        clickType,
-        sessionId,
-        userAgent,
-        ipAddress,
-        referrerUrl,
-      };
-
-      const clickRecord = await storage.trackContractorClick(analyticsData);
-      res.json(clickRecord);
-    } catch (error) {
-      console.error("Error tracking contractor click:", error);
-      res.status(500).json({ message: "Failed to track click" });
-    }
-  });
-
-  app.get('/api/contractor/analytics', async (req: any, res) => {
-    try {
-      if (!req.session?.isAuthenticated || req.session?.user?.role !== 'contractor') {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const contractorId = req.session.user.id;
-      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
-      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
-
-      const analytics = await storage.getContractorAnalytics(contractorId, startDate, endDate);
-      res.json(analytics);
-    } catch (error) {
-      console.error("Error fetching contractor analytics:", error);
-      res.status(500).json({ message: "Failed to fetch analytics" });
-    }
-  });
-
-  app.get('/api/contractor/analytics/monthly', async (req: any, res) => {
-    try {
-      if (!req.session?.isAuthenticated || req.session?.user?.role !== 'contractor') {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const contractorId = req.session.user.id;
-      const year = parseInt(req.query.year as string) || new Date().getFullYear();
-      const month = parseInt(req.query.month as string) || new Date().getMonth() + 1;
-
-      if (month < 1 || month > 12) {
-        return res.status(400).json({ message: "Month must be between 1 and 12" });
-      }
-
-      const stats = await storage.getContractorMonthlyStats(contractorId, year, month);
-      res.json(stats);
-    } catch (error) {
-      console.error("Error fetching contractor monthly stats:", error);
-      res.status(500).json({ message: "Failed to fetch monthly stats" });
     }
   });
 

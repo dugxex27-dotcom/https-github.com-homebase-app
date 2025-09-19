@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Proposals } from "@/components/proposals";
 
 import { useAuth } from "@/hooks/useAuth";
-import { Calendar, Users, Star, TrendingUp, FileText, User, BarChart3 } from "lucide-react";
+import { Calendar, Users, Star, TrendingUp, FileText, User } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 
 export default function ContractorDashboard() {
@@ -125,7 +125,7 @@ export default function ContractorDashboard() {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Button 
                   className="h-20 flex flex-col items-center justify-center space-y-2 text-white hover:opacity-90" 
                   style={{ backgroundColor: '#1560a2' }}
@@ -162,22 +162,10 @@ export default function ContractorDashboard() {
                   <span>Edit Profile</span>
                 </Button>
                 <Button 
-                  className="h-20 flex flex-col items-center justify-center space-y-2 text-white hover:opacity-90"
-                  style={{ backgroundColor: '#1560a2', border: 'none' }}
-                  onClick={() => window.location.href = "/contractor-analytics"}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = '#afd6f9'; e.currentTarget.querySelectorAll('svg').forEach(svg => svg.style.color = '#afd6f9'); }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = 'white'; e.currentTarget.querySelectorAll('svg').forEach(svg => svg.style.color = 'white'); }}
-                  data-testid="button-view-analytics"
-                >
-                  <BarChart3 className="h-6 w-6 text-white" />
-                  <span>View Analytics</span>
-                </Button>
-                <Button 
                   className="h-20 flex flex-col items-center justify-center space-y-2 text-white hover:opacity-90" 
                   style={{ backgroundColor: '#1560a2' }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = '#afd6f9'; e.currentTarget.querySelectorAll('svg').forEach(svg => svg.style.color = '#afd6f9'); }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = 'white'; e.currentTarget.querySelectorAll('svg').forEach(svg => svg.style.color = 'white'); }}
-                  data-testid="button-view-reviews"
                 >
                   <Star className="h-6 w-6 text-white" />
                   <span>View Reviews</span>

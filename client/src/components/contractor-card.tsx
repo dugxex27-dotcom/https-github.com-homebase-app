@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import ContactContractorButton from "@/components/contact-contractor-button";
 import type { Contractor } from "@shared/schema";
-import { trackProfileView } from "@/lib/analytics";
 
 interface ContractorCardProps {
   contractor: Contractor & { isBoosted?: boolean };
@@ -113,14 +112,7 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
               className="flex-1"
             />
             <Link href={`/contractor/${contractor.id}`} className="flex-shrink-0">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="px-3 whitespace-nowrap" 
-                style={{ color: '#ffffff' }}
-                onClick={() => trackProfileView(contractor.id)}
-                data-testid="button-view-profile"
-              >
+              <Button variant="outline" size="sm" className="px-3 whitespace-nowrap" style={{ color: '#ffffff' }}>
                 View Profile
               </Button>
             </Link>

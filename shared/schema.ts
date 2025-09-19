@@ -112,30 +112,8 @@ export const contractors = pgTable("contractors", {
   profileImage: text("profile_image"),
   businessLogo: text("business_logo"),
   projectPhotos: text("project_photos").array().default(sql`ARRAY[]::text[]`),
-  website: text("website"),
-  facebook: text("facebook"),
-  instagram: text("instagram"),
-  linkedin: text("linkedin"),
   googleBusinessUrl: text("google_business_url"),
 });
-
-// Contractor analytics table for tracking clicks and engagement
-export const contractorAnalytics = pgTable("contractor_analytics", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  contractorId: varchar("contractor_id").notNull().references(() => contractors.id, { onDelete: 'cascade' }),
-  homeownerId: varchar("homeowner_id"), // nullable, references users table (if logged in)
-  clickType: text("click_type").notNull(), // "profile_view", "website", "facebook", "instagram", "linkedin", "google_business"
-  sessionId: varchar("session_id"), // for tracking unique sessions
-  userAgent: text("user_agent"), // browser/device info
-  ipAddress: varchar("ip_address"), // for basic location tracking
-  referrerUrl: text("referrer_url"), // where they came from
-  clickedAt: timestamp("clicked_at").notNull().defaultNow(),
-}, (table) => [
-  // Indexes for performance
-  index("IDX_contractor_analytics_contractor_id").on(table.contractorId),
-  index("IDX_contractor_analytics_clicked_at").on(table.clickedAt),
-  index("IDX_contractor_analytics_type_date").on(table.contractorId, table.clickType, table.clickedAt),
-]);
 
 export const products = pgTable("products", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -549,11 +527,6 @@ export const insertHouseTransferSchema = createInsertSchema(houseTransfers).omit
   homeSystemsTransferred: true,
 });
 
-export const insertContractorAnalyticsSchema = createInsertSchema(contractorAnalytics).omit({
-  id: true,
-  clickedAt: true,
-});
-
 export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
   id: true,
   createdAt: true,
@@ -609,5 +582,3 @@ export type InsertContractorBoost = z.infer<typeof insertContractorBoostSchema>;
 export type ContractorBoost = typeof contractorBoosts.$inferSelect;
 export type InsertHouseTransfer = z.infer<typeof insertHouseTransferSchema>;
 export type HouseTransfer = typeof houseTransfers.$inferSelect;
-export type InsertContractorAnalytics = z.infer<typeof insertContractorAnalyticsSchema>;
-export type ContractorAnalytics = typeof contractorAnalytics.$inferSelect;
