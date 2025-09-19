@@ -1203,19 +1203,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const homeownerId = req.session.user.id;
       
-      // Validate request body (exclude server-generated fields)
-      const validatedData = insertHouseTransferSchema.omit({ 
+      // Validate request body (only accept client-provided fields)
+      const validatedData = insertHouseTransferSchema.omit({
         fromHomeownerId: true,
         token: true,
         expiresAt: true,
-        status: true,
-        maintenanceLogsTransferred: true,
-        appliancesTransferred: true,
-        appointmentsTransferred: true,
-        customTasksTransferred: true,
-        homeSystemsTransferred: true,
-        createdAt: true,
-        completedAt: true
+        status: true
       }).parse(req.body);
       
       // Verify house ownership
@@ -1286,7 +1279,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if token is still valid
       const tokenExpiry = transfer.expiresAt ? 
         new Date(transfer.expiresAt) : 
-        new Date(new Date(transfer.createdAt).getTime() + 7*24*60*60*1000);
+        new Date(new Date(transfer.createdAt || new Date()).getTime() + 7*24*60*60*1000);
       
       if (new Date() > tokenExpiry) {
         return res.status(410).json({ message: "Transfer token has expired" });
