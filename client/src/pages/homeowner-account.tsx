@@ -434,7 +434,9 @@ export default function HomeownerAccount() {
 
             {/* Push Notifications */}
             {user && (
-              <PushNotificationManager userId={(user as any).id} />
+              <div>
+                <PushNotificationManager userId={(user as any).id} />
+              </div>
             )}
 
             {/* Referral Sharing */}
