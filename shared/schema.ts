@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, decimal, boolean, timestamp, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, decimal, boolean, timestamp, index, uniqueIndex, check, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -21,7 +21,9 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   displayName: text("display_name").notNull(), // "Basic Homeowner", "Super Homeowner", "Contractor"
   description: text("description").notNull(),
   monthlyPrice: decimal("monthly_price", { precision: 10, scale: 2 }).notNull(),
-  maxHouses: integer("max_houses").notNull(), // Maximum houses allowed for this tier
+  minHouses: integer("min_houses").notNull().default(0), // Minimum houses required for this tier
+  maxHouses: integer("max_houses"), // Maximum houses allowed (null = unlimited)
+  planType: text("plan_type").notNull().default("homeowner"), // "homeowner" or "contractor"
   stripeProductId: varchar("stripe_product_id").unique(),
   stripePriceId: varchar("stripe_price_id").unique(),
   features: text("features").array().notNull(), // Array of feature descriptions
@@ -30,6 +32,34 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// Referral credits tracking table for detailed audit trail
+export const referralCredits = pgTable("referral_credits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referrerUserId: varchar("referrer_user_id").notNull().references(() => users.id, { onDelete: 'cascade' }), // User who made the referral
+  referredUserId: varchar("referred_user_id").notNull().references(() => users.id, { onDelete: 'cascade' }), // User who was referred
+  creditAmount: decimal("credit_amount", { precision: 10, scale: 2 }).notNull().default("1.00"), // Amount of credit earned
+  status: text("status").notNull().default("earned"), // "earned", "applied", "expired", "cancelled"
+  earnedAt: timestamp("earned_at").notNull().defaultNow(), // When the credit was earned
+  appliedAt: timestamp("applied_at"), // When credit was applied to a bill
+  appliedToInvoiceId: varchar("applied_to_invoice_id"), // Stripe invoice ID where credit was applied
+  appliedAmount: decimal("applied_amount", { precision: 10, scale: 2 }), // Actual amount applied (may be less than credit_amount)
+  billingPeriodStart: timestamp("billing_period_start"), // Start of billing period where applied
+  billingPeriodEnd: timestamp("billing_period_end"), // End of billing period where applied
+  expiresAt: timestamp("expires_at"), // Optional expiration date for credits
+  source: text("source").notNull().default("referral"), // "referral", "bonus", "promotion", etc.
+  notes: text("notes"), // Additional notes about the credit
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Unique constraint to prevent duplicate referral credits
+  uniqueIndex("UX_referral_pair").on(table.referrerUserId, table.referredUserId),
+  // Performance indexes
+  index("IDX_referral_referrer_status_applied_at").on(table.referrerUserId, table.status, table.appliedAt),
+  index("IDX_referral_referred").on(table.referredUserId),
+  // Check constraint to prevent self-referrals
+  check("CHK_not_self", sql`referrer_user_id <> referred_user_id`),
+]);
 
 // Users table for Replit Auth with role and subscription support
 export const users = pgTable("users", {
@@ -43,10 +73,10 @@ export const users = pgTable("users", {
   referredBy: varchar("referred_by"), // referral code of user who referred this user
   referralCount: integer("referral_count").notNull().default(0),
   // Subscription fields
-  subscriptionTier: text("subscription_tier").default("free"), // "free", "basic", "super", "contractor"
+  subscriptionPlanId: varchar("subscription_plan_id").references(() => subscriptionPlans.id, { onDelete: 'set null' }), // FK to subscription_plans.id
   subscriptionStatus: text("subscription_status").default("inactive"), // "active", "inactive", "cancelled", "past_due"
-  referralDiscountAmount: decimal("referral_discount_amount", { precision: 10, scale: 2 }).notNull().default("0.00"), // Total discount earned from referrals
-  maxHousesAllowed: integer("max_houses_allowed").notNull().default(2), // Based on subscription tier
+  // Note: maxHousesAllowed and tier info can be derived from the plan, but keeping for performance
+  maxHousesAllowed: integer("max_houses_allowed").notNull().default(2), // Cached from subscription plan
   isPremium: boolean("is_premium").notNull().default(false),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
@@ -55,7 +85,10 @@ export const users = pgTable("users", {
   subscriptionEndDate: timestamp("subscription_end_date"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  // Index for subscription plan lookups
+  index("IDX_users_subscription_plan_id").on(table.subscriptionPlanId),
+]);
 
 export const contractors = pgTable("contractors", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -465,8 +498,16 @@ export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans
   updatedAt: true,
 });
 
+export const insertReferralCreditSchema = createInsertSchema(referralCredits).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
 export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type InsertReferralCredit = z.infer<typeof insertReferralCreditSchema>;
+export type ReferralCredit = typeof referralCredits.$inferSelect;
 export type InsertContractor = z.infer<typeof insertContractorSchema>;
 export type Contractor = typeof contractors.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;

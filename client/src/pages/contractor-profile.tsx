@@ -26,7 +26,12 @@ import {
   Camera,
   Save,
   Plus,
-  X
+  X,
+  Share2,
+  Copy,
+  MessageSquare,
+  Gift,
+  DollarSign
 } from "lucide-react";
 
 const AVAILABLE_SERVICES = [
@@ -345,6 +350,52 @@ export default function ContractorProfile() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateProfileMutation.mutate(formData);
+  };
+
+  // Referral sharing functionality
+  const generateReferralCode = () => {
+    const userId = typedUser?.id || 'contractor';
+    return userId.slice(0, 8).toUpperCase();
+  };
+
+  const referralCode = typedUser?.referralCode || generateReferralCode();
+  const referralLink = `${window.location.origin}/?ref=${referralCode}`;
+  const shareMessage = `Join me on Home Base! Use my referral code ${referralCode} and we both get $1 off our subscription. Perfect for contractors! Sign up here: ${referralLink}`;
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied!",
+        description: "Referral code copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: "Please copy the code manually",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const shareViaText = () => {
+    const smsLink = `sms:?body=${encodeURIComponent(shareMessage)}`;
+    window.open(smsLink);
+  };
+
+  const shareViaFacebook = () => {
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}&quote=${encodeURIComponent(shareMessage)}`;
+    window.open(facebookUrl, '_blank', 'width=600,height=400');
+  };
+
+  const shareViaTwitter = () => {
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}`;
+    window.open(twitterUrl, '_blank', 'width=600,height=400');
+  };
+
+  const shareViaWhatsApp = () => {
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   if (isLoading) {
@@ -948,7 +999,141 @@ export default function ContractorProfile() {
           </CardContent>
         </Card>
 
+        {/* Referral Sharing */}
+        <Card style={{ backgroundColor: '#f2f2f2' }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2" style={{ color: '#1560a2' }}>
+              <Gift className="w-5 h-5" style={{ color: '#1560a2' }} />
+              Referral Rewards
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-sm text-gray-600">
+              Share Home Base with other contractors and homeowners. Earn $1 off your subscription for each signup!
+            </div>
+            
+            {/* Referral Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-3 bg-white rounded-lg">
+                <div className="text-2xl font-bold" style={{ color: '#1560a2' }}>
+                  {typedUser?.referralCount || 0}
+                </div>
+                <div className="text-sm text-gray-600">People Referred</div>
+              </div>
+              <div className="text-center p-3 bg-white rounded-lg">
+                <div className="text-2xl font-bold text-green-600">
+                  ${((typedUser?.referralCount || 0) * 1).toFixed(2)}
+                </div>
+                <div className="text-sm text-gray-600">Total Earned</div>
+              </div>
+            </div>
 
+            {/* Referral Code */}
+            <div>
+              <Label style={{ color: '#1560a2' }}>Your Referral Code</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  value={referralCode}
+                  readOnly
+                  data-testid="input-contractor-referral-code"
+                  className="font-mono text-lg font-bold text-center"
+                  style={{ backgroundColor: 'white', color: '#1560a2' }}
+                />
+                <Button
+                  onClick={() => copyToClipboard(referralCode)}
+                  variant="outline"
+                  size="icon"
+                  data-testid="button-copy-contractor-code"
+                  title="Copy referral code"
+                  type="button"
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Share Options */}
+            <div>
+              <Label style={{ color: '#1560a2' }}>Share with Your Network</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <Button
+                  onClick={shareViaText}
+                  variant="outline"
+                  size="sm"
+                  data-testid="button-contractor-share-text"
+                  className="flex items-center gap-2"
+                  type="button"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Text Message
+                </Button>
+                <Button
+                  onClick={shareViaWhatsApp}
+                  variant="outline"
+                  size="sm"
+                  data-testid="button-contractor-share-whatsapp"
+                  className="flex items-center gap-2"
+                  style={{ color: '#25D366' }}
+                  type="button"
+                >
+                  <Share2 className="w-4 h-4" />
+                  WhatsApp
+                </Button>
+                <Button
+                  onClick={shareViaFacebook}
+                  variant="outline"
+                  size="sm"
+                  data-testid="button-contractor-share-facebook"
+                  className="flex items-center gap-2"
+                  style={{ color: '#1877F2' }}
+                  type="button"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Facebook
+                </Button>
+                <Button
+                  onClick={shareViaTwitter}
+                  variant="outline"
+                  size="sm"
+                  data-testid="button-contractor-share-twitter"
+                  className="flex items-center gap-2"
+                  style={{ color: '#1DA1F2' }}
+                  type="button"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Twitter
+                </Button>
+              </div>
+            </div>
+
+            {/* Copy Link */}
+            <div>
+              <Label style={{ color: '#1560a2' }}>Referral Link</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  value={referralLink}
+                  readOnly
+                  data-testid="input-contractor-referral-link"
+                  className="text-sm"
+                  style={{ backgroundColor: 'white', color: '#1560a2' }}
+                />
+                <Button
+                  onClick={() => copyToClipboard(referralLink)}
+                  variant="outline"
+                  size="icon"
+                  data-testid="button-copy-contractor-link"
+                  title="Copy referral link"
+                  type="button"
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-sm text-gray-600 mt-1">
+                Perfect for sharing with fellow contractors and potential clients!
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Save Button */}
         <div className="flex justify-end">

@@ -18,7 +18,12 @@ import {
   MapPin,
   Save,
   Camera,
-  LogOut
+  LogOut,
+  Share2,
+  Copy,
+  MessageSquare,
+  Gift,
+  DollarSign
 } from "lucide-react";
 import PushNotificationManager from "@/components/push-notification-manager";
 
@@ -120,6 +125,52 @@ export default function HomeownerAccount() {
       // Fallback: try the GET endpoint
       window.location.href = '/api/logout';
     }
+  };
+
+  // Generate referral code if user doesn't have one
+  const generateReferralCode = () => {
+    const userId = (user as any)?.id || 'user';
+    return userId.slice(0, 8).toUpperCase();
+  };
+
+  const referralCode = (user as any)?.referralCode || generateReferralCode();
+  const referralLink = `${window.location.origin}/?ref=${referralCode}`;
+  const shareMessage = `Join me on Home Base! Use my referral code ${referralCode} and we both get $1 off our subscription. Sign up here: ${referralLink}`;
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied!",
+        description: "Referral code copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: "Please copy the code manually",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const shareViaText = () => {
+    const smsLink = `sms:?body=${encodeURIComponent(shareMessage)}`;
+    window.open(smsLink);
+  };
+
+  const shareViaFacebook = () => {
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}&quote=${encodeURIComponent(shareMessage)}`;
+    window.open(facebookUrl, '_blank', 'width=600,height=400');
+  };
+
+  const shareViaTwitter = () => {
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}`;
+    window.open(twitterUrl, '_blank', 'width=600,height=400');
+  };
+
+  const shareViaWhatsApp = () => {
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   return (
@@ -383,8 +434,139 @@ export default function HomeownerAccount() {
 
             {/* Push Notifications */}
             {user && (
-              <PushNotificationManager userId={(user as any).id} />
+              <div>
+                <PushNotificationManager userId={(user as any).id} />
+              </div>
             )}
+
+            {/* Referral Sharing */}
+            <Card style={{ backgroundColor: '#f2f2f2' }}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Gift className="w-5 h-5" />
+                  Referral Rewards
+                </CardTitle>
+                <CardDescription>
+                  Share Home Base with friends and earn $1 off your subscription for each signup
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Referral Stats */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-3 bg-white rounded-lg">
+                    <div className="text-2xl font-bold" style={{ color: '#2c0f5b' }}>
+                      {(user as any)?.referralCount || 0}
+                    </div>
+                    <div className="text-sm text-gray-600">Friends Referred</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      ${((user as any)?.referralCount || 0) * 1}.00
+                    </div>
+                    <div className="text-sm text-gray-600">Total Earned</div>
+                  </div>
+                </div>
+
+                {/* Referral Code */}
+                <div>
+                  <Label style={{ color: '#2c0f5b' }}>Your Referral Code</Label>
+                  <div className="flex gap-2 mt-2">
+                    <Input
+                      value={referralCode}
+                      readOnly
+                      data-testid="input-referral-code"
+                      className="font-mono text-lg font-bold text-center"
+                      style={{ backgroundColor: 'white', color: '#2c0f5b' }}
+                    />
+                    <Button
+                      onClick={() => copyToClipboard(referralCode)}
+                      variant="outline"
+                      size="icon"
+                      data-testid="button-copy-code"
+                      title="Copy referral code"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Share Options */}
+                <div>
+                  <Label style={{ color: '#2c0f5b' }}>Share with Friends</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    <Button
+                      onClick={shareViaText}
+                      variant="outline"
+                      size="sm"
+                      data-testid="button-share-text"
+                      className="flex items-center gap-2"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      Text Message
+                    </Button>
+                    <Button
+                      onClick={shareViaWhatsApp}
+                      variant="outline"
+                      size="sm"
+                      data-testid="button-share-whatsapp"
+                      className="flex items-center gap-2"
+                      style={{ color: '#25D366' }}
+                    >
+                      <Share2 className="w-4 h-4" />
+                      WhatsApp
+                    </Button>
+                    <Button
+                      onClick={shareViaFacebook}
+                      variant="outline"
+                      size="sm"
+                      data-testid="button-share-facebook"
+                      className="flex items-center gap-2"
+                      style={{ color: '#1877F2' }}
+                    >
+                      <Share2 className="w-4 h-4" />
+                      Facebook
+                    </Button>
+                    <Button
+                      onClick={shareViaTwitter}
+                      variant="outline"
+                      size="sm"
+                      data-testid="button-share-twitter"
+                      className="flex items-center gap-2"
+                      style={{ color: '#1DA1F2' }}
+                    >
+                      <Share2 className="w-4 h-4" />
+                      Twitter
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Copy Link */}
+                <div>
+                  <Label style={{ color: '#2c0f5b' }}>Referral Link</Label>
+                  <div className="flex gap-2 mt-2">
+                    <Input
+                      value={referralLink}
+                      readOnly
+                      data-testid="input-referral-link"
+                      className="text-sm"
+                      style={{ backgroundColor: 'white', color: '#2c0f5b' }}
+                    />
+                    <Button
+                      onClick={() => copyToClipboard(referralLink)}
+                      variant="outline"
+                      size="icon"
+                      data-testid="button-copy-link"
+                      title="Copy referral link"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Share this link and both you and your friend get $1 off when they subscribe!
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Account Overview */}
             <Card>
