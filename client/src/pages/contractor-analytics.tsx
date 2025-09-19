@@ -86,10 +86,16 @@ export default function ContractorAnalytics() {
     );
   }
 
-  // Fetch monthly stats
+  // Fetch monthly stats  
   const { data: monthlyStats, isLoading } = useQuery<MonthlyStats>({
     queryKey: ['/api/contractor/analytics/monthly', selectedYear, selectedMonth],
-    queryParams: { year: selectedYear, month: selectedMonth },
+    queryFn: async () => {
+      const response = await fetch(`/api/contractor/analytics/monthly?year=${selectedYear}&month=${selectedMonth}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch monthly stats');
+      }
+      return response.json();
+    },
   });
 
   const chartData = [
