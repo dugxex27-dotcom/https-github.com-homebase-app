@@ -109,7 +109,8 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Inspect and maintain outdoor spaces',
           'Check attic ventilation for summer heat',
           'Clean and inspect swimming pool if applicable',
-          'Maintain landscaping and irrigation'
+          'Maintain landscaping and irrigation',
+          'Flush water heater'
         ],
         weatherSpecific: [
           'Ensure adequate cooling system capacity',
@@ -334,7 +335,8 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Monitor air conditioning efficiency',
           'Maintain pool and outdoor systems',
           'Check attic ventilation',
-          'Inspect for heat-related expansion'
+          'Inspect for heat-related expansion',
+          'Flush water heater'
         ],
         weatherSpecific: [
           'Hurricane season preparation',
@@ -558,7 +560,8 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Monitor air conditioning efficiency',
           'Maintain outdoor living spaces',
           'Check attic ventilation',
-          'Inspect and maintain pool if applicable'
+          'Inspect and maintain pool if applicable',
+          'Flush water heater'
         ],
         weatherSpecific: [
           'Continue tornado season vigilance',
@@ -783,7 +786,8 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Monitor energy efficiency',
           'Maintain pool and cooling systems',
           'Check attic ventilation',
-          'Inspect outdoor equipment protection'
+          'Inspect outdoor equipment protection',
+          'Flush water heater'
         ],
         weatherSpecific: [
           'Peak heat season preparation (110°F+)',
@@ -1007,7 +1011,8 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Monitor air conditioning efficiency',
           'Maintain outdoor living spaces',
           'Check pool and water systems',
-          'Inspect exterior for fire safety'
+          'Inspect exterior for fire safety',
+          'Flush water heater'
         ],
         weatherSpecific: [
           'Peak wildfire season (June-October)',
@@ -1231,7 +1236,8 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Monitor air conditioning efficiency',
           'Maintain outdoor equipment',
           'Check pool and water systems',
-          'Inspect fire-safe landscaping'
+          'Inspect fire-safe landscaping',
+          'Flush water heater'
         ],
         weatherSpecific: [
           'Peak wildfire season (June-September)',
@@ -1456,7 +1462,8 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Monitor air conditioning efficiency',
           'Maintain fire-safe landscaping',
           'Check outdoor water systems',
-          'Inspect exterior for summer preparation'
+          'Inspect exterior for summer preparation',
+          'Flush water heater'
         ],
         weatherSpecific: [
           'Begin dry season and wildfire vigilance',
