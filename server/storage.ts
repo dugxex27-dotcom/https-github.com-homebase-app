@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer } from "@shared/schema";
+import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -165,6 +165,20 @@ export interface IStorage {
     homeSystemsTransferred: number;
   }>;
   getHousesCount(homeownerId: string): Promise<number>;
+  
+  // Contractor analytics operations
+  trackContractorClick(analytics: InsertContractorAnalytics): Promise<ContractorAnalytics>;
+  getContractorAnalytics(contractorId: string, startDate?: Date, endDate?: Date): Promise<ContractorAnalytics[]>;
+  getContractorMonthlyStats(contractorId: string, year: number, month: number): Promise<{
+    profileViews: number;
+    websiteClicks: number;
+    facebookClicks: number;
+    instagramClicks: number;
+    linkedinClicks: number;
+    googleBusinessClicks: number;
+    totalClicks: number;
+    uniqueViewers: number;
+  }>;
 }
 
 export class MemStorage implements IStorage {
@@ -188,6 +202,7 @@ export class MemStorage implements IStorage {
   private homeSystems: Map<string, HomeSystem>;
   private pushSubscriptions: Map<string, PushSubscription>;
   private contractorBoosts: Map<string, ContractorBoost>;
+  private contractorAnalytics: Map<string, ContractorAnalytics>;
 
   constructor() {
     this.users = new Map();
@@ -210,6 +225,7 @@ export class MemStorage implements IStorage {
     this.homeSystems = new Map();
     this.pushSubscriptions = new Map();
     this.contractorBoosts = new Map();
+    this.contractorAnalytics = new Map();
     this.seedData();
     this.seedServiceRecords();
     this.seedReviews();
@@ -2277,6 +2293,71 @@ export class MemStorage implements IStorage {
 
   async getHousesCount(homeownerId: string): Promise<number> {
     return Array.from(this.houses.values()).filter(house => house.homeownerId === homeownerId).length;
+  }
+
+  // Contractor analytics operations
+  async trackContractorClick(analytics: InsertContractorAnalytics): Promise<ContractorAnalytics> {
+    const id = randomUUID();
+    const clickRecord: ContractorAnalytics = {
+      id,
+      contractorId: analytics.contractorId,
+      homeownerId: analytics.homeownerId || null,
+      clickType: analytics.clickType,
+      sessionId: analytics.sessionId || null,
+      userAgent: analytics.userAgent || null,
+      ipAddress: analytics.ipAddress || null,
+      referrerUrl: analytics.referrerUrl || null,
+      clickedAt: new Date(),
+    };
+    
+    this.contractorAnalytics.set(id, clickRecord);
+    return clickRecord;
+  }
+
+  async getContractorAnalytics(contractorId: string, startDate?: Date, endDate?: Date): Promise<ContractorAnalytics[]> {
+    const analytics = Array.from(this.contractorAnalytics.values())
+      .filter(record => record.contractorId === contractorId);
+
+    if (startDate || endDate) {
+      return analytics.filter(record => {
+        const clickDate = record.clickedAt;
+        if (startDate && clickDate < startDate) return false;
+        if (endDate && clickDate > endDate) return false;
+        return true;
+      });
+    }
+
+    return analytics;
+  }
+
+  async getContractorMonthlyStats(contractorId: string, year: number, month: number): Promise<{
+    profileViews: number;
+    websiteClicks: number;
+    facebookClicks: number;
+    instagramClicks: number;
+    linkedinClicks: number;
+    googleBusinessClicks: number;
+    totalClicks: number;
+    uniqueViewers: number;
+  }> {
+    const startDate = new Date(year, month - 1, 1); // month is 0-indexed in JS
+    const endDate = new Date(year, month, 0); // Last day of the month
+    endDate.setHours(23, 59, 59, 999); // End of day
+
+    const analytics = await this.getContractorAnalytics(contractorId, startDate, endDate);
+    
+    const stats = {
+      profileViews: analytics.filter(a => a.clickType === 'profile_view').length,
+      websiteClicks: analytics.filter(a => a.clickType === 'website').length,
+      facebookClicks: analytics.filter(a => a.clickType === 'facebook').length,
+      instagramClicks: analytics.filter(a => a.clickType === 'instagram').length,
+      linkedinClicks: analytics.filter(a => a.clickType === 'linkedin').length,
+      googleBusinessClicks: analytics.filter(a => a.clickType === 'google_business').length,
+      totalClicks: analytics.length,
+      uniqueViewers: new Set(analytics.map(a => a.sessionId || a.ipAddress).filter(Boolean)).size,
+    };
+
+    return stats;
   }
 }
 
