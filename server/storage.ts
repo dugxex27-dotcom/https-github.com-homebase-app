@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics } from "@shared/schema";
+import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -179,6 +179,12 @@ export interface IStorage {
     topReferrers: { referrer: string; count: number }[];
     dailyBreakdown: { day: number; views: number; uniqueVisitors: number }[];
   }>;
+
+  // Task override operations for customizing default regional tasks
+  getTaskOverrides(homeownerId: string, houseId: string): Promise<TaskOverride[]>;
+  getTaskOverride(homeownerId: string, houseId: string, taskId: string): Promise<TaskOverride | undefined>;
+  upsertTaskOverride(override: InsertTaskOverride): Promise<TaskOverride>;
+  deleteTaskOverride(homeownerId: string, houseId: string, taskId: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -203,6 +209,7 @@ export class MemStorage implements IStorage {
   private pushSubscriptions: Map<string, PushSubscription>;
   private contractorBoosts: Map<string, ContractorBoost>;
   private contractorAnalytics: Map<string, ContractorAnalytics>;
+  private taskOverrides: Map<string, TaskOverride>;
 
   constructor() {
     this.users = new Map();
@@ -226,6 +233,7 @@ export class MemStorage implements IStorage {
     this.pushSubscriptions = new Map();
     this.contractorBoosts = new Map();
     this.contractorAnalytics = new Map();
+    this.taskOverrides = new Map();
     this.seedData();
     this.seedServiceRecords();
     this.seedReviews();
@@ -2401,6 +2409,56 @@ export class MemStorage implements IStorage {
       topReferrers,
       dailyBreakdown
     };
+  }
+
+  // Task override operations for customizing default regional tasks
+  async getTaskOverrides(homeownerId: string, houseId: string): Promise<TaskOverride[]> {
+    const overrides: TaskOverride[] = [];
+    for (const override of this.taskOverrides.values()) {
+      if (override.homeownerId === homeownerId && override.houseId === houseId) {
+        overrides.push(override);
+      }
+    }
+    return overrides;
+  }
+
+  async getTaskOverride(homeownerId: string, houseId: string, taskId: string): Promise<TaskOverride | undefined> {
+    for (const override of this.taskOverrides.values()) {
+      if (override.homeownerId === homeownerId && override.houseId === houseId && override.taskId === taskId) {
+        return override;
+      }
+    }
+    return undefined;
+  }
+
+  async upsertTaskOverride(overrideData: InsertTaskOverride): Promise<TaskOverride> {
+    // Look for existing override
+    const existingOverride = await this.getTaskOverride(overrideData.homeownerId, overrideData.houseId, overrideData.taskId);
+    
+    const override: TaskOverride = {
+      id: existingOverride?.id || randomUUID(),
+      homeownerId: overrideData.homeownerId,
+      houseId: overrideData.houseId,
+      taskId: overrideData.taskId,
+      isEnabled: overrideData.isEnabled ?? true,
+      frequencyType: overrideData.frequencyType || null,
+      frequencyValue: overrideData.frequencyValue || null,
+      specificMonths: overrideData.specificMonths || null,
+      notes: overrideData.notes || null,
+      createdAt: existingOverride?.createdAt || new Date(),
+      updatedAt: new Date(),
+    };
+
+    this.taskOverrides.set(override.id, override);
+    return override;
+  }
+
+  async deleteTaskOverride(homeownerId: string, houseId: string, taskId: string): Promise<boolean> {
+    const existing = await this.getTaskOverride(homeownerId, houseId, taskId);
+    if (!existing) {
+      return false;
+    }
+    return this.taskOverrides.delete(existing.id);
   }
 }
 
