@@ -13,8 +13,8 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { insertMaintenanceLogSchema, insertCustomMaintenanceTaskSchema, insertHomeSystemSchema } from "@shared/schema";
-import type { MaintenanceLog, House, CustomMaintenanceTask, HomeSystem } from "@shared/schema";
+import { insertMaintenanceLogSchema, insertCustomMaintenanceTaskSchema, insertHomeSystemSchema, insertTaskOverrideSchema } from "@shared/schema";
+import type { MaintenanceLog, House, CustomMaintenanceTask, HomeSystem, TaskOverride } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud } from "lucide-react";
@@ -191,6 +191,27 @@ interface AddressSuggestion {
   };
 }
 
+// Generate stable task ID from task title for override tracking
+const generateTaskId = (title: string): string => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, '-')
+    .trim();
+};
+
+// Helper function to get task override for a specific task
+const getTaskOverride = (taskTitle: string, overrides: TaskOverride[]): TaskOverride | undefined => {
+  const taskId = generateTaskId(taskTitle);
+  return overrides.find(override => override.taskId === taskId);
+};
+
+// Helper function to check if a task is enabled (default true unless disabled by override)
+const isTaskEnabled = (taskTitle: string, overrides: TaskOverride[]): boolean => {
+  const override = getTaskOverride(taskTitle, overrides);
+  return override ? override.isEnabled : true;
+};
+
 // Get address suggestions using Google Places API (fallback to manual geocoding)
 const getAddressSuggestions = async (input: string): Promise<AddressSuggestion[]> => {
   try {
@@ -328,6 +349,9 @@ export default function Maintenance() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  
+  // Task override states
+  const [showCustomizeTask, setShowCustomizeTask] = useState<string | null>(null);
 
   // Use authenticated user's ID  
   const homeownerId = (user as any)?.id;
@@ -509,6 +533,52 @@ export default function Maintenance() {
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to delete maintenance log", variant: "destructive" });
+    },
+  });
+
+  // Task override queries and mutations
+  const { data: taskOverrides = [] } = useQuery<TaskOverride[]>({
+    queryKey: ['/api/houses', selectedHouseId, 'task-overrides'],
+    queryFn: async () => {
+      if (!selectedHouseId) return [];
+      const response = await fetch(`/api/houses/${selectedHouseId}/task-overrides`);
+      if (!response.ok) throw new Error('Failed to fetch task overrides');
+      return response.json();
+    },
+    enabled: !!selectedHouseId && isAuthenticated,
+  });
+
+  const upsertTaskOverrideMutation = useMutation({
+    mutationFn: async (data: { taskId: string; isEnabled?: boolean; frequencyType?: string; specificMonths?: string[]; notes?: string }) => {
+      const response = await fetch(`/api/houses/${selectedHouseId}/task-overrides`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to save task override');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/houses', selectedHouseId, 'task-overrides'] });
+      toast({ title: "Success", description: "Task customization saved" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to save customization", variant: "destructive" });
+    },
+  });
+
+  const deleteTaskOverrideMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      const response = await fetch(`/api/houses/${selectedHouseId}/task-overrides/${taskId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete task override');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/houses', selectedHouseId, 'task-overrides'] });
+      toast({ title: "Success", description: "Task customization removed" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to remove customization", variant: "destructive" });
     },
   });
 
@@ -2237,9 +2307,20 @@ export default function Maintenance() {
                             {task.title}
                           </CardTitle>
                         </div>
-                        <Badge className={`${getPriorityColor(task.priority)} border ml-2`}>
-                          {task.priority} priority
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge className={`${getPriorityColor(task.priority)} border`}>
+                            {task.priority} priority
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowCustomizeTask(showCustomizeTask === task.id ? null : task.id)}
+                            className="p-1 h-7 w-7"
+                            data-testid={`button-customize-${generateTaskId(task.title)}`}
+                          >
+                            <Settings className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -2285,6 +2366,113 @@ export default function Maintenance() {
                           </div>
                         </div>
                       )}
+
+                      {/* Task Customization Panel */}
+                      <Collapsible open={showCustomizeTask === task.id}>
+                        <CollapsibleContent>
+                          <div className="border rounded-lg p-4 bg-slate-50 dark:bg-slate-800">
+                            <h4 className="font-medium mb-3 flex items-center">
+                              <Settings className="w-4 h-4 mr-2" />
+                              Customize This Task
+                            </h4>
+                            
+                            {(() => {
+                              const currentOverride = getTaskOverride(task.title, taskOverrides);
+                              const taskId = generateTaskId(task.title);
+                              
+                              return (
+                                <div className="space-y-4">
+                                  {/* Enable/Disable Task */}
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox
+                                        id={`enable-${taskId}`}
+                                        checked={isTaskEnabled(task.title, taskOverrides)}
+                                        onCheckedChange={(checked) => {
+                                          upsertTaskOverrideMutation.mutate({
+                                            taskId,
+                                            isEnabled: checked as boolean,
+                                            frequencyType: currentOverride?.frequencyType || undefined,
+                                            specificMonths: currentOverride?.specificMonths || undefined,
+                                          });
+                                        }}
+                                        data-testid={`checkbox-enable-${taskId}`}
+                                      />
+                                      <label htmlFor={`enable-${taskId}`} className="text-sm font-medium">
+                                        Enable this task
+                                      </label>
+                                    </div>
+                                    {currentOverride && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          deleteTaskOverrideMutation.mutate(taskId);
+                                        }}
+                                        className="text-xs"
+                                        data-testid={`button-reset-${taskId}`}
+                                      >
+                                        Reset to Default
+                                      </Button>
+                                    )}
+                                  </div>
+
+                                  {/* Frequency Control */}
+                                  <div>
+                                    <label className="text-sm font-medium mb-2 block">
+                                      Task Frequency
+                                    </label>
+                                    <Select
+                                      value={currentOverride?.frequencyType || 'default'}
+                                      onValueChange={(value) => {
+                                        if (value === 'default') {
+                                          // Reset to default - delete override if it exists
+                                          if (currentOverride) {
+                                            deleteTaskOverrideMutation.mutate(taskId);
+                                          }
+                                        } else {
+                                          upsertTaskOverrideMutation.mutate({
+                                            taskId,
+                                            isEnabled: isTaskEnabled(task.title, taskOverrides),
+                                            frequencyType: value,
+                                          });
+                                        }
+                                      }}
+                                      data-testid={`select-frequency-${taskId}`}
+                                    >
+                                      <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select frequency" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="default">Default (As Shown)</SelectItem>
+                                        <SelectItem value="monthly">Monthly</SelectItem>
+                                        <SelectItem value="quarterly">Quarterly</SelectItem>
+                                        <SelectItem value="biannually">Twice per Year</SelectItem>
+                                        <SelectItem value="annually">Once per Year</SelectItem>
+                                        <SelectItem value="custom">Custom</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+
+                                  {/* Show current customization status */}
+                                  {currentOverride && (
+                                    <div className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
+                                      <strong>Current customization:</strong>
+                                      {currentOverride.isEnabled ? 
+                                        ` Enabled, ${currentOverride.frequencyType || 'default'} frequency` :
+                                        ' Disabled'
+                                      }
+                                      {currentOverride.notes && (
+                                        <div className="mt-1">Note: {currentOverride.notes}</div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
 
                       {/* Previous Contractor Section */}
                       {previousContractor && (
