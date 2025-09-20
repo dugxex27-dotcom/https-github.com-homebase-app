@@ -184,16 +184,30 @@ export const taskOverrides = pgTable("task_overrides", {
 export const homeAppliances = pgTable("home_appliances", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   homeownerId: text("homeowner_id").notNull(), // In real app would be foreign key to users table
-  houseId: text("house_id").notNull(), // references houses table
-  applianceType: text("appliance_type").notNull(), // 'hvac', 'water_heater', 'washer', etc.
-  brand: text("brand").notNull(),
+  houseId: text("house_id"), // Temporarily nullable for migration - will be required after backfill
+  name: text("name").notNull(), // User-friendly name like "Kitchen Dishwasher", "Main Water Heater"
+  make: text("make").notNull(), // Brand/manufacturer
   model: text("model").notNull(),
-  yearInstalled: integer("year_installed"),
   serialNumber: text("serial_number"),
+  purchaseDate: text("purchase_date"), // For age calculation
+  installDate: text("install_date"), // For age calculation, separate from purchase
+  yearInstalled: integer("year_installed"), // Keep for backward compatibility
   notes: text("notes"), // Additional details about condition, issues, etc.
   location: text("location"), // Kitchen, basement, garage, etc.
   warrantyExpiration: text("warranty_expiration"),
   lastServiceDate: text("last_service_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const homeApplianceManuals = pgTable("home_appliance_manuals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  applianceId: varchar("appliance_id").notNull().references(() => homeAppliances.id, { onDelete: 'cascade' }),
+  title: text("title").notNull(), // "Owner's Manual", "Installation Guide", etc.
+  type: text("type").notNull().default("owner"), // 'owner', 'install', 'warranty', 'service', 'other'
+  source: text("source").notNull(), // 'upload' or 'link'
+  url: text("url").notNull(), // File path (/objects/...) or external URL
+  fileName: text("file_name"), // Original filename if uploaded
+  fileSize: integer("file_size"), // File size in bytes if uploaded
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -455,6 +469,11 @@ export const insertHomeApplianceSchema = createInsertSchema(homeAppliances).omit
   createdAt: true,
 });
 
+export const insertHomeApplianceManualSchema = createInsertSchema(homeApplianceManuals).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertMaintenanceLogSchema = createInsertSchema(maintenanceLogs).omit({
   id: true,
   createdAt: true,
@@ -629,3 +648,5 @@ export type InsertHouseTransfer = z.infer<typeof insertHouseTransferSchema>;
 export type HouseTransfer = typeof houseTransfers.$inferSelect;
 export type InsertContractorAnalytics = z.infer<typeof insertContractorAnalyticsSchema>;
 export type ContractorAnalytics = typeof contractorAnalytics.$inferSelect;
+export type InsertHomeApplianceManual = z.infer<typeof insertHomeApplianceManualSchema>;
+export type HomeApplianceManual = typeof homeApplianceManuals.$inferSelect;
