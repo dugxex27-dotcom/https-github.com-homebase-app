@@ -2148,7 +2148,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                       size="lg"
                       variant="outline"
                       className="px-8 py-3 text-lg font-semibold text-[#ffffff]"
-                      style={{ borderColor: '#2c0f5b', color: '#2c0f5b' }}
+                      style={{ borderColor: '#2c0f5b', color: '#ffffff' }}
                       data-testid="button-find-contractors-general"
                     >
                       <MapPin className="w-5 h-5 mr-2" />
