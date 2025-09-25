@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireRole, requirePropertyOwner } from "./replitAuth";
 import { z } from "zod";
 import { randomUUID } from "crypto";
-import { insertHomeApplianceSchema, insertHomeApplianceManualSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema, insertHouseTransferSchema, insertContractorAnalyticsSchema, insertTaskOverrideSchema } from "@shared/schema";
+import { insertHomeApplianceSchema, insertHomeApplianceManualSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema, insertHouseTransferSchema, insertContractorAnalyticsSchema, insertTaskOverrideSchema, insertCountrySchema, insertRegionSchema, insertClimateZoneSchema, insertRegulatoryBodySchema, insertRegionalMaintenanceTaskSchema } from "@shared/schema";
 import pushRoutes from "./push-routes";
 import { pushService } from "./push-service";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
@@ -2511,6 +2511,161 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching monthly stats:", error);
       res.status(500).json({ message: "Failed to fetch monthly stats" });
+    }
+  });
+
+  // Regional API endpoints for international expansion
+  
+  // Countries endpoints
+  app.get('/api/countries', async (req: any, res) => {
+    try {
+      const countries = await storage.getCountries();
+      res.json(countries);
+    } catch (error) {
+      console.error("Error fetching countries:", error);
+      res.status(500).json({ message: "Failed to fetch countries" });
+    }
+  });
+
+  app.get('/api/countries/:id', async (req: any, res) => {
+    try {
+      const country = await storage.getCountry(req.params.id);
+      if (!country) {
+        return res.status(404).json({ message: "Country not found" });
+      }
+      res.json(country);
+    } catch (error) {
+      console.error("Error fetching country:", error);
+      res.status(500).json({ message: "Failed to fetch country" });
+    }
+  });
+
+  app.get('/api/countries/code/:code', async (req: any, res) => {
+    try {
+      const country = await storage.getCountryByCode(req.params.code);
+      if (!country) {
+        return res.status(404).json({ message: "Country not found" });
+      }
+      res.json(country);
+    } catch (error) {
+      console.error("Error fetching country by code:", error);
+      res.status(500).json({ message: "Failed to fetch country" });
+    }
+  });
+
+  // Regions endpoints
+  app.get('/api/countries/:countryId/regions', async (req: any, res) => {
+    try {
+      const regions = await storage.getRegionsByCountry(req.params.countryId);
+      res.json(regions);
+    } catch (error) {
+      console.error("Error fetching regions:", error);
+      res.status(500).json({ message: "Failed to fetch regions" });
+    }
+  });
+
+  app.get('/api/regions/:id', async (req: any, res) => {
+    try {
+      const region = await storage.getRegion(req.params.id);
+      if (!region) {
+        return res.status(404).json({ message: "Region not found" });
+      }
+      res.json(region);
+    } catch (error) {
+      console.error("Error fetching region:", error);
+      res.status(500).json({ message: "Failed to fetch region" });
+    }
+  });
+
+  // Climate zones endpoints
+  app.get('/api/countries/:countryId/climate-zones', async (req: any, res) => {
+    try {
+      const climateZones = await storage.getClimateZonesByCountry(req.params.countryId);
+      res.json(climateZones);
+    } catch (error) {
+      console.error("Error fetching climate zones:", error);
+      res.status(500).json({ message: "Failed to fetch climate zones" });
+    }
+  });
+
+  app.get('/api/climate-zones/:id', async (req: any, res) => {
+    try {
+      const climateZone = await storage.getClimateZone(req.params.id);
+      if (!climateZone) {
+        return res.status(404).json({ message: "Climate zone not found" });
+      }
+      res.json(climateZone);
+    } catch (error) {
+      console.error("Error fetching climate zone:", error);
+      res.status(500).json({ message: "Failed to fetch climate zone" });
+    }
+  });
+
+  // Regulatory bodies endpoints
+  app.get('/api/regions/:regionId/regulatory-bodies', async (req: any, res) => {
+    try {
+      const regulatoryBodies = await storage.getRegulatoryBodiesByRegion(req.params.regionId);
+      res.json(regulatoryBodies);
+    } catch (error) {
+      console.error("Error fetching regulatory bodies by region:", error);
+      res.status(500).json({ message: "Failed to fetch regulatory bodies" });
+    }
+  });
+
+  app.get('/api/countries/:countryId/regulatory-bodies', async (req: any, res) => {
+    try {
+      const regulatoryBodies = await storage.getRegulatoryBodiesByCountry(req.params.countryId);
+      res.json(regulatoryBodies);
+    } catch (error) {
+      console.error("Error fetching regulatory bodies by country:", error);
+      res.status(500).json({ message: "Failed to fetch regulatory bodies" });
+    }
+  });
+
+  app.get('/api/regulatory-bodies/:id', async (req: any, res) => {
+    try {
+      const regulatoryBody = await storage.getRegulatoryBody(req.params.id);
+      if (!regulatoryBody) {
+        return res.status(404).json({ message: "Regulatory body not found" });
+      }
+      res.json(regulatoryBody);
+    } catch (error) {
+      console.error("Error fetching regulatory body:", error);
+      res.status(500).json({ message: "Failed to fetch regulatory body" });
+    }
+  });
+
+  // Regional maintenance tasks endpoints
+  app.get('/api/maintenance-tasks/regional', async (req: any, res) => {
+    try {
+      const { countryId, climateZoneId, month } = req.query;
+      
+      if (!countryId) {
+        return res.status(400).json({ message: "countryId is required" });
+      }
+
+      const tasks = await storage.getRegionalMaintenanceTasks(
+        countryId as string,
+        climateZoneId as string | undefined,
+        month ? parseInt(month as string) : undefined
+      );
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching regional maintenance tasks:", error);
+      res.status(500).json({ message: "Failed to fetch regional maintenance tasks" });
+    }
+  });
+
+  app.get('/api/maintenance-tasks/regional/:id', async (req: any, res) => {
+    try {
+      const task = await storage.getRegionalMaintenanceTask(req.params.id);
+      if (!task) {
+        return res.status(404).json({ message: "Regional maintenance task not found" });
+      }
+      res.json(task);
+    } catch (error) {
+      console.error("Error fetching regional maintenance task:", error);
+      res.status(500).json({ message: "Failed to fetch regional maintenance task" });
     }
   });
 
