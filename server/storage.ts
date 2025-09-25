@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride } from "@shared/schema";
+import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -192,6 +192,34 @@ export interface IStorage {
   getTaskOverride(homeownerId: string, houseId: string, taskId: string): Promise<TaskOverride | undefined>;
   upsertTaskOverride(override: InsertTaskOverride): Promise<TaskOverride>;
   deleteTaskOverride(homeownerId: string, houseId: string, taskId: string): Promise<boolean>;
+
+  // Regional data operations for international expansion
+  getCountries(): Promise<Country[]>;
+  getCountry(id: string): Promise<Country | undefined>;
+  getCountryByCode(code: string): Promise<Country | undefined>;
+  createCountry(country: InsertCountry): Promise<Country>;
+  updateCountry(id: string, country: Partial<InsertCountry>): Promise<Country | undefined>;
+
+  getRegionsByCountry(countryId: string): Promise<Region[]>;
+  getRegion(id: string): Promise<Region | undefined>;
+  createRegion(region: InsertRegion): Promise<Region>;
+  updateRegion(id: string, region: Partial<InsertRegion>): Promise<Region | undefined>;
+
+  getClimateZonesByCountry(countryId: string): Promise<ClimateZone[]>;
+  getClimateZone(id: string): Promise<ClimateZone | undefined>;
+  createClimateZone(climateZone: InsertClimateZone): Promise<ClimateZone>;
+  updateClimateZone(id: string, climateZone: Partial<InsertClimateZone>): Promise<ClimateZone | undefined>;
+
+  getRegulatoryBodiesByRegion(regionId: string): Promise<RegulatoryBody[]>;
+  getRegulatoryBodiesByCountry(countryId: string): Promise<RegulatoryBody[]>;
+  getRegulatoryBody(id: string): Promise<RegulatoryBody | undefined>;
+  createRegulatoryBody(regulatoryBody: InsertRegulatoryBody): Promise<RegulatoryBody>;
+  updateRegulatoryBody(id: string, regulatoryBody: Partial<InsertRegulatoryBody>): Promise<RegulatoryBody | undefined>;
+
+  getRegionalMaintenanceTasks(countryId: string, climateZoneId?: string, month?: number): Promise<RegionalMaintenanceTask[]>;
+  getRegionalMaintenanceTask(id: string): Promise<RegionalMaintenanceTask | undefined>;
+  createRegionalMaintenanceTask(task: InsertRegionalMaintenanceTask): Promise<RegionalMaintenanceTask>;
+  updateRegionalMaintenanceTask(id: string, task: Partial<InsertRegionalMaintenanceTask>): Promise<RegionalMaintenanceTask | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -218,6 +246,12 @@ export class MemStorage implements IStorage {
   private contractorBoosts: Map<string, ContractorBoost>;
   private contractorAnalytics: Map<string, ContractorAnalytics>;
   private taskOverrides: Map<string, TaskOverride>;
+  // Regional data Maps for international expansion
+  private countries: Map<string, Country>;
+  private regions: Map<string, Region>;
+  private climateZones: Map<string, ClimateZone>;
+  private regulatoryBodies: Map<string, RegulatoryBody>;
+  private regionalMaintenanceTasks: Map<string, RegionalMaintenanceTask>;
 
   constructor() {
     this.users = new Map();
@@ -243,6 +277,12 @@ export class MemStorage implements IStorage {
     this.contractorBoosts = new Map();
     this.contractorAnalytics = new Map();
     this.taskOverrides = new Map();
+    // Initialize regional data Maps
+    this.countries = new Map();
+    this.regions = new Map();
+    this.climateZones = new Map();
+    this.regulatoryBodies = new Map();
+    this.regionalMaintenanceTasks = new Map();
     this.seedData();
     this.seedServiceRecords();
     this.seedReviews();
@@ -2508,6 +2548,227 @@ export class MemStorage implements IStorage {
       return false;
     }
     return this.taskOverrides.delete(existing.id);
+  }
+
+  // Regional data operations for international expansion
+  async getCountries(): Promise<Country[]> {
+    return Array.from(this.countries.values());
+  }
+
+  async getCountry(id: string): Promise<Country | undefined> {
+    return this.countries.get(id);
+  }
+
+  async getCountryByCode(code: string): Promise<Country | undefined> {
+    for (const country of this.countries.values()) {
+      if (country.code === code) {
+        return country;
+      }
+    }
+    return undefined;
+  }
+
+  async createCountry(countryData: InsertCountry): Promise<Country> {
+    const country: Country = {
+      id: randomUUID(),
+      code: countryData.code,
+      name: countryData.name,
+      isActive: countryData.isActive ?? true,
+      defaultCurrency: countryData.defaultCurrency,
+      createdAt: new Date(),
+    };
+    this.countries.set(country.id, country);
+    return country;
+  }
+
+  async updateCountry(id: string, countryData: Partial<InsertCountry>): Promise<Country | undefined> {
+    const existing = this.countries.get(id);
+    if (!existing) {
+      return undefined;
+    }
+    const updated = { ...existing, ...countryData };
+    this.countries.set(id, updated);
+    return updated;
+  }
+
+  async getRegionsByCountry(countryId: string): Promise<Region[]> {
+    const regions: Region[] = [];
+    for (const region of this.regions.values()) {
+      if (region.countryId === countryId) {
+        regions.push(region);
+      }
+    }
+    return regions;
+  }
+
+  async getRegion(id: string): Promise<Region | undefined> {
+    return this.regions.get(id);
+  }
+
+  async createRegion(regionData: InsertRegion): Promise<Region> {
+    const region: Region = {
+      id: randomUUID(),
+      countryId: regionData.countryId,
+      code: regionData.code,
+      name: regionData.name,
+      type: regionData.type,
+      isActive: regionData.isActive ?? true,
+      createdAt: new Date(),
+    };
+    this.regions.set(region.id, region);
+    return region;
+  }
+
+  async updateRegion(id: string, regionData: Partial<InsertRegion>): Promise<Region | undefined> {
+    const existing = this.regions.get(id);
+    if (!existing) {
+      return undefined;
+    }
+    const updated = { ...existing, ...regionData };
+    this.regions.set(id, updated);
+    return updated;
+  }
+
+  async getClimateZonesByCountry(countryId: string): Promise<ClimateZone[]> {
+    const zones: ClimateZone[] = [];
+    for (const zone of this.climateZones.values()) {
+      if (zone.countryId === countryId) {
+        zones.push(zone);
+      }
+    }
+    return zones;
+  }
+
+  async getClimateZone(id: string): Promise<ClimateZone | undefined> {
+    return this.climateZones.get(id);
+  }
+
+  async createClimateZone(zoneData: InsertClimateZone): Promise<ClimateZone> {
+    const zone: ClimateZone = {
+      id: randomUUID(),
+      countryId: zoneData.countryId,
+      code: zoneData.code,
+      name: zoneData.name,
+      description: zoneData.description || null,
+      isActive: zoneData.isActive ?? true,
+      createdAt: new Date(),
+    };
+    this.climateZones.set(zone.id, zone);
+    return zone;
+  }
+
+  async updateClimateZone(id: string, zoneData: Partial<InsertClimateZone>): Promise<ClimateZone | undefined> {
+    const existing = this.climateZones.get(id);
+    if (!existing) {
+      return undefined;
+    }
+    const updated = { ...existing, ...zoneData };
+    this.climateZones.set(id, updated);
+    return updated;
+  }
+
+  async getRegulatoryBodiesByRegion(regionId: string): Promise<RegulatoryBody[]> {
+    const bodies: RegulatoryBody[] = [];
+    for (const body of this.regulatoryBodies.values()) {
+      if (body.regionId === regionId) {
+        bodies.push(body);
+      }
+    }
+    return bodies;
+  }
+
+  async getRegulatoryBodiesByCountry(countryId: string): Promise<RegulatoryBody[]> {
+    const bodies: RegulatoryBody[] = [];
+    for (const body of this.regulatoryBodies.values()) {
+      if (body.countryId === countryId) {
+        bodies.push(body);
+      }
+    }
+    return bodies;
+  }
+
+  async getRegulatoryBody(id: string): Promise<RegulatoryBody | undefined> {
+    return this.regulatoryBodies.get(id);
+  }
+
+  async createRegulatoryBody(bodyData: InsertRegulatoryBody): Promise<RegulatoryBody> {
+    const body: RegulatoryBody = {
+      id: randomUUID(),
+      regionId: bodyData.regionId || null,
+      countryId: bodyData.countryId,
+      name: bodyData.name,
+      type: bodyData.type,
+      website: bodyData.website || null,
+      description: bodyData.description || null,
+      isActive: bodyData.isActive ?? true,
+      createdAt: new Date(),
+    };
+    this.regulatoryBodies.set(body.id, body);
+    return body;
+  }
+
+  async updateRegulatoryBody(id: string, bodyData: Partial<InsertRegulatoryBody>): Promise<RegulatoryBody | undefined> {
+    const existing = this.regulatoryBodies.get(id);
+    if (!existing) {
+      return undefined;
+    }
+    const updated = { ...existing, ...bodyData };
+    this.regulatoryBodies.set(id, updated);
+    return updated;
+  }
+
+  async getRegionalMaintenanceTasks(countryId: string, climateZoneId?: string, month?: number): Promise<RegionalMaintenanceTask[]> {
+    const tasks: RegionalMaintenanceTask[] = [];
+    for (const task of this.regionalMaintenanceTasks.values()) {
+      if (task.countryId === countryId) {
+        if (climateZoneId && task.climateZoneId !== climateZoneId) {
+          continue;
+        }
+        if (month && task.months && !task.months.includes(month.toString())) {
+          continue;
+        }
+        tasks.push(task);
+      }
+    }
+    return tasks;
+  }
+
+  async getRegionalMaintenanceTask(id: string): Promise<RegionalMaintenanceTask | undefined> {
+    return this.regionalMaintenanceTasks.get(id);
+  }
+
+  async createRegionalMaintenanceTask(taskData: InsertRegionalMaintenanceTask): Promise<RegionalMaintenanceTask> {
+    const task: RegionalMaintenanceTask = {
+      id: randomUUID(),
+      countryId: taskData.countryId,
+      climateZoneId: taskData.climateZoneId || null,
+      taskId: taskData.taskId,
+      title: taskData.title,
+      description: taskData.description,
+      category: taskData.category,
+      priority: taskData.priority,
+      estimatedTime: taskData.estimatedTime || null,
+      difficulty: taskData.difficulty || null,
+      tools: taskData.tools || null,
+      cost: taskData.cost || null,
+      season: taskData.season || null,
+      months: taskData.months || null,
+      systemRequirements: taskData.systemRequirements || null,
+      isActive: taskData.isActive ?? true,
+      createdAt: new Date(),
+    };
+    this.regionalMaintenanceTasks.set(task.id, task);
+    return task;
+  }
+
+  async updateRegionalMaintenanceTask(id: string, taskData: Partial<InsertRegionalMaintenanceTask>): Promise<RegionalMaintenanceTask | undefined> {
+    const existing = this.regionalMaintenanceTasks.get(id);
+    if (!existing) {
+      return undefined;
+    }
+    const updated = { ...existing, ...taskData };
+    this.regionalMaintenanceTasks.set(id, updated);
+    return updated;
   }
 }
 

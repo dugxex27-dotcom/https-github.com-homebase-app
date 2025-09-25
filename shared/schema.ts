@@ -113,6 +113,13 @@ export const contractors = pgTable("contractors", {
   businessLogo: text("business_logo"),
   projectPhotos: text("project_photos").array().default(sql`ARRAY[]::text[]`),
   googleBusinessUrl: text("google_business_url"),
+  
+  // International expansion fields
+  countryId: varchar("country_id").references(() => countries.id), // nullable for backward compatibility
+  regionId: varchar("region_id").references(() => regions.id), // nullable for backward compatibility
+  licenses: text("licenses"), // JSON string of licensing info per regulatory body
+  insuranceInfo: text("insurance_info"), // JSON string of insurance details by region
+  postalCode: text("postal_code"), // For international address support
 });
 
 export const products = pgTable("products", {
@@ -253,9 +260,14 @@ export const houses = pgTable("houses", {
   homeownerId: text("homeowner_id").notNull(),
   name: text("name").notNull(), // "Main House", "Vacation Home", "Rental Property", etc.
   address: text("address").notNull(),
-  climateZone: text("climate_zone").notNull(),
+  climateZone: text("climate_zone").notNull(), // Legacy field for backward compatibility
   homeSystems: text("home_systems").array().notNull(), // Array of systems like ["Central Air", "Gas Heat", etc.]
   isDefault: boolean("is_default").default(false).notNull(),
+  // International expansion fields
+  countryId: varchar("country_id").references(() => countries.id), // nullable for backward compatibility
+  regionId: varchar("region_id").references(() => regions.id), // nullable for backward compatibility  
+  climateZoneId: varchar("climate_zone_id").references(() => climateZones.id), // nullable for backward compatibility
+  postalCode: text("postal_code"), // For international address support
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -591,6 +603,100 @@ export const insertContractorAnalyticsSchema = createInsertSchema(contractorAnal
   clickedAt: true,
 });
 
+// Regional Support Tables for International Expansion
+
+// Countries table - master list of supported countries
+export const countries = pgTable("countries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: text("code").notNull().unique(), // ISO 3166-1 alpha-2 (US, CA, AU, GB)
+  name: text("name").notNull(), // United States, Canada, Australia, United Kingdom
+  isActive: boolean("is_active").default(true).notNull(),
+  defaultCurrency: text("default_currency").notNull(), // USD, CAD, AUD, GBP
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Administrative regions within countries (states, provinces, territories)
+export const regions = pgTable("regions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  countryId: varchar("country_id").notNull().references(() => countries.id),
+  code: text("code").notNull(), // State/province code (CA, ON, NSW, etc.)
+  name: text("name").notNull(), // California, Ontario, New South Wales
+  type: text("type").notNull(), // state, province, territory, country
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Climate zones for each country with regional mapping
+export const climateZones = pgTable("climate_zones", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  countryId: varchar("country_id").notNull().references(() => countries.id),
+  code: text("code").notNull(), // pacific-northwest, zone-5, zone-1, etc.
+  name: text("name").notNull(), // Pacific Northwest, Zone 5 - Warm-Humid, etc.
+  description: text("description"), // Detailed climate description
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Regulatory bodies for contractor licensing by region
+export const regulatoryBodies = pgTable("regulatory_bodies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  regionId: varchar("region_id").references(() => regions.id),
+  countryId: varchar("country_id").notNull().references(() => countries.id),
+  name: text("name").notNull(), // Gas Safe Register, Skilled Trades Ontario, etc.
+  type: text("type").notNull(), // licensing, certification, registration
+  website: text("website"), // Official website URL
+  description: text("description"), // What they regulate
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Regional maintenance task templates with seasonal mappings
+export const regionalMaintenanceTasks = pgTable("regional_maintenance_tasks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  countryId: varchar("country_id").notNull().references(() => countries.id),
+  climateZoneId: varchar("climate_zone_id").references(() => climateZones.id),
+  taskId: text("task_id").notNull(), // Unique identifier for the task type
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // HVAC, Plumbing, Electrical, etc.
+  priority: text("priority").notNull(), // high, medium, low
+  estimatedTime: text("estimated_time"),
+  difficulty: text("difficulty"), // easy, medium, hard
+  tools: text("tools").array(), // Required tools
+  cost: text("cost"), // Estimated cost range
+  season: text("season"), // spring, summer, autumn, winter, year-round
+  months: text("months").array(), // Specific months [1,2,3] for seasonal tasks
+  systemRequirements: text("system_requirements").array(), // Required home systems
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Schema definitions for new regional tables
+export const insertCountrySchema = createInsertSchema(countries).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertRegionSchema = createInsertSchema(regions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertClimateZoneSchema = createInsertSchema(climateZones).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertRegulatoryBodySchema = createInsertSchema(regulatoryBodies).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertRegionalMaintenanceTaskSchema = createInsertSchema(regionalMaintenanceTasks).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
   id: true,
   createdAt: true,
@@ -650,3 +756,15 @@ export type InsertContractorAnalytics = z.infer<typeof insertContractorAnalytics
 export type ContractorAnalytics = typeof contractorAnalytics.$inferSelect;
 export type InsertHomeApplianceManual = z.infer<typeof insertHomeApplianceManualSchema>;
 export type HomeApplianceManual = typeof homeApplianceManuals.$inferSelect;
+
+// Type exports for new regional tables
+export type Country = typeof countries.$inferSelect;
+export type InsertCountry = z.infer<typeof insertCountrySchema>;
+export type Region = typeof regions.$inferSelect;
+export type InsertRegion = z.infer<typeof insertRegionSchema>;
+export type ClimateZone = typeof climateZones.$inferSelect;
+export type InsertClimateZone = z.infer<typeof insertClimateZoneSchema>;
+export type RegulatoryBody = typeof regulatoryBodies.$inferSelect;
+export type InsertRegulatoryBody = z.infer<typeof insertRegulatoryBodySchema>;
+export type RegionalMaintenanceTask = typeof regionalMaintenanceTasks.$inferSelect;
+export type InsertRegionalMaintenanceTask = z.infer<typeof insertRegionalMaintenanceTaskSchema>;
