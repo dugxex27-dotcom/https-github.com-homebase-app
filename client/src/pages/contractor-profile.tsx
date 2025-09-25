@@ -13,6 +13,7 @@ import Header from "@/components/header";
 
 import { useAuth } from "@/hooks/useAuth";
 import type { User as UserType } from "@shared/schema";
+import { getServiceRadiusOptions, getDistanceUnit, extractCountryFromAddress, convertDistanceForDisplay, convertDistanceForStorage } from '@shared/distance-utils';
 import { 
   User, 
   Building, 
@@ -129,6 +130,9 @@ export default function ContractorProfile() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [addressDebounceTimer, setAddressDebounceTimer] = useState<NodeJS.Timeout>();
+  
+  // Country detection for distance units
+  const [detectedCountry, setDetectedCountry] = useState<string>('US');
   const [licenses, setLicenses] = useState([{
     id: '',
     licenseNumber: '',
@@ -237,6 +241,12 @@ export default function ContractorProfile() {
           const state = addressDetails.state || addressDetails.province || '';
           const zipCode = addressDetails.postcode || '';
           
+          // Detect country for distance units
+          const countryCode = addressDetails.country_code?.toUpperCase() || extractCountryFromAddress(result.display_name);
+          if (countryCode) {
+            setDetectedCountry(countryCode);
+          }
+          
           setFormData(prev => ({
             ...prev,
             city: city,
@@ -244,9 +254,10 @@ export default function ContractorProfile() {
             zipCode: zipCode
           }));
           
+          const distanceUnit = getDistanceUnit(countryCode);
           toast({
             title: "Address details populated",
-            description: `Auto-filled city, state, and zip code from ${addressDetails.country}`,
+            description: `Auto-filled city, state, and zip code from ${addressDetails.country}. Distance units: ${distanceUnit}`,
           });
         }
       }
@@ -698,29 +709,29 @@ export default function ContractorProfile() {
             </div>
 
             <div>
-              <Label htmlFor="serviceRadius">Service Radius (miles) *</Label>
-              <Select onValueChange={(value) => handleInputChange('serviceRadius', value)}>
+              <Label htmlFor="serviceRadius">Service Radius ({getDistanceUnit(detectedCountry)}) *</Label>
+              <Select onValueChange={(value) => {
+                // Convert display value to storage value if needed
+                const storageValue = convertDistanceForStorage(parseInt(value), detectedCountry);
+                handleInputChange('serviceRadius', storageValue.toString());
+              }}>
                 <SelectTrigger style={{ backgroundColor: '#ffffff', color: 'black' }} className="hover:bg-[#afd6f9] hover:text-black transition-colors">
-                  <SelectValue placeholder={`${formData.serviceRadius} miles`} />
+                  <SelectValue placeholder={`${convertDistanceForDisplay(formData.serviceRadius, detectedCountry)} ${getDistanceUnit(detectedCountry)}`} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="5">5 miles</SelectItem>
-                  <SelectItem value="10">10 miles</SelectItem>
-                  <SelectItem value="15">15 miles</SelectItem>
-                  <SelectItem value="20">20 miles</SelectItem>
-                  <SelectItem value="25">25 miles</SelectItem>
-                  <SelectItem value="30">30 miles</SelectItem>
-                  <SelectItem value="35">35 miles</SelectItem>
-                  <SelectItem value="40">40 miles</SelectItem>
-                  <SelectItem value="45">45 miles</SelectItem>
-                  <SelectItem value="50">50 miles</SelectItem>
-                  <SelectItem value="75">75 miles</SelectItem>
-                  <SelectItem value="100">100 miles</SelectItem>
+                  {getServiceRadiusOptions(detectedCountry).map((option) => (
+                    <SelectItem key={option.value} value={option.value.toString()}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground mt-1">
                 How far are you willing to travel for projects?
               </p>
+              <div className="text-xs text-gray-500 mt-1">
+                🌍 {detectedCountry === 'US' ? 'US addresses use miles' : 'International addresses use kilometers'}
+              </div>
             </div>
           </CardContent>
         </Card>
