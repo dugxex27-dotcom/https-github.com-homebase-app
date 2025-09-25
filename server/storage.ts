@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride } from "@shared/schema";
+import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -36,11 +36,18 @@ export interface IStorage {
   createProduct(product: InsertProduct): Promise<Product>;
   
   // Appliance methods
-  getHomeAppliances(homeownerId?: string): Promise<HomeAppliance[]>;
+  getHomeAppliances(homeownerId?: string, houseId?: string): Promise<HomeAppliance[]>;
   getHomeAppliance(id: string): Promise<HomeAppliance | undefined>;
   createHomeAppliance(appliance: InsertHomeAppliance): Promise<HomeAppliance>;
   updateHomeAppliance(id: string, appliance: Partial<InsertHomeAppliance>): Promise<HomeAppliance | undefined>;
   deleteHomeAppliance(id: string): Promise<boolean>;
+  
+  // Appliance manual methods
+  getHomeApplianceManuals(applianceId: string): Promise<HomeApplianceManual[]>;
+  getHomeApplianceManual(id: string): Promise<HomeApplianceManual | undefined>;
+  createHomeApplianceManual(manual: InsertHomeApplianceManual): Promise<HomeApplianceManual>;
+  updateHomeApplianceManual(id: string, manual: Partial<InsertHomeApplianceManual>): Promise<HomeApplianceManual | undefined>;
+  deleteHomeApplianceManual(id: string): Promise<boolean>;
   
   // Maintenance log methods
   getMaintenanceLogs(homeownerId?: string): Promise<MaintenanceLog[]>;
@@ -193,6 +200,7 @@ export class MemStorage implements IStorage {
   private contractorLicenses: Map<string, ContractorLicense>;
   private products: Map<string, Product>;
   private homeAppliances: Map<string, HomeAppliance>;
+  private homeApplianceManuals: Map<string, HomeApplianceManual>;
   private maintenanceLogs: Map<string, MaintenanceLog>;
   private customMaintenanceTasks: Map<string, CustomMaintenanceTask>;
   private houses: Map<string, House>;
@@ -217,6 +225,7 @@ export class MemStorage implements IStorage {
     this.contractorLicenses = new Map();
     this.products = new Map();
     this.homeAppliances = new Map();
+    this.homeApplianceManuals = new Map();
     this.maintenanceLogs = new Map();
     this.customMaintenanceTasks = new Map();
     this.houses = new Map();
@@ -897,11 +906,15 @@ export class MemStorage implements IStorage {
 
 
 
-  async getHomeAppliances(homeownerId?: string): Promise<HomeAppliance[]> {
+  async getHomeAppliances(homeownerId?: string, houseId?: string): Promise<HomeAppliance[]> {
     const appliances = Array.from(this.homeAppliances.values());
     
-    if (homeownerId) {
+    if (homeownerId && houseId) {
+      return appliances.filter(appliance => appliance.homeownerId === homeownerId && appliance.houseId === houseId);
+    } else if (homeownerId) {
       return appliances.filter(appliance => appliance.homeownerId === homeownerId);
+    } else if (houseId) {
+      return appliances.filter(appliance => appliance.houseId === houseId);
     }
     
     return appliances;
@@ -944,6 +957,42 @@ export class MemStorage implements IStorage {
 
   async deleteHomeAppliance(id: string): Promise<boolean> {
     return this.homeAppliances.delete(id);
+  }
+
+  // Appliance manual methods implementation
+  async getHomeApplianceManuals(applianceId: string): Promise<HomeApplianceManual[]> {
+    const manuals = Array.from(this.homeApplianceManuals.values());
+    return manuals.filter(manual => manual.applianceId === applianceId);
+  }
+
+  async getHomeApplianceManual(id: string): Promise<HomeApplianceManual | undefined> {
+    return this.homeApplianceManuals.get(id);
+  }
+
+  async createHomeApplianceManual(manual: InsertHomeApplianceManual): Promise<HomeApplianceManual> {
+    const newManual: HomeApplianceManual = {
+      id: randomUUID(),
+      ...manual,
+      createdAt: new Date(),
+    };
+    this.homeApplianceManuals.set(newManual.id, newManual);
+    return newManual;
+  }
+
+  async updateHomeApplianceManual(id: string, manual: Partial<InsertHomeApplianceManual>): Promise<HomeApplianceManual | undefined> {
+    const existing = this.homeApplianceManuals.get(id);
+    if (!existing) return undefined;
+
+    const updated: HomeApplianceManual = {
+      ...existing,
+      ...manual,
+    };
+    this.homeApplianceManuals.set(id, updated);
+    return updated;
+  }
+
+  async deleteHomeApplianceManual(id: string): Promise<boolean> {
+    return this.homeApplianceManuals.delete(id);
   }
 
   // Maintenance log methods
