@@ -13,11 +13,11 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { insertMaintenanceLogSchema, insertCustomMaintenanceTaskSchema, insertHomeSystemSchema, insertTaskOverrideSchema } from "@shared/schema";
-import type { MaintenanceLog, House, CustomMaintenanceTask, HomeSystem, TaskOverride } from "@shared/schema";
+import { insertMaintenanceLogSchema, insertCustomMaintenanceTaskSchema, insertHomeSystemSchema, insertTaskOverrideSchema, insertHomeApplianceSchema, insertHomeApplianceManualSchema } from "@shared/schema";
+import type { MaintenanceLog, House, CustomMaintenanceTask, HomeSystem, TaskOverride, HomeAppliance, HomeApplianceManual } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud } from "lucide-react";
+import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud, Monitor, Book, ExternalLink, Upload } from "lucide-react";
 import { AppointmentScheduler } from "@/components/appointment-scheduler";
 import { CustomMaintenanceTasks } from "@/components/custom-maintenance-tasks";
 import { US_MAINTENANCE_DATA, getRegionFromClimateZone, getCurrentMonthTasks } from "@shared/location-maintenance-data";
@@ -72,6 +72,24 @@ const houseFormSchema = z.object({
 const customTaskFormSchema = insertCustomMaintenanceTaskSchema.extend({
   homeownerId: z.string().min(1, "Homeowner ID is required"),
   tools: z.array(z.string()).optional(),
+});
+
+// Form schema for appliance creation/editing
+const applianceFormSchema = insertHomeApplianceSchema.extend({
+  homeownerId: z.string().min(1, "Homeowner ID is required"),
+  houseId: z.string().min(1, "House ID is required"),
+  name: z.string().min(1, "Appliance name is required"),
+  make: z.string().min(1, "Make is required"),
+  model: z.string().min(1, "Model is required"),
+});
+
+// Form schema for appliance manual creation/editing
+const applianceManualFormSchema = insertHomeApplianceManualSchema.extend({
+  applianceId: z.string().min(1, "Appliance ID is required"),
+  title: z.string().min(1, "Title is required"),
+  type: z.string().min(1, "Type is required"),
+  source: z.string().min(1, "Source is required"),
+  url: z.string().min(1, "URL is required"),
 });
 
 // Form schema for home system creation/editing
@@ -353,6 +371,13 @@ export default function Maintenance() {
   // Task override states
   const [showCustomizeTask, setShowCustomizeTask] = useState<string | null>(null);
 
+  // Appliance management states
+  const [isApplianceDialogOpen, setIsApplianceDialogOpen] = useState(false);
+  const [editingAppliance, setEditingAppliance] = useState<HomeAppliance | null>(null);
+  const [isApplianceManualDialogOpen, setIsApplianceManualDialogOpen] = useState(false);
+  const [editingApplianceManual, setEditingApplianceManual] = useState<HomeApplianceManual | null>(null);
+  const [selectedApplianceId, setSelectedApplianceId] = useState<string>("");
+
   // Use authenticated user's ID  
   const homeownerId = (user as any)?.id;
   const userRole = (user as any)?.role;
@@ -408,6 +433,29 @@ export default function Maintenance() {
       return response.json();
     },
     enabled: isAuthenticated && !!homeownerId && !!selectedHouseId && !isContractor
+  });
+
+  // Appliances queries (only for homeowners)
+  const { data: appliances = [], isLoading: appliancesLoading } = useQuery<HomeAppliance[]>({
+    queryKey: ['/api/appliances', { homeownerId, houseId: selectedHouseId }],
+    queryFn: async () => {
+      const response = await fetch(`/api/appliances?homeownerId=${homeownerId}&houseId=${selectedHouseId}`);
+      if (!response.ok) throw new Error('Failed to fetch appliances');
+      return response.json();
+    },
+    enabled: isAuthenticated && !!homeownerId && !!selectedHouseId && !isContractor
+  });
+
+  // Appliance manuals queries (only for homeowners)
+  const { data: applianceManuals = [], isLoading: applianceManualsLoading } = useQuery<HomeApplianceManual[]>({
+    queryKey: ['/api/appliances', selectedApplianceId, 'manuals'],
+    queryFn: async () => {
+      if (!selectedApplianceId) return [];
+      const response = await fetch(`/api/appliances/${selectedApplianceId}/manuals`);
+      if (!response.ok) throw new Error('Failed to fetch appliance manuals');
+      return response.json();
+    },
+    enabled: isAuthenticated && !!homeownerId && !!selectedApplianceId && !isContractor
   });
 
 
@@ -662,6 +710,8 @@ export default function Maintenance() {
 
   // Home systems form handling
   type HomeSystemFormData = z.infer<typeof homeSystemFormSchema>;
+type ApplianceFormData = z.infer<typeof applianceFormSchema>;
+type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
 
   const homeSystemForm = useForm<HomeSystemFormData>({
     resolver: zodResolver(homeSystemFormSchema),
@@ -674,6 +724,39 @@ export default function Maintenance() {
       brand: "",
       model: "",
       notes: "",
+    },
+  });
+
+  // Appliance forms
+  const applianceForm = useForm<ApplianceFormData>({
+    resolver: zodResolver(applianceFormSchema),
+    defaultValues: {
+      homeownerId,
+      houseId: selectedHouseId,
+      name: "",
+      make: "",
+      model: "",
+      serialNumber: "",
+      purchaseDate: "",
+      installDate: "",
+      yearInstalled: undefined,
+      notes: "",
+      location: "",
+      warrantyExpiration: "",
+      lastServiceDate: "",
+    },
+  });
+
+  const applianceManualForm = useForm<ApplianceManualFormData>({
+    resolver: zodResolver(applianceManualFormSchema),
+    defaultValues: {
+      applianceId: "",
+      title: "",
+      type: "owner",
+      source: "upload",
+      url: "",
+      fileName: "",
+      fileSize: undefined,
     },
   });
 
@@ -734,6 +817,124 @@ export default function Maintenance() {
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to delete home system", variant: "destructive" });
+    },
+  });
+
+  // Appliance mutations
+  const createApplianceMutation = useMutation({
+    mutationFn: async (data: ApplianceFormData) => {
+      const response = await fetch('/api/appliances', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create appliance');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/appliances'] });
+      setIsApplianceDialogOpen(false);
+      applianceForm.reset();
+      toast({ title: "Success", description: "Appliance added successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to add appliance", variant: "destructive" });
+    },
+  });
+
+  const updateApplianceMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<ApplianceFormData> }) => {
+      const response = await fetch(`/api/appliances/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update appliance');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/appliances'] });
+      setIsApplianceDialogOpen(false);
+      setEditingAppliance(null);
+      applianceForm.reset();
+      toast({ title: "Success", description: "Appliance updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update appliance", variant: "destructive" });
+    },
+  });
+
+  const deleteApplianceMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/appliances/${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete appliance');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/appliances'] });
+      toast({ title: "Success", description: "Appliance deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete appliance", variant: "destructive" });
+    },
+  });
+
+  // Appliance manual mutations
+  const createApplianceManualMutation = useMutation({
+    mutationFn: async (data: ApplianceManualFormData) => {
+      const response = await fetch(`/api/appliances/${data.applianceId}/manuals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create appliance manual');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/appliances'] });
+      setIsApplianceManualDialogOpen(false);
+      applianceManualForm.reset();
+      toast({ title: "Success", description: "Manual added successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to add manual", variant: "destructive" });
+    },
+  });
+
+  const updateApplianceManualMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<ApplianceManualFormData> }) => {
+      const response = await fetch(`/api/appliance-manuals/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update appliance manual');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/appliances'] });
+      setIsApplianceManualDialogOpen(false);
+      setEditingApplianceManual(null);
+      applianceManualForm.reset();
+      toast({ title: "Success", description: "Manual updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update manual", variant: "destructive" });
+    },
+  });
+
+  const deleteApplianceManualMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/appliance-manuals/${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete appliance manual');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/appliances'] });
+      toast({ title: "Success", description: "Manual deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete manual", variant: "destructive" });
     },
   });
 
@@ -2564,6 +2765,214 @@ export default function Maintenance() {
           />
         </div>
 
+        {/* Appliances Section */}
+        {selectedHouseId && (
+          <div className="mt-12">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-2">Home Appliances</h2>
+                <p className="text-lg" style={{ color: '#b6a6f4' }}>
+                  Track appliances, manuals, and maintenance schedules
+                </p>
+              </div>
+              <Button
+                onClick={() => {
+                  setEditingAppliance(null);
+                  applianceForm.reset({
+                    homeownerId,
+                    houseId: selectedHouseId,
+                    name: "",
+                    make: "",
+                    model: "",
+                    serialNumber: "",
+                    purchaseDate: "",
+                    installDate: "",
+                    yearInstalled: undefined,
+                    notes: "",
+                    location: "",
+                    warrantyExpiration: "",
+                    lastServiceDate: "",
+                  });
+                  setIsApplianceDialogOpen(true);
+                }}
+                style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                className="hover:opacity-90"
+                data-testid="button-add-appliance"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Appliance
+              </Button>
+            </div>
+
+            {appliancesLoading ? (
+              <div className="text-center py-8">
+                <div className="text-lg text-white">Loading appliances...</div>
+              </div>
+            ) : appliances.length === 0 ? (
+              <Card className="border-gray-300 shadow-lg" style={{ backgroundColor: '#f2f2f2' }}>
+                <CardContent className="text-center py-12">
+                  <Monitor className="mx-auto h-12 w-12 mb-4" style={{ color: '#2c0f5b' }} />
+                  <h3 className="text-lg font-semibold mb-2" style={{ color: '#2c0f5b' }}>
+                    No appliances added yet
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Start tracking your home appliances, their manuals, and maintenance schedules.
+                  </p>
+                  <Button
+                    onClick={() => {
+                      setEditingAppliance(null);
+                      applianceForm.reset({
+                        homeownerId,
+                        houseId: selectedHouseId,
+                        name: "",
+                        make: "",
+                        model: "",
+                        serialNumber: "",
+                        purchaseDate: "",
+                        installDate: "",
+                        yearInstalled: undefined,
+                        notes: "",
+                        location: "",
+                        warrantyExpiration: "",
+                        lastServiceDate: "",
+                      });
+                      setIsApplianceDialogOpen(true);
+                    }}
+                    style={{ backgroundColor: '#2c0f5b', color: 'white' }}
+                    data-testid="button-add-first-appliance"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Your First Appliance
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {appliances.map((appliance) => {
+                  const calculateAge = () => {
+                    const installYear = appliance.installDate ? 
+                      new Date(appliance.installDate).getFullYear() : 
+                      appliance.yearInstalled;
+                    if (!installYear) return null;
+                    return new Date().getFullYear() - installYear;
+                  };
+
+                  const age = calculateAge();
+                  
+                  return (
+                    <Card 
+                      key={appliance.id} 
+                      className="hover:shadow-md transition-all border-gray-300"
+                      style={{ backgroundColor: '#f2f2f2' }}
+                    >
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-start space-x-3 flex-1">
+                            <Monitor className="w-5 h-5 mt-1" style={{ color: '#2c0f5b' }} />
+                            <div className="flex-1">
+                              <CardTitle className="text-lg font-semibold" style={{ color: '#2c0f5b' }}>
+                                {appliance.name}
+                              </CardTitle>
+                              <p className="text-sm text-gray-600">
+                                {appliance.make} {appliance.model}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setEditingAppliance(appliance);
+                                applianceForm.reset(appliance);
+                                setIsApplianceDialogOpen(true);
+                              }}
+                              className="p-1 h-7 w-7"
+                              data-testid={`button-edit-appliance-${appliance.id}`}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete ${appliance.name}?`)) {
+                                  deleteApplianceMutation.mutate(appliance.id);
+                                }
+                              }}
+                              className="p-1 h-7 w-7 text-red-600 hover:text-red-700"
+                              data-testid={`button-delete-appliance-${appliance.id}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          {age && (
+                            <div className="flex items-center">
+                              <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+                              <span className="text-gray-600">{age} years old</span>
+                            </div>
+                          )}
+                          {appliance.location && (
+                            <div className="flex items-center">
+                              <Home className="w-4 h-4 mr-2 text-gray-500" />
+                              <span className="text-gray-600">{appliance.location}</span>
+                            </div>
+                          )}
+                          {appliance.serialNumber && (
+                            <div className="flex items-center text-xs text-gray-500 col-span-2">
+                              Serial: {appliance.serialNumber}
+                            </div>
+                          )}
+                        </div>
+
+                        {appliance.notes && (
+                          <p className="text-sm text-gray-600 bg-gray-100 p-2 rounded">
+                            {appliance.notes}
+                          </p>
+                        )}
+
+                        <div className="flex justify-between items-center pt-2 border-t">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedApplianceId(appliance.id);
+                              setEditingApplianceManual(null);
+                              applianceManualForm.reset({
+                                applianceId: appliance.id,
+                                title: "",
+                                type: "owner",
+                                source: "upload",
+                                url: "",
+                                fileName: "",
+                                fileSize: undefined,
+                              });
+                              setIsApplianceManualDialogOpen(true);
+                            }}
+                            className="text-xs"
+                            data-testid={`button-add-manual-${appliance.id}`}
+                          >
+                            <Book className="w-3 h-3 mr-1" />
+                            Add Manual
+                          </Button>
+                          <span className="text-xs text-gray-500">
+                            {/* Show manual count here when we implement manual fetching */}
+                            0 manuals
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
 
 
         {/* Maintenance Log Section */}
@@ -3202,6 +3611,368 @@ export default function Maintenance() {
                       {deleteHomeSystemMutation.isPending ? "Deleting..." : "Delete"}
                     </Button>
                   )}
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Appliance Dialog */}
+        <Dialog open={isApplianceDialogOpen} onOpenChange={setIsApplianceDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto text-white" style={{ backgroundColor: '#2c0f5b' }}>
+            <DialogHeader>
+              <DialogTitle style={{ color: 'white' }}>
+                {editingAppliance ? 'Edit Appliance' : 'Add New Appliance'}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <Form {...applianceForm}>
+              <form onSubmit={applianceForm.handleSubmit((data) => {
+                if (editingAppliance) {
+                  updateApplianceMutation.mutate({ id: editingAppliance.id, data });
+                } else {
+                  createApplianceMutation.mutate(data);
+                }
+              })} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={applianceForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel style={{ color: 'white' }}>Appliance Name</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="e.g., Kitchen Dishwasher, Main Water Heater" 
+                            {...field} 
+                            style={{ backgroundColor: '#ffffff' }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={applianceForm.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel style={{ color: 'white' }}>Location</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="e.g., Kitchen, Basement, Garage" 
+                            {...field} 
+                            value={field.value || ""}
+                            style={{ backgroundColor: '#ffffff' }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={applianceForm.control}
+                    name="make"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel style={{ color: 'white' }}>Make/Brand</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="e.g., Whirlpool, GE, Samsung" 
+                            {...field} 
+                            style={{ backgroundColor: '#ffffff' }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={applianceForm.control}
+                    name="model"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel style={{ color: 'white' }}>Model</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="e.g., WDF520PADM, GTW465ASNWW" 
+                            {...field} 
+                            style={{ backgroundColor: '#ffffff' }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={applianceForm.control}
+                    name="serialNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel style={{ color: 'white' }}>Serial Number (Optional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="e.g., ABC123456789" 
+                            {...field} 
+                            value={field.value || ""}
+                            style={{ backgroundColor: '#ffffff' }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={applianceForm.control}
+                    name="purchaseDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel style={{ color: 'white' }}>Purchase Date (Optional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date"
+                            {...field} 
+                            value={field.value || ""}
+                            style={{ backgroundColor: '#ffffff' }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={applianceForm.control}
+                    name="installDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel style={{ color: 'white' }}>Install Date (Optional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date"
+                            {...field} 
+                            value={field.value || ""}
+                            style={{ backgroundColor: '#ffffff' }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={applianceForm.control}
+                    name="warrantyExpiration"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel style={{ color: 'white' }}>Warranty Expiration (Optional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date"
+                            {...field} 
+                            value={field.value || ""}
+                            style={{ backgroundColor: '#ffffff' }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={applianceForm.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel style={{ color: 'white' }}>Notes (Optional)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Additional details, condition, issues, etc." 
+                          {...field} 
+                          value={field.value || ""}
+                          style={{ backgroundColor: '#ffffff' }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsApplianceDialogOpen(false)}
+                    style={{ color: 'white', borderColor: 'white' }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={createApplianceMutation.isPending || updateApplianceMutation.isPending}
+                    style={{ backgroundColor: 'white', color: '#2c0f5b' }}
+                    className="hover:opacity-90"
+                  >
+                    {createApplianceMutation.isPending || updateApplianceMutation.isPending ? (
+                      "Saving..."
+                    ) : (
+                      editingAppliance ? "Update Appliance" : "Add Appliance"
+                    )}
+                  </Button>
+                  {editingAppliance && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to delete this appliance?')) {
+                          deleteApplianceMutation.mutate(editingAppliance.id);
+                          setIsApplianceDialogOpen(false);
+                        }
+                      }}
+                      disabled={deleteApplianceMutation.isPending}
+                    >
+                      {deleteApplianceMutation.isPending ? "Deleting..." : "Delete"}
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Appliance Manual Dialog */}
+        <Dialog open={isApplianceManualDialogOpen} onOpenChange={setIsApplianceManualDialogOpen}>
+          <DialogContent className="max-w-md text-white" style={{ backgroundColor: '#2c0f5b' }}>
+            <DialogHeader>
+              <DialogTitle style={{ color: 'white' }}>
+                {editingApplianceManual ? 'Edit Manual' : 'Add Manual'}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <Form {...applianceManualForm}>
+              <form onSubmit={applianceManualForm.handleSubmit((data) => {
+                if (editingApplianceManual) {
+                  updateApplianceManualMutation.mutate({ id: editingApplianceManual.id, data });
+                } else {
+                  createApplianceManualMutation.mutate(data);
+                }
+              })} className="space-y-4">
+                <FormField
+                  control={applianceManualForm.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel style={{ color: 'white' }}>Manual Title</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g., Owner's Manual, Installation Guide" 
+                          {...field} 
+                          style={{ backgroundColor: '#ffffff' }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={applianceManualForm.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel style={{ color: 'white' }}>Manual Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger style={{ backgroundColor: '#ffffff' }}>
+                            <SelectValue placeholder="Select manual type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="owner">Owner's Manual</SelectItem>
+                          <SelectItem value="install">Installation Guide</SelectItem>
+                          <SelectItem value="warranty">Warranty Information</SelectItem>
+                          <SelectItem value="service">Service Manual</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={applianceManualForm.control}
+                  name="source"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel style={{ color: 'white' }}>Source Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger style={{ backgroundColor: '#ffffff' }}>
+                            <SelectValue placeholder="Select source type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="upload">Upload File</SelectItem>
+                          <SelectItem value="link">External Link</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={applianceManualForm.control}
+                  name="url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel style={{ color: 'white' }}>
+                        {applianceManualForm.watch('source') === 'upload' ? 'File Path' : 'URL'}
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder={
+                            applianceManualForm.watch('source') === 'upload' 
+                              ? "File will be uploaded..." 
+                              : "https://example.com/manual.pdf"
+                          }
+                          {...field} 
+                          style={{ backgroundColor: '#ffffff' }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsApplianceManualDialogOpen(false)}
+                    style={{ color: 'white', borderColor: 'white' }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={createApplianceManualMutation.isPending || updateApplianceManualMutation.isPending}
+                    style={{ backgroundColor: 'white', color: '#2c0f5b' }}
+                    className="hover:opacity-90"
+                  >
+                    {createApplianceManualMutation.isPending || updateApplianceManualMutation.isPending ? (
+                      "Saving..."
+                    ) : (
+                      editingApplianceManual ? "Update Manual" : "Add Manual"
+                    )}
+                  </Button>
                 </div>
               </form>
             </Form>
