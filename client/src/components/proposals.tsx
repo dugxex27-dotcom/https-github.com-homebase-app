@@ -97,11 +97,23 @@ export function Proposals({ contractorId }: ProposalsProps) {
       }
       return apiRequest(`/api/proposals/${id}`, "PATCH", payload);
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/proposals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/achievements"] });
       setIsDialogOpen(false);
       setEditingProposal(null);
       form.reset();
+      
+      if (data.newAchievements && data.newAchievements.length > 0) {
+        data.newAchievements.forEach((achievement: any) => {
+          toast({
+            title: "Achievement Unlocked!",
+            description: `${achievement.title} - ${achievement.description}`,
+            duration: 5000,
+          });
+        });
+      }
+      
       toast({
         title: "Success",
         description: "Proposal updated successfully",

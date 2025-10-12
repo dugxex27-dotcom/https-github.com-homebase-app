@@ -879,10 +879,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/proposals/:id", isAuthenticated, async (req: any, res) => {
     try {
       const partialData = insertProposalSchema.partial().parse(req.body);
+      const oldProposal = await storage.getProposal(req.params.id);
       const proposal = await storage.updateProposal(req.params.id, partialData);
       if (!proposal) {
         return res.status(404).json({ message: "Proposal not found" });
       }
+      
+      if (oldProposal && oldProposal.status !== 'accepted' && proposal.status === 'accepted' && proposal.homeownerId) {
+        try {
+          const newAchievements = await storage.checkAndUnlockContractorHiringAchievements(proposal.homeownerId);
+          if (newAchievements.length > 0) {
+            res.json({ ...proposal, newAchievements });
+            return;
+          }
+        } catch (achievementError) {
+          console.error("Error unlocking contractor hiring achievement:", achievementError);
+        }
+      }
+      
       res.json(proposal);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -922,6 +936,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         signatureIpAddress: ipAddress,
         status: "accepted"
       });
+
+      try {
+        const newAchievements = await storage.checkAndUnlockContractorHiringAchievements(userId);
+        if (newAchievements.length > 0) {
+          res.json({ ...updatedProposal, newAchievements });
+          return;
+        }
+      } catch (achievementError) {
+        console.error("Error unlocking contractor hiring achievement:", achievementError);
+      }
 
       res.json(updatedProposal);
     } catch (error) {

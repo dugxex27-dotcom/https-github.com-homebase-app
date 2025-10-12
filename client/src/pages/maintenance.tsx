@@ -708,6 +708,35 @@ export default function Maintenance() {
     },
   });
 
+  const trackTaskCompletionMutation = useMutation({
+    mutationFn: async (data: { taskId: string; houseId: string }) => {
+      const response = await fetch('/api/task-completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to track task completion');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/task-completions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/achievements'] });
+      
+      if (data.newAchievements && data.newAchievements.length > 0) {
+        data.newAchievements.forEach((achievement: any) => {
+          toast({
+            title: "Achievement Unlocked!",
+            description: `${achievement.title} - ${achievement.description}`,
+            duration: 5000,
+          });
+        });
+      }
+    },
+    onError: () => {
+      console.error('Failed to track task completion');
+    },
+  });
+
   // Home systems form handling
   type HomeSystemFormData = z.infer<typeof homeSystemFormSchema>;
 type ApplianceFormData = z.infer<typeof applianceFormSchema>;
@@ -977,11 +1006,19 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
   const toggleTaskCompletion = (taskId: string) => {
     const currentYear = new Date().getFullYear();
     const taskKey = getTaskKey(taskId, selectedMonth, currentYear);
+    const wasCompleted = completedTasks[taskKey] || false;
     
     setCompletedTasks(prev => ({
       ...prev,
       [taskKey]: !prev[taskKey]
     }));
+    
+    if (!wasCompleted && selectedHouseId && (user as any)?.id) {
+      trackTaskCompletionMutation.mutate({
+        taskId,
+        houseId: selectedHouseId
+      });
+    }
   };
 
   // Check if task is completed
@@ -2884,7 +2921,11 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                               size="sm"
                               onClick={() => {
                                 setEditingAppliance(appliance);
-                                applianceForm.reset(appliance);
+                                applianceForm.reset({
+                                  ...appliance,
+                                  houseId: appliance.houseId || undefined,
+                                  notes: appliance.notes || undefined,
+                                });
                                 setIsApplianceDialogOpen(true);
                               }}
                               className="p-1 h-7 w-7"
