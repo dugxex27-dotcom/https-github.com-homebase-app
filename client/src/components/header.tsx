@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Users, Package, User as UserIcon, LogOut, MessageCircle } from "lucide-react";
+import { Users, Package, User as UserIcon, LogOut, MessageCircle, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/logo";
 import { Notifications } from "@/components/notifications";
@@ -60,6 +60,12 @@ export default function Header() {
                   location === '/products' ? 'text-primary font-medium' : ''
                 }`}>
                   Products
+                </Link>
+                <Link href="/achievements" className={`text-gray-700 hover:text-primary transition-colors ${
+                  location === '/achievements' ? 'text-primary font-medium' : ''
+                }`} data-testid="link-achievements">
+                  <Trophy className="w-4 h-4 inline mr-1" />
+                  Achievements
                 </Link>
                 <Link href="/messages" className={`text-gray-700 hover:text-primary transition-colors ${
                   location === '/messages' ? 'text-primary font-medium' : ''

@@ -22,6 +22,7 @@ import HomeownerAccount from "./pages/homeowner-account";
 import Messages from "./pages/messages";
 import MyHome from "./pages/my-home";
 import HouseTransferAccept from "./pages/house-transfer-accept";
+import Achievements from "./pages/achievements";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -74,6 +75,7 @@ function Router() {
           <Route path="/contractor/:id" component={ContractorDetail} />
           <Route path="/service-records" component={HomeownerServiceRecords} />
           <Route path="/account" component={HomeownerAccount} />
+          <Route path="/achievements" component={Achievements} />
         </>
       )}
       
