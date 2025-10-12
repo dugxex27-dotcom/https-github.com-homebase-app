@@ -432,6 +432,40 @@ export const contractorBoosts = pgTable("contractor_boosts", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Task completions tracking for achievements and streak calculation
+export const taskCompletions = pgTable("task_completions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  homeownerId: text("homeowner_id").notNull(),
+  houseId: text("house_id").notNull(), // references houses table
+  taskId: text("task_id"), // references maintenanceTasks or customMaintenanceTasks
+  taskType: text("task_type").notNull(), // "maintenance" or "custom"
+  taskTitle: text("task_title").notNull(), // denormalized for quick access
+  completedAt: timestamp("completed_at").notNull().defaultNow(),
+  month: integer("month").notNull(), // 1-12, month when task was completed
+  year: integer("year").notNull(), // year when task was completed
+  notes: text("notes"), // optional completion notes
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_task_completions_homeowner").on(table.homeownerId),
+  index("IDX_task_completions_date").on(table.year, table.month),
+]);
+
+// Achievements tracking for homeowner milestones
+export const achievements = pgTable("achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  homeownerId: text("homeowner_id").notNull(),
+  achievementType: text("achievement_type").notNull(), // "first_task", "monthly_streak", "contractor_hired_1", "contractor_hired_3", "contractor_hired_5", "contractor_hired_10", "referral"
+  achievementTitle: text("achievement_title").notNull(), // Display title
+  achievementDescription: text("achievement_description").notNull(), // Description of what was accomplished
+  unlockedAt: timestamp("unlocked_at").notNull().defaultNow(),
+  metadata: text("metadata"), // JSON string for additional data (e.g., streak count, contractor count)
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_achievements_homeowner").on(table.homeownerId),
+  // Ensure one achievement per type per homeowner (except referrals which can be multiple)
+  uniqueIndex("UX_achievement_unique").on(table.homeownerId, table.achievementType),
+]);
+
 export const houseTransfers = pgTable("house_transfers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   houseId: text("house_id").notNull(), // references houses table
@@ -572,6 +606,16 @@ export const insertContractorBoostSchema = createInsertSchema(contractorBoosts).
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertTaskCompletionSchema = createInsertSchema(taskCompletions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertHouseTransferSchema = createInsertSchema(houseTransfers).omit({
@@ -751,6 +795,10 @@ export type InsertContractorLicense = z.infer<typeof insertContractorLicenseSche
 export type ContractorLicense = typeof contractorLicenses.$inferSelect;
 export type InsertContractorBoost = z.infer<typeof insertContractorBoostSchema>;
 export type ContractorBoost = typeof contractorBoosts.$inferSelect;
+export type InsertTaskCompletion = z.infer<typeof insertTaskCompletionSchema>;
+export type TaskCompletion = typeof taskCompletions.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type Achievement = typeof achievements.$inferSelect;
 export type InsertHouseTransfer = z.infer<typeof insertHouseTransferSchema>;
 export type HouseTransfer = typeof houseTransfers.$inferSelect;
 export type InsertContractorAnalytics = z.infer<typeof insertContractorAnalyticsSchema>;

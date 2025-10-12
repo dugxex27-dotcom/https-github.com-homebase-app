@@ -1,6 +1,7 @@
-import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks } from "@shared/schema";
+import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, type TaskCompletion, type InsertTaskCompletion, type Achievement, type InsertAchievement, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks, taskCompletions, achievements, maintenanceLogs } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
+import { eq, ne, isNotNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -221,6 +222,20 @@ export interface IStorage {
   getRegionalMaintenanceTask(id: string): Promise<RegionalMaintenanceTask | undefined>;
   createRegionalMaintenanceTask(task: InsertRegionalMaintenanceTask): Promise<RegionalMaintenanceTask>;
   updateRegionalMaintenanceTask(id: string, task: Partial<InsertRegionalMaintenanceTask>): Promise<RegionalMaintenanceTask | undefined>;
+
+  // Task completion operations for achievements and streaks
+  getTaskCompletions(homeownerId: string, houseId?: string): Promise<TaskCompletion[]>;
+  getTaskCompletion(id: string): Promise<TaskCompletion | undefined>;
+  createTaskCompletion(completion: InsertTaskCompletion): Promise<TaskCompletion>;
+  getTaskCompletionsByMonth(homeownerId: string, year: number, month: number): Promise<TaskCompletion[]>;
+  getMonthlyStreak(homeownerId: string): Promise<{ currentStreak: number; longestStreak: number }>;
+
+  // Achievement operations for milestone tracking
+  getAchievements(homeownerId: string): Promise<Achievement[]>;
+  getAchievement(id: string): Promise<Achievement | undefined>;
+  createAchievement(achievement: InsertAchievement): Promise<Achievement>;
+  hasAchievement(homeownerId: string, achievementType: string): Promise<boolean>;
+  getContractorHireCount(homeownerId: string): Promise<number>;
 }
 
 export class MemStorage implements IStorage {
@@ -2777,6 +2792,134 @@ export class MemStorage implements IStorage {
     const updated = { ...existing, ...taskData };
     this.regionalMaintenanceTasks.set(id, updated);
     return updated;
+  }
+
+  // Task completion operations for achievements
+  async getTaskCompletions(homeownerId: string, houseId?: string): Promise<TaskCompletion[]> {
+    if (houseId) {
+      const result = await db.select().from(taskCompletions).where(eq(taskCompletions.homeownerId, homeownerId)).where(eq(taskCompletions.houseId, houseId));
+      return result;
+    }
+    const result = await db.select().from(taskCompletions).where(eq(taskCompletions.homeownerId, homeownerId));
+    return result;
+  }
+
+  async getTaskCompletion(id: string): Promise<TaskCompletion | undefined> {
+    const result = await db.select().from(taskCompletions).where(eq(taskCompletions.id, id));
+    return result[0];
+  }
+
+  async createTaskCompletion(completion: InsertTaskCompletion): Promise<TaskCompletion> {
+    const result = await db.insert(taskCompletions).values(completion).returning();
+    return result[0];
+  }
+
+  async getTaskCompletionsByMonth(homeownerId: string, year: number, month: number): Promise<TaskCompletion[]> {
+    const result = await db.select().from(taskCompletions)
+      .where(eq(taskCompletions.homeownerId, homeownerId))
+      .where(eq(taskCompletions.year, year))
+      .where(eq(taskCompletions.month, month));
+    return result;
+  }
+
+  async getMonthlyStreak(homeownerId: string): Promise<{ currentStreak: number; longestStreak: number }> {
+    // Get all task completions ordered by date
+    const completions = await db.select().from(taskCompletions)
+      .where(eq(taskCompletions.homeownerId, homeownerId))
+      .orderBy(taskCompletions.year, taskCompletions.month);
+
+    if (completions.length === 0) {
+      return { currentStreak: 0, longestStreak: 0 };
+    }
+
+    // Calculate streaks
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 1;
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    // Group completions by month
+    const monthSet = new Set<string>();
+    completions.forEach(c => monthSet.add(`${c.year}-${c.month}`));
+    
+    const months = Array.from(monthSet).sort();
+
+    // Calculate longest streak
+    for (let i = 1; i < months.length; i++) {
+      const [prevYear, prevMonth] = months[i - 1].split('-').map(Number);
+      const [currYear, currMonth] = months[i].split('-').map(Number);
+      
+      const isConsecutive = 
+        (currYear === prevYear && currMonth === prevMonth + 1) ||
+        (currYear === prevYear + 1 && prevMonth === 12 && currMonth === 1);
+      
+      if (isConsecutive) {
+        tempStreak++;
+      } else {
+        longestStreak = Math.max(longestStreak, tempStreak);
+        tempStreak = 1;
+      }
+    }
+    longestStreak = Math.max(longestStreak, tempStreak);
+
+    // Calculate current streak
+    const lastMonth = months[months.length - 1];
+    const [lastYear, lastMonthNum] = lastMonth.split('-').map(Number);
+    
+    if (lastYear === currentYear && lastMonthNum === currentMonth) {
+      currentStreak = 1;
+      for (let i = months.length - 2; i >= 0; i--) {
+        const [year, month] = months[i].split('-').map(Number);
+        const [nextYear, nextMonth] = months[i + 1].split('-').map(Number);
+        
+        const isConsecutive = 
+          (nextYear === year && nextMonth === month + 1) ||
+          (nextYear === year + 1 && month === 12 && nextMonth === 1);
+        
+        if (isConsecutive) {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+    }
+
+    return { currentStreak, longestStreak };
+  }
+
+  // Achievement operations
+  async getAchievements(homeownerId: string): Promise<Achievement[]> {
+    const result = await db.select().from(achievements).where(eq(achievements.homeownerId, homeownerId));
+    return result;
+  }
+
+  async getAchievement(id: string): Promise<Achievement | undefined> {
+    const result = await db.select().from(achievements).where(eq(achievements.id, id));
+    return result[0];
+  }
+
+  async createAchievement(achievement: InsertAchievement): Promise<Achievement> {
+    const result = await db.insert(achievements).values(achievement).returning();
+    return result[0];
+  }
+
+  async hasAchievement(homeownerId: string, achievementType: string): Promise<boolean> {
+    const result = await db.select().from(achievements)
+      .where(eq(achievements.homeownerId, homeownerId))
+      .where(eq(achievements.achievementType, achievementType));
+    return result.length > 0;
+  }
+
+  async getContractorHireCount(homeownerId: string): Promise<number> {
+    // Count unique contractors hired by this homeowner from maintenance logs
+    const logs = await db.select().from(maintenanceLogs)
+      .where(eq(maintenanceLogs.homeownerId, homeownerId))
+      .where(isNotNull(maintenanceLogs.contractorId));
+    
+    const uniqueContractors = new Set(logs.map(log => log.contractorId).filter(Boolean));
+    return uniqueContractors.size;
   }
 }
 
