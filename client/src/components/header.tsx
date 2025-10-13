@@ -61,17 +61,17 @@ export default function Header() {
                 }`}>
                   Products
                 </Link>
-                <Link href="/achievements" className={`text-gray-700 hover:text-primary transition-colors ${
-                  location === '/achievements' ? 'text-primary font-medium' : ''
-                }`} data-testid="link-achievements">
-                  <Trophy className="w-4 h-4 inline mr-1" />
-                  Achievements
-                </Link>
                 <Link href="/messages" className={`text-gray-700 hover:text-primary transition-colors ${
                   location === '/messages' ? 'text-primary font-medium' : ''
                 }`}>
                   <MessageCircle className="w-4 h-4 inline mr-1" />
                   Messages
+                </Link>
+                <Link href="/achievements" className={`text-gray-700 hover:text-primary transition-colors ${
+                  location === '/achievements' ? 'text-primary font-medium' : ''
+                }`} data-testid="link-achievements">
+                  <Trophy className="w-4 h-4 inline mr-1" />
+                  Achievements
                 </Link>
                 <Link href="/account" className={`text-gray-700 hover:text-primary transition-colors ${
                   location === '/account' ? 'text-primary font-medium' : ''
