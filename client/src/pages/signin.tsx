@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home, Wrench, ArrowRight } from "lucide-react";
@@ -6,6 +7,7 @@ import logoImage from '@assets/homebase-logo_1756861910640.png';
 
 export default function SignIn() {
   const [selectedRole, setSelectedRole] = useState<'homeowner' | 'contractor' | null>(null);
+  const [, setLocation] = useLocation();
 
   const handleRoleSelect = (role: 'homeowner' | 'contractor') => {
     setSelectedRole(role);
@@ -15,8 +17,8 @@ export default function SignIn() {
     if (!selectedRole) return;
     
     if (selectedRole === 'contractor') {
-      // Redirect to safe contractor signin
-      window.location.href = '/contractor-signin';
+      // Use wouter navigation to stay within the app
+      setLocation('/contractor-signin');
       return;
     }
     
