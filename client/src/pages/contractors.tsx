@@ -346,52 +346,57 @@ export default function Contractors() {
               )}
 
               {/* Distance Filter */}
-              <div>
+              <div className="flex flex-col h-full">
                 <label className="text-sm font-medium text-foreground mb-3 block">Distance from you ({getDistanceUnit(userCountry)})</label>
-                <select 
-                  className="w-full px-3 py-2 border border-muted rounded-md"
-                  style={{ color: '#ffffff', backgroundColor: '#1e1e20' }}
-                  value={selectedDistance}
-                  onChange={(e) => {
-                    setSelectedDistance(e.target.value);
-                  }}
-                  data-testid="filter-distance"
-                >
-                  <option value="">Any distance</option>
-                  {getDistanceOptions(userCountry).map((option) => (
-                    <option key={option.value} value={option.value.toString()}>
-                      Within {option.label}
-                    </option>
-                  ))}
-                </select>
-                <div className="text-xs text-gray-500 mt-1">
-                  🌍 {userCountry === 'US' ? 'Using miles for US locations' : 'Using kilometers for international locations'}
+                <div className="mt-auto">
+                  <select 
+                    className="w-full px-3 py-2 border border-muted rounded-md"
+                    style={{ color: '#ffffff', backgroundColor: '#1e1e20' }}
+                    value={selectedDistance}
+                    onChange={(e) => {
+                      setSelectedDistance(e.target.value);
+                    }}
+                    data-testid="filter-distance"
+                  >
+                    <option value="">Any distance</option>
+                    {getDistanceOptions(userCountry).map((option) => (
+                      <option key={option.value} value={option.value.toString()}>
+                        Within {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="text-xs text-gray-500 mt-1">
+                    🌍 {userCountry === 'US' ? 'Using miles for US locations' : 'Using kilometers for international locations'}
+                  </div>
                 </div>
               </div>
 
               {/* Rating Filter */}
-              <div>
+              <div className="flex flex-col h-full">
                 <label className="text-sm font-medium text-foreground mb-3 block">Minimum Rating</label>
-                <select 
-                  className="w-full px-3 py-2 border border-muted rounded-md"
-                  style={{ color: '#ffffff', backgroundColor: '#1e1e20' }}
-                  value={selectedRating}
-                  onChange={(e) => {
-                    setSelectedRating(e.target.value);
-                  }}
-                  data-testid="filter-rating"
-                >
-                  <option value="">Any rating</option>
-                  <option value="5">5 stars</option>
-                  <option value="4">4+ stars</option>
-                  <option value="3">3+ stars</option>
-                </select>
+                <div className="mt-auto">
+                  <select 
+                    className="w-full px-3 py-2 border border-muted rounded-md"
+                    style={{ color: '#ffffff', backgroundColor: '#1e1e20' }}
+                    value={selectedRating}
+                    onChange={(e) => {
+                      setSelectedRating(e.target.value);
+                    }}
+                    data-testid="filter-rating"
+                  >
+                    <option value="">Any rating</option>
+                    <option value="5">5 stars</option>
+                    <option value="4">4+ stars</option>
+                    <option value="3">3+ stars</option>
+                  </select>
+                </div>
               </div>
 
               {/* Services Filter */}
-              <div className="relative lg:col-span-2" ref={servicesDropdownRef}>
+              <div className="flex flex-col h-full relative lg:col-span-2" ref={servicesDropdownRef}>
                 <label className="text-sm font-medium text-foreground mb-3 block">Services</label>
-                <button
+                <div className="mt-auto">
+                  <button
                   type="button"
                   className="w-full px-3 py-2 border border-muted rounded-md text-left flex items-center justify-between"
                   style={{ color: '#ffffff', backgroundColor: '#1e1e20' }}
@@ -447,30 +452,34 @@ export default function Contractors() {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
 
               {/* Emergency Services */}
-              <div>
+              <div className="flex flex-col h-full">
                 <label className="text-sm font-medium text-foreground mb-3 block">Emergency Services</label>
-                <div className="flex items-center space-x-2">
-                  <input 
-                    type="checkbox" 
-                    id="emergency-services"
-                    className="rounded"
-                    checked={hasEmergencyServices}
-                    onChange={(e) => {
-                      setHasEmergencyServices(e.target.checked);
-                    }}
-                    data-testid="filter-emergency"
-                  />
-                  <label htmlFor="emergency-services" className="text-sm text-foreground">
-                    Available 24/7
-                  </label>
+                <div className="mt-auto">
+                  <div className="flex items-center space-x-2">
+                    <input 
+                      type="checkbox" 
+                      id="emergency-services"
+                      className="rounded"
+                      checked={hasEmergencyServices}
+                      onChange={(e) => {
+                        setHasEmergencyServices(e.target.checked);
+                      }}
+                      data-testid="filter-emergency"
+                    />
+                    <label htmlFor="emergency-services" className="text-sm text-foreground">
+                      Available 24/7
+                    </label>
+                  </div>
                 </div>
               </div>
 
               {/* Apply Filters Button */}
-              <div className="flex items-end">
+              <div className="flex flex-col h-full">
+                <div className="mt-auto">
                 <button 
                   className="w-full py-2 px-4 rounded-md text-white font-medium hover:opacity-90"
                   style={{ backgroundColor: '#3c258e' }}
@@ -502,6 +511,7 @@ export default function Contractors() {
                 >
                   Apply Filters
                 </button>
+                </div>
               </div>
             </div>
           </div>
