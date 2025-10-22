@@ -23,6 +23,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Check heating system efficiency',
           'Inspect and clean fireplace/chimney',
           'Check for ice dams on roof',
+          'Test carbon monoxide detectors',
           'Inspect weatherstripping on doors and windows',
           'Inspect furnace filter and replace if dirty',
           'Test GFCI outlets in kitchen, bathrooms, garage, and exterior',
@@ -61,7 +62,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       3: { // March
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Begin spring cleaning preparation',
           'Schedule HVAC system transition maintenance',
           'Inspect exterior for winter damage',
@@ -205,6 +205,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Clean and inspect gutters before autumn',
           'Check weatherstripping and caulking',
           'Prepare outdoor equipment for storage',
+          'Test smoke/CO detectors again (quarterly)',
           'Test thermostat programming',
           'Inspect weatherstripping and door seals before cold weather',
           'Check attic for pests (rodents often enter in fall)',
@@ -231,6 +232,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Test outdoor lighting (especially pathway and security lights)',
           'Test emergency generator if you have one',
           'Inspect fireplace and chimney flue; schedule cleaning if needed',
+          'Test carbon monoxide detectors before heating season',
           'Check insulation around pipes to prevent winter freezing',
           'Test ground drainage with garden hose'
         ],
@@ -245,7 +247,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       11: { // November
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Complete winter preparation',
           'Test heating system thoroughly',
           'Final exterior maintenance before cold',
@@ -272,6 +273,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Monitor heating system performance',
           'Check holiday decorations safety',
           'Inspect and maintain fireplace',
+          'Test carbon monoxide and smoke detectors',
           'Monitor energy usage and efficiency',
           'Check water heater pressure relief valve (carefully lift lever)',
           'Test indoor circuit breakers (flip each one to ensure not stuck)',
@@ -290,6 +292,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       }
     },
     yearRoundTasks: [
+      'Test smoke and carbon monoxide detectors monthly',
       'Check HVAC filters monthly',
       'Inspect plumbing for leaks quarterly',
       'Check electrical systems annually',
@@ -319,6 +322,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Service heating system during cooler months',
           'Check and clean fireplace if applicable',
           'Inspect weatherstripping',
+          'Test carbon monoxide detectors',
           'Check attic insulation',
           'Inspect furnace filter and replace if dirty',
           'Test GFCI outlets in kitchen, bathrooms, garage, and exterior',
@@ -357,7 +361,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       3: { // March
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Begin spring cleaning and maintenance',
           'Service air conditioning system',
           'Clean and inspect gutters',
@@ -501,6 +504,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Begin gradual fall preparation',
           'Check exterior maintenance needs',
           'Inspect pool and outdoor equipment',
+          'Test smoke/CO detectors again (quarterly)',
           'Test thermostat programming',
           'Inspect weatherstripping and door seals before cold weather',
           'Check attic for pests (rodents often enter in fall)',
@@ -526,6 +530,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Test outdoor lighting (especially pathway and security lights)',
           'Test emergency generator if you have one',
           'Inspect fireplace and chimney flue; schedule cleaning if needed',
+          'Test carbon monoxide detectors before heating season',
           'Check insulation around pipes to prevent winter freezing',
           'Test ground drainage with garden hose'
         ],
@@ -540,7 +545,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       11: { // November
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Prepare for mild winter season',
           'Check heating system operation',
           'Clean and maintain outdoor areas',
@@ -567,6 +571,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Monitor heating system performance',
           'Check holiday decorations and lighting',
           'Maintain mild winter preparations',
+          'Test smoke and carbon monoxide detectors',
           'Check weatherstripping and insulation',
           'Check water heater pressure relief valve (carefully lift lever)',
           'Test indoor circuit breakers (flip each one to ensure not stuck)',
@@ -585,6 +590,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       }
     },
     yearRoundTasks: [
+      'Test smoke and carbon monoxide detectors monthly',
       'Check HVAC filters monthly (more frequent due to humidity)',
       'Inspect for mold and moisture quarterly',
       'Professional pest control quarterly',
@@ -607,6 +613,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Peak heating season maintenance',
           'Check heating system efficiency',
           'Inspect and clean fireplace/chimney',
+          'Test carbon monoxide detectors',
           'Check insulation and weatherstripping'
         ],
         weatherSpecific: [
@@ -637,7 +644,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       3: { // March
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Begin spring transition planning',
           'Check HVAC system for seasonal change',
           'Inspect exterior for winter damage',
@@ -777,7 +783,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       11: { // November
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Complete winter preparation',
           'Test heating system thoroughly',
           'Check insulation and weatherproofing',
@@ -797,6 +802,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
         seasonal: [
           'Monitor heating system performance',
           'Check holiday decorations and lighting',
+          'Test carbon monoxide and smoke detectors',
           'Maintain winter preparations',
           'Monitor energy usage',
           'Check water heater pressure relief valve (carefully lift lever)',
@@ -816,6 +822,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       }
     },
     yearRoundTasks: [
+      'Test smoke and carbon monoxide detectors monthly',
       'Check HVAC filters monthly',
       'Inspect for seasonal weather damage quarterly',
       'Check sump pump operation seasonally',
@@ -838,6 +845,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Monitor heating system for cool season',
           'Check weatherstripping and insulation',
           'Inspect exterior for UV and heat damage',
+          'Test carbon monoxide detectors',
           'Check attic insulation'
         ],
         weatherSpecific: [
@@ -868,7 +876,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       3: { // March
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Begin spring cleaning and maintenance',
           'Service air conditioning system early',
           'Check and clean outdoor equipment',
@@ -1007,7 +1014,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       11: { // November
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Enjoy pleasant weather for maintenance',
           'Check heating system for winter',
           'Complete exterior maintenance',
@@ -1028,6 +1034,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Monitor heating system performance',
           'Check holiday decorations and lighting',
           'Maintain mild winter conditions',
+          'Test smoke and carbon monoxide detectors',
           'Check pool and spa heating'
         ],
         weatherSpecific: [
@@ -1041,6 +1048,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       }
     },
     yearRoundTasks: [
+      'Test smoke and carbon monoxide detectors monthly',
       'Check HVAC filters frequently (dust/sand)',
       'Monitor water conservation systems monthly',
       'Check pool and cooling systems regularly',
@@ -1063,6 +1071,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Monitor heating system for cool season',
           'Check for winter storm damage',
           'Inspect weatherstripping',
+          'Test carbon monoxide detectors',
           'Check attic insulation and ventilation'
         ],
         weatherSpecific: [
@@ -1093,7 +1102,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       3: { // March
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Begin spring maintenance',
           'Check irrigation systems',
           'Inspect exterior paint and siding',
@@ -1232,7 +1240,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       11: { // November
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'End of wildfire season vigilance',
           'Prepare for winter storm season',
           'Check heating system operation',
@@ -1252,6 +1259,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
         seasonal: [
           'Monitor heating system performance',
           'Check winter storm preparation',
+          'Test smoke and carbon monoxide detectors',
           'Check holiday decorations safety',
           'Maintain mild winter conditions'
         ],
@@ -1266,6 +1274,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       }
     },
     yearRoundTasks: [
+      'Test smoke and carbon monoxide detectors monthly',
       'Check earthquake emergency supplies quarterly',
       'Monitor air quality systems regularly',
       'Check water conservation systems monthly',
@@ -1319,7 +1328,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       3: { // March
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Begin spring preparation',
           'Check HVAC system transition',
           'Inspect exterior for winter damage',
@@ -1459,7 +1467,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       11: { // November
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Complete winter preparation',
           'Test heating system thoroughly',
           'Check winter emergency supplies',
@@ -1494,6 +1501,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       }
     },
     yearRoundTasks: [
+      'Test smoke and carbon monoxide detectors monthly',
       'Check HVAC filters monthly (altitude effects)',
       'Monitor emergency supplies quarterly',
       'Check altitude-specific equipment annually',
@@ -1516,6 +1524,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           'Monitor heating system for cool, wet season',
           'Check for winter storm damage',
           'Inspect weatherstripping and insulation',
+          'Test carbon monoxide detectors',
           'Check moisture control systems'
         ],
         weatherSpecific: [
@@ -1546,7 +1555,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       3: { // March
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Begin spring maintenance',
           'Check drainage systems thoroughly',
           'Inspect exterior paint for weather damage',
@@ -1685,7 +1693,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       },
       11: { // November
         seasonal: [
-          'Test smoke and carbon monoxide detectors (daylight saving time reminder)',
           'Complete winter storm preparation',
           'Check heating system efficiency',
           'Prepare moisture control systems',
@@ -1720,6 +1727,7 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
       }
     },
     yearRoundTasks: [
+      'Test smoke and carbon monoxide detectors monthly',
       'Check moisture control systems monthly',
       'Monitor air quality during fire season',
       'Check earthquake emergency supplies quarterly',

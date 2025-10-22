@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, type TaskCompletion, type InsertTaskCompletion, type Achievement, type InsertAchievement, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks, taskCompletions, achievements, maintenanceLogs } from "@shared/schema";
+import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, type TaskCompletion, type InsertTaskCompletion, type Achievement, type InsertAchievement, type AchievementDefinition, type InsertAchievementDefinition, type UserAchievement, type InsertUserAchievement, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks, taskCompletions, achievements, achievementDefinitions, userAchievements, maintenanceLogs } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { eq, ne, isNotNull } from "drizzle-orm";
@@ -236,6 +236,17 @@ export interface IStorage {
   createAchievement(achievement: InsertAchievement): Promise<Achievement>;
   hasAchievement(homeownerId: string, achievementType: string): Promise<boolean>;
   getContractorHireCount(homeownerId: string): Promise<number>;
+  
+  // New achievement system operations
+  getAllAchievementDefinitions(): Promise<AchievementDefinition[]>;
+  getAchievementDefinitionsByCategory(category: string): Promise<AchievementDefinition[]>;
+  getUserAchievements(homeownerId: string): Promise<UserAchievement[]>;
+  getUserAchievement(homeownerId: string, achievementKey: string): Promise<UserAchievement | undefined>;
+  createUserAchievement(userAchievement: InsertUserAchievement): Promise<UserAchievement>;
+  updateUserAchievementProgress(homeownerId: string, achievementKey: string, progress: number, metadata?: string): Promise<UserAchievement | undefined>;
+  unlockUserAchievement(homeownerId: string, achievementKey: string): Promise<UserAchievement | undefined>;
+  checkAndAwardAchievements(homeownerId: string): Promise<UserAchievement[]>;
+  getAchievementProgress(homeownerId: string, achievementKey: string): Promise<{ progress: number; isUnlocked: boolean; criteria: any }>;
 }
 
 export class MemStorage implements IStorage {
@@ -2933,6 +2944,221 @@ export class MemStorage implements IStorage {
     
     const uniqueContractors = new Set(logs.map(log => log.contractorId).filter(Boolean));
     return uniqueContractors.size;
+  }
+
+  // New achievement system operations
+  async getAllAchievementDefinitions(): Promise<AchievementDefinition[]> {
+    const result = await db.select().from(achievementDefinitions).where(eq(achievementDefinitions.isActive, true));
+    return result;
+  }
+
+  async getAchievementDefinitionsByCategory(category: string): Promise<AchievementDefinition[]> {
+    const result = await db.select().from(achievementDefinitions)
+      .where(eq(achievementDefinitions.category, category))
+      .where(eq(achievementDefinitions.isActive, true));
+    return result;
+  }
+
+  async getUserAchievements(homeownerId: string): Promise<UserAchievement[]> {
+    const result = await db.select().from(userAchievements).where(eq(userAchievements.homeownerId, homeownerId));
+    return result;
+  }
+
+  async getUserAchievement(homeownerId: string, achievementKey: string): Promise<UserAchievement | undefined> {
+    const result = await db.select().from(userAchievements)
+      .where(eq(userAchievements.homeownerId, homeownerId))
+      .where(eq(userAchievements.achievementKey, achievementKey));
+    return result[0];
+  }
+
+  async createUserAchievement(userAchievement: InsertUserAchievement): Promise<UserAchievement> {
+    const result = await db.insert(userAchievements).values(userAchievement).returning();
+    return result[0];
+  }
+
+  async updateUserAchievementProgress(homeownerId: string, achievementKey: string, progress: number, metadata?: string): Promise<UserAchievement | undefined> {
+    const updateData: any = { progress };
+    if (metadata) {
+      updateData.metadata = metadata;
+    }
+    
+    const result = await db.update(userAchievements)
+      .set(updateData)
+      .where(eq(userAchievements.homeownerId, homeownerId))
+      .where(eq(userAchievements.achievementKey, achievementKey))
+      .returning();
+    return result[0];
+  }
+
+  async unlockUserAchievement(homeownerId: string, achievementKey: string): Promise<UserAchievement | undefined> {
+    const result = await db.update(userAchievements)
+      .set({ isUnlocked: true, unlockedAt: new Date(), progress: "100" })
+      .where(eq(userAchievements.homeownerId, homeownerId))
+      .where(eq(userAchievements.achievementKey, achievementKey))
+      .returning();
+    return result[0];
+  }
+
+  async checkAndAwardAchievements(homeownerId: string): Promise<UserAchievement[]> {
+    const newlyUnlocked: UserAchievement[] = [];
+    
+    // Get all achievement definitions
+    const definitions = await this.getAllAchievementDefinitions();
+    
+    // Get user's current achievements
+    const userAchievs = await this.getUserAchievements(homeownerId);
+    const unlockedKeys = new Set(userAchievs.filter(a => a.isUnlocked).map(a => a.achievementKey));
+    
+    for (const def of definitions) {
+      // Skip if already unlocked
+      if (unlockedKeys.has(def.achievementKey)) continue;
+      
+      const criteria = JSON.parse(def.criteria);
+      let isCompleted = false;
+      let progress = 0;
+      
+      // Check each achievement type
+      switch (criteria.type) {
+        case 'seasonal_tasks': {
+          // Get tasks for this season
+          const seasonMonths: Record<string, number[]> = {
+            winter: [12, 1, 2],
+            spring: [3, 4, 5],
+            summer: [6, 7, 8],
+            fall: [9, 10, 11]
+          };
+          
+          const months = seasonMonths[criteria.season] || [];
+          const currentYear = new Date().getFullYear();
+          
+          // Count completed seasonal tasks
+          const completions = await db.select().from(taskCompletions)
+            .where(eq(taskCompletions.homeownerId, homeownerId))
+            .where(eq(taskCompletions.year, currentYear));
+          
+          const seasonalCompletions = completions.filter(c => months.includes(c.month));
+          
+          // For simplicity, assume "all" means at least 5 tasks per season
+          const requiredCount = 5;
+          progress = Math.min(100, (seasonalCompletions.length / requiredCount) * 100);
+          isCompleted = seasonalCompletions.length >= requiredCount;
+          break;
+        }
+        
+        case 'under_budget': {
+          const completions = await db.select().from(taskCompletions)
+            .where(eq(taskCompletions.homeownerId, homeownerId))
+            .where(isNotNull(taskCompletions.costSavings));
+          
+          const underBudgetCount = completions.filter(c => 
+            c.costSavings && parseFloat(c.costSavings.toString()) > 0
+          ).length;
+          
+          progress = Math.min(100, (underBudgetCount / criteria.count) * 100);
+          isCompleted = underBudgetCount >= criteria.count;
+          break;
+        }
+        
+        case 'total_savings': {
+          const completions = await db.select().from(taskCompletions)
+            .where(eq(taskCompletions.homeownerId, homeownerId))
+            .where(isNotNull(taskCompletions.costSavings));
+          
+          const totalSavings = completions.reduce((sum, c) => 
+            sum + (c.costSavings ? parseFloat(c.costSavings.toString()) : 0), 0
+          );
+          
+          progress = Math.min(100, (totalSavings / criteria.amount) * 100);
+          isCompleted = totalSavings >= criteria.amount;
+          break;
+        }
+        
+        case 'documents_uploaded': {
+          const logs = await db.select().from(maintenanceLogs)
+            .where(eq(maintenanceLogs.homeownerId, homeownerId));
+          
+          const docsCount = logs.reduce((sum, log) => 
+            sum + (log.receiptUrls?.length || 0), 0
+          );
+          
+          progress = Math.min(100, (docsCount / criteria.count) * 100);
+          isCompleted = docsCount >= criteria.count;
+          break;
+        }
+        
+        case 'logs_created': {
+          const logs = await db.select().from(maintenanceLogs)
+            .where(eq(maintenanceLogs.homeownerId, homeownerId));
+          
+          progress = Math.min(100, (logs.length / criteria.count) * 100);
+          isCompleted = logs.length >= criteria.count;
+          break;
+        }
+        
+        case 'photos_uploaded': {
+          const logs = await db.select().from(maintenanceLogs)
+            .where(eq(maintenanceLogs.homeownerId, homeownerId));
+          
+          const photosCount = logs.reduce((sum, log) => 
+            sum + (log.beforePhotoUrls?.length || 0) + (log.afterPhotoUrls?.length || 0), 0
+          );
+          
+          // Count pairs of before/after photos
+          const pairsCount = Math.floor(photosCount / 2);
+          progress = Math.min(100, (pairsCount / criteria.count) * 100);
+          isCompleted = pairsCount >= criteria.count;
+          break;
+        }
+      }
+      
+      // Create or update user achievement
+      const existing = userAchievs.find(a => a.achievementKey === def.achievementKey);
+      
+      if (isCompleted) {
+        if (existing) {
+          const unlocked = await this.unlockUserAchievement(homeownerId, def.achievementKey);
+          if (unlocked) newlyUnlocked.push(unlocked);
+        } else {
+          const created = await this.createUserAchievement({
+            homeownerId,
+            achievementKey: def.achievementKey,
+            progress: "100",
+            isUnlocked: true,
+            unlockedAt: new Date()
+          });
+          newlyUnlocked.push(created);
+        }
+      } else if (!existing && progress > 0) {
+        // Create progress tracking
+        await this.createUserAchievement({
+          homeownerId,
+          achievementKey: def.achievementKey,
+          progress: progress.toString(),
+          isUnlocked: false
+        });
+      } else if (existing && progress > parseFloat(existing.progress?.toString() || "0")) {
+        // Update progress
+        await this.updateUserAchievementProgress(homeownerId, def.achievementKey, progress);
+      }
+    }
+    
+    return newlyUnlocked;
+  }
+
+  async getAchievementProgress(homeownerId: string, achievementKey: string): Promise<{ progress: number; isUnlocked: boolean; criteria: any }> {
+    const userAchiev = await this.getUserAchievement(homeownerId, achievementKey);
+    const definition = await db.select().from(achievementDefinitions)
+      .where(eq(achievementDefinitions.achievementKey, achievementKey));
+    
+    if (!definition[0]) {
+      throw new Error('Achievement definition not found');
+    }
+    
+    return {
+      progress: userAchiev ? parseFloat(userAchiev.progress?.toString() || "0") : 0,
+      isUnlocked: userAchiev?.isUnlocked || false,
+      criteria: JSON.parse(definition[0].criteria)
+    };
   }
 }
 

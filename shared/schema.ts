@@ -235,6 +235,9 @@ export const maintenanceLogs = pgTable("maintenance_logs", {
   notes: text("notes"), // Additional notes about the service
   warrantyPeriod: text("warranty_period"), // Warranty period for the work
   nextServiceDue: text("next_service_due"), // When next service is recommended
+  receiptUrls: text("receipt_urls").array().default(sql`'{}'::text[]`), // uploaded receipt images
+  beforePhotoUrls: text("before_photo_urls").array().default(sql`'{}'::text[]`), // before photos
+  afterPhotoUrls: text("after_photo_urls").array().default(sql`'{}'::text[]`), // after photos
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -442,17 +445,53 @@ export const taskCompletions = pgTable("task_completions", {
   taskId: text("task_id"), // references maintenanceTasks or customMaintenanceTasks
   taskType: text("task_type").notNull(), // "maintenance" or "custom"
   taskTitle: text("task_title").notNull(), // denormalized for quick access
+  taskCategory: text("task_category"), // category for seasonal tracking
   completedAt: timestamp("completed_at").notNull().defaultNow(),
   month: integer("month").notNull(), // 1-12, month when task was completed
   year: integer("year").notNull(), // year when task was completed
+  estimatedCost: decimal("estimated_cost", { precision: 10, scale: 2 }), // estimated cost before doing task
+  actualCost: decimal("actual_cost", { precision: 10, scale: 2 }), // actual cost paid
+  costSavings: decimal("cost_savings", { precision: 10, scale: 2 }), // calculated savings
   notes: text("notes"), // optional completion notes
+  documentsUploaded: integer("documents_uploaded").default(0), // count of receipts/photos uploaded
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("IDX_task_completions_homeowner").on(table.homeownerId),
   index("IDX_task_completions_date").on(table.year, table.month),
 ]);
 
-// Achievements tracking for homeowner milestones
+// Achievement definitions - master list of all available achievements
+export const achievementDefinitions = pgTable("achievement_definitions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  achievementKey: text("achievement_key").notNull().unique(), // unique identifier e.g. "winter_ready", "budget_boss"
+  category: text("category").notNull(), // "seasonal", "financial", "organization", "streak", "community"
+  name: text("name").notNull(), // Display name
+  description: text("description").notNull(), // What this achievement is for
+  icon: text("icon").notNull(), // lucide-react icon name
+  criteria: text("criteria").notNull(), // JSON string describing unlock criteria
+  points: integer("points").default(10), // Achievement points value
+  tier: text("tier").default("bronze"), // "bronze", "silver", "gold", "platinum"
+  isActive: boolean("is_active").default(true).notNull(),
+  sortOrder: integer("sort_order").default(0), // for display ordering
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User achievements - tracks which achievements each user has earned
+export const userAchievements = pgTable("user_achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  homeownerId: text("homeowner_id").notNull(),
+  achievementKey: text("achievement_key").notNull(), // references achievementDefinitions.achievementKey
+  progress: decimal("progress", { precision: 5, scale: 2 }).default("0"), // percentage progress (0-100)
+  isUnlocked: boolean("is_unlocked").default(false).notNull(),
+  unlockedAt: timestamp("unlocked_at"),
+  metadata: text("metadata"), // JSON string for additional tracking data
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_user_achievements_homeowner").on(table.homeownerId),
+  uniqueIndex("UX_user_achievement_unique").on(table.homeownerId, table.achievementKey),
+]);
+
+// Legacy achievements table - kept for backward compatibility, will migrate to userAchievements
 export const achievements = pgTable("achievements", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   homeownerId: text("homeowner_id").notNull(),
@@ -611,6 +650,16 @@ export const insertContractorBoostSchema = createInsertSchema(contractorBoosts).
 });
 
 export const insertTaskCompletionSchema = createInsertSchema(taskCompletions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAchievementDefinitionSchema = createInsertSchema(achievementDefinitions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
   id: true,
   createdAt: true,
 });
@@ -799,6 +848,10 @@ export type InsertContractorBoost = z.infer<typeof insertContractorBoostSchema>;
 export type ContractorBoost = typeof contractorBoosts.$inferSelect;
 export type InsertTaskCompletion = z.infer<typeof insertTaskCompletionSchema>;
 export type TaskCompletion = typeof taskCompletions.$inferSelect;
+export type InsertAchievementDefinition = z.infer<typeof insertAchievementDefinitionSchema>;
+export type AchievementDefinition = typeof achievementDefinitions.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertHouseTransfer = z.infer<typeof insertHouseTransferSchema>;

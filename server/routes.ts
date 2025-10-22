@@ -2881,6 +2881,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New achievement system endpoints
+  // GET /api/achievements - Returns all achievement definitions with user progress
+  app.get('/api/achievements', async (req: any, res) => {
+    try {
+      const homeownerId = req.session?.user?.id;
+      const { category } = req.query;
+      
+      // Get all definitions (or filtered by category)
+      let definitions;
+      if (category) {
+        definitions = await storage.getAchievementDefinitionsByCategory(category as string);
+      } else {
+        definitions = await storage.getAllAchievementDefinitions();
+      }
+      
+      // If user is authenticated, merge with their progress
+      if (homeownerId) {
+        const userAchievements = await storage.getUserAchievements(homeownerId);
+        
+        const achievementsWithProgress = definitions.map(def => {
+          const userAchiev = userAchievements.find(ua => ua.achievementKey === def.achievementKey);
+          return {
+            ...def,
+            progress: userAchiev ? parseFloat(userAchiev.progress?.toString() || "0") : 0,
+            isUnlocked: userAchiev?.isUnlocked || false,
+            unlockedAt: userAchiev?.unlockedAt || null,
+            metadata: userAchiev?.metadata || null
+          };
+        });
+        
+        res.json(achievementsWithProgress);
+      } else {
+        // If not authenticated, just return definitions without progress
+        res.json(definitions.map(def => ({
+          ...def,
+          progress: 0,
+          isUnlocked: false,
+          unlockedAt: null,
+          metadata: null
+        })));
+      }
+    } catch (error) {
+      console.error("Error fetching achievements:", error);
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+
+  // GET /api/achievements/user - Returns only the user's earned/unlocked achievements
+  app.get('/api/achievements/user', async (req: any, res) => {
+    try {
+      const homeownerId = req.session?.user?.id;
+      if (!homeownerId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userAchievements = await storage.getUserAchievements(homeownerId);
+      const definitions = await storage.getAllAchievementDefinitions();
+      
+      // Return only unlocked achievements with full definition data
+      const unlockedAchievements = userAchievements
+        .filter(ua => ua.isUnlocked)
+        .map(ua => {
+          const def = definitions.find(d => d.achievementKey === ua.achievementKey);
+          return {
+            ...def,
+            ...ua,
+            progress: parseFloat(ua.progress?.toString() || "100")
+          };
+        })
+        .filter(a => a.id); // Filter out any that didn't match a definition
+      
+      res.json(unlockedAchievements);
+    } catch (error) {
+      console.error("Error fetching user achievements:", error);
+      res.status(500).json({ message: "Failed to fetch user achievements" });
+    }
+  });
+
+  app.post('/api/achievements/check', async (req: any, res) => {
+    try {
+      const homeownerId = req.session?.user?.id;
+      if (!homeownerId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const newlyUnlocked = await storage.checkAndAwardAchievements(homeownerId);
+      
+      res.json({
+        success: true,
+        newlyUnlocked: newlyUnlocked.map(ua => ({
+          achievementKey: ua.achievementKey,
+          unlockedAt: ua.unlockedAt
+        }))
+      });
+    } catch (error) {
+      console.error("Error checking and awarding achievements:", error);
+      res.status(500).json({ message: "Failed to check achievements" });
+    }
+  });
+
+  app.get('/api/achievements/progress/:achievementKey', async (req: any, res) => {
+    try {
+      const homeownerId = req.session?.user?.id;
+      if (!homeownerId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const { achievementKey } = req.params;
+      const progress = await storage.getAchievementProgress(homeownerId, achievementKey);
+      
+      res.json(progress);
+    } catch (error) {
+      console.error("Error fetching achievement progress:", error);
+      res.status(500).json({ message: "Failed to fetch achievement progress" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
