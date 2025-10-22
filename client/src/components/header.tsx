@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Users, Package, User as UserIcon, LogOut, MessageCircle, Trophy } from "lucide-react";
+import { Users, Package, User as UserIcon, LogOut, MessageCircle, Trophy, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/logo";
 import { Notifications } from "@/components/notifications";
@@ -12,6 +12,10 @@ export default function Header() {
   const [location] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const typedUser = user as User | undefined;
+
+  // Check if user is admin
+  const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((e: string) => e.trim()).filter(Boolean);
+  const isAdmin = typedUser?.email && adminEmails.includes(typedUser.email);
 
   const handleLogout = async () => {
     try {
@@ -44,6 +48,14 @@ export default function Header() {
           </div>
           
           <nav className="hidden md:flex space-x-8">
+            {isAdmin && (
+              <Link href="/admin" className={`text-gray-700 hover:text-primary transition-colors ${
+                location === '/admin' ? 'text-primary font-medium' : ''
+              }`} data-testid="link-admin">
+                <Shield className="w-4 h-4 inline mr-1" />
+                Admin
+              </Link>
+            )}
             {typedUser?.role === 'homeowner' && (
               <>
                 <Link href="/maintenance" className={`text-gray-700 hover:text-primary transition-colors ${

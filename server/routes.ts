@@ -230,6 +230,202 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email/password registration
+  app.post('/api/auth/register', authLimiter, async (req, res) => {
+    try {
+      const { email, password, firstName, lastName, role, zipCode, inviteCode } = req.body;
+      
+      if (!email || !password || !firstName || !lastName || !role || !zipCode) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
+
+      // Check for duplicate email
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ message: "Email already registered" });
+      }
+
+      // Validate invite code if provided
+      if (inviteCode) {
+        const isValid = await storage.validateAndUseInviteCode(inviteCode);
+        if (!isValid) {
+          return res.status(400).json({ message: "Invalid or expired invite code" });
+        }
+      }
+
+      // Hash password with bcrypt
+      const bcrypt = await import('bcryptjs');
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      // Create user
+      const user = await storage.createUserWithPassword({
+        email,
+        passwordHash,
+        firstName,
+        lastName,
+        role: role as 'homeowner' | 'contractor',
+        zipCode
+      });
+
+      // Create session
+      req.session.user = user;
+      req.session.isAuthenticated = true;
+
+      res.json({ success: true, user });
+    } catch (error) {
+      console.error("Error registering user:", error);
+      res.status(500).json({ message: "Failed to create account" });
+    }
+  });
+
+  // Email/password login
+  app.post('/api/auth/login', authLimiter, async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Missing email or password" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user || !user.passwordHash) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Verify password
+      const bcrypt = await import('bcryptjs');
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Create session
+      req.session.user = user;
+      req.session.isAuthenticated = true;
+
+      res.json({ success: true, user });
+    } catch (error) {
+      console.error("Error logging in:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Admin middleware
+  const requireAdmin: any = (req: any, res: any, next: any) => {
+    if (!req.session?.isAuthenticated || !req.session?.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
+    if (!adminEmails.includes(req.session.user.email)) {
+      return res.status(403).json({ message: "Forbidden - admin access required" });
+    }
+
+    next();
+  };
+
+  // Search analytics tracking
+  app.post('/api/analytics/search', async (req: any, res) => {
+    try {
+      const { searchTerm, serviceType, searchContext } = req.body;
+      
+      const userId = req.session?.user?.id || null;
+      const userZipCode = req.session?.user?.zipCode || null;
+
+      const analytics = await storage.trackSearch({
+        userId,
+        searchTerm,
+        serviceType,
+        userZipCode,
+        searchContext
+      });
+
+      res.json({ success: true, id: analytics.id });
+    } catch (error) {
+      console.error("Error tracking search:", error);
+      res.status(500).json({ message: "Failed to track search" });
+    }
+  });
+
+  // Admin analytics routes
+  app.get('/api/admin/stats', requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ message: "Failed to fetch statistics" });
+    }
+  });
+
+  app.get('/api/admin/search-analytics', requireAdmin, async (req, res) => {
+    try {
+      const { zipCode, limit } = req.query;
+      const analytics = await storage.getSearchAnalytics({
+        zipCode: zipCode as string,
+        limit: limit ? parseInt(limit as string) : undefined
+      });
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching search analytics:", error);
+      res.status(500).json({ message: "Failed to fetch search analytics" });
+    }
+  });
+
+  // Invite code routes
+  app.get('/api/admin/invite-codes', requireAdmin, async (req, res) => {
+    try {
+      const codes = await storage.getInviteCodes();
+      res.json(codes);
+    } catch (error) {
+      console.error("Error fetching invite codes:", error);
+      res.status(500).json({ message: "Failed to fetch invite codes" });
+    }
+  });
+
+  app.post('/api/admin/invite-codes', requireAdmin, async (req, res) => {
+    try {
+      const { code, maxUses } = req.body;
+      
+      const createdBy = req.session.user.id;
+      const inviteCode = await storage.createInviteCode({
+        code,
+        createdBy,
+        maxUses: maxUses || 1,
+        currentUses: 0,
+        isActive: true,
+        usedBy: []
+      });
+
+      res.json(inviteCode);
+    } catch (error) {
+      console.error("Error creating invite code:", error);
+      res.status(500).json({ message: "Failed to create invite code" });
+    }
+  });
+
+  app.patch('/api/admin/invite-codes/:code/deactivate', requireAdmin, async (req, res) => {
+    try {
+      const { code } = req.params;
+      const success = await storage.deactivateInviteCode(code);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Invite code not found" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deactivating invite code:", error);
+      res.status(500).json({ message: "Failed to deactivate invite code" });
+    }
+  });
+
   // Homeowner profile routes
   app.patch('/api/homeowner/profile', async (req: any, res) => {
     try {

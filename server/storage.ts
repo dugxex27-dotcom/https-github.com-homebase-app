@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, type TaskCompletion, type InsertTaskCompletion, type Achievement, type InsertAchievement, type AchievementDefinition, type InsertAchievementDefinition, type UserAchievement, type InsertUserAchievement, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks, taskCompletions, achievements, achievementDefinitions, userAchievements, maintenanceLogs } from "@shared/schema";
+import { type Contractor, type InsertContractor, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, type TaskCompletion, type InsertTaskCompletion, type Achievement, type InsertAchievement, type AchievementDefinition, type InsertAchievementDefinition, type UserAchievement, type InsertUserAchievement, type SearchAnalytics, type InsertSearchAnalytics, type InviteCode, type InsertInviteCode, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks, taskCompletions, achievements, achievementDefinitions, userAchievements, maintenanceLogs, searchAnalytics, inviteCodes } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { eq, ne, isNotNull } from "drizzle-orm";
@@ -247,6 +247,29 @@ export interface IStorage {
   unlockUserAchievement(homeownerId: string, achievementKey: string): Promise<UserAchievement | undefined>;
   checkAndAwardAchievements(homeownerId: string): Promise<UserAchievement[]>;
   getAchievementProgress(homeownerId: string, achievementKey: string): Promise<{ progress: number; isUnlocked: boolean; criteria: any }>;
+
+  // Authentication methods
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUserWithPassword(data: { email: string, passwordHash: string, firstName: string, lastName: string, role: 'homeowner' | 'contractor', zipCode: string }): Promise<User>;
+
+  // Invite code methods
+  validateAndUseInviteCode(code: string): Promise<boolean>;
+  getInviteCodes(): Promise<InviteCode[]>;
+  createInviteCode(data: InsertInviteCode): Promise<InviteCode>;
+  deactivateInviteCode(code: string): Promise<boolean>;
+
+  // Search analytics methods
+  trackSearch(data: InsertSearchAnalytics): Promise<SearchAnalytics>;
+  getSearchAnalytics(filters?: { zipCode?: string, limit?: number }): Promise<SearchAnalytics[]>;
+
+  // Admin analytics methods
+  getAdminStats(): Promise<{
+    totalUsers: number;
+    homeownerCount: number;
+    contractorCount: number;
+    topSearches: Array<{ searchTerm: string; count: number }>;
+    signupsByZip: Array<{ zipCode: string; count: number }>;
+  }>;
 }
 
 export class MemStorage implements IStorage {
@@ -279,6 +302,9 @@ export class MemStorage implements IStorage {
   private climateZones: Map<string, ClimateZone>;
   private regulatoryBodies: Map<string, RegulatoryBody>;
   private regionalMaintenanceTasks: Map<string, RegionalMaintenanceTask>;
+  // Auth and analytics Maps
+  private inviteCodesMap: Map<string, InviteCode>;
+  private searchAnalyticsMap: Map<string, SearchAnalytics>;
 
   constructor() {
     this.users = new Map();
@@ -310,6 +336,9 @@ export class MemStorage implements IStorage {
     this.climateZones = new Map();
     this.regulatoryBodies = new Map();
     this.regionalMaintenanceTasks = new Map();
+    // Initialize auth and analytics Maps
+    this.inviteCodesMap = new Map();
+    this.searchAnalyticsMap = new Map();
     this.seedData();
     this.seedServiceRecords();
     this.seedReviews();
@@ -3158,6 +3187,201 @@ export class MemStorage implements IStorage {
       progress: userAchiev ? parseFloat(userAchiev.progress?.toString() || "0") : 0,
       isUnlocked: userAchiev?.isUnlocked || false,
       criteria: JSON.parse(definition[0].criteria)
+    };
+  }
+
+  // Authentication methods
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    for (const user of this.users.values()) {
+      if (user.email === email) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  async createUserWithPassword(data: { 
+    email: string; 
+    passwordHash: string; 
+    firstName: string; 
+    lastName: string; 
+    role: 'homeowner' | 'contractor'; 
+    zipCode: string 
+  }): Promise<User> {
+    const id = randomUUID();
+    const user: User = {
+      id,
+      email: data.email,
+      passwordHash: data.passwordHash,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      role: data.role,
+      zipCode: data.zipCode,
+      profileImageUrl: null,
+      referralCode: null,
+      referredBy: null,
+      referralCount: 0,
+      subscriptionPlanId: null,
+      subscriptionStatus: 'inactive',
+      maxHousesAllowed: 2,
+      isPremium: false,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      stripePriceId: null,
+      subscriptionStartDate: null,
+      subscriptionEndDate: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  // Invite code methods
+  async validateAndUseInviteCode(code: string): Promise<boolean> {
+    const inviteCode = Array.from(this.inviteCodesMap.values()).find(ic => ic.code === code);
+    
+    if (!inviteCode) {
+      return false;
+    }
+    
+    if (!inviteCode.isActive) {
+      return false;
+    }
+    
+    if (inviteCode.currentUses >= inviteCode.maxUses) {
+      return false;
+    }
+    
+    // Increment usage
+    const updated: InviteCode = {
+      ...inviteCode,
+      currentUses: inviteCode.currentUses + 1,
+      updatedAt: new Date(),
+    };
+    this.inviteCodesMap.set(inviteCode.id, updated);
+    return true;
+  }
+
+  async getInviteCodes(): Promise<InviteCode[]> {
+    return Array.from(this.inviteCodesMap.values());
+  }
+
+  async createInviteCode(data: InsertInviteCode): Promise<InviteCode> {
+    const id = randomUUID();
+    const inviteCode: InviteCode = {
+      id,
+      code: data.code,
+      createdBy: data.createdBy || null,
+      usedBy: data.usedBy || [],
+      isActive: data.isActive ?? true,
+      maxUses: data.maxUses ?? 1,
+      currentUses: data.currentUses ?? 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.inviteCodesMap.set(id, inviteCode);
+    return inviteCode;
+  }
+
+  async deactivateInviteCode(code: string): Promise<boolean> {
+    const inviteCode = Array.from(this.inviteCodesMap.values()).find(ic => ic.code === code);
+    
+    if (!inviteCode) {
+      return false;
+    }
+    
+    const updated: InviteCode = {
+      ...inviteCode,
+      isActive: false,
+      updatedAt: new Date(),
+    };
+    this.inviteCodesMap.set(inviteCode.id, updated);
+    return true;
+  }
+
+  // Search analytics methods
+  async trackSearch(data: InsertSearchAnalytics): Promise<SearchAnalytics> {
+    const id = randomUUID();
+    const searchAnalytic: SearchAnalytics = {
+      id,
+      userId: data.userId || null,
+      searchTerm: data.searchTerm,
+      serviceType: data.serviceType || null,
+      userZipCode: data.userZipCode || null,
+      searchContext: data.searchContext || null,
+      createdAt: new Date(),
+    };
+    this.searchAnalyticsMap.set(id, searchAnalytic);
+    return searchAnalytic;
+  }
+
+  async getSearchAnalytics(filters?: { zipCode?: string; limit?: number }): Promise<SearchAnalytics[]> {
+    let analytics = Array.from(this.searchAnalyticsMap.values());
+    
+    if (filters?.zipCode) {
+      analytics = analytics.filter(a => a.userZipCode === filters.zipCode);
+    }
+    
+    // Sort by most recent
+    analytics.sort((a, b) => {
+      const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+      const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+      return bTime - aTime;
+    });
+    
+    if (filters?.limit) {
+      analytics = analytics.slice(0, filters.limit);
+    }
+    
+    return analytics;
+  }
+
+  // Admin analytics methods
+  async getAdminStats(): Promise<{
+    totalUsers: number;
+    homeownerCount: number;
+    contractorCount: number;
+    topSearches: Array<{ searchTerm: string; count: number }>;
+    signupsByZip: Array<{ zipCode: string; count: number }>;
+  }> {
+    const allUsers = Array.from(this.users.values());
+    
+    const totalUsers = allUsers.length;
+    const homeownerCount = allUsers.filter(u => u.role === 'homeowner').length;
+    const contractorCount = allUsers.filter(u => u.role === 'contractor').length;
+    
+    // Count search terms
+    const searchTermCounts = new Map<string, number>();
+    Array.from(this.searchAnalyticsMap.values()).forEach(search => {
+      const term = search.searchTerm;
+      searchTermCounts.set(term, (searchTermCounts.get(term) || 0) + 1);
+    });
+    
+    const topSearches = Array.from(searchTermCounts.entries())
+      .map(([searchTerm, count]) => ({ searchTerm, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+    
+    // Count signups by zip
+    const zipCounts = new Map<string, number>();
+    allUsers.forEach(user => {
+      if (user.zipCode) {
+        zipCounts.set(user.zipCode, (zipCounts.get(user.zipCode) || 0) + 1);
+      }
+    });
+    
+    const signupsByZip = Array.from(zipCounts.entries())
+      .map(([zipCode, count]) => ({ zipCode, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+    
+    return {
+      totalUsers,
+      homeownerCount,
+      contractorCount,
+      topSearches,
+      signupsByZip,
     };
   }
 }

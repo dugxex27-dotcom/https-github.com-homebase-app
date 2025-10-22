@@ -23,6 +23,7 @@ import Messages from "./pages/messages";
 import MyHome from "./pages/my-home";
 import HouseTransferAccept from "./pages/house-transfer-accept";
 import Achievements from "./pages/achievements";
+import AdminDashboard from "./pages/admin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -51,7 +52,11 @@ function Router() {
   }
 
   // Authenticated user routes
-  const typedUser = user as { role?: string } | undefined;
+  const typedUser = user as { role?: string; email?: string } | undefined;
+  
+  // Check if user is admin (based on ADMIN_EMAILS environment variable)
+  const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((e: string) => e.trim()).filter(Boolean);
+  const isAdmin = typedUser?.email && adminEmails.includes(typedUser.email);
   
   return (
     <Switch>
@@ -59,6 +64,9 @@ function Router() {
       
       {/* Public routes */}
       <Route path="/house-transfer/:token" component={HouseTransferAccept} />
+      
+      {/* Admin route */}
+      {isAdmin && <Route path="/admin" component={AdminDashboard} />}
       
       {/* Always available routes */}
       <Route path="/maintenance" component={Maintenance} />

@@ -29,6 +29,23 @@ export default function Products() {
       if (searchQuery) params.set('search', searchQuery);
       if (selectedCategory) params.set('category', selectedCategory);
       
+      // Track search analytics for any search or category selection
+      if (searchQuery || selectedCategory) {
+        try {
+          await fetch('/api/analytics/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              searchTerm: searchQuery || selectedCategory || 'product search',
+              serviceType: selectedCategory,
+              searchContext: 'marketplace'
+            })
+          });
+        } catch (error) {
+          console.error('Failed to track search:', error);
+        }
+      }
+      
       const response = await fetch(`/api/products?${params}`);
       if (!response.ok) throw new Error('Failed to fetch products');
       return response.json();

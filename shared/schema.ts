@@ -69,6 +69,8 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   role: text("role").notNull().default("homeowner"), // "homeowner" or "contractor"
+  passwordHash: varchar("password_hash"),
+  zipCode: varchar("zip_code", { length: 10 }),
   referralCode: varchar("referral_code").unique(),
   referredBy: varchar("referred_by"), // referral code of user who referred this user
   referralCount: integer("referral_count").notNull().default(0),
@@ -88,6 +90,7 @@ export const users = pgTable("users", {
 }, (table) => [
   // Index for subscription plan lookups
   index("IDX_users_subscription_plan_id").on(table.subscriptionPlanId),
+  index("IDX_users_zip_code").on(table.zipCode),
 ]);
 
 export const contractors = pgTable("contractors", {
@@ -873,3 +876,42 @@ export type RegulatoryBody = typeof regulatoryBodies.$inferSelect;
 export type InsertRegulatoryBody = z.infer<typeof insertRegulatoryBodySchema>;
 export type RegionalMaintenanceTask = typeof regionalMaintenanceTasks.$inferSelect;
 export type InsertRegionalMaintenanceTask = z.infer<typeof insertRegionalMaintenanceTaskSchema>;
+
+// Search analytics table
+export const searchAnalytics = pgTable("search_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'set null' }),
+  searchTerm: text("search_term").notNull(),
+  serviceType: text("service_type"),
+  userZipCode: varchar("user_zip_code", { length: 10 }),
+  searchContext: text("search_context"), // "contractor_directory", "marketplace", "maintenance"
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_search_analytics_user_id").on(table.userId),
+  index("IDX_search_analytics_zip_code").on(table.userZipCode),
+  index("IDX_search_analytics_created_at").on(table.createdAt),
+]);
+
+export const insertSearchAnalyticsSchema = createInsertSchema(searchAnalytics).omit({ id: true, createdAt: true });
+export type InsertSearchAnalytics = z.infer<typeof insertSearchAnalyticsSchema>;
+export type SearchAnalytics = typeof searchAnalytics.$inferSelect;
+
+// Invite codes table
+export const inviteCodes = pgTable("invite_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code", { length: 50 }).notNull().unique(),
+  createdBy: varchar("created_by").references(() => users.id, { onDelete: 'set null' }),
+  usedBy: varchar("used_by").array().default(sql`ARRAY[]::varchar[]`),
+  isActive: boolean("is_active").notNull().default(true),
+  maxUses: integer("max_uses").notNull().default(1),
+  currentUses: integer("current_uses").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_invite_codes_code").on(table.code),
+  index("IDX_invite_codes_is_active").on(table.isActive),
+]);
+
+export const insertInviteCodeSchema = createInsertSchema(inviteCodes).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertInviteCode = z.infer<typeof insertInviteCodeSchema>;
+export type InviteCode = typeof inviteCodes.$inferSelect;

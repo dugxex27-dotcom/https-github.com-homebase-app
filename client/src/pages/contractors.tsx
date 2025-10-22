@@ -210,6 +210,21 @@ export default function Contractors() {
         if (filters.searchQuery) params.set('q', filters.searchQuery);
         if (filters.searchLocation) params.set('location', filters.searchLocation);
         
+        // Track search analytics for any filter or search activity
+        try {
+          await fetch('/api/analytics/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              searchTerm: filters.searchQuery || filters.services?.join(', ') || 'contractor search',
+              serviceType: filters.services?.join(', '),
+              searchContext: 'contractor_directory'
+            })
+          });
+        } catch (error) {
+          console.error('Failed to track search:', error);
+        }
+        
         const response = await fetch(`/api/contractors/search?${params}`);
         if (!response.ok) throw new Error('Failed to search contractors');
         return response.json();
