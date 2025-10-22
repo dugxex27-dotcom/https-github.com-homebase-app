@@ -1,30 +1,66 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, Star, Users, Repeat, Gift, Lock } from "lucide-react";
+import { 
+  Trophy, 
+  Star, 
+  Lock, 
+  Snowflake, 
+  Sun, 
+  Leaf, 
+  Cloud,
+  DollarSign,
+  Wrench,
+  PiggyBank,
+  FileText,
+  Clock,
+  Camera,
+  CheckCircle,
+  Target
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import Header from "@/components/header";
 
-interface Achievement {
-  id: string;
-  achievementType: string;
-  achievementTitle: string;
-  achievementDescription: string;
-  unlockedAt: string;
-  metadata: string | null;
+// Backend achievement definition with user progress
+interface AchievementWithProgress {
+  key: string;
+  category: string;
+  name: string;
+  description: string;
+  icon: string;
+  criteria: any;
+  isUnlocked: boolean;
+  progress: number;
+  unlockedAt?: string;
 }
 
 interface AchievementsResponse {
-  achievements: Achievement[];
-  progress: {
-    tasksCompleted: number;
-    contractorsHired: number;
-    currentStreak: number;
-    longestStreak: number;
-  };
+  achievements: AchievementWithProgress[];
 }
 
+// Icon mapping for achievements
+const iconMap: Record<string, any> = {
+  snowflake: Snowflake,
+  sun: Sun,
+  leaf: Leaf,
+  cloud: Cloud,
+  'dollar-sign': DollarSign,
+  wrench: Wrench,
+  'piggy-bank': PiggyBank,
+  'file-text': FileText,
+  clock: Clock,
+  camera: Camera,
+  trophy: Trophy,
+  star: Star,
+};
+
 export default function Achievements() {
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedAchievement, setSelectedAchievement] = useState<AchievementWithProgress | null>(null);
+
   const { data, isLoading } = useQuery<AchievementsResponse>({
     queryKey: ['/api/achievements'],
   });
@@ -33,10 +69,10 @@ export default function Achievements() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 p-8">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-4xl font-bold mb-2">Achievements</h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-8">Loading your achievements...</p>
+        <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
+          <div className="container mx-auto px-4 py-8">
+            <h1 className="text-4xl font-bold mb-2 text-white">Achievements</h1>
+            <p className="text-purple-200 mb-8">Loading your achievements...</p>
           </div>
         </div>
       </>
@@ -44,226 +80,326 @@ export default function Achievements() {
   }
 
   const achievements = data?.achievements || [];
-  const progress = data?.progress || {
-    tasksCompleted: 0,
-    contractorsHired: 0,
-    currentStreak: 0,
-    longestStreak: 0,
+  
+  // Count achievements by category
+  const unlockedCount = achievements.filter(a => a.isUnlocked).length;
+  const totalCount = achievements.length;
+  
+  // Filter achievements by category
+  const filteredAchievements = selectedCategory === "all" 
+    ? achievements 
+    : achievements.filter(a => a.category.toLowerCase() === selectedCategory);
+
+  // Group stats by category
+  const categoryStats = {
+    seasonal: {
+      unlocked: achievements.filter(a => a.category === 'Seasonal' && a.isUnlocked).length,
+      total: achievements.filter(a => a.category === 'Seasonal').length,
+    },
+    financial: {
+      unlocked: achievements.filter(a => a.category === 'Financial Savvy' && a.isUnlocked).length,
+      total: achievements.filter(a => a.category === 'Financial Savvy').length,
+    },
+    organization: {
+      unlocked: achievements.filter(a => a.category === 'Organization' && a.isUnlocked).length,
+      total: achievements.filter(a => a.category === 'Organization').length,
+    },
   };
-
-  // Define all possible achievements with their requirements
-  const allAchievements = [
-    {
-      type: 'first_task',
-      icon: Star,
-      title: 'First Task Complete!',
-      description: 'You completed your first maintenance task',
-      unlocked: achievements.some(a => a.achievementType === 'first_task'),
-      progress: progress.tasksCompleted >= 1 ? 100 : 0,
-      requirement: 'Complete 1 task',
-    },
-    {
-      type: 'monthly_streak',
-      icon: Repeat,
-      title: 'Streak Master!',
-      description: `Complete tasks for ${progress.currentStreak || 3} months in a row`,
-      unlocked: achievements.some(a => a.achievementType === 'monthly_streak'),
-      progress: Math.min((progress.currentStreak / 3) * 100, 100),
-      requirement: 'Complete tasks for 3 consecutive months',
-    },
-    {
-      type: 'contractor_hired_1',
-      icon: Users,
-      title: 'First Hire!',
-      description: 'You hired your first contractor',
-      unlocked: achievements.some(a => a.achievementType === 'contractor_hired_1'),
-      progress: progress.contractorsHired >= 1 ? 100 : 0,
-      requirement: 'Hire 1 contractor',
-    },
-    {
-      type: 'contractor_hired_3',
-      icon: Users,
-      title: 'Building Trust',
-      description: 'You hired 3 contractors',
-      unlocked: achievements.some(a => a.achievementType === 'contractor_hired_3'),
-      progress: Math.min((progress.contractorsHired / 3) * 100, 100),
-      requirement: 'Hire 3 contractors',
-    },
-    {
-      type: 'contractor_hired_5',
-      icon: Users,
-      title: 'Growing Network',
-      description: 'You hired 5 contractors',
-      unlocked: achievements.some(a => a.achievementType === 'contractor_hired_5'),
-      progress: Math.min((progress.contractorsHired / 5) * 100, 100),
-      requirement: 'Hire 5 contractors',
-    },
-    {
-      type: 'contractor_hired_10',
-      icon: Trophy,
-      title: 'Community Builder',
-      description: 'You hired 10 contractors',
-      unlocked: achievements.some(a => a.achievementType === 'contractor_hired_10'),
-      progress: Math.min((progress.contractorsHired / 10) * 100, 100),
-      requirement: 'Hire 10 contractors',
-    },
-  ];
-
-  const referralAchievements = achievements.filter(a => a.achievementType.startsWith('referral_'));
 
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
+        <div className="container mx-auto px-4 py-8">
+          {/* Page Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold mb-2 text-white flex items-center gap-3">
+              <Trophy className="w-10 h-10 text-yellow-400" />
               Achievements
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-purple-200">
               Track your home maintenance milestones and accomplishments
             </p>
           </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-purple-600">{progress.tasksCompleted}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Tasks Completed</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-blue-600">{progress.contractorsHired}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Contractors Hired</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-green-600">{progress.currentStreak}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Month Streak</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-orange-600">{achievements.length}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Badges Earned</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+          {/* Stats Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <Card style={{ backgroundColor: '#f2f2f2' }}>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <p className="text-3xl font-bold" style={{ color: '#6d28d9' }}>
+                    {unlockedCount}/{totalCount}
+                  </p>
+                  <p className="text-sm" style={{ color: '#2c0f5b' }}>Total Achievements</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card style={{ backgroundColor: '#f2f2f2' }}>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <p className="text-3xl font-bold" style={{ color: '#3b82f6' }}>
+                    {categoryStats.seasonal.unlocked}/{categoryStats.seasonal.total}
+                  </p>
+                  <p className="text-sm" style={{ color: '#2c0f5b' }}>Seasonal Badges</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card style={{ backgroundColor: '#f2f2f2' }}>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <p className="text-3xl font-bold" style={{ color: '#10b981' }}>
+                    {categoryStats.financial.unlocked}/{categoryStats.financial.total}
+                  </p>
+                  <p className="text-sm" style={{ color: '#2c0f5b' }}>Financial Savvy</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card style={{ backgroundColor: '#f2f2f2' }}>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <p className="text-3xl font-bold" style={{ color: '#f59e0b' }}>
+                    {categoryStats.organization.unlocked}/{categoryStats.organization.total}
+                  </p>
+                  <p className="text-sm" style={{ color: '#2c0f5b' }}>Organization</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Achievement Badges */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Achievement Badges</CardTitle>
-            <CardDescription>Unlock badges by completing milestones</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {allAchievements.map((achievement) => {
-                const Icon = achievement.icon;
-                const isUnlocked = achievement.unlocked;
-                
-                return (
-                  <div
-                    key={achievement.type}
-                    className={`relative p-6 rounded-lg border-2 transition-all ${
-                      isUnlocked
-                        ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20'
-                        : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 opacity-60'
-                    }`}
-                    data-testid={`achievement-${achievement.type}`}
-                  >
-                    <div className="flex items-start gap-4">
+          {/* Category Tabs */}
+          <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
+            <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-4 mb-6" style={{ backgroundColor: '#f2f2f2' }}>
+              <TabsTrigger value="all" data-testid="tab-all">All</TabsTrigger>
+              <TabsTrigger value="seasonal" data-testid="tab-seasonal">Seasonal</TabsTrigger>
+              <TabsTrigger value="financial savvy" data-testid="tab-financial">Financial</TabsTrigger>
+              <TabsTrigger value="organization" data-testid="tab-organization">Organization</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value={selectedCategory}>
+              <Card style={{ backgroundColor: '#f2f2f2' }}>
+                <CardHeader>
+                  <CardTitle style={{ color: '#2c0f5b' }}>
+                    {selectedCategory === "all" ? "All Achievements" : 
+                     selectedCategory === "seasonal" ? "Seasonal Badges" :
+                     selectedCategory === "financial savvy" ? "Financial Savvy Achievements" :
+                     "Tracking & Organization Badges"}
+                  </CardTitle>
+                  <CardDescription style={{ color: '#6b7280' }}>
+                    {selectedCategory === "all" ? "Complete milestones to unlock badges" :
+                     selectedCategory === "seasonal" ? "Complete seasonal maintenance tasks" :
+                     selectedCategory === "financial savvy" ? "Save money and track your spending" :
+                     "Stay organized with records and documentation"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredAchievements.map((achievement) => {
+                      const IconComponent = iconMap[achievement.icon] || Trophy;
+                      const isUnlocked = achievement.isUnlocked;
+                      const progress = achievement.progress || 0;
+                      
+                      return (
+                        <div
+                          key={achievement.key}
+                          onClick={() => setSelectedAchievement(achievement)}
+                          className={`relative p-6 rounded-lg border-2 transition-all cursor-pointer hover:shadow-lg ${
+                            isUnlocked
+                              ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-blue-50 hover:border-purple-600'
+                              : 'border-gray-300 bg-white opacity-75 hover:opacity-90'
+                          }`}
+                          data-testid={`achievement-${achievement.key}`}
+                        >
+                          <div className="flex items-start gap-4">
+                            <div
+                              className={`p-3 rounded-full ${
+                                isUnlocked
+                                  ? 'bg-gradient-to-br from-purple-500 to-blue-500 text-white'
+                                  : 'bg-gray-300 text-gray-500'
+                              }`}
+                            >
+                              {isUnlocked ? (
+                                <IconComponent className="w-6 h-6" data-testid={`icon-${achievement.key}`} />
+                              ) : (
+                                <Lock className="w-6 h-6" data-testid={`icon-locked-${achievement.key}`} />
+                              )}
+                            </div>
+                            
+                            <div className="flex-1">
+                              <h3 className="font-semibold mb-1" style={{ color: '#2c0f5b' }}>
+                                {achievement.name}
+                              </h3>
+                              <p className="text-sm mb-3" style={{ color: '#6b7280' }}>
+                                {achievement.description}
+                              </p>
+                              
+                              {!isUnlocked && (
+                                <div>
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="text-xs" style={{ color: '#6b7280' }}>
+                                      Progress
+                                    </span>
+                                    <span className="text-xs font-semibold" style={{ color: '#6d28d9' }}>
+                                      {Math.round(progress)}%
+                                    </span>
+                                  </div>
+                                  <Progress 
+                                    value={progress} 
+                                    className="h-2" 
+                                    data-testid={`progress-${achievement.key}`}
+                                  />
+                                </div>
+                              )}
+                              
+                              {isUnlocked && (
+                                <div className="flex items-center gap-2">
+                                  <Badge 
+                                    className="bg-gradient-to-r from-purple-500 to-blue-500 text-white"
+                                    data-testid={`badge-unlocked-${achievement.key}`}
+                                  >
+                                    Unlocked
+                                  </Badge>
+                                  {achievement.unlockedAt && (
+                                    <span className="text-xs" style={{ color: '#6b7280' }}>
+                                      {new Date(achievement.unlockedAt).toLocaleDateString()}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  {filteredAchievements.length === 0 && (
+                    <div className="text-center py-12">
+                      <Lock className="w-12 h-12 mx-auto mb-4" style={{ color: '#9ca3af' }} />
+                      <p className="text-lg" style={{ color: '#6b7280' }}>
+                        No achievements in this category yet
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+          {/* Achievement Detail Modal */}
+          <Dialog open={!!selectedAchievement} onOpenChange={() => setSelectedAchievement(null)}>
+            <DialogContent className="sm:max-w-[500px]" style={{ backgroundColor: '#f2f2f2' }}>
+              {selectedAchievement && (
+                <>
+                  <DialogHeader>
+                    <div className="flex items-center gap-4 mb-2">
                       <div
-                        className={`p-3 rounded-full ${
-                          isUnlocked
+                        className={`p-4 rounded-full ${
+                          selectedAchievement.isUnlocked
                             ? 'bg-gradient-to-br from-purple-500 to-blue-500 text-white'
-                            : 'bg-gray-300 dark:bg-gray-700 text-gray-500'
+                            : 'bg-gray-300 text-gray-500'
                         }`}
                       >
-                        {isUnlocked ? <Icon className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
-                      </div>
-                      
-                      <div className="flex-1">
-                        <h3 className="font-semibold mb-1">{achievement.title}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                          {achievement.description}
-                        </p>
-                        
-                        {!isUnlocked && (
-                          <div>
-                            <div className="flex justify-between items-center mb-1">
-                              <span className="text-xs text-gray-500">{achievement.requirement}</span>
-                              <span className="text-xs text-gray-500">{Math.round(achievement.progress)}%</span>
-                            </div>
-                            <Progress value={achievement.progress} className="h-2" />
-                          </div>
+                        {selectedAchievement.isUnlocked ? (
+                          (() => {
+                            const Icon = iconMap[selectedAchievement.icon] || Trophy;
+                            return <Icon className="w-8 h-8" />;
+                          })()
+                        ) : (
+                          <Lock className="w-8 h-8" />
                         )}
-                        
-                        {isUnlocked && (
-                          <Badge className="bg-purple-500 text-white">
-                            Unlocked
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Referral Achievements */}
-        {referralAchievements.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Gift className="w-5 h-5" />
-                Referral Rewards
-              </CardTitle>
-              <CardDescription>Badges earned from successful referrals</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {referralAchievements.map((achievement) => (
-                  <div
-                    key={achievement.id}
-                    className="p-4 rounded-lg border-2 border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20"
-                    data-testid={`achievement-${achievement.achievementType}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-3 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 text-white">
-                        <Gift className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">{achievement.achievementTitle}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {achievement.achievementDescription}
-                        </p>
+                        <DialogTitle style={{ color: '#2c0f5b' }}>{selectedAchievement.name}</DialogTitle>
+                        <Badge className={selectedAchievement.isUnlocked ? "bg-purple-500" : "bg-gray-400"}>
+                          {selectedAchievement.category}
+                        </Badge>
                       </div>
                     </div>
+                    <DialogDescription style={{ color: '#6b7280' }}>
+                      {selectedAchievement.description}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="space-y-4 pt-4">
+                    {/* Status */}
+                    <div>
+                      <h4 className="font-semibold mb-2 flex items-center gap-2" style={{ color: '#2c0f5b' }}>
+                        {selectedAchievement.isUnlocked ? (
+                          <>
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                            Achievement Unlocked!
+                          </>
+                        ) : (
+                          <>
+                            <Target className="w-4 h-4 text-orange-500" />
+                            In Progress
+                          </>
+                        )}
+                      </h4>
+                      {selectedAchievement.isUnlocked ? (
+                        <p className="text-sm" style={{ color: '#6b7280' }}>
+                          Unlocked on {new Date(selectedAchievement.unlockedAt!).toLocaleDateString('en-US', { 
+                            month: 'long', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })}
+                        </p>
+                      ) : (
+                        <div>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm" style={{ color: '#6b7280' }}>Progress</span>
+                            <span className="text-sm font-semibold" style={{ color: '#6d28d9' }}>
+                              {Math.round(selectedAchievement.progress)}%
+                            </span>
+                          </div>
+                          <Progress value={selectedAchievement.progress} className="h-2" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Criteria */}
+                    <div>
+                      <h4 className="font-semibold mb-2" style={{ color: '#2c0f5b' }}>Requirements</h4>
+                      <div className="bg-white p-3 rounded-lg border" style={{ borderColor: '#e5e7eb' }}>
+                        {selectedAchievement.criteria && (
+                          <ul className="space-y-1 text-sm" style={{ color: '#6b7280' }}>
+                            {Object.entries(selectedAchievement.criteria).map(([key, value]) => (
+                              <li key={key} className="flex items-start gap-2">
+                                <span className="text-purple-500">•</span>
+                                <span>
+                                  {key === 'seasonalTasksCount' && `Complete ${value} seasonal maintenance tasks`}
+                                  {key === 'costSavingsAmount' && `Save $${value} through maintenance`}
+                                  {key === 'documentsCount' && `Upload ${value} service documents`}
+                                  {key === 'photosCount' && `Upload ${value} maintenance photos`}
+                                  {key === 'serviceLogsCount' && `Create ${value} service log entries`}
+                                  {!['seasonalTasksCount', 'costSavingsAmount', 'documentsCount', 'photosCount', 'serviceLogsCount'].includes(key) && 
+                                    `${key}: ${value}`}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Tips */}
+                    {!selectedAchievement.isUnlocked && (
+                      <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                        <p className="text-sm" style={{ color: '#6d28d9' }}>
+                          <strong>Tip:</strong> Keep completing your {selectedAchievement.category.toLowerCase()} tasks to unlock this achievement!
+                        </p>
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
-    </div>
     </>
   );
 }

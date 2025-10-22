@@ -17,7 +17,7 @@ import { insertMaintenanceLogSchema, insertCustomMaintenanceTaskSchema, insertHo
 import type { MaintenanceLog, House, CustomMaintenanceTask, HomeSystem, TaskOverride, HomeAppliance, HomeApplianceManual } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud, Monitor, Book, ExternalLink, Upload } from "lucide-react";
+import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud, Monitor, Book, ExternalLink, Upload, Trophy } from "lucide-react";
 import { AppointmentScheduler } from "@/components/appointment-scheduler";
 import { CustomMaintenanceTasks } from "@/components/custom-maintenance-tasks";
 import { US_MAINTENANCE_DATA, getRegionFromClimateZone, getCurrentMonthTasks } from "@shared/location-maintenance-data";
@@ -718,15 +718,22 @@ export default function Maintenance() {
       if (!response.ok) throw new Error('Failed to track task completion');
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: { completion: any; newAchievements?: any[] }) => {
+      // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/task-completions'] });
       queryClient.invalidateQueries({ queryKey: ['/api/achievements'] });
       
+      // Show achievement notifications
       if (data.newAchievements && data.newAchievements.length > 0) {
-        data.newAchievements.forEach((achievement: any) => {
+        data.newAchievements.forEach((achievement) => {
           toast({
-            title: "Achievement Unlocked!",
-            description: `${achievement.title} - ${achievement.description}`,
+            title: (
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                <span>Achievement Unlocked!</span>
+              </div>
+            ) as any,
+            description: achievement.name || 'You earned a new achievement!',
             duration: 5000,
           });
         });

@@ -2026,7 +2026,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contractorId,
       };
       const serviceRecord = await storage.createServiceRecord(serviceRecordData);
-      res.json(serviceRecord);
+      
+      // Check for homeowner achievements if there's cost savings
+      let newAchievements: any[] = [];
+      if (serviceRecordData.homeownerId && serviceRecordData.cost) {
+        try {
+          newAchievements = await storage.checkAndAwardAchievements(serviceRecordData.homeownerId);
+        } catch (error) {
+          console.error("Error checking achievements:", error);
+          // Don't fail the request if achievement check fails
+        }
+      }
+      
+      res.json({ serviceRecord, newAchievements });
     } catch (error) {
       console.error("Error creating service record:", error);
       res.status(500).json({ message: "Failed to create service record" });
@@ -2040,7 +2052,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!serviceRecord) {
         return res.status(404).json({ message: "Service record not found" });
       }
-      res.json(serviceRecord);
+      
+      // Check for homeowner achievements if cost was updated
+      let newAchievements: any[] = [];
+      if (serviceRecord.homeownerId && req.body.cost) {
+        try {
+          newAchievements = await storage.checkAndAwardAchievements(serviceRecord.homeownerId);
+        } catch (error) {
+          console.error("Error checking achievements:", error);
+          // Don't fail the request if achievement check fails
+        }
+      }
+      
+      res.json({ serviceRecord, newAchievements });
     } catch (error) {
       console.error("Error updating service record:", error);
       res.status(500).json({ message: "Failed to update service record" });
@@ -2743,32 +2767,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const completion = await storage.createTaskCompletion(completionData);
 
-      // Check and award achievements
-      const tasks = await storage.getTaskCompletions(homeownerId);
-      
-      // First task achievement
-      if (tasks.length === 1 && !(await storage.hasAchievement(homeownerId, 'first_task'))) {
-        await storage.createAchievement({
-          homeownerId,
-          achievementType: 'first_task',
-          achievementTitle: 'First Task Complete!',
-          achievementDescription: 'You completed your first maintenance task',
-        });
+      // Check and award achievements using new system
+      let newAchievements: any[] = [];
+      try {
+        newAchievements = await storage.checkAndAwardAchievements(homeownerId);
+      } catch (error) {
+        console.error("Error checking achievements:", error);
+        // Don't fail the request if achievement check fails
       }
 
-      // Monthly streak achievement
-      const { currentStreak } = await storage.getMonthlyStreak(homeownerId);
-      if (currentStreak >= 3 && !(await storage.hasAchievement(homeownerId, 'monthly_streak'))) {
-        await storage.createAchievement({
-          homeownerId,
-          achievementType: 'monthly_streak',
-          achievementTitle: 'Streak Master!',
-          achievementDescription: `Completed tasks for ${currentStreak} months in a row`,
-          metadata: JSON.stringify({ streak: currentStreak }),
-        });
-      }
-
-      res.json(completion);
+      res.json({ completion, newAchievements });
     } catch (error) {
       console.error("Error creating task completion:", error);
       res.status(500).json({ message: "Failed to create task completion" });

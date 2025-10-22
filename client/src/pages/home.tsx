@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Package, Calendar, Search, MapPin, Star, CheckCircle, TrendingUp, Shield, Home as HomeIcon, Wrench, Bell, BarChart3, X, ChevronDown } from "lucide-react";
+import { Users, Package, Calendar, Search, MapPin, Star, CheckCircle, TrendingUp, Shield, Home as HomeIcon, Wrench, Bell, BarChart3, X, ChevronDown, Trophy, Lock } from "lucide-react";
 import Header from "@/components/header";
 import HeroSection from "@/components/hero-section";
 import ProductCard from "@/components/product-card";
@@ -107,6 +107,18 @@ export default function Home() {
     enabled: typedUser?.role === 'homeowner',
   });
 
+  // Fetch achievements for homeowners
+  const { data: achievementsData } = useQuery<any>({
+    queryKey: ['/api/achievements/user'],
+    queryFn: async () => {
+      if (typedUser?.role !== 'homeowner') return { achievements: [] };
+      const response = await fetch('/api/achievements/user');
+      if (!response.ok) throw new Error('Failed to fetch achievements');
+      return response.json();
+    },
+    enabled: typedUser?.role === 'homeowner',
+  });
+
   const { data: featuredProducts, isLoading } = useQuery<Product[]>({
     queryKey: ['/api/products', 'featured'],
     queryFn: async () => {
@@ -120,6 +132,66 @@ export default function Home() {
     <div className="min-h-screen" style={{ background: typedUser?.role === 'homeowner' ? '#2c0f5b' : '#1560a2' }}>
       <Header />
       <HeroSection />
+      
+      {/* Homeowner Achievements Section */}
+      {typedUser?.role === 'homeowner' && achievementsData?.achievements && achievementsData.achievements.length > 0 && (
+        <section className="py-12" style={{ backgroundColor: '#2c0f5b' }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-5xl mx-auto">
+              <Card style={{ backgroundColor: '#f2f2f2' }}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Trophy className="w-8 h-8 text-yellow-500" />
+                      <div>
+                        <CardTitle style={{ color: '#2c0f5b' }}>Your Achievements</CardTitle>
+                        <p className="text-sm" style={{ color: '#6b7280' }}>
+                          {achievementsData.achievements.length} {achievementsData.achievements.length === 1 ? 'badge' : 'badges'} unlocked
+                        </p>
+                      </div>
+                    </div>
+                    <Link href="/achievements">
+                      <Button variant="outline" data-testid="button-view-all-achievements" style={{ color: '#6d28d9' }}>
+                        View All
+                      </Button>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {achievementsData.achievements.slice(0, 3).map((achievement: any) => (
+                      <div
+                        key={achievement.achievementKey}
+                        className="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-300"
+                        data-testid={`achievement-preview-${achievement.achievementKey}`}
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="p-2 rounded-full bg-gradient-to-br from-purple-500 to-blue-500">
+                            <Trophy className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-sm" style={{ color: '#2c0f5b' }}>
+                              {achievement.name}
+                            </h4>
+                          </div>
+                        </div>
+                        <p className="text-xs" style={{ color: '#6b7280' }}>
+                          {achievement.description}
+                        </p>
+                        {achievement.unlockedAt && (
+                          <p className="text-xs mt-2" style={{ color: '#9ca3af' }}>
+                            Unlocked {new Date(achievement.unlockedAt).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+      )}
       
       {/* Contractor Dashboard - shown directly after hero for contractors */}
       {typedUser?.role === 'contractor' && (
