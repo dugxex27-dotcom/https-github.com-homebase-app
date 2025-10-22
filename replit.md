@@ -27,6 +27,23 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Features and Specifications
 - **User Management**: Support for distinct Homeowner and Contractor roles.
+- **Authentication System**:
+    - Email/password registration with bcrypt password hashing (10 rounds)
+    - Google OAuth integration for quick signup
+    - Zip code capture during registration for geographic analytics
+    - Optional invite code system with usage tracking
+    - Secure session management with httpOnly cookies
+- **Admin Dashboard** (access controlled by ADMIN_EMAILS environment variable):
+    - User analytics: total users, homeowner/contractor breakdown
+    - Signups by zip code with sortable/filterable table
+    - Top search terms across contractor directory and marketplace
+    - Recent searches timeline with context (contractor/marketplace)
+    - Invite code management: create, view usage stats, deactivate codes
+- **Search Analytics**:
+    - Automatic tracking of all contractor directory searches
+    - Automatic tracking of all marketplace product searches
+    - Captures: search term, service type, user zip code, timestamp, context
+    - Powers admin dashboard insights and geographic trends
 - **Contractor Features**:
     - Detailed profiles with personal, professional, and service offering information.
     - Comprehensive proposal management system (create, edit, delete, status tracking).
@@ -36,10 +53,10 @@ Preferred communication style: Simple, everyday language.
     - Automatic climate zone detection based on property address using geocoding.
     - Address autocomplete functionality for property setup.
     - Centralized service records tracking.
-- **Marketplace**: Functionality for listing and browsing DIY products.
+- **Marketplace**: Functionality for listing and browsing DIY products with search analytics.
 - **Maintenance Guidance**: Seasonal home maintenance schedule with location-based recommendations.
 - **Notifications**: Enhanced system for appointments and maintenance task alerts, with priority levels and house-specific filtering.
-- **API Endpoints**: Structured for contractors and products, with implied support for houses, notifications, and proposals.
+- **API Endpoints**: Structured for contractors, products, houses, notifications, proposals, search analytics, and admin functions.
 
 ## External Dependencies
 
@@ -56,6 +73,7 @@ Preferred communication style: Simple, everyday language.
 - **Validation**: Zod
 - **Development**: tsx
 - **Session Management**: connect-pg-simple
+- **Authentication**: bcryptjs for password hashing, passport for session management
 
 ### Third-Party Services
 - **Geocoding**: OpenStreetMap Nominatim (for climate zone detection).
