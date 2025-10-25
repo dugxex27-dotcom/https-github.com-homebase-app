@@ -30,13 +30,53 @@ async function makeRequest(endpoint, options = {}) {
   }
 }
 
-async function loginUser(email, name, role = 'homeowner') {
-  // Note: Only homeowner demo login is supported
-  // Contractor test users should use standard registration
+async function registerAndLoginUser(email, name, role = 'homeowner') {
+  // For contractors, use standard registration
   if (role === 'contractor') {
-    throw new Error('Contractor demo login is no longer supported. Use standard registration instead.');
+    // Split name into first and last name for registration
+    const nameParts = name.split(' ');
+    const firstName = nameParts[0] || 'Test';
+    const lastName = nameParts.slice(1).join(' ') || 'User';
+    
+    // Register the contractor
+    const registerResponse = await makeRequest('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        firstName,
+        lastName,
+        password: 'TestPassword123!',
+        role: 'contractor',
+        zipCode: '12345'
+      })
+    });
+    
+    if (registerResponse.status === 200) {
+      // Extract cookie from Set-Cookie header
+      const setCookieHeader = registerResponse.headers.get('set-cookie');
+      return setCookieHeader ? setCookieHeader.split(';')[0] : null;
+    }
+    
+    // If registration fails with 409 (already exists), try logging in
+    if (registerResponse.status === 409) {
+      const loginResponse = await makeRequest('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          email,
+          password: 'TestPassword123!'
+        })
+      });
+      
+      if (loginResponse.status === 200) {
+        const setCookieHeader = loginResponse.headers.get('set-cookie');
+        return setCookieHeader ? setCookieHeader.split(';')[0] : null;
+      }
+    }
+    
+    return null;
   }
   
+  // For homeowners, use demo login
   const response = await makeRequest('/api/auth/homeowner-demo-login', {
     method: 'POST',
     body: JSON.stringify({ email, name, role })
@@ -62,9 +102,9 @@ async function runSecurityTests() {
     // Step 1: Create test users
     console.log('\n📝 Step 1: Creating test users...');
     
-    user1Cookie = await loginUser('user1@test.com', 'User One', 'homeowner');
-    user2Cookie = await loginUser('user2@test.com', 'User Two', 'homeowner');
-    contractorCookie = await loginUser('contractor@test.com', 'Contractor One', 'contractor');
+    user1Cookie = await registerAndLoginUser('user1@test.com', 'User One', 'homeowner');
+    user2Cookie = await registerAndLoginUser('user2@test.com', 'User Two', 'homeowner');
+    contractorCookie = await registerAndLoginUser('contractor@test.com', 'Contractor One', 'contractor');
     
     if (!user1Cookie || !user2Cookie || !contractorCookie) {
       throw new Error('Failed to create test users');
