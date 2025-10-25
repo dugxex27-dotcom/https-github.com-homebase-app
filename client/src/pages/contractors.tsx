@@ -343,7 +343,7 @@ export default function Contractors() {
               {/* Distance Filter */}
               <div className="flex flex-col h-full">
                 <label className="text-sm font-medium text-foreground mb-3 block">Distance from you ({getDistanceUnit(userCountry)})</label>
-                <div className="mt-auto">
+                <div>
                   <select 
                     className="w-full px-3 py-2 border border-muted rounded-md"
                     style={{ color: '#ffffff', backgroundColor: '#1e1e20' }}
@@ -369,7 +369,7 @@ export default function Contractors() {
               {/* Rating Filter */}
               <div className="flex flex-col h-full">
                 <label className="text-sm font-medium text-foreground mb-3 block">Minimum Rating</label>
-                <div className="mt-auto">
+                <div>
                   <select 
                     className="w-full px-3 py-2 border border-muted rounded-md"
                     style={{ color: '#ffffff', backgroundColor: '#1e1e20' }}
@@ -385,13 +385,12 @@ export default function Contractors() {
                     <option value="3">3+ stars</option>
                   </select>
                 </div>
-                <div className="text-xs mt-1 invisible" aria-hidden="true">Spacer</div>
               </div>
 
               {/* Services Filter */}
               <div className="flex flex-col h-full relative lg:col-span-2" ref={servicesDropdownRef}>
                 <label className="text-sm font-medium text-foreground mb-3 block">Services</label>
-                <div className="mt-auto">
+                <div>
                   <button
                   type="button"
                   className="w-full px-3 py-2 border border-muted rounded-md text-left flex items-center justify-between"
@@ -449,13 +448,12 @@ export default function Contractors() {
                   </div>
                 )}
                 </div>
-                <div className="text-xs mt-1 invisible" aria-hidden="true">Spacer</div>
               </div>
 
               {/* Emergency Services */}
               <div className="flex flex-col h-full">
                 <label className="text-sm font-medium text-foreground mb-3 block">Emergency Services</label>
-                <div className="mt-auto">
+                <div>
                   <div className="flex items-center space-x-2">
                     <input 
                       type="checkbox" 
@@ -472,7 +470,6 @@ export default function Contractors() {
                     </label>
                   </div>
                 </div>
-                <div className="text-xs mt-1 invisible" aria-hidden="true">Spacer</div>
               </div>
 
               {/* Apply Filters Button */}
@@ -480,7 +477,7 @@ export default function Contractors() {
                 <label className="text-sm font-medium text-foreground mb-3 block opacity-0 pointer-events-none" aria-hidden="true">
                   Filters
                 </label>
-                <div className="mt-auto">
+                <div>
                   <button 
                     className="w-full py-2 px-4 rounded-md text-white font-medium hover:opacity-90"
                     style={{ backgroundColor: '#3c258e' }}
@@ -513,7 +510,6 @@ export default function Contractors() {
                     Apply Filters
                   </button>
                 </div>
-                <div className="text-xs mt-1 invisible" aria-hidden="true">Spacer</div>
               </div>
             </div>
           </div>
