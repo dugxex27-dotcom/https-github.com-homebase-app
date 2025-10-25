@@ -258,6 +258,7 @@ export default function SignIn() {
                             placeholder="Enter your password"
                             {...field}
                             data-testid="input-password"
+                            style={{ color: '#ffffff' }}
                           />
                         </FormControl>
                         <FormMessage />
