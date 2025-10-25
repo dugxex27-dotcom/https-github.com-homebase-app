@@ -88,10 +88,6 @@ export async function setupGoogleAuth(app: Express) {
     }
   });
 
-  // Initialize passport
-  app.use(passport.initialize());
-  app.use(passport.session());
-
   // Google OAuth routes
   app.get(
     '/auth/google',

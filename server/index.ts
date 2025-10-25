@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
+import passport from "passport";
 import helmet from "helmet";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
@@ -87,6 +88,10 @@ app.use(session({
   },
   name: 'sessionId', // Obscure session cookie name
 }));
+
+// Initialize Passport for OAuth (must be after session middleware)
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use((req, res, next) => {
   const start = Date.now();
