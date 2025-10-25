@@ -47,8 +47,8 @@ export default function CompleteProfile() {
       
       // Redirect to appropriate dashboard
       const redirectPath = data.role === 'contractor' 
-        ? '/dashboard/contractor' 
-        : '/dashboard/homeowner';
+        ? '/contractor-dashboard' 
+        : '/dashboard';
       
       setTimeout(() => {
         window.location.href = redirectPath;

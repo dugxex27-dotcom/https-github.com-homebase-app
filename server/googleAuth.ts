@@ -124,8 +124,8 @@ export async function setupGoogleAuth(app: Express) {
           // Redirect to appropriate dashboard based on role
           const redirectPath =
             user.role === 'contractor'
-              ? '/dashboard/contractor'
-              : '/dashboard/homeowner';
+              ? '/contractor-dashboard'
+              : '/dashboard';
           res.redirect(redirectPath);
         });
       } catch (error) {
