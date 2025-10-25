@@ -29,10 +29,15 @@ Preferred communication style: Simple, everyday language.
 - **User Management**: Support for distinct Homeowner and Contractor roles.
 - **Authentication System**:
     - Email/password registration with bcrypt password hashing (10 rounds)
-    - Google OAuth integration for quick signup
+    - Google OAuth integration via Replit Auth for quick signup
+        - OAuth callback creates unified session format (req.session.isAuthenticated + req.session.user)
+        - Complete-profile flow for OAuth users missing zip code/role
+        - Data preservation: existing zipCode and role persist across repeat OAuth logins
+        - Requires environment variables: REPLIT_DOMAINS, REPL_ID, ISSUER_URL
     - Zip code capture during registration for geographic analytics
     - Optional invite code system with usage tracking
     - Secure session management with httpOnly cookies
+    - Session compatibility: OAuth and email/password use identical session structure
 - **Admin Dashboard** (access controlled by ADMIN_EMAILS environment variable):
     - User analytics: total users, homeowner/contractor breakdown
     - Signups by zip code with sortable/filterable table
