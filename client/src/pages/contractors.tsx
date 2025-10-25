@@ -494,38 +494,41 @@ export default function Contractors() {
 
               {/* Apply Filters Button */}
               <div className="flex flex-col h-full">
+                <label className="text-sm font-medium text-foreground mb-3 block opacity-0 pointer-events-none" aria-hidden="true">
+                  Filters
+                </label>
                 <div className="mt-auto">
-                <button 
-                  className="w-full py-2 px-4 rounded-md text-white font-medium hover:opacity-90"
-                  style={{ backgroundColor: '#3c258e' }}
-                  onClick={() => {
-                    const newFilters: any = {};
-                    
-                    if (selectedDistance) {
-                      // Convert display distance to storage format (always store in miles)
-                      const storageDistance = convertDistanceForStorage(parseFloat(selectedDistance), userCountry);
-                      newFilters.maxDistance = storageDistance;
-                    }
-                    
-                    if (selectedRating) {
-                      newFilters.minRating = parseFloat(selectedRating);
-                    }
-                    
-                    if (hasEmergencyServices) {
-                      newFilters.hasEmergencyServices = true;
-                    }
-                    
-                    if (selectedServices.length > 0) {
-                      newFilters.services = selectedServices;
-                    }
-                    
-                    handleFiltersChange(newFilters);
-                    setServicesDropdownOpen(false);
-                  }}
-                  data-testid="button-apply-filters"
-                >
-                  Apply Filters
-                </button>
+                  <button 
+                    className="w-full py-2 px-4 rounded-md text-white font-medium hover:opacity-90"
+                    style={{ backgroundColor: '#3c258e' }}
+                    onClick={() => {
+                      const newFilters: any = {};
+                      
+                      if (selectedDistance) {
+                        // Convert display distance to storage format (always store in miles)
+                        const storageDistance = convertDistanceForStorage(parseFloat(selectedDistance), userCountry);
+                        newFilters.maxDistance = storageDistance;
+                      }
+                      
+                      if (selectedRating) {
+                        newFilters.minRating = parseFloat(selectedRating);
+                      }
+                      
+                      if (hasEmergencyServices) {
+                        newFilters.hasEmergencyServices = true;
+                      }
+                      
+                      if (selectedServices.length > 0) {
+                        newFilters.services = selectedServices;
+                      }
+                      
+                      handleFiltersChange(newFilters);
+                      setServicesDropdownOpen(false);
+                    }}
+                    data-testid="button-apply-filters"
+                  >
+                    Apply Filters
+                  </button>
                 </div>
               </div>
             </div>
