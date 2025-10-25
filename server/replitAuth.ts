@@ -129,9 +129,49 @@ export async function setupAuth(app: Express) {
     if (!process.env.REPLIT_DOMAINS) {
       return res.redirect("/signin");
     }
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successRedirect: "/",
-      failureRedirect: "/signin",
+    passport.authenticate(`replitauth:${req.hostname}`, async (err: any, user: any) => {
+      if (err || !user) {
+        return res.redirect("/signin");
+      }
+      
+      try {
+        // Get the full user record from storage
+        const userId = user.claims?.sub;
+        if (!userId) {
+          return res.redirect("/signin");
+        }
+        
+        const fullUser = await storage.getUser(userId);
+        if (!fullUser) {
+          return res.redirect("/signin");
+        }
+        
+        // Create session in the same format as email/password login
+        (req.session as any).isAuthenticated = true;
+        (req.session as any).user = fullUser;
+        
+        // Save session before redirecting
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error:", saveErr);
+            return res.redirect("/signin");
+          }
+          
+          // Check if user needs to complete profile (add zip code)
+          if (!fullUser.zipCode) {
+            return res.redirect("/complete-profile");
+          }
+          
+          // Redirect to appropriate dashboard based on role
+          const redirectPath = fullUser.role === 'contractor' 
+            ? '/dashboard/contractor' 
+            : '/dashboard/homeowner';
+          res.redirect(redirectPath);
+        });
+      } catch (error) {
+        console.error("OAuth callback error:", error);
+        res.redirect("/signin");
+      }
     })(req, res, next);
   });
 
