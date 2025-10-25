@@ -206,6 +206,7 @@ export default function SignIn() {
               className="w-full flex items-center justify-center gap-2"
               onClick={handleGoogleLogin}
               data-testid="button-google-oauth"
+              style={{ color: '#ffffff' }}
             >
               <SiGoogle className="w-5 h-5" />
               Continue with Google
