@@ -166,6 +166,30 @@ export default function SignIn() {
     }
   };
 
+  const handleContractorDemoLogin = async () => {
+    try {
+      const response = await apiRequest('/api/auth/contractor-demo-login', 'POST', {
+        email: 'demo@contractor.com',
+        name: 'Demo Contractor',
+        role: 'contractor'
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Demo login successful",
+          description: "Logged in as demo contractor.",
+        });
+        setLocation('/contractor-dashboard');
+      }
+    } catch (error) {
+      toast({
+        title: "Demo login failed",
+        description: "Could not log in. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const selectedRole = registerForm.watch("role");
 
   return (
@@ -476,21 +500,33 @@ export default function SignIn() {
               </button>
             </div>
 
-            {/* Demo Login Button */}
+            {/* Demo Login Buttons */}
             <div className="pt-4 border-t">
               <p className="text-center text-sm text-muted-foreground mb-3">
                 Demo Login (for testing)
               </p>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleDemoLogin}
-                data-testid="button-demo-homeowner"
-                style={{ color: '#ffffff' }}
-              >
-                Homeowner Demo
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleDemoLogin}
+                  data-testid="button-demo-homeowner"
+                  style={{ color: '#ffffff' }}
+                >
+                  Homeowner Demo
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleContractorDemoLogin}
+                  data-testid="button-demo-contractor"
+                  style={{ color: '#ffffff' }}
+                >
+                  Contractor Demo
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

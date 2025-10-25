@@ -205,6 +205,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Simple contractor demo login
+  app.post('/api/auth/contractor-demo-login', authLimiter, async (req, res) => {
+    try {
+      const { email, name, role } = req.body;
+      
+      // Create a demo contractor user
+      const contractorId = `demo-contractor-${Date.now()}`;
+      const user = await storage.upsertUser({
+        id: contractorId,
+        email: email || 'demo@contractor.com',
+        firstName: (name || 'Demo Contractor').split(' ')[0],
+        lastName: (name || 'Demo Contractor').split(' ').slice(1).join(' '),
+        profileImageUrl: null,
+        role: role || 'contractor'
+      });
+
+      // Create a simple session
+      req.session.user = user;
+      req.session.isAuthenticated = true;
+
+      res.json({ success: true, user });
+    } catch (error) {
+      console.error("Error creating contractor demo user:", error);
+      res.status(500).json({ message: "Failed to create contractor account" });
+    }
+  });
+
   // Email/password registration
   app.post('/api/auth/register', authLimiter, async (req, res) => {
     try {
