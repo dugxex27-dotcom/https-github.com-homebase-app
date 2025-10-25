@@ -74,6 +74,7 @@ export default function Contractors() {
     "Custom Carpentry",
     "Custom Home Building",
     "Deck Construction",
+    "Demo Contractor",
     "Drainage Solutions",
     "Drywall & Spackling Repair",
     "Dumpster Rental",

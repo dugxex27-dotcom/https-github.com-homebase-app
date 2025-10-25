@@ -31,6 +31,7 @@ export default function FilterSidebar({ onFiltersChange, userCountry = 'US' }: F
     "Custom Carpentry",
     "Custom Home Building",
     "Deck Construction",
+    "Demo Contractor",
     "Drainage Solutions",
     "Drywall & Spackling Repair",
     "Dumpster Rental",
