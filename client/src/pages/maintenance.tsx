@@ -3694,7 +3694,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                           <Input 
                             placeholder="e.g., Kitchen Dishwasher, Main Water Heater" 
                             {...field} 
-                            style={{ backgroundColor: '#ffffff' }}
+                            style={{ backgroundColor: '#ffffff', color: '#000000' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -3713,7 +3713,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                             placeholder="e.g., Kitchen, Basement, Garage" 
                             {...field} 
                             value={field.value || ""}
-                            style={{ backgroundColor: '#ffffff' }}
+                            style={{ backgroundColor: '#ffffff', color: '#000000' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -3731,7 +3731,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                           <Input 
                             placeholder="e.g., Whirlpool, GE, Samsung" 
                             {...field} 
-                            style={{ backgroundColor: '#ffffff' }}
+                            style={{ backgroundColor: '#ffffff', color: '#000000' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -3749,7 +3749,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                           <Input 
                             placeholder="e.g., WDF520PADM, GTW465ASNWW" 
                             {...field} 
-                            style={{ backgroundColor: '#ffffff' }}
+                            style={{ backgroundColor: '#ffffff', color: '#000000' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -3768,7 +3768,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                             placeholder="e.g., ABC123456789" 
                             {...field} 
                             value={field.value || ""}
-                            style={{ backgroundColor: '#ffffff' }}
+                            style={{ backgroundColor: '#ffffff', color: '#000000' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -3806,7 +3806,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                             type="date"
                             {...field} 
                             value={field.value || ""}
-                            style={{ backgroundColor: '#ffffff' }}
+                            style={{ backgroundColor: '#ffffff', color: '#000000' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -3825,7 +3825,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                             type="date"
                             {...field} 
                             value={field.value || ""}
-                            style={{ backgroundColor: '#ffffff' }}
+                            style={{ backgroundColor: '#ffffff', color: '#000000' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -3845,7 +3845,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                           placeholder="Additional details, condition, issues, etc." 
                           {...field} 
                           value={field.value || ""}
-                          style={{ backgroundColor: '#ffffff' }}
+                          style={{ backgroundColor: '#ffffff', color: '#000000' }}
                         />
                       </FormControl>
                       <FormMessage />
