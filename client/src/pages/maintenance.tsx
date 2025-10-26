@@ -2588,7 +2588,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                         </div>
                         {task.cost && (
                           <div className="flex items-center">
-                            <DollarSign className="w-4 h-4 mr-2" style={{ color: '#ffffff' }} />
+                            <DollarSign className="w-4 h-4 mr-2" style={{ color: '#10b981' }} />
                             <span style={{ color: '#2c0f5b' }}>{task.cost}</span>
                           </div>
                         )}
