@@ -2579,7 +2579,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center">
                           <Clock className="w-4 h-4 mr-2" style={{ color: '#ffffff' }} />
-                          <span style={{ color: '#ffffff' }}>{task.estimatedTime}</span>
+                          <span style={{ color: '#ffffff' }} className="text-[#2c0f5b]">{task.estimatedTime}</span>
                         </div>
                         <div className="flex items-center">
                           <Badge variant="secondary" className={getDifficultyColor(task.difficulty)}>
@@ -2603,7 +2603,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                         <div>
                           <div className="flex items-center mb-2">
                             <Wrench className="w-4 h-4 mr-2" style={{ color: '#ffffff' }} />
-                            <span className="text-sm font-medium" style={{ color: '#ffffff' }}>Tools needed:</span>
+                            <span className="text-sm font-medium text-[#2c0f5b]" style={{ color: '#ffffff' }}>Tools needed:</span>
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {task.tools.map((tool, index) => (
