@@ -827,7 +827,7 @@ export default function ContractorProfile() {
               variant="outline"
               onClick={addLicense}
               className="w-full border-dashed border-2"
-              style={{ borderColor: '#1560a2', color: '#1560a2' }}
+              style={{ borderColor: '#1560a2', color: '#1560a2', backgroundColor: 'white' }}
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Another License
