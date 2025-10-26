@@ -3488,32 +3488,6 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
 
                 <FormField
                   control={houseForm.control}
-                  name="climateZone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Climate Zone</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger style={{ backgroundColor: '#ffffff' }}>
-                            <SelectValue placeholder="Will auto-detect from address" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {CLIMATE_ZONES.map((zone) => (
-                            <SelectItem key={zone.value} value={zone.value}>
-                              {zone.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-
-                <FormField
-                  control={houseForm.control}
                   name="isDefault"
                   render={({ field }) => (
                     <FormItem className="flex items-center space-x-2">
