@@ -3506,9 +3506,6 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="text-xs text-muted-foreground">
-                        Climate zone will be automatically detected when you enter an address. You can manually override if needed.
-                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
