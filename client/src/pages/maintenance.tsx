@@ -2579,7 +2579,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center">
                           <Clock className="w-4 h-4 mr-2" style={{ color: '#ffffff' }} />
-                          <span style={{ color: '#ffffff' }} className="text-[#2c0f5b]">{task.estimatedTime}</span>
+                          <span style={{ color: '#2c0f5b' }} className="text-[#2c0f5b]">{task.estimatedTime}</span>
                         </div>
                         <div className="flex items-center">
                           <Badge variant="secondary" className={getDifficultyColor(task.difficulty)}>
