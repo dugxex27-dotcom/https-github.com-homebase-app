@@ -578,6 +578,7 @@ export function Proposals({ contractorId }: ProposalsProps) {
                       variant="outline"
                       onClick={() => setIsDialogOpen(false)}
                       data-testid="button-cancel"
+                      style={{ backgroundColor: 'white', color: '#000000' }}
                     >
                       Cancel
                     </Button>
