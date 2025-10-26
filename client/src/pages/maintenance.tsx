@@ -2551,7 +2551,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                             onCheckedChange={() => toggleTaskCompletion(task.id)}
                             className="mt-1"
                           />
-                          <CardTitle className="tracking-tight text-lg font-semibold text-[#9687ad]" style={{ color: '#ffffff' }}>
+                          <CardTitle className="tracking-tight text-lg font-semibold text-[#9687ad]" style={{ color: '#2c0f5b' }}>
                             {task.title}
                           </CardTitle>
                         </div>
