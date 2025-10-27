@@ -295,24 +295,50 @@ export default function ContractorProfile() {
   const handleBusinessAddressSuggestionSelect = (suggestion: any) => {
     // Extract clean street address from components instead of using verbose display_name
     const addr = suggestion.address;
-    let cleanAddress = '';
     
     // Build a clean street address (house number + street name)
-    const parts = [];
-    if (addr?.house_number) parts.push(addr.house_number);
-    if (addr?.road) parts.push(addr.road);
-    else if (addr?.street) parts.push(addr.street);
+    const streetParts = [];
+    if (addr?.house_number) streetParts.push(addr.house_number);
+    if (addr?.road) streetParts.push(addr.road);
+    else if (addr?.street) streetParts.push(addr.street);
     
-    cleanAddress = parts.join(' ') || suggestion.display_name.split(',')[0];
+    const streetAddress = streetParts.join(' ') || suggestion.display_name.split(',')[0];
     
-    setFormData(prev => ({ ...prev, address: cleanAddress }));
+    // Build full address with all location details
+    const addressParts = [streetAddress];
+    
+    // Add locality (hamlet, village, town, or city)
+    const hamlet = addr?.hamlet || '';
+    const village = addr?.village || '';
+    const town = addr?.town || '';
+    const city = addr?.city || '';
+    
+    if (hamlet) addressParts.push(hamlet);
+    else if (village) addressParts.push(village);
+    else if (town) addressParts.push(town);
+    else if (city) addressParts.push(city);
+    
+    // Add county
+    const county = addr?.county || '';
+    if (county) addressParts.push(county);
+    
+    // Add state/province
+    const state = addr?.state || addr?.province || '';
+    if (state) addressParts.push(state);
+    
+    // Add zipcode
+    const zipcode = addr?.postcode || '';
+    if (zipcode) addressParts.push(zipcode);
+    
+    const fullAddress = addressParts.join(', ');
+    
+    setFormData(prev => ({ ...prev, address: fullAddress }));
     setShowSuggestions(false);
     setAddressSuggestions([]);
     
     // Auto-populate city, state, zip from the selected suggestion
     if (addr) {
-      const city = addr.city || addr.town || addr.village || '';
-      const state = addr.state || addr.province || '';
+      const cityValue = city || town || village || hamlet || '';
       const zipCode = addr.postcode || '';
       const countryCode = addr.country_code?.toUpperCase() || 'US';
       
