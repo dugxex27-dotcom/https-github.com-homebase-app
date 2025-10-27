@@ -78,20 +78,22 @@ app.use(express.urlencoded({ extended: false }));
 
 // Session configuration with enhanced security
 const isProduction = process.env.NODE_ENV === 'production';
-const PgSession = connectPgSimple(session);
 
-// Create session store with proper error handling
-const sessionStore = new PgSession({
-  conObject: {
-    connectionString: process.env.DATABASE_URL,
-  },
-  createTableIfMissing: true,
-  // Suppress all errors during table creation (handles "already exists" errors)
-  errorLog: () => {},
-});
+// Use PostgreSQL session store if DATABASE_URL is available
+let sessionStore;
+if (process.env.DATABASE_URL) {
+  const PgSession = connectPgSimple(session);
+  sessionStore = new PgSession({
+    conObject: {
+      connectionString: process.env.DATABASE_URL,
+    },
+    // Don't auto-create table - it already exists
+    createTableIfMissing: false,
+  });
+}
 
 app.use(session({
-  store: sessionStore,
+  ...(sessionStore && { store: sessionStore }),
   secret: process.env.SESSION_SECRET || 'demo-session-secret-key-for-development',
   resave: false,
   saveUninitialized: false,
