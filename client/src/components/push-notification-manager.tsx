@@ -38,7 +38,42 @@ export default function PushNotificationManager({ userId }: PushNotificationMana
     if (!('serviceWorker' in navigator)) return;
 
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js');
+      // Force unregister all old service workers first
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        console.log('Unregistering old service worker');
+        await registration.unregister();
+      }
+
+      // Clear all caches to remove old cached files
+      const cacheNames = await caches.keys();
+      for (const cacheName of cacheNames) {
+        console.log('Deleting old cache:', cacheName);
+        await caches.delete(cacheName);
+      }
+
+      // Register new service worker
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        updateViaCache: 'none' // Don't cache the service worker file itself
+      });
+      
+      // Force immediate activation
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'activated') {
+              console.log('New service worker activated');
+              // Reload page once to use new service worker
+              if (!sessionStorage.getItem('sw-refreshed')) {
+                sessionStorage.setItem('sw-refreshed', 'true');
+                window.location.reload();
+              }
+            }
+          });
+        }
+      });
+
       console.log('Service Worker registered:', registration);
       
       // Listen for messages from service worker
