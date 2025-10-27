@@ -27,13 +27,13 @@ export default function Header() {
       if (response.ok) {
         // Clear all cached queries
         queryClient.clear();
-        // Reload the page to reset the app state
-        window.location.href = '/';
+        // Redirect to signin page
+        window.location.href = '/signin';
       }
     } catch (error) {
       console.error('Logout error:', error);
-      // Fallback: try the GET endpoint
-      window.location.href = '/api/logout';
+      // Fallback: redirect to signin
+      window.location.href = '/signin';
     }
   };
 
