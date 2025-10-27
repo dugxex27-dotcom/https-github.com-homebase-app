@@ -332,15 +332,13 @@ export default function Contractors() {
                     }}
                     data-testid="filter-home"
                   >
-                    <SelectTrigger className="w-64 h-auto min-h-[60px] py-3 whitespace-normal text-left" style={{ backgroundColor: '#1e1e20', color: '#ffffff' }}>
-                      {selectedHouseId && houses.length > 0 ? (
-                        <div className="flex flex-col items-start w-full">
-                          <span className="font-medium text-white">{houses.find((h: House) => h.id === selectedHouseId)?.name}</span>
-                          <span className="text-xs text-gray-400">{houses.find((h: House) => h.id === selectedHouseId)?.address}</span>
-                        </div>
-                      ) : (
-                        <SelectValue placeholder="Change property..." />
-                      )}
+                    <SelectTrigger className="w-64 h-auto min-h-[60px] py-3 whitespace-normal text-left flex items-center" style={{ backgroundColor: '#1e1e20', color: '#ffffff' }}>
+                      <div className="flex flex-col items-start w-full pr-2">
+                        <span className="font-medium text-white text-sm">{houses.find((h: House) => h.id === selectedHouseId)?.name || 'Change property...'}</span>
+                        {houses.find((h: House) => h.id === selectedHouseId)?.address && (
+                          <span className="text-xs text-gray-400 mt-0.5">{houses.find((h: House) => h.id === selectedHouseId)?.address}</span>
+                        )}
+                      </div>
                     </SelectTrigger>
                     <SelectContent>
                       {houses.map((house: House) => (
