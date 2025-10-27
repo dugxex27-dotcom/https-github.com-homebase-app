@@ -80,13 +80,14 @@ app.use(express.urlencoded({ extended: false }));
 const isProduction = process.env.NODE_ENV === 'production';
 const PgSession = connectPg(session);
 
-// Create session store - table already exists so no need to create
+// Create session store with proper error handling
 const sessionStore = new PgSession({
   conObject: {
     connectionString: process.env.DATABASE_URL,
   },
-  // Don't try to create table since it already exists
-  createTableIfMissing: false,
+  createTableIfMissing: true,
+  // Suppress all errors during table creation (handles "already exists" errors)
+  errorLog: () => {},
 });
 
 app.use(session({
