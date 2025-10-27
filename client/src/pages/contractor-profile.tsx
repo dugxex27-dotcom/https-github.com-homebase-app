@@ -710,13 +710,32 @@ export default function ContractorProfile() {
                       if (addr?.road) parts.push(addr.road);
                       else if (addr?.street) parts.push(addr.street);
                       const streetAddress = parts.join(' ') || suggestion.display_name.split(',')[0];
-                      const town = addr?.city || addr?.town || addr?.village || addr?.hamlet || '';
+                      
+                      // Collect all location components
+                      const locationParts = [];
+                      const hamlet = addr?.hamlet || '';
+                      const village = addr?.village || '';
+                      const town = addr?.town || '';
+                      const city = addr?.city || '';
                       const county = addr?.county || '';
+                      const state = addr?.state || addr?.province || '';
                       const zipcode = addr?.postcode || '';
                       
-                      const locationParts = [];
-                      if (town) locationParts.push(town);
-                      if (county) locationParts.push(county);
+                      // Add locality (hamlet, village, town, or city) - in order of specificity
+                      if (hamlet) locationParts.push(hamlet);
+                      if (village && !hamlet) locationParts.push(village);
+                      if (town && !village && !hamlet) locationParts.push(town);
+                      if (city && !town && !village && !hamlet) locationParts.push(city);
+                      
+                      // Add county if different from locality
+                      if (county && county !== hamlet && county !== village && county !== town && county !== city) {
+                        locationParts.push(county);
+                      }
+                      
+                      // Add state/province
+                      if (state) locationParts.push(state);
+                      
+                      // Add zipcode
                       if (zipcode) locationParts.push(zipcode);
                       
                       return (
