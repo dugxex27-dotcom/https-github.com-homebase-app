@@ -2978,4 +2978,270 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database-backed storage for users (OAuth persistence)
+class DbStorage implements IStorage {
+  private memStorage: MemStorage;
+
+  constructor() {
+    this.memStorage = new MemStorage();
+  }
+
+  // User operations - DATABASE BACKED for persistence
+  async getUser(id: string): Promise<User | undefined> {
+    const { users } = await import("@shared/schema");
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const { users } = await import("@shared/schema");
+    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0];
+  }
+
+  async getUserByReferralCode(referralCode: string): Promise<User | undefined> {
+    const { users } = await import("@shared/schema");
+    const result = await db.select().from(users).where(eq(users.referralCode, referralCode)).limit(1);
+    return result[0];
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const { users } = await import("@shared/schema");
+    
+    // Check if user exists
+    const existingUser = userData.id ? await this.getUser(userData.id) : null;
+    
+    if (existingUser) {
+      // Update existing user, preserving fields not provided in userData
+      const updatedData = {
+        id: userData.id!,
+        email: userData.email ?? existingUser.email,
+        firstName: userData.firstName ?? existingUser.firstName,
+        lastName: userData.lastName ?? existingUser.lastName,
+        profileImageUrl: userData.profileImageUrl ?? existingUser.profileImageUrl,
+        role: userData.role ?? existingUser.role,
+        passwordHash: userData.passwordHash ?? existingUser.passwordHash,
+        zipCode: userData.zipCode ?? existingUser.zipCode,
+        referralCode: userData.referralCode ?? existingUser.referralCode,
+        referredBy: userData.referredBy ?? existingUser.referredBy,
+        referralCount: userData.referralCount ?? existingUser.referralCount,
+        subscriptionPlanId: userData.subscriptionPlanId ?? existingUser.subscriptionPlanId,
+        subscriptionStatus: userData.subscriptionStatus ?? existingUser.subscriptionStatus,
+        maxHousesAllowed: userData.maxHousesAllowed ?? existingUser.maxHousesAllowed,
+        isPremium: userData.isPremium ?? existingUser.isPremium,
+        stripeCustomerId: userData.stripeCustomerId ?? existingUser.stripeCustomerId,
+        stripeSubscriptionId: userData.stripeSubscriptionId ?? existingUser.stripeSubscriptionId,
+        stripePriceId: userData.stripePriceId ?? existingUser.stripePriceId,
+        subscriptionStartDate: userData.subscriptionStartDate ?? existingUser.subscriptionStartDate,
+        subscriptionEndDate: userData.subscriptionEndDate ?? existingUser.subscriptionEndDate,
+        updatedAt: new Date(),
+      };
+      
+      await db.update(users).set(updatedData).where(eq(users.id, userData.id!));
+      return (await this.getUser(userData.id!))!;
+    } else {
+      // Insert new user
+      const newUser = {
+        id: userData.id,
+        email: userData.email ?? null,
+        firstName: userData.firstName ?? null,
+        lastName: userData.lastName ?? null,
+        profileImageUrl: userData.profileImageUrl ?? null,
+        role: userData.role ?? 'homeowner',
+        passwordHash: userData.passwordHash ?? null,
+        zipCode: userData.zipCode ?? null,
+        referralCode: userData.referralCode ?? null,
+        referredBy: userData.referredBy ?? null,
+        referralCount: userData.referralCount ?? 0,
+        subscriptionPlanId: userData.subscriptionPlanId ?? null,
+        subscriptionStatus: userData.subscriptionStatus ?? 'inactive',
+        maxHousesAllowed: userData.maxHousesAllowed ?? 2,
+        isPremium: userData.isPremium ?? false,
+        stripeCustomerId: userData.stripeCustomerId ?? null,
+        stripeSubscriptionId: userData.stripeSubscriptionId ?? null,
+        stripePriceId: userData.stripePriceId ?? null,
+        subscriptionStartDate: userData.subscriptionStartDate ?? null,
+        subscriptionEndDate: userData.subscriptionEndDate ?? null,
+      };
+      
+      await db.insert(users).values(newUser);
+      return (await this.getUser(newUser.id!))!;
+    }
+  }
+
+  async createUserWithPassword(data: { email: string, passwordHash: string, firstName: string, lastName: string, role: 'homeowner' | 'contractor', zipCode: string }): Promise<User> {
+    return this.upsertUser({
+      id: randomUUID(),
+      email: data.email,
+      passwordHash: data.passwordHash,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      role: data.role,
+      zipCode: data.zipCode,
+    });
+  }
+
+  // All other methods delegated to MemStorage
+  getContractors = this.memStorage.getContractors.bind(this.memStorage);
+  getContractor = this.memStorage.getContractor.bind(this.memStorage);
+  createContractor = this.memStorage.createContractor.bind(this.memStorage);
+  getContractorLicenses = this.memStorage.getContractorLicenses.bind(this.memStorage);
+  getContractorLicense = this.memStorage.getContractorLicense.bind(this.memStorage);
+  createContractorLicense = this.memStorage.createContractorLicense.bind(this.memStorage);
+  updateContractorLicense = this.memStorage.updateContractorLicense.bind(this.memStorage);
+  deleteContractorLicense = this.memStorage.deleteContractorLicense.bind(this.memStorage);
+  getProducts = this.memStorage.getProducts.bind(this.memStorage);
+  getProduct = this.memStorage.getProduct.bind(this.memStorage);
+  createProduct = this.memStorage.createProduct.bind(this.memStorage);
+  getHomeAppliances = this.memStorage.getHomeAppliances.bind(this.memStorage);
+  getHomeAppliance = this.memStorage.getHomeAppliance.bind(this.memStorage);
+  createHomeAppliance = this.memStorage.createHomeAppliance.bind(this.memStorage);
+  updateHomeAppliance = this.memStorage.updateHomeAppliance.bind(this.memStorage);
+  deleteHomeAppliance = this.memStorage.deleteHomeAppliance.bind(this.memStorage);
+  getHomeApplianceManuals = this.memStorage.getHomeApplianceManuals.bind(this.memStorage);
+  getHomeApplianceManual = this.memStorage.getHomeApplianceManual.bind(this.memStorage);
+  createHomeApplianceManual = this.memStorage.createHomeApplianceManual.bind(this.memStorage);
+  updateHomeApplianceManual = this.memStorage.updateHomeApplianceManual.bind(this.memStorage);
+  deleteHomeApplianceManual = this.memStorage.deleteHomeApplianceManual.bind(this.memStorage);
+  getMaintenanceLogs = this.memStorage.getMaintenanceLogs.bind(this.memStorage);
+  getMaintenanceLog = this.memStorage.getMaintenanceLog.bind(this.memStorage);
+  createMaintenanceLog = this.memStorage.createMaintenanceLog.bind(this.memStorage);
+  updateMaintenanceLog = this.memStorage.updateMaintenanceLog.bind(this.memStorage);
+  deleteMaintenanceLog = this.memStorage.deleteMaintenanceLog.bind(this.memStorage);
+  getCustomMaintenanceTasks = this.memStorage.getCustomMaintenanceTasks.bind(this.memStorage);
+  getCustomMaintenanceTask = this.memStorage.getCustomMaintenanceTask.bind(this.memStorage);
+  createCustomMaintenanceTask = this.memStorage.createCustomMaintenanceTask.bind(this.memStorage);
+  updateCustomMaintenanceTask = this.memStorage.updateCustomMaintenanceTask.bind(this.memStorage);
+  deleteCustomMaintenanceTask = this.memStorage.deleteCustomMaintenanceTask.bind(this.memStorage);
+  getHouses = this.memStorage.getHouses.bind(this.memStorage);
+  getHouse = this.memStorage.getHouse.bind(this.memStorage);
+  createHouse = this.memStorage.createHouse.bind(this.memStorage);
+  updateHouse = this.memStorage.updateHouse.bind(this.memStorage);
+  deleteHouse = this.memStorage.deleteHouse.bind(this.memStorage);
+  getDefaultHouse = this.memStorage.getDefaultHouse.bind(this.memStorage);
+  getContractorAppointments = this.memStorage.getContractorAppointments.bind(this.memStorage);
+  getContractorAppointment = this.memStorage.getContractorAppointment.bind(this.memStorage);
+  createContractorAppointment = this.memStorage.createContractorAppointment.bind(this.memStorage);
+  updateContractorAppointment = this.memStorage.updateContractorAppointment.bind(this.memStorage);
+  deleteContractorAppointment = this.memStorage.deleteContractorAppointment.bind(this.memStorage);
+  getNotifications = this.memStorage.getNotifications.bind(this.memStorage);
+  getNotification = this.memStorage.getNotification.bind(this.memStorage);
+  createNotification = this.memStorage.createNotification.bind(this.memStorage);
+  updateNotification = this.memStorage.updateNotification.bind(this.memStorage);
+  deleteNotification = this.memStorage.deleteNotification.bind(this.memStorage);
+  getUnreadNotifications = this.memStorage.getUnreadNotifications.bind(this.memStorage);
+  markNotificationAsRead = this.memStorage.markNotificationAsRead.bind(this.memStorage);
+  searchContractors = this.memStorage.searchContractors.bind(this.memStorage);
+  searchProducts = this.memStorage.searchProducts.bind(this.memStorage);
+  getContractorProfile = this.memStorage.getContractorProfile.bind(this.memStorage);
+  updateContractorProfile = this.memStorage.updateContractorProfile.bind(this.memStorage);
+  getServiceRecords = this.memStorage.getServiceRecords.bind(this.memStorage);
+  getServiceRecord = this.memStorage.getServiceRecord.bind(this.memStorage);
+  createServiceRecord = this.memStorage.createServiceRecord.bind(this.memStorage);
+  updateServiceRecord = this.memStorage.updateServiceRecord.bind(this.memStorage);
+  deleteServiceRecord = this.memStorage.deleteServiceRecord.bind(this.memStorage);
+  getHomeownerServiceRecords = this.memStorage.getHomeownerServiceRecords.bind(this.memStorage);
+  getCustomerServiceRecords = this.memStorage.getCustomerServiceRecords.bind(this.memStorage);
+  getConversations = this.memStorage.getConversations.bind(this.memStorage);
+  getConversation = this.memStorage.getConversation.bind(this.memStorage);
+  createConversation = this.memStorage.createConversation.bind(this.memStorage);
+  getMessages = this.memStorage.getMessages.bind(this.memStorage);
+  createMessage = this.memStorage.createMessage.bind(this.memStorage);
+  markMessagesAsRead = this.memStorage.markMessagesAsRead.bind(this.memStorage);
+  getUnreadMessageCount = this.memStorage.getUnreadMessageCount.bind(this.memStorage);
+  getContractorReviews = this.memStorage.getContractorReviews.bind(this.memStorage);
+  getReviewsByHomeowner = this.memStorage.getReviewsByHomeowner.bind(this.memStorage);
+  createContractorReview = this.memStorage.createContractorReview.bind(this.memStorage);
+  updateContractorReview = this.memStorage.updateContractorReview.bind(this.memStorage);
+  deleteContractorReview = this.memStorage.deleteContractorReview.bind(this.memStorage);
+  getContractorAverageRating = this.memStorage.getContractorAverageRating.bind(this.memStorage);
+  getProposals = this.memStorage.getProposals.bind(this.memStorage);
+  getProposal = this.memStorage.getProposal.bind(this.memStorage);
+  createProposal = this.memStorage.createProposal.bind(this.memStorage);
+  updateProposal = this.memStorage.updateProposal.bind(this.memStorage);
+  deleteProposal = this.memStorage.deleteProposal.bind(this.memStorage);
+  getHomeSystems = this.memStorage.getHomeSystems.bind(this.memStorage);
+  getHomeSystem = this.memStorage.getHomeSystem.bind(this.memStorage);
+  createHomeSystem = this.memStorage.createHomeSystem.bind(this.memStorage);
+  updateHomeSystem = this.memStorage.updateHomeSystem.bind(this.memStorage);
+  deleteHomeSystem = this.memStorage.deleteHomeSystem.bind(this.memStorage);
+  getPushSubscriptions = this.memStorage.getPushSubscriptions.bind(this.memStorage);
+  getPushSubscription = this.memStorage.getPushSubscription.bind(this.memStorage);
+  createPushSubscription = this.memStorage.createPushSubscription.bind(this.memStorage);
+  updatePushSubscription = this.memStorage.updatePushSubscription.bind(this.memStorage);
+  deletePushSubscription = this.memStorage.deletePushSubscription.bind(this.memStorage);
+  deletePushSubscriptionByEndpoint = this.memStorage.deletePushSubscriptionByEndpoint.bind(this.memStorage);
+  getHousesByHomeowner = this.memStorage.getHousesByHomeowner.bind(this.memStorage);
+  getHomeSystemsByHomeowner = this.memStorage.getHomeSystemsByHomeowner.bind(this.memStorage);
+  getMaintenanceLogsByHomeowner = this.memStorage.getMaintenanceLogsByHomeowner.bind(this.memStorage);
+  getActiveBoosts = this.memStorage.getActiveBoosts.bind(this.memStorage);
+  getContractorBoosts = this.memStorage.getContractorBoosts.bind(this.memStorage);
+  createContractorBoost = this.memStorage.createContractorBoost.bind(this.memStorage);
+  updateContractorBoost = this.memStorage.updateContractorBoost.bind(this.memStorage);
+  deleteContractorBoost = this.memStorage.deleteContractorBoost.bind(this.memStorage);
+  checkBoostConflict = this.memStorage.checkBoostConflict.bind(this.memStorage);
+  createHouseTransfer = this.memStorage.createHouseTransfer.bind(this.memStorage);
+  getHouseTransfer = this.memStorage.getHouseTransfer.bind(this.memStorage);
+  getHouseTransferByToken = this.memStorage.getHouseTransferByToken.bind(this.memStorage);
+  getHouseTransfersForUser = this.memStorage.getHouseTransfersForUser.bind(this.memStorage);
+  updateHouseTransfer = this.memStorage.updateHouseTransfer.bind(this.memStorage);
+  transferHouseOwnership = this.memStorage.transferHouseOwnership.bind(this.memStorage);
+  getHousesCount = this.memStorage.getHousesCount.bind(this.memStorage);
+  trackContractorClick = this.memStorage.trackContractorClick.bind(this.memStorage);
+  getContractorAnalytics = this.memStorage.getContractorAnalytics.bind(this.memStorage);
+  getContractorMonthlyStats = this.memStorage.getContractorMonthlyStats.bind(this.memStorage);
+  getTaskOverrides = this.memStorage.getTaskOverrides.bind(this.memStorage);
+  getTaskOverride = this.memStorage.getTaskOverride.bind(this.memStorage);
+  upsertTaskOverride = this.memStorage.upsertTaskOverride.bind(this.memStorage);
+  deleteTaskOverride = this.memStorage.deleteTaskOverride.bind(this.memStorage);
+  getCountries = this.memStorage.getCountries.bind(this.memStorage);
+  getCountry = this.memStorage.getCountry.bind(this.memStorage);
+  getCountryByCode = this.memStorage.getCountryByCode.bind(this.memStorage);
+  createCountry = this.memStorage.createCountry.bind(this.memStorage);
+  updateCountry = this.memStorage.updateCountry.bind(this.memStorage);
+  getRegionsByCountry = this.memStorage.getRegionsByCountry.bind(this.memStorage);
+  getRegion = this.memStorage.getRegion.bind(this.memStorage);
+  createRegion = this.memStorage.createRegion.bind(this.memStorage);
+  updateRegion = this.memStorage.updateRegion.bind(this.memStorage);
+  getClimateZonesByCountry = this.memStorage.getClimateZonesByCountry.bind(this.memStorage);
+  getClimateZone = this.memStorage.getClimateZone.bind(this.memStorage);
+  createClimateZone = this.memStorage.createClimateZone.bind(this.memStorage);
+  updateClimateZone = this.memStorage.updateClimateZone.bind(this.memStorage);
+  getRegulatoryBodiesByRegion = this.memStorage.getRegulatoryBodiesByRegion.bind(this.memStorage);
+  getRegulatoryBodiesByCountry = this.memStorage.getRegulatoryBodiesByCountry.bind(this.memStorage);
+  getRegulatoryBody = this.memStorage.getRegulatoryBody.bind(this.memStorage);
+  createRegulatoryBody = this.memStorage.createRegulatoryBody.bind(this.memStorage);
+  updateRegulatoryBody = this.memStorage.updateRegulatoryBody.bind(this.memStorage);
+  getRegionalMaintenanceTasks = this.memStorage.getRegionalMaintenanceTasks.bind(this.memStorage);
+  getRegionalMaintenanceTask = this.memStorage.getRegionalMaintenanceTask.bind(this.memStorage);
+  createRegionalMaintenanceTask = this.memStorage.createRegionalMaintenanceTask.bind(this.memStorage);
+  updateRegionalMaintenanceTask = this.memStorage.updateRegionalMaintenanceTask.bind(this.memStorage);
+  getTaskCompletions = this.memStorage.getTaskCompletions.bind(this.memStorage);
+  getTaskCompletion = this.memStorage.getTaskCompletion.bind(this.memStorage);
+  createTaskCompletion = this.memStorage.createTaskCompletion.bind(this.memStorage);
+  getTaskCompletionsByMonth = this.memStorage.getTaskCompletionsByMonth.bind(this.memStorage);
+  getMonthlyStreak = this.memStorage.getMonthlyStreak.bind(this.memStorage);
+  getAchievements = this.memStorage.getAchievements.bind(this.memStorage);
+  getAchievement = this.memStorage.getAchievement.bind(this.memStorage);
+  createAchievement = this.memStorage.createAchievement.bind(this.memStorage);
+  hasAchievement = this.memStorage.hasAchievement.bind(this.memStorage);
+  getContractorHireCount = this.memStorage.getContractorHireCount.bind(this.memStorage);
+  getAllAchievementDefinitions = this.memStorage.getAllAchievementDefinitions.bind(this.memStorage);
+  getAchievementDefinitionsByCategory = this.memStorage.getAchievementDefinitionsByCategory.bind(this.memStorage);
+  getUserAchievements = this.memStorage.getUserAchievements.bind(this.memStorage);
+  getUserAchievement = this.memStorage.getUserAchievement.bind(this.memStorage);
+  createUserAchievement = this.memStorage.createUserAchievement.bind(this.memStorage);
+  updateUserAchievementProgress = this.memStorage.updateUserAchievementProgress.bind(this.memStorage);
+  unlockUserAchievement = this.memStorage.unlockUserAchievement.bind(this.memStorage);
+  checkAndAwardAchievements = this.memStorage.checkAndAwardAchievements.bind(this.memStorage);
+  getAchievementProgress = this.memStorage.getAchievementProgress.bind(this.memStorage);
+  validateAndUseInviteCode = this.memStorage.validateAndUseInviteCode.bind(this.memStorage);
+  getInviteCodes = this.memStorage.getInviteCodes.bind(this.memStorage);
+  createInviteCode = this.memStorage.createInviteCode.bind(this.memStorage);
+  deactivateInviteCode = this.memStorage.deactivateInviteCode.bind(this.memStorage);
+  trackSearch = this.memStorage.trackSearch.bind(this.memStorage);
+  getSearchAnalytics = this.memStorage.getSearchAnalytics.bind(this.memStorage);
+  getAdminStats = this.memStorage.getAdminStats.bind(this.memStorage);
+}
+
+export const storage = new DbStorage();
