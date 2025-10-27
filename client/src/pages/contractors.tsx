@@ -332,7 +332,7 @@ export default function Contractors() {
                     }}
                     data-testid="filter-home"
                   >
-                    <SelectTrigger className="w-64" style={{ backgroundColor: '#1e1e20', color: '#ffffff' }}>
+                    <SelectTrigger className="w-64 h-auto min-h-[60px] py-3" style={{ backgroundColor: '#1e1e20', color: '#ffffff' }}>
                       <SelectValue placeholder="Change property..." />
                     </SelectTrigger>
                     <SelectContent>
