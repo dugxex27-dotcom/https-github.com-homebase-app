@@ -77,6 +77,7 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [showServiceDropdown, setShowServiceDropdown] = useState(false);
+  const [selectedHouseId, setSelectedHouseId] = useState<string>('');
   const serviceDropdownRef = useRef<HTMLDivElement>(null);
 
   // Redirect contractors to their dashboard
@@ -446,7 +447,7 @@ export default function Home() {
                       <div className="relative">
                         <MapPin className="absolute left-3 top-3 h-4 w-4 z-10" style={{ color: '#b6a6f4' }} />
                         {userHouses.length > 0 ? (
-                          <Select>
+                          <Select value={selectedHouseId} onValueChange={setSelectedHouseId}>
                             <SelectTrigger 
                               className="pl-10 h-12 text-base border-gray-300 dark:border-gray-600"
                               style={{ backgroundColor: '#ffffff', color: '#000000' }}
