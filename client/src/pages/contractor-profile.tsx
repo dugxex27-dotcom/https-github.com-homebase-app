@@ -710,8 +710,14 @@ export default function ContractorProfile() {
                       if (addr?.road) parts.push(addr.road);
                       else if (addr?.street) parts.push(addr.street);
                       const streetAddress = parts.join(' ') || suggestion.display_name.split(',')[0];
+                      const town = addr?.city || addr?.town || addr?.village || '';
                       const county = addr?.county || '';
                       const zipcode = addr?.postcode || '';
+                      
+                      const locationParts = [];
+                      if (town) locationParts.push(town);
+                      if (county) locationParts.push(county);
+                      if (zipcode) locationParts.push(zipcode);
                       
                       return (
                         <div
@@ -723,10 +729,8 @@ export default function ContractorProfile() {
                           <div className="font-medium text-sm text-gray-900">
                             {streetAddress}
                           </div>
-                          <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
-                            {county && <span>{county}</span>}
-                            {county && zipcode && <span>•</span>}
-                            {zipcode && <span>{zipcode}</span>}
+                          <div className="text-xs text-gray-500 mt-1">
+                            {locationParts.join(' • ')}
                           </div>
                         </div>
                       );
