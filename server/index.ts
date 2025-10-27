@@ -80,14 +80,22 @@ app.use(express.urlencoded({ extended: false }));
 const isProduction = process.env.NODE_ENV === 'production';
 const PgSession = connectPg(session);
 
+// Create session store with error handling for existing tables
+const sessionStore = new PgSession({
+  conObject: {
+    connectionString: process.env.DATABASE_URL,
+  },
+  createTableIfMissing: true,
+  errorLog: (error: any) => {
+    // Ignore "already exists" errors, log others
+    if (!error?.message?.includes('already exists')) {
+      console.error('Session store error:', error);
+    }
+  },
+});
+
 app.use(session({
-  store: new PgSession({
-    conObject: {
-      connectionString: process.env.DATABASE_URL,
-    },
-    createTableIfMissing: true,
-    errorLog: () => {}, // Suppress "table already exists" errors silently
-  }),
+  store: sessionStore,
   secret: process.env.SESSION_SECRET || 'demo-session-secret-key-for-development',
   resave: false,
   saveUninitialized: false,
