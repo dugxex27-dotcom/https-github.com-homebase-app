@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
-import connectPg from "connect-pg-simple";
+import connectPgSimple from "connect-pg-simple";
 import passport from "passport";
 import helmet from "helmet";
 import cors from "cors";
@@ -78,7 +78,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // Session configuration with enhanced security
 const isProduction = process.env.NODE_ENV === 'production';
-const PgSession = connectPg(session);
+const PgSession = connectPgSimple(session);
 
 // Create session store with proper error handling
 const sessionStore = new PgSession({
