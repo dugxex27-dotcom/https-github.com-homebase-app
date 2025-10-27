@@ -131,7 +131,8 @@ export default function ContractorProfile() {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [addressDebounceTimer, setAddressDebounceTimer] = useState<NodeJS.Timeout>();
   
-  // Country detection for distance units
+  // Country selection and detection for distance units
+  const [selectedCountry, setSelectedCountry] = useState<string>('US');
   const [detectedCountry, setDetectedCountry] = useState<string>('US');
   const [licenses, setLicenses] = useState([{
     id: '',
@@ -172,6 +173,17 @@ export default function ContractorProfile() {
     }
   }, [existingLicenses]);
 
+  // Map selected country to country code
+  const getCountryCode = (country: string) => {
+    const codes: Record<string, string> = {
+      'US': 'us',
+      'GB': 'gb',
+      'CA': 'ca',
+      'AU': 'au'
+    };
+    return codes[country] || 'us';
+  };
+
   // Business address geolocation functions
   const getBusinessAddressSuggestions = async (query: string) => {
     if (!query || query.length < 3) {
@@ -182,9 +194,10 @@ export default function ContractorProfile() {
 
     setIsLoadingSuggestions(true);
     try {
-      // Use OpenStreetMap Nominatim for business address suggestions
+      // Use OpenStreetMap Nominatim for business address suggestions with selected country
+      const countryCode = getCountryCode(selectedCountry);
       const nominatimResponse = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&countrycodes=gb,ca,au,us`,
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&countrycodes=${countryCode}`,
         {
           headers: {
             'User-Agent': 'HomeBase/1.0'
@@ -649,8 +662,28 @@ export default function ContractorProfile() {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <Label htmlFor="country">Country *</Label>
+                <Select value={selectedCountry} onValueChange={(value) => {
+                  setSelectedCountry(value);
+                  setDetectedCountry(value);
+                }}>
+                  <SelectTrigger style={{ backgroundColor: '#ffffff', color: 'black' }} className="hover:bg-[#afd6f9] hover:text-black transition-colors">
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="US">United States</SelectItem>
+                    <SelectItem value="GB">United Kingdom</SelectItem>
+                    <SelectItem value="CA">Canada</SelectItem>
+                    <SelectItem value="AU">Australia</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div>
-              <Label htmlFor="address">Business Address * (UK, Canada, Australia, US supported)</Label>
+              <Label htmlFor="address">Street Address *</Label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-3 h-4 w-4" style={{ color: '#1560a2' }} />
                 <Input
@@ -658,7 +691,7 @@ export default function ContractorProfile() {
                   value={formData.address}
                   onChange={(e) => handleBusinessAddressChange(e.target.value)}
                   className="pl-10"
-                  placeholder="Start typing business address (e.g., 123 Business St, London)"
+                  placeholder="Start typing street address (e.g., 123 Business St)"
                   required
                   style={{ backgroundColor: '#ffffff' }}
                 />
@@ -670,27 +703,36 @@ export default function ContractorProfile() {
                 {/* Business address suggestions dropdown */}
                 {showSuggestions && addressSuggestions.length > 0 && (
                   <div className="absolute z-50 w-full mt-1 max-h-60 overflow-auto bg-white border border-gray-300 rounded-md shadow-lg">
-                    {addressSuggestions.map((suggestion, index) => (
-                      <div
-                        key={index}
-                        className="px-4 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                        onClick={() => handleBusinessAddressSuggestionSelect(suggestion)}
-                        data-testid={`business-address-suggestion-${index}`}
-                      >
-                        <div className="font-medium text-sm text-gray-900">
-                          {suggestion.display_name}
+                    {addressSuggestions.map((suggestion, index) => {
+                      const addr = suggestion.address;
+                      const parts = [];
+                      if (addr?.house_number) parts.push(addr.house_number);
+                      if (addr?.road) parts.push(addr.road);
+                      else if (addr?.street) parts.push(addr.street);
+                      const streetAddress = parts.join(' ') || suggestion.display_name.split(',')[0];
+                      const county = addr?.county || '';
+                      const zipcode = addr?.postcode || '';
+                      
+                      return (
+                        <div
+                          key={index}
+                          className="px-4 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          onClick={() => handleBusinessAddressSuggestionSelect(suggestion)}
+                          data-testid={`business-address-suggestion-${index}`}
+                        >
+                          <div className="font-medium text-sm text-gray-900">
+                            {streetAddress}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                            {county && <span>{county}</span>}
+                            {county && zipcode && <span>•</span>}
+                            {zipcode && <span>{zipcode}</span>}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500 mt-1 flex items-center">
-                          <MapPin className="w-3 h-3 mr-1" />
-                          {suggestion.address?.country || 'Unknown country'}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                🌍 International support: Type addresses from UK, Canada, Australia, or US for automatic address completion
               </div>
             </div>
 
