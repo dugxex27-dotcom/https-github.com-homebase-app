@@ -88,8 +88,8 @@ if (process.env.DATABASE_URL) {
       conObject: {
         connectionString: process.env.DATABASE_URL,
       },
-      // Don't auto-create table - it already exists
-      createTableIfMissing: false,
+      // Create table if missing (safe for both dev and production)
+      createTableIfMissing: true,
     });
     log('PostgreSQL session store initialized');
   } catch (error) {
