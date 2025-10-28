@@ -3037,8 +3037,7 @@ class DbStorage implements IStorage {
     this.markNotificationAsRead = this.memStorage.markNotificationAsRead.bind(this.memStorage);
     this.searchContractors = this.memStorage.searchContractors.bind(this.memStorage);
     this.searchProducts = this.memStorage.searchProducts.bind(this.memStorage);
-    this.getContractorProfile = this.memStorage.getContractorProfile.bind(this.memStorage);
-    this.updateContractorProfile = this.memStorage.updateContractorProfile.bind(this.memStorage);
+    // getContractorProfile and updateContractorProfile now use database-backed methods (defined below)
     this.getServiceRecords = this.memStorage.getServiceRecords.bind(this.memStorage);
     this.getServiceRecord = this.memStorage.getServiceRecord.bind(this.memStorage);
     this.createServiceRecord = this.memStorage.createServiceRecord.bind(this.memStorage);
@@ -3237,6 +3236,54 @@ class DbStorage implements IStorage {
       role: data.role,
       zipCode: data.zipCode,
     });
+  }
+
+  // Contractor profile operations - DATABASE BACKED for persistence
+  async getContractorProfile(contractorId: string): Promise<Contractor | undefined> {
+    const result = await db.select().from(contractors).where(eq(contractors.id, contractorId)).limit(1);
+    return result[0];
+  }
+
+  async updateContractorProfile(contractorId: string, profileData: Partial<InsertContractor>): Promise<Contractor> {
+    const existingContractor = await this.getContractorProfile(contractorId);
+    
+    if (!existingContractor) {
+      // Create new contractor profile if it doesn't exist (upsert pattern)
+      const newContractor = {
+        id: contractorId,
+        businessName: profileData.businessName || '',
+        contactName: profileData.contactName || '',
+        email: profileData.email || '',
+        phone: profileData.phone || '',
+        address: profileData.address || '',
+        city: profileData.city || '',
+        state: profileData.state || '',
+        zipCode: profileData.zipCode || '',
+        serviceRadius: profileData.serviceRadius || 25,
+        servicesOffered: profileData.servicesOffered || [],
+        hasEmergencyServices: profileData.hasEmergencyServices || false,
+        website: profileData.website || '',
+        facebook: profileData.facebook || '',
+        instagram: profileData.instagram || '',
+        linkedin: profileData.linkedin || '',
+        googleBusinessUrl: profileData.googleBusinessUrl || '',
+        bio: profileData.bio || '',
+        yearsExperience: profileData.yearsExperience || '',
+        profileImage: profileData.profileImage || '',
+      };
+      
+      await db.insert(contractors).values(newContractor);
+      return (await this.getContractorProfile(contractorId))!;
+    } else {
+      // Update existing contractor profile
+      const updatedData = {
+        ...existingContractor,
+        ...profileData,
+      };
+      
+      await db.update(contractors).set(updatedData).where(eq(contractors.id, contractorId));
+      return (await this.getContractorProfile(contractorId))!;
+    }
   }
 
   // Methods delegated to MemStorage (bound in constructor)
