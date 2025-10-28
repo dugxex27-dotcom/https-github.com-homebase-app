@@ -155,7 +155,8 @@ export default function SignIn() {
           title: "Demo login successful",
           description: "Logged in as demo homeowner.",
         });
-        window.location.reload();
+        // Redirect to homeowner dashboard
+        setLocation('/');
       }
     } catch (error) {
       toast({
@@ -179,8 +180,8 @@ export default function SignIn() {
           title: "Demo login successful",
           description: "Logged in as demo contractor.",
         });
-        // Reload the page to properly initialize the session
-        window.location.reload();
+        // Redirect to contractor dashboard
+        setLocation('/contractor-dashboard');
       }
     } catch (error) {
       toast({
