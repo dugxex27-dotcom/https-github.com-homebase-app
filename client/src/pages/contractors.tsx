@@ -157,14 +157,16 @@ export default function Contractors() {
   }, [houses, selectedHouseId]);
 
   // Auto-set location filter when a house is initially selected
+  const hasSetInitialLocation = useRef(false);
   useEffect(() => {
-    if (selectedHouseId && houses.length > 0) {
+    if (selectedHouseId && houses.length > 0 && !hasSetInitialLocation.current) {
       const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
-      if (selectedHouse && !filters.searchLocation) {
+      if (selectedHouse) {
         setFilters((prev: any) => ({ 
           ...prev, 
           searchLocation: selectedHouse.address 
         }));
+        hasSetInitialLocation.current = true;
       }
     }
   }, [selectedHouseId, houses]);
@@ -321,6 +323,7 @@ export default function Contractors() {
                     value={selectedHouseId} 
                     onValueChange={(value) => {
                       setSelectedHouseId(value);
+                      hasSetInitialLocation.current = false;
                       // Update location filter when home changes
                       const selectedHouse = houses.find((h: House) => h.id === value);
                       if (selectedHouse) {
