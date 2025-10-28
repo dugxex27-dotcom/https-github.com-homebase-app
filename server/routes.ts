@@ -537,6 +537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const contractors = await storage.getContractors(filters);
       res.json(contractors);
     } catch (error) {
+      console.error("Error fetching contractors:", error);
       res.status(500).json({ message: "Failed to fetch contractors" });
     }
   });
