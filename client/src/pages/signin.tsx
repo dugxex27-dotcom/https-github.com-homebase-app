@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SiGoogle } from "react-icons/si";
 import logoImage from '@assets/homebase-logo_1756861910640.png';
 
@@ -151,6 +151,9 @@ export default function SignIn() {
       });
       
       if (response.ok) {
+        // Invalidate auth cache to refresh user data
+        await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+        
         toast({
           title: "Demo login successful",
           description: "Logged in as demo homeowner.",
@@ -176,6 +179,9 @@ export default function SignIn() {
       });
       
       if (response.ok) {
+        // Invalidate auth cache to refresh user data
+        await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+        
         toast({
           title: "Demo login successful",
           description: "Logged in as demo contractor.",
