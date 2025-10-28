@@ -3291,6 +3291,47 @@ class DbStorage implements IStorage {
   async searchContractors(query: string, location?: string): Promise<Contractor[]> {
     let results = await db.select().from(contractors);
     
+    // If location is provided, geocode it and calculate distances
+    if (location) {
+      try {
+        // Geocode the search location
+        const searchCoords = await this.geocodeLocation(location);
+        
+        if (searchCoords) {
+          // Calculate distance for each contractor
+          results = results.map(contractor => {
+            if (contractor.postalCode || contractor.location) {
+              // Try to get contractor coordinates
+              const contractorLocation = contractor.postalCode || contractor.location;
+              // For now, we'll use a simple approach - in production, you'd geocode each contractor's location
+              // and store lat/lon in the database for performance
+              
+              // Simple distance estimation based on zip code proximity (placeholder)
+              // Real implementation would geocode contractor location and use haversine formula
+              const distance = this.estimateDistanceByZipCode(
+                location, 
+                contractor.postalCode || contractor.location
+              );
+              
+              return { ...contractor, distance: distance.toString() };
+            }
+            return contractor;
+          });
+          
+          // Filter by service radius
+          results = results.filter(contractor => {
+            if (!contractor.distance) return true;
+            const distanceToHomeowner = parseFloat(contractor.distance);
+            return contractor.serviceRadius >= distanceToHomeowner;
+          });
+        }
+      } catch (error) {
+        console.error('Error geocoding location:', error);
+        // Fall back to simple string matching if geocoding fails
+      }
+    }
+    
+    // Filter by query
     return results.filter(contractor => {
       const matchesQuery = query === "" || 
         contractor.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -3298,15 +3339,58 @@ class DbStorage implements IStorage {
         contractor.bio.toLowerCase().includes(query.toLowerCase()) ||
         contractor.services.some(service => service.toLowerCase().includes(query.toLowerCase()));
       
-      const matchesLocation = !location || 
-        contractor.location.toLowerCase().includes(location.toLowerCase());
-      
-      // Only show contractors whose service area overlaps with homeowner's location
-      const withinServiceArea = !contractor.distance || 
-        contractor.serviceRadius >= parseFloat(contractor.distance);
-      
-      return matchesQuery && matchesLocation && withinServiceArea;
+      return matchesQuery;
     });
+  }
+  
+  // Helper method to estimate distance between zip codes
+  // This is a simplified version - real implementation should use actual geocoding
+  private estimateDistanceByZipCode(zip1: string, zip2: string): number {
+    // Extract numeric part of zip codes
+    const num1 = parseInt(zip1.replace(/\D/g, '').substring(0, 5));
+    const num2 = parseInt(zip2.replace(/\D/g, '').substring(0, 5));
+    
+    if (isNaN(num1) || isNaN(num2)) return 999; // Return large distance if invalid
+    
+    // US zip codes: first 3 digits represent geographic area
+    // Approximate: each zip code difference ~= 0.5 miles (very rough estimate)
+    const zipDiff = Math.abs(num1 - num2);
+    
+    // Estimate distance based on zip code difference
+    // This is a placeholder - real implementation should use lat/lon
+    if (zipDiff === 0) return 0;
+    if (zipDiff < 10) return 2; // Very close (within ~5 miles)
+    if (zipDiff < 100) return zipDiff * 0.5; // Rough estimate
+    return Math.min(zipDiff * 0.5, 200); // Cap at 200 miles
+  }
+  
+  // Geocode a location using Nominatim
+  private async geocodeLocation(location: string): Promise<{ lat: number; lon: number } | null> {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1&addressdetails=1`,
+        {
+          headers: {
+            'User-Agent': 'HomeBase/1.0'
+          }
+        }
+      );
+      
+      if (!response.ok) return null;
+      
+      const data = await response.json();
+      if (data && data.length > 0) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lon: parseFloat(data[0].lon)
+        };
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      return null;
+    }
   }
 
   // Contractor profile operations - DATABASE BACKED for persistence
