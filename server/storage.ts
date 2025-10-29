@@ -3288,7 +3288,7 @@ class DbStorage implements IStorage {
     return results.map(contractor => ({ ...contractor, isBoosted: false }));
   }
 
-  async searchContractors(query: string, location?: string): Promise<Contractor[]> {
+  async searchContractors(query: string, location?: string, services?: string[]): Promise<Contractor[]> {
     let results = await db.select().from(contractors);
     
     // If location is provided, geocode it and calculate distances
@@ -3329,6 +3329,17 @@ class DbStorage implements IStorage {
         console.error('Error geocoding location:', error);
         // Fall back to simple string matching if geocoding fails
       }
+    }
+    
+    // Filter by services - contractor must offer at least one of the requested services
+    if (services && services.length > 0) {
+      results = results.filter(contractor => {
+        return contractor.services.some(contractorService => 
+          services.some(requestedService => 
+            contractorService.toLowerCase() === requestedService.toLowerCase()
+          )
+        );
+      });
     }
     
     // Filter by query

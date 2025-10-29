@@ -546,8 +546,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const query = req.query.q as string || "";
       const location = req.query.location as string;
+      const servicesParam = req.query.services as string;
+      const services = servicesParam ? servicesParam.split(',').map(s => s.trim()).filter(s => s) : undefined;
       
-      const contractors = await storage.searchContractors(query, location);
+      const contractors = await storage.searchContractors(query, location, services);
       res.json(contractors);
     } catch (error) {
       res.status(500).json({ message: "Failed to search contractors" });
