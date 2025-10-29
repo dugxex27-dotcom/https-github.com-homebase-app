@@ -28,10 +28,14 @@ export default function ContractorDetail() {
   const [match, params] = useRoute("/contractor/:id");
   const contractorId = params?.id;
 
+  console.log('[ContractorDetail] Route params:', params, 'contractorId:', contractorId);
+
   const { data: contractor, isLoading, error } = useQuery<Contractor>({
     queryKey: ['/api/contractors', contractorId],
     enabled: !!contractorId,
   });
+
+  console.log('[ContractorDetail] Query state:', { contractor, isLoading, error });
 
   // Track profile view when contractor data loads
   useEffect(() => {

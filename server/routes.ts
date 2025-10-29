@@ -558,12 +558,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/contractors/:id", async (req, res) => {
     try {
+      console.log('[DEBUG] GET /api/contractors/:id - Looking for contractor ID:', req.params.id);
       const contractor = await storage.getContractor(req.params.id);
+      console.log('[DEBUG] Contractor found:', !!contractor);
       if (!contractor) {
         return res.status(404).json({ message: "Contractor not found" });
       }
       res.json(contractor);
     } catch (error) {
+      console.error('[ERROR] Failed to fetch contractor:', error);
       res.status(500).json({ message: "Failed to fetch contractor" });
     }
   });
