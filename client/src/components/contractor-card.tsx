@@ -46,13 +46,13 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
           {contractor.profileImage ? (
             <img
               src={contractor.profileImage}
-              alt={`${contractor.name} profile photo`}
+              alt={`${contractor.company} profile photo`}
               className="w-20 h-20 rounded-full object-cover border-2 border-primary/10"
             />
           ) : (
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
               <span className="text-lg font-semibold text-primary">
-                {contractor.name.split(' ').map(n => n[0]).join('')}
+                {contractor.company.split(' ').map(n => n[0]).join('')}
               </span>
             </div>
           )}
@@ -63,7 +63,7 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-foreground text-lg truncate">{contractor.name}</h3>
+                <h3 className="font-semibold text-foreground text-lg truncate">{contractor.company}</h3>
                 {contractor.isBoosted && (
                   <Badge className="text-xs px-2 py-1 text-white font-medium" style={{ background: 'linear-gradient(135deg, #ffd700, #ff8c00)' }}>
                     <TrendingUp className="w-3 h-3 mr-1" />
@@ -71,7 +71,7 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
                   </Badge>
                 )}
               </div>
-              <p className="text-muted-foreground text-sm mb-2">{contractor.company}</p>
+              <p className="text-muted-foreground text-sm mb-2">{contractor.name}</p>
             </div>
             <div className="flex items-center ml-4 flex-shrink-0">
               {renderStars(contractor.rating)}
