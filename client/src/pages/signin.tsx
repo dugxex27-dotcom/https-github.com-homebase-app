@@ -320,6 +320,7 @@ export default function SignIn() {
                               placeholder="First name"
                               {...field}
                               data-testid="input-first-name"
+                              style={{ color: '#ffffff' }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -338,6 +339,7 @@ export default function SignIn() {
                               placeholder="Last name"
                               {...field}
                               data-testid="input-last-name"
+                              style={{ color: '#ffffff' }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -358,6 +360,7 @@ export default function SignIn() {
                             placeholder="Enter your email"
                             {...field}
                             data-testid="input-email"
+                            style={{ color: '#ffffff' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -377,6 +380,7 @@ export default function SignIn() {
                             placeholder="Create a password (min 6 characters)"
                             {...field}
                             data-testid="input-password"
+                            style={{ color: '#ffffff' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -396,6 +400,7 @@ export default function SignIn() {
                             placeholder="Confirm your password"
                             {...field}
                             data-testid="input-confirm-password"
+                            style={{ color: '#ffffff' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -414,6 +419,7 @@ export default function SignIn() {
                             placeholder="Enter your zip code"
                             {...field}
                             data-testid="input-zip-code"
+                            style={{ color: '#ffffff' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -471,6 +477,7 @@ export default function SignIn() {
                             placeholder="Enter invite code if you have one"
                             {...field}
                             data-testid="input-invite-code"
+                            style={{ color: '#ffffff' }}
                           />
                         </FormControl>
                         <FormMessage />
