@@ -24,6 +24,15 @@ import { SiFacebook, SiInstagram, SiLinkedin, SiGoogle } from "react-icons/si";
 import type { Contractor } from "@shared/schema";
 import { trackProfileView, trackSocialClick } from "@/lib/analytics";
 
+// Utility to ensure URL has proper protocol
+function ensureHttps(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  return `https://${url}`;
+}
+
 export default function ContractorDetail() {
   const [match, params] = useRoute("/contractor/:id");
   const contractorId = params?.id;
@@ -282,7 +291,7 @@ export default function ContractorDetail() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {contractor.website && (
                     <a 
-                      href={contractor.website} 
+                      href={ensureHttps(contractor.website)} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       onClick={() => trackSocialClick(contractor.id, 'website')}
@@ -299,7 +308,7 @@ export default function ContractorDetail() {
                   )}
                   {contractor.facebook && (
                     <a 
-                      href={contractor.facebook} 
+                      href={ensureHttps(contractor.facebook)} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       onClick={() => trackSocialClick(contractor.id, 'facebook')}
@@ -316,7 +325,7 @@ export default function ContractorDetail() {
                   )}
                   {contractor.instagram && (
                     <a 
-                      href={contractor.instagram} 
+                      href={ensureHttps(contractor.instagram)} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       onClick={() => trackSocialClick(contractor.id, 'instagram')}
@@ -333,7 +342,7 @@ export default function ContractorDetail() {
                   )}
                   {contractor.linkedin && (
                     <a 
-                      href={contractor.linkedin} 
+                      href={ensureHttps(contractor.linkedin)} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       onClick={() => trackSocialClick(contractor.id, 'linkedin')}
@@ -350,7 +359,7 @@ export default function ContractorDetail() {
                   )}
                   {contractor.googleBusinessUrl && (
                     <a 
-                      href={contractor.googleBusinessUrl} 
+                      href={ensureHttps(contractor.googleBusinessUrl)} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       onClick={() => trackSocialClick(contractor.id, 'google_business')}
