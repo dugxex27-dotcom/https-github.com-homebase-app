@@ -535,6 +535,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const contractors = await storage.getContractors(filters);
+      console.log('[DEBUG] /api/contractors returning', contractors.length, 'contractors');
+      if (contractors.length > 0) {
+        console.log('[DEBUG] First contractor ID:', contractors[0].id);
+      }
       res.json(contractors);
     } catch (error) {
       console.error("Error fetching contractors:", error);
