@@ -17,8 +17,10 @@ import {
   Shield, 
   Wrench, 
   Globe,
-  Star
+  Star,
+  ExternalLink
 } from "lucide-react";
+import { SiFacebook, SiInstagram, SiLinkedin, SiGoogle } from "react-icons/si";
 import type { Contractor } from "@shared/schema";
 import { trackProfileView, trackSocialClick } from "@/lib/analytics";
 
@@ -262,6 +264,107 @@ export default function ContractorDetail() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Website & Social Media */}
+          {(contractor.website || contractor.facebook || contractor.instagram || contractor.linkedin || contractor.googleBusinessUrl) && (
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                  <Globe className="h-6 w-6 mr-3 text-blue-600 dark:text-blue-400" />
+                  Connect Online
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {contractor.website && (
+                    <a 
+                      href={contractor.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      onClick={() => trackSocialClick(contractor.id, 'website')}
+                      className="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+                      data-testid="link-website"
+                    >
+                      <Globe className="w-6 h-6 mr-3 text-blue-600" />
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 dark:text-white">Website</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 truncate">{contractor.website}</div>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
+                    </a>
+                  )}
+                  {contractor.facebook && (
+                    <a 
+                      href={contractor.facebook} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      onClick={() => trackSocialClick(contractor.id, 'facebook')}
+                      className="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+                      data-testid="link-facebook"
+                    >
+                      <SiFacebook className="w-6 h-6 mr-3 text-[#1877f2]" />
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 dark:text-white">Facebook</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Follow us on Facebook</div>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#1877f2]" />
+                    </a>
+                  )}
+                  {contractor.instagram && (
+                    <a 
+                      href={contractor.instagram} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      onClick={() => trackSocialClick(contractor.id, 'instagram')}
+                      className="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+                      data-testid="link-instagram"
+                    >
+                      <SiInstagram className="w-6 h-6 mr-3 text-[#e4405f]" />
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 dark:text-white">Instagram</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">See our work on Instagram</div>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#e4405f]" />
+                    </a>
+                  )}
+                  {contractor.linkedin && (
+                    <a 
+                      href={contractor.linkedin} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      onClick={() => trackSocialClick(contractor.id, 'linkedin')}
+                      className="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+                      data-testid="link-linkedin"
+                    >
+                      <SiLinkedin className="w-6 h-6 mr-3 text-[#0a66c2]" />
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 dark:text-white">LinkedIn</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Connect on LinkedIn</div>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#0a66c2]" />
+                    </a>
+                  )}
+                  {contractor.googleBusinessUrl && (
+                    <a 
+                      href={contractor.googleBusinessUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      onClick={() => trackSocialClick(contractor.id, 'google')}
+                      className="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+                      data-testid="link-google-business"
+                    >
+                      <SiGoogle className="w-6 h-6 mr-3 text-[#4285f4]" />
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 dark:text-white">Google Business</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">View our Google listing</div>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#4285f4]" />
+                    </a>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Reviews Section */}
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
