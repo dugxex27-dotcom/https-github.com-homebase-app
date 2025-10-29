@@ -51,9 +51,6 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
             />
           ) : (
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-              <span className="text-lg font-semibold text-primary">
-                {contractor.company.split(' ').map(n => n[0]).join('')}
-              </span>
             </div>
           )}
 
