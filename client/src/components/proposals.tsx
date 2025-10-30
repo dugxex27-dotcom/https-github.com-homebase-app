@@ -308,6 +308,7 @@ export function Proposals({ contractorId }: ProposalsProps) {
             <FileText className="h-5 w-5" style={{ color: '#1560a2' }} />
             Proposals
           </CardTitle>
+          {/* Note: Proposal creation moved to Messages area - contractors can only create proposals from active conversations */}
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
             if (!open) {
@@ -315,12 +316,15 @@ export function Proposals({ contractorId }: ProposalsProps) {
               form.reset();
             }
           }}>
-            <DialogTrigger asChild>
-              <Button data-testid="button-create-proposal" style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:opacity-90">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Proposal
-              </Button>
-            </DialogTrigger>
+            {/* Hidden - Create Proposal button moved to Messages */}
+            {false && (
+              <DialogTrigger asChild>
+                <Button data-testid="button-create-proposal" style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:opacity-90">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Proposal
+                </Button>
+              </DialogTrigger>
+            )}
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#1560a2' }}>
               <DialogHeader>
                 <DialogTitle style={{ color: 'white' }}>

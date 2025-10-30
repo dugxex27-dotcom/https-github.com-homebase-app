@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -15,7 +17,11 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MessageCircle, Send, User, Calendar, Plus, Users, FileText, DollarSign, Clock, Star } from "lucide-react";
+import { insertProposalSchema } from "@shared/schema";
+import { z } from "zod";
 import type { User as UserType, Conversation, Message, Contractor, Proposal, ContractorReview } from "@shared/schema";
 
 interface ConversationWithDetails extends Conversation {
@@ -39,6 +45,41 @@ export default function Messages() {
     rating: 5,
     comment: "",
     wouldRecommend: true
+  });
+  const [isProposalDialogOpen, setIsProposalDialogOpen] = useState(false);
+
+  // Proposal form setup (without contractorId/homeownerId as they'll be added on submit)
+  const proposalFormSchema = z.object({
+    title: z.string().min(1, "Title is required"),
+    description: z.string().min(1, "Description is required"),
+    scope: z.string().min(1, "Scope of work is required"),
+    serviceType: z.string().min(1, "Service type is required"),
+    estimatedCost: z.string().min(1, "Estimated cost is required"),
+    estimatedDuration: z.string().min(1, "Estimated duration is required"),
+    validUntil: z.string().min(1, "Valid until date is required"),
+    materials: z.string().optional(),
+    warrantyPeriod: z.string().optional(),
+    customerNotes: z.string().optional(),
+    internalNotes: z.string().optional(),
+  });
+
+  type ProposalFormData = z.infer<typeof proposalFormSchema>;
+
+  const proposalForm = useForm<ProposalFormData>({
+    resolver: zodResolver(proposalFormSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      scope: "",
+      estimatedCost: "",
+      estimatedDuration: "",
+      materials: "",
+      warrantyPeriod: "",
+      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      serviceType: "",
+      customerNotes: "",
+      internalNotes: "",
+    },
   });
 
   // Fetch conversations
@@ -172,6 +213,53 @@ export default function Messages() {
       return;
     }
     submitReviewMutation.mutate(reviewForm);
+  };
+
+  // Create proposal mutation (contractors only)
+  const createProposalMutation = useMutation({
+    mutationFn: async (proposalData: any) => {
+      const response = await fetch(`/api/proposals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(proposalData)
+      });
+      if (!response.ok) throw new Error('Failed to create proposal');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
+      setIsProposalDialogOpen(false);
+      proposalForm.reset();
+      toast({
+        title: "Proposal Created",
+        description: "Your proposal has been created successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create proposal.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleCreateProposal = (data: ProposalFormData) => {
+    if (!selectedConversation) return;
+    
+    // Transform data to match backend schema (same as proposals component)
+    const proposalData = {
+      ...data,
+      homeownerId: selectedConversation.homeownerId,
+      contractorId: typedUser?.id,
+      // Always convert materials string to array (handles empty string case)
+      materials: (data.materials || "").split(',').map(item => item.trim()).filter(item => item.length > 0),
+      estimatedCost: parseFloat(data.estimatedCost).toString(),
+      status: "draft" as const,
+    };
+    
+    createProposalMutation.mutate(proposalData);
   };
 
   const handleContractorSelection = (contractorId: string, checked: boolean) => {
@@ -413,10 +501,291 @@ export default function Messages() {
         <Card className="lg:col-span-2 bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700" style={{ backgroundColor: '#f2f2f2' }}>
           {selectedConversationId ? (
             <>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>
                   {conversations.find(c => c.id === selectedConversationId)?.subject || 'Conversation'}
                 </CardTitle>
+                {/* Create Proposal Button - Contractors only */}
+                {typedUser?.role === 'contractor' && selectedConversation && (
+                  <Dialog open={isProposalDialogOpen} onOpenChange={setIsProposalDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        style={{ backgroundColor: '#1560a2', color: 'white' }}
+                        className="hover:opacity-90"
+                        data-testid="button-create-proposal-from-message"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Proposal
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#1560a2' }}>
+                      <DialogHeader>
+                        <DialogTitle style={{ color: 'white' }}>
+                          Create Proposal for {selectedConversation?.otherPartyName}
+                        </DialogTitle>
+                        <DialogDescription style={{ color: '#e0e0e0' }}>
+                          Fill out the details below to create a proposal for this homeowner
+                        </DialogDescription>
+                      </DialogHeader>
+                      <Form {...proposalForm}>
+                        <form onSubmit={proposalForm.handleSubmit(handleCreateProposal)} className="space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={proposalForm.control}
+                              name="title"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel style={{ color: 'white' }}>Title *</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Kitchen renovation proposal"
+                                      {...field}
+                                      data-testid="input-proposal-title"
+                                      style={{ backgroundColor: 'white', color: '#000000' }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage style={{ color: '#ffcccc' }} />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={proposalForm.control}
+                              name="serviceType"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel style={{ color: 'white' }}>Service Type *</FormLabel>
+                                  <FormControl>
+                                    <Select value={field.value} onValueChange={field.onChange}>
+                                      <SelectTrigger data-testid="select-service-type" style={{ backgroundColor: 'white', color: '#000000' }}>
+                                        <SelectValue placeholder="Select service type" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="hvac">HVAC</SelectItem>
+                                        <SelectItem value="plumbing">Plumbing</SelectItem>
+                                        <SelectItem value="electrical">Electrical</SelectItem>
+                                        <SelectItem value="roofing">Roofing</SelectItem>
+                                        <SelectItem value="gutters">Gutters</SelectItem>
+                                        <SelectItem value="drywall">Drywall / Spackling</SelectItem>
+                                        <SelectItem value="custom-cabinetry">Custom Cabinetry</SelectItem>
+                                        <SelectItem value="flooring">Flooring</SelectItem>
+                                        <SelectItem value="painting">Painting</SelectItem>
+                                        <SelectItem value="landscaping">Landscaping</SelectItem>
+                                        <SelectItem value="christmas-light-hanging">Christmas Light Hanging</SelectItem>
+                                        <SelectItem value="snow-removal">Snow Removal</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </FormControl>
+                                  <FormMessage style={{ color: '#ffcccc' }} />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <FormField
+                            control={proposalForm.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel style={{ color: 'white' }}>Description *</FormLabel>
+                                <FormControl>
+                                  <Textarea
+                                    placeholder="Brief overview of the project"
+                                    {...field}
+                                    data-testid="textarea-proposal-description"
+                                    style={{ backgroundColor: 'white', color: '#000000' }}
+                                  />
+                                </FormControl>
+                                <FormMessage style={{ color: '#ffcccc' }} />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={proposalForm.control}
+                            name="scope"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel style={{ color: 'white' }}>Scope of Work *</FormLabel>
+                                <FormControl>
+                                  <Textarea
+                                    placeholder="Detailed scope of work including specific tasks, materials, and deliverables"
+                                    rows={4}
+                                    {...field}
+                                    data-testid="textarea-proposal-scope"
+                                    style={{ backgroundColor: 'white', color: '#000000' }}
+                                  />
+                                </FormControl>
+                                <FormMessage style={{ color: '#ffcccc' }} />
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={proposalForm.control}
+                              name="estimatedCost"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel style={{ color: 'white' }}>Estimated Cost ($) *</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="0.00"
+                                      {...field}
+                                      data-testid="input-estimated-cost"
+                                      style={{ backgroundColor: 'white', color: '#000000' }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage style={{ color: '#ffcccc' }} />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={proposalForm.control}
+                              name="estimatedDuration"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel style={{ color: 'white' }}>Estimated Duration *</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="2-3 days, 1 week, etc."
+                                      {...field}
+                                      data-testid="input-estimated-duration"
+                                      style={{ backgroundColor: 'white', color: '#000000' }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage style={{ color: '#ffcccc' }} />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <FormField
+                            control={proposalForm.control}
+                            name="materials"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel style={{ color: 'white' }}>Materials (comma-separated)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Pipes, fittings, sealant, labor"
+                                    {...field}
+                                    data-testid="input-materials"
+                                    style={{ backgroundColor: 'white', color: '#000000' }}
+                                  />
+                                </FormControl>
+                                <FormMessage style={{ color: '#ffcccc' }} />
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={proposalForm.control}
+                              name="warrantyPeriod"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel style={{ color: 'white' }}>Warranty Period</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="1 year, 6 months, etc."
+                                      {...field}
+                                      value={field.value || ""}
+                                      data-testid="input-warranty-period"
+                                      style={{ backgroundColor: 'white', color: '#000000' }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage style={{ color: '#ffcccc' }} />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={proposalForm.control}
+                              name="validUntil"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel style={{ color: 'white' }}>Valid Until *</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="date"
+                                      {...field}
+                                      data-testid="input-valid-until"
+                                      style={{ backgroundColor: 'white', color: '#000000' }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage style={{ color: '#ffcccc' }} />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <FormField
+                            control={proposalForm.control}
+                            name="customerNotes"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel style={{ color: 'white' }}>Customer Notes</FormLabel>
+                                <FormControl>
+                                  <Textarea
+                                    placeholder="Notes visible to the customer about this job"
+                                    {...field}
+                                    value={field.value || ""}
+                                    data-testid="textarea-customer-notes"
+                                    style={{ backgroundColor: 'white', color: '#000000' }}
+                                  />
+                                </FormControl>
+                                <FormMessage style={{ color: '#ffcccc' }} />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={proposalForm.control}
+                            name="internalNotes"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel style={{ color: 'white' }}>Internal Notes</FormLabel>
+                                <FormControl>
+                                  <Textarea
+                                    placeholder="Private notes for internal use only"
+                                    {...field}
+                                    value={field.value || ""}
+                                    data-testid="textarea-internal-notes"
+                                    style={{ backgroundColor: 'white', color: '#000000' }}
+                                  />
+                                </FormControl>
+                                <FormMessage style={{ color: '#ffcccc' }} />
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="flex justify-end space-x-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setIsProposalDialogOpen(false)}
+                              data-testid="button-cancel-proposal"
+                              style={{ backgroundColor: 'white', color: '#000000' }}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              type="submit"
+                              disabled={createProposalMutation.isPending}
+                              data-testid="button-submit-proposal"
+                              style={{ backgroundColor: '#1560a2', color: 'white' }}
+                              className="hover:opacity-90"
+                            >
+                              {createProposalMutation.isPending ? "Creating..." : "Create Proposal"}
+                            </Button>
+                          </div>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </CardHeader>
               <CardContent className="p-0 flex flex-col h-[500px]">
                 {/* Messages */}
