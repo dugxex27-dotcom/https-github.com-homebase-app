@@ -379,10 +379,16 @@ export default function ContractorProfile() {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      console.log('[DEBUG] Starting profile update mutation');
+      console.log('[DEBUG] User companyId:', typedUser?.companyId);
+      console.log('[DEBUG] Has businessLogo:', !!data.businessLogo);
+      console.log('[DEBUG] Project photos count:', data.projectPhotos?.length || 0);
+      
       // Separate contractor data from company data
       const { businessLogo, projectPhotos, ...contractorData } = data;
       
       // Update contractor profile (without businessLogo and projectPhotos)
+      console.log('[DEBUG] Updating contractor profile...');
       const profileResponse = await fetch('/api/contractor/profile', {
         method: 'PUT',
         body: JSON.stringify(contractorData),
@@ -391,11 +397,15 @@ export default function ContractorProfile() {
         },
       });
       if (!profileResponse.ok) {
-        throw new Error('Failed to update profile');
+        const errorText = await profileResponse.text();
+        console.error('[DEBUG] Profile update failed:', profileResponse.status, errorText);
+        throw new Error(`Failed to update profile: ${errorText}`);
       }
+      console.log('[DEBUG] Profile updated successfully');
       
       // Update company with businessLogo and projectPhotos if user has a company
       if (typedUser?.companyId) {
+        console.log('[DEBUG] Updating company images for companyId:', typedUser.companyId);
         const companyResponse = await fetch(`/api/companies/${typedUser.companyId}`, {
           method: 'PUT',
           body: JSON.stringify({ businessLogo, projectPhotos }),
@@ -404,8 +414,13 @@ export default function ContractorProfile() {
           },
         });
         if (!companyResponse.ok) {
-          throw new Error('Failed to update company images');
+          const errorText = await companyResponse.text();
+          console.error('[DEBUG] Company update failed:', companyResponse.status, errorText);
+          throw new Error(`Failed to update company images: ${errorText}`);
         }
+        console.log('[DEBUG] Company images updated successfully');
+      } else {
+        console.warn('[DEBUG] No companyId found - skipping company image update');
       }
       
       // Save licenses - first get existing licenses to determine creates vs updates
@@ -448,9 +463,10 @@ export default function ContractorProfile() {
       }
     },
     onError: (error) => {
+      console.error('Profile update error:', error);
       toast({
         title: "Update Failed",
-        description: "Failed to update profile. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update profile. Please try again.",
         variant: "destructive",
       });
     },
