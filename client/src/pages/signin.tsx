@@ -188,7 +188,7 @@ export default function SignIn() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = '/auth/google';
+    window.location.href = '/api/login';
   };
 
   const handleDemoLogin = async () => {

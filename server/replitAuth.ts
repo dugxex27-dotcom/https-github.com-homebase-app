@@ -6,7 +6,6 @@ import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
-import MemoryStore from "memorystore";
 import { storage } from "./storage";
 
 // Only require REPLIT_DOMAINS in production
@@ -26,21 +25,22 @@ const getOidcConfig = memoize(
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  
-  // Use memory store for development since we don't have PostgreSQL configured
-  const memoryStore = MemoryStore(session);
-  const sessionStore = new memoryStore({
-    checkPeriod: 86400000, // prune expired entries every 24h
+  const pgStore = connectPg(session);
+  const sessionStore = new pgStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: false,
+    ttl: sessionTtl,
+    tableName: "sessions",
   });
   
   return session({
-    secret: process.env.SESSION_SECRET || 'dev-secret-key',
+    secret: process.env.SESSION_SECRET!,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Set to false for development
+      secure: true,
       maxAge: sessionTtl,
     },
   });
@@ -56,22 +56,33 @@ function updateUserSession(
   user.expires_at = user.claims?.exp;
 }
 
-async function upsertUser(
-  claims: any,
-) {
-  // Check if user already exists to preserve their data
+async function upsertUser(claims: any) {
+  // Check if user already exists to preserve existing data
   const existingUser = await storage.getUser(claims["sub"]);
   
-  // Preserve existing role, zipCode, and other data if user exists
-  await storage.upsertUser({
+  const userData: any = {
     id: claims["sub"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
-    role: existingUser?.role || (global as any).pendingUserRole || 'homeowner',
-    zipCode: existingUser?.zipCode || null,
-  });
+    email: claims["email"] || existingUser?.email,
+    firstName: claims["first_name"] || existingUser?.firstName,
+    lastName: claims["last_name"] || existingUser?.lastName,
+    profileImageUrl: claims["profile_image_url"] || existingUser?.profileImageUrl,
+  };
+
+  // Preserve existing fields that aren't in OAuth claims
+  if (existingUser) {
+    userData.role = existingUser.role;
+    userData.zipCode = existingUser.zipCode;
+    userData.companyId = existingUser.companyId;
+    userData.companyRole = existingUser.companyRole;
+    userData.passwordHash = existingUser.passwordHash;
+    userData.isPremium = existingUser.isPremium;
+  } else {
+    // New user defaults
+    userData.role = (global as any).pendingUserRole || 'homeowner';
+    userData.zipCode = null;
+  }
+
+  await storage.upsertUser(userData);
   
   // Clear the pending role
   delete (global as any).pendingUserRole;

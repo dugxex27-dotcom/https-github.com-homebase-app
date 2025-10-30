@@ -99,34 +99,25 @@ export async function setupGoogleAuth(app: Express) {
     passport.authenticate('google', { failureRedirect: '/signin' }),
     async (req: any, res) => {
       try {
-        console.log('[Google OAuth] Callback triggered');
         const user = req.user;
 
         if (!user) {
-          console.log('[Google OAuth] No user found in req.user');
           return res.redirect('/signin');
         }
-
-        console.log('[Google OAuth] User authenticated:', { id: user.id, email: user.email, role: user.role, zipCode: user.zipCode });
 
         // Create session in the same format as email/password login
         req.session.isAuthenticated = true;
         req.session.user = user;
 
-        console.log('[Google OAuth] Session data set, saving session...');
-
         // Save session before redirecting
         req.session.save((saveErr: any) => {
           if (saveErr) {
-            console.error('[Google OAuth] Session save error:', saveErr);
+            console.error('Session save error:', saveErr);
             return res.redirect('/signin');
           }
 
-          console.log('[Google OAuth] Session saved successfully');
-
           // Check if user needs to complete profile (add zip code or role)
           if (!user.zipCode) {
-            console.log('[Google OAuth] Redirecting to complete-profile (missing zipCode)');
             return res.redirect('/complete-profile');
           }
 
@@ -135,11 +126,10 @@ export async function setupGoogleAuth(app: Express) {
             user.role === 'contractor'
               ? '/contractor-dashboard'
               : '/';
-          console.log('[Google OAuth] Redirecting to:', redirectPath);
           res.redirect(redirectPath);
         });
       } catch (error) {
-        console.error('[Google OAuth] Callback error:', error);
+        console.error('Google OAuth callback error:', error);
         res.redirect('/signin');
       }
     }
