@@ -142,6 +142,7 @@ export async function setupAuth(app: Express) {
     }
     passport.authenticate(`replitauth:${req.hostname}`, async (err: any, user: any) => {
       if (err || !user) {
+        console.error("OAuth authentication error:", err);
         return res.redirect("/signin");
       }
       
@@ -149,35 +150,60 @@ export async function setupAuth(app: Express) {
         // Get the full user record from storage
         const userId = user.claims?.sub;
         if (!userId) {
+          console.error("No userId in OAuth claims");
           return res.redirect("/signin");
         }
         
         const fullUser = await storage.getUser(userId);
         if (!fullUser) {
+          console.error("User not found in database:", userId);
           return res.redirect("/signin");
         }
         
-        // Create session in the same format as email/password login
-        (req.session as any).isAuthenticated = true;
-        (req.session as any).user = fullUser;
+        console.log("OAuth callback: User authenticated:", fullUser.email);
         
-        // Save session before redirecting
-        req.session.save((saveErr) => {
-          if (saveErr) {
-            console.error("Session save error:", saveErr);
+        // Regenerate session to prevent fixation attacks
+        req.session.regenerate((regenerateErr) => {
+          if (regenerateErr) {
+            console.error("Session regenerate error:", regenerateErr);
             return res.redirect("/signin");
           }
           
-          // Check if user needs to complete profile (add zip code)
-          if (!fullUser.zipCode) {
-            return res.redirect("/complete-profile");
-          }
-          
-          // Redirect to appropriate dashboard based on role
-          const redirectPath = fullUser.role === 'contractor' 
-            ? '/contractor-dashboard' 
-            : '/';
-          res.redirect(redirectPath);
+          // Establish Passport session with req.login()
+          req.login(fullUser, (loginErr) => {
+            if (loginErr) {
+              console.error("Passport login error:", loginErr);
+              return res.redirect("/signin");
+            }
+            
+            // Set session data in the format expected by the app
+            (req.session as any).isAuthenticated = true;
+            (req.session as any).user = fullUser;
+            
+            console.log("OAuth callback: Session established for", fullUser.email);
+            
+            // Save session to store before redirecting
+            req.session.save((saveErr) => {
+              if (saveErr) {
+                console.error("Session save error:", saveErr);
+                return res.redirect("/signin");
+              }
+              
+              console.log("OAuth callback: Session saved successfully");
+              
+              // Check if user needs to complete profile (add zip code)
+              if (!fullUser.zipCode) {
+                return res.redirect("/complete-profile");
+              }
+              
+              // Redirect to appropriate dashboard based on role
+              const redirectPath = fullUser.role === 'contractor' 
+                ? '/contractor-dashboard' 
+                : '/';
+              console.log("OAuth callback: Redirecting to", redirectPath);
+              res.redirect(redirectPath);
+            });
+          });
         });
       } catch (error) {
         console.error("OAuth callback error:", error);
