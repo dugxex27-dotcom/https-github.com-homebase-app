@@ -37,7 +37,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', async (req: any, res) => {
     try {
-      // Check for demo session first
+      // Check for session-based authentication (email/password login)
       if (req.session?.isAuthenticated && req.session?.user) {
         // Ensure isPremium is included in the response
         const user = req.session.user;
@@ -45,6 +45,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           user.isPremium = false; // Default for demo users
         }
         return res.json(user);
+      }
+
+      // Check for passport authentication (Google OAuth login)
+      if (req.user) {
+        const userId = (req.user as any).id || (req.user as any).claims?.sub;
+        if (userId) {
+          const fullUser = await storage.getUser(userId);
+          if (fullUser) {
+            // Sync to session for consistent access
+            req.session.isAuthenticated = true;
+            req.session.user = fullUser;
+            
+            // Ensure isPremium is included
+            if (!fullUser.hasOwnProperty('isPremium')) {
+              fullUser.isPremium = false;
+            }
+            return res.json(fullUser);
+          }
+        }
       }
 
       // No authentication found
