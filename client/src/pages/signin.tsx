@@ -360,7 +360,6 @@ export default function SignIn() {
                           <Input
                             type="email"
                             placeholder="Enter your email"
-                            defaultValue=""
                             onChange={onChange}
                             onBlur={onBlur}
                             name={name}
