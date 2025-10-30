@@ -14,8 +14,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MessageCircle, Send, User, Calendar, Plus, Users } from "lucide-react";
-import type { User as UserType, Conversation, Message, Contractor } from "@shared/schema";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MessageCircle, Send, User, Calendar, Plus, Users, FileText, DollarSign, Clock } from "lucide-react";
+import type { User as UserType, Conversation, Message, Contractor, Proposal } from "@shared/schema";
 
 interface ConversationWithDetails extends Conversation {
   otherPartyName: string;
@@ -44,6 +45,12 @@ export default function Messages() {
   // Fetch contractors for homeowners to compose new messages
   const { data: contractors = [] } = useQuery<Contractor[]>({
     queryKey: ['/api/contractors'],
+    enabled: !!typedUser && typedUser.role === 'homeowner'
+  });
+
+  // Fetch proposals for homeowners
+  const { data: proposals = [], isLoading: proposalsLoading } = useQuery<Proposal[]>({
+    queryKey: ['/api/proposals'],
     enabled: !!typedUser && typedUser.role === 'homeowner'
   });
 
@@ -178,66 +185,177 @@ export default function Messages() {
       <div className="container mx-auto p-6">
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
-        {/* Conversations List */}
+        {/* Conversations and Proposals List */}
         <Card className="lg:col-span-1 bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700" style={{ backgroundColor: '#f2f2f2' }}>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
-                Conversations
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ScrollArea className="h-[500px]">
-              {conversationsLoading ? (
-                <div className="p-4 text-center text-gray-500">Loading conversations...</div>
-              ) : conversations.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">
-                  No conversations yet. Contact a {typedUser.role === 'homeowner' ? 'contractor' : 'homeowner'} to start messaging.
-                </div>
-              ) : (
-                conversations.map((conversation) => (
-                  <div key={conversation.id}>
-                    <div
-                      className={`p-4 cursor-pointer hover:bg-gray-50 ${
-                        selectedConversationId === conversation.id 
-                          ? typedUser.role === 'contractor' 
-                            ? 'bg-blue-50 border-r-2 border-blue-800' 
-                            : 'bg-blue-50 border-r-2 border-blue-500'
-                          : ''
-                      }`}
-                      onClick={() => setSelectedConversationId(conversation.id)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3 flex-1">
-                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                            <User className="h-5 w-5 text-gray-500" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium text-gray-900">{conversation.otherPartyName}</h3>
-                            <p className="text-sm text-gray-600 truncate">{conversation.subject}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Calendar className="h-3 w-3 text-gray-400" />
-                              <span className="text-xs text-gray-400">
-                                {new Date(conversation.lastMessageAt || conversation.createdAt || new Date()).toLocaleDateString()}
-                              </span>
+          {typedUser.role === 'homeowner' ? (
+            <Tabs defaultValue="conversations" className="w-full">
+              <TabsList className="w-full" style={{ backgroundColor: '#e0e0e0' }}>
+                <TabsTrigger value="conversations" className="flex-1">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Messages
+                </TabsTrigger>
+                <TabsTrigger value="proposals" className="flex-1">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Proposals
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="conversations" className="mt-0">
+                <ScrollArea className="h-[550px]">
+                  {conversationsLoading ? (
+                    <div className="p-4 text-center text-gray-500">Loading conversations...</div>
+                  ) : conversations.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500">
+                      No conversations yet. Contact a contractor to start messaging.
+                    </div>
+                  ) : (
+                    conversations.map((conversation) => (
+                      <div key={conversation.id}>
+                        <div
+                          className={`p-4 cursor-pointer hover:bg-gray-50 ${
+                            selectedConversationId === conversation.id 
+                              ? 'bg-blue-50 border-r-2 border-blue-500'
+                              : ''
+                          }`}
+                          onClick={() => setSelectedConversationId(conversation.id)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3 flex-1">
+                              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                <User className="h-5 w-5 text-gray-500" />
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-medium text-gray-900">{conversation.otherPartyName}</h3>
+                                <p className="text-sm text-gray-600 truncate">{conversation.subject}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Calendar className="h-3 w-3 text-gray-400" />
+                                  <span className="text-xs text-gray-400">
+                                    {new Date(conversation.lastMessageAt || conversation.createdAt || new Date()).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
+                            {conversation.unreadCount > 0 && (
+                              <Badge variant="destructive" className="ml-2">
+                                {conversation.unreadCount}
+                              </Badge>
+                            )}
                           </div>
                         </div>
-                        {conversation.unreadCount > 0 && (
-                          <Badge variant="destructive" className="ml-2">
-                            {conversation.unreadCount}
-                          </Badge>
-                        )}
+                        <Separator />
                       </div>
+                    ))
+                  )}
+                </ScrollArea>
+              </TabsContent>
+
+              <TabsContent value="proposals" className="mt-0">
+                <ScrollArea className="h-[550px]">
+                  {proposalsLoading ? (
+                    <div className="p-4 text-center text-gray-500">Loading proposals...</div>
+                  ) : proposals.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500">
+                      No proposals yet. Contractors you've messaged can send you proposals.
                     </div>
-                    <Separator />
+                  ) : (
+                    proposals.map((proposal) => (
+                      <div key={proposal.id} className="p-4 border-b hover:bg-gray-50">
+                        <div className="mb-2">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-medium text-gray-900">{proposal.title}</h3>
+                            <Badge variant={
+                              proposal.status === 'sent' ? 'default' :
+                              proposal.status === 'accepted' ? 'default' :
+                              proposal.status === 'rejected' ? 'destructive' :
+                              'secondary'
+                            } style={
+                              proposal.status === 'accepted' ? { backgroundColor: '#10b981', color: 'white' } : {}
+                            }>
+                              {proposal.status}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">{proposal.description}</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mt-2">
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="h-3 w-3" />
+                            <span>${parseFloat(proposal.estimatedCost).toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{proposal.estimatedDuration}</span>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-400 mt-2">
+                          Valid until: {new Date(proposal.validUntil).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
+          ) : (
+            // Contractor view - just conversations
+            <>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5" />
+                    Conversations
                   </div>
-                ))
-              )}
-            </ScrollArea>
-          </CardContent>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <ScrollArea className="h-[500px]">
+                  {conversationsLoading ? (
+                    <div className="p-4 text-center text-gray-500">Loading conversations...</div>
+                  ) : conversations.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500">
+                      No conversations yet.
+                    </div>
+                  ) : (
+                    conversations.map((conversation) => (
+                      <div key={conversation.id}>
+                        <div
+                          className={`p-4 cursor-pointer hover:bg-gray-50 ${
+                            selectedConversationId === conversation.id 
+                              ? 'bg-blue-50 border-r-2 border-blue-800'
+                              : ''
+                          }`}
+                          onClick={() => setSelectedConversationId(conversation.id)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3 flex-1">
+                              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                <User className="h-5 w-5 text-gray-500" />
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-medium text-gray-900">{conversation.otherPartyName}</h3>
+                                <p className="text-sm text-gray-600 truncate">{conversation.subject}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Calendar className="h-3 w-3 text-gray-400" />
+                                  <span className="text-xs text-gray-400">
+                                    {new Date(conversation.lastMessageAt || conversation.createdAt || new Date()).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            {conversation.unreadCount > 0 && (
+                              <Badge variant="destructive" className="ml-2">
+                                {conversation.unreadCount}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <Separator />
+                      </div>
+                    ))
+                  )}
+                </ScrollArea>
+              </CardContent>
+            </>
+          )}
         </Card>
 
         {/* Messages Area */}
