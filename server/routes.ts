@@ -89,6 +89,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // TEMPORARY: Test login endpoint for debugging OAuth issues
+  app.post('/api/auth/test-login', async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ message: "Email required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Create session
+      req.session.user = user;
+      req.session.isAuthenticated = true;
+
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
+      console.log('🟢 Test login successful for:', user.email);
+      res.json({ success: true, user });
+    } catch (error) {
+      console.error('🔴 Test login failed:', error);
+      res.status(500).json({ message: "Test login failed" });
+    }
+  });
+
   // GET logout endpoint for direct navigation
   app.get('/api/logout', (req, res) => {
     req.session.destroy((err) => {
