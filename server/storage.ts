@@ -3339,65 +3339,83 @@ class DbStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    
-    // Check if user exists
-    const existingUser = userData.id ? await this.getUser(userData.id) : null;
-    
-    if (existingUser) {
-      // Update existing user, preserving fields not provided in userData
-      const updatedData = {
-        id: userData.id!,
-        email: userData.email ?? existingUser.email,
-        firstName: userData.firstName ?? existingUser.firstName,
-        lastName: userData.lastName ?? existingUser.lastName,
-        profileImageUrl: userData.profileImageUrl ?? existingUser.profileImageUrl,
-        role: userData.role ?? existingUser.role,
-        passwordHash: userData.passwordHash ?? existingUser.passwordHash,
-        zipCode: userData.zipCode ?? existingUser.zipCode,
-        referralCode: userData.referralCode ?? existingUser.referralCode,
-        referredBy: userData.referredBy ?? existingUser.referredBy,
-        referralCount: userData.referralCount ?? existingUser.referralCount,
-        subscriptionPlanId: userData.subscriptionPlanId ?? existingUser.subscriptionPlanId,
-        subscriptionStatus: userData.subscriptionStatus ?? existingUser.subscriptionStatus,
-        maxHousesAllowed: userData.maxHousesAllowed ?? existingUser.maxHousesAllowed,
-        isPremium: userData.isPremium ?? existingUser.isPremium,
-        stripeCustomerId: userData.stripeCustomerId ?? existingUser.stripeCustomerId,
-        stripeSubscriptionId: userData.stripeSubscriptionId ?? existingUser.stripeSubscriptionId,
-        stripePriceId: userData.stripePriceId ?? existingUser.stripePriceId,
-        subscriptionStartDate: userData.subscriptionStartDate ?? existingUser.subscriptionStartDate,
-        subscriptionEndDate: userData.subscriptionEndDate ?? existingUser.subscriptionEndDate,
-        updatedAt: new Date(),
-      };
+    try {
+      console.log('🟢 upsertUser called with:', { id: userData.id, email: userData.email, role: userData.role });
       
-      await db.update(users).set(updatedData).where(eq(users.id, userData.id!));
-      return (await this.getUser(userData.id!))!;
-    } else {
-      // Insert new user
-      const newUser = {
-        id: userData.id,
-        email: userData.email ?? null,
-        firstName: userData.firstName ?? null,
-        lastName: userData.lastName ?? null,
-        profileImageUrl: userData.profileImageUrl ?? null,
-        role: userData.role ?? 'homeowner',
-        passwordHash: userData.passwordHash ?? null,
-        zipCode: userData.zipCode ?? null,
-        referralCode: userData.referralCode ?? null,
-        referredBy: userData.referredBy ?? null,
-        referralCount: userData.referralCount ?? 0,
-        subscriptionPlanId: userData.subscriptionPlanId ?? null,
-        subscriptionStatus: userData.subscriptionStatus ?? 'inactive',
-        maxHousesAllowed: userData.maxHousesAllowed ?? 2,
-        isPremium: userData.isPremium ?? false,
-        stripeCustomerId: userData.stripeCustomerId ?? null,
-        stripeSubscriptionId: userData.stripeSubscriptionId ?? null,
-        stripePriceId: userData.stripePriceId ?? null,
-        subscriptionStartDate: userData.subscriptionStartDate ?? null,
-        subscriptionEndDate: userData.subscriptionEndDate ?? null,
-      };
+      // Check if user exists
+      const existingUser = userData.id ? await this.getUser(userData.id) : null;
+      console.log('🟢 Existing user check:', existingUser ? 'FOUND' : 'NOT FOUND');
       
-      await db.insert(users).values(newUser);
-      return (await this.getUser(newUser.id!))!;
+      if (existingUser) {
+        // Update existing user, preserving fields not provided in userData
+        const updatedData = {
+          id: userData.id!,
+          email: userData.email ?? existingUser.email,
+          firstName: userData.firstName ?? existingUser.firstName,
+          lastName: userData.lastName ?? existingUser.lastName,
+          profileImageUrl: userData.profileImageUrl ?? existingUser.profileImageUrl,
+          role: userData.role ?? existingUser.role,
+          passwordHash: userData.passwordHash ?? existingUser.passwordHash,
+          zipCode: userData.zipCode ?? existingUser.zipCode,
+          referralCode: userData.referralCode ?? existingUser.referralCode,
+          referredBy: userData.referredBy ?? existingUser.referredBy,
+          referralCount: userData.referralCount ?? existingUser.referralCount,
+          subscriptionPlanId: userData.subscriptionPlanId ?? existingUser.subscriptionPlanId,
+          subscriptionStatus: userData.subscriptionStatus ?? existingUser.subscriptionStatus,
+          maxHousesAllowed: userData.maxHousesAllowed ?? existingUser.maxHousesAllowed,
+          isPremium: userData.isPremium ?? existingUser.isPremium,
+          stripeCustomerId: userData.stripeCustomerId ?? existingUser.stripeCustomerId,
+          stripeSubscriptionId: userData.stripeSubscriptionId ?? existingUser.stripeSubscriptionId,
+          stripePriceId: userData.stripePriceId ?? existingUser.stripePriceId,
+          subscriptionStartDate: userData.subscriptionStartDate ?? existingUser.subscriptionStartDate,
+          subscriptionEndDate: userData.subscriptionEndDate ?? existingUser.subscriptionEndDate,
+          updatedAt: new Date(),
+        };
+        
+        console.log('🟢 Updating existing user in database...');
+        await db.update(users).set(updatedData).where(eq(users.id, userData.id!));
+        const updatedUser = await this.getUser(userData.id!);
+        console.log('🟢 User updated successfully:', updatedUser?.id);
+        return updatedUser!;
+      } else {
+        // Insert new user
+        const newUser = {
+          id: userData.id,
+          email: userData.email ?? null,
+          firstName: userData.firstName ?? null,
+          lastName: userData.lastName ?? null,
+          profileImageUrl: userData.profileImageUrl ?? null,
+          role: userData.role ?? 'homeowner',
+          passwordHash: userData.passwordHash ?? null,
+          zipCode: userData.zipCode ?? null,
+          referralCode: userData.referralCode ?? null,
+          referredBy: userData.referredBy ?? null,
+          referralCount: userData.referralCount ?? 0,
+          subscriptionPlanId: userData.subscriptionPlanId ?? null,
+          subscriptionStatus: userData.subscriptionStatus ?? 'inactive',
+          maxHousesAllowed: userData.maxHousesAllowed ?? 2,
+          isPremium: userData.isPremium ?? false,
+          stripeCustomerId: userData.stripeCustomerId ?? null,
+          stripeSubscriptionId: userData.stripeSubscriptionId ?? null,
+          stripePriceId: userData.stripePriceId ?? null,
+          subscriptionStartDate: userData.subscriptionStartDate ?? null,
+          subscriptionEndDate: userData.subscriptionEndDate ?? null,
+        };
+        
+        console.log('🟢 Inserting new user into database:', newUser.id);
+        await db.insert(users).values(newUser);
+        const insertedUser = await this.getUser(newUser.id!);
+        console.log('🟢 User inserted successfully:', insertedUser?.id);
+        return insertedUser!;
+      }
+    } catch (error) {
+      console.error('🔴 upsertUser ERROR:', error);
+      console.error('🔴 Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        userData: { id: userData.id, email: userData.email, role: userData.role }
+      });
+      throw error;
     }
   }
 
