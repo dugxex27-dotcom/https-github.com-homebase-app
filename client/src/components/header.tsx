@@ -99,6 +99,12 @@ export default function Header() {
                 }`}>
                   Dashboard
                 </Link>
+                <Link href="/manage-team" className={`text-gray-700 hover:text-primary transition-colors ${
+                  location === '/manage-team' ? 'text-primary font-medium' : ''
+                }`} data-testid="link-manage-team">
+                  <Users className="w-4 h-4 inline mr-1" />
+                  Manage Team
+                </Link>
                 <Link href="/messages" className={`text-gray-700 hover:text-primary transition-colors ${
                   location === '/messages' ? 'text-primary font-medium' : ''
                 }`}>

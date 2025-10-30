@@ -22,6 +22,7 @@ import HouseTransferAccept from "./pages/house-transfer-accept";
 import Achievements from "./pages/achievements";
 import AdminDashboard from "./pages/admin";
 import CompleteProfile from "./pages/complete-profile";
+import ManageTeam from "./pages/manage-team";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -93,6 +94,7 @@ function Router() {
           <Route path="/contractor-dashboard" component={ContractorDashboard} />
           <Route path="/contractor-profile" component={ContractorProfile} />
           <Route path="/service-records" component={ServiceRecords} />
+          <Route path="/manage-team" component={ManageTeam} />
         </>
       )}
       
