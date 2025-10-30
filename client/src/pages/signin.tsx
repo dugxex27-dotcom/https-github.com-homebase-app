@@ -359,7 +359,10 @@ export default function SignIn() {
                             type="text"
                             placeholder="Enter your email"
                             value={field.value}
-                            onChange={field.onChange}
+                            onChange={(e) => {
+                              console.log("Email onChange:", e.target.value);
+                              field.onChange(e);
+                            }}
                             onBlur={field.onBlur}
                             name={field.name}
                             ref={field.ref}
