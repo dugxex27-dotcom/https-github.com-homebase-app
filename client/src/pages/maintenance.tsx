@@ -80,9 +80,9 @@ const customTaskFormSchema = insertCustomMaintenanceTaskSchema.extend({
 const applianceFormSchema = insertHomeApplianceSchema.extend({
   homeownerId: z.string().min(1, "Homeowner ID is required"),
   houseId: z.string().min(1, "House ID is required"),
-  name: z.string().min(1, "Appliance name is required"),
-  make: z.string().min(1, "Make is required"),
-  model: z.string().min(1, "Model is required"),
+  name: z.string().optional(),
+  make: z.string().optional(),
+  model: z.string().optional(),
 });
 
 // Form schema for appliance manual creation/editing
