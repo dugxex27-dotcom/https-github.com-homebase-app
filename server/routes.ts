@@ -896,6 +896,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/companies/:id/employees/:userId/permissions", isAuthenticated, async (req: any, res) => {
+    try {
+      const ownerId = req.session.user.id;
+      const company = await storage.getCompany(req.params.id);
+
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+
+      // Only company owner can change permissions
+      if (company.ownerId !== ownerId) {
+        return res.status(403).json({ message: "Only company owner can change permissions" });
+      }
+
+      // Cannot change owner's permissions
+      if (req.params.userId === ownerId) {
+        return res.status(400).json({ message: "Cannot change owner permissions" });
+      }
+
+      const employee = await storage.getUser(req.params.userId);
+      if (!employee) {
+        return res.status(404).json({ message: "Employee not found" });
+      }
+
+      if (employee.companyId !== req.params.id) {
+        return res.status(400).json({ message: "Employee does not belong to this company" });
+      }
+
+      // Update employee permissions
+      const updatedEmployee = await storage.upsertUser({
+        ...employee,
+        canRespondToProposals: req.body.canRespondToProposals
+      });
+
+      res.json(updatedEmployee);
+    } catch (error) {
+      console.error("Error updating employee permissions:", error);
+      res.status(500).json({ message: "Failed to update permissions" });
+    }
+  });
+
   app.post("/api/companies/:id/invite-codes", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.user.id;
@@ -924,6 +965,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error creating invite code:", error);
       res.status(500).json({ message: "Failed to create invite code" });
+    }
+  });
+
+  app.get("/api/companies/:id/invite-codes", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user.id;
+      const company = await storage.getCompany(req.params.id);
+
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+
+      // Only company owner can view invite codes
+      if (company.ownerId !== userId) {
+        return res.status(403).json({ message: "Only company owner can view invite codes" });
+      }
+
+      const inviteCodes = await storage.getCompanyInviteCodes(req.params.id);
+      res.json(inviteCodes);
+    } catch (error) {
+      console.error("Error fetching invite codes:", error);
+      res.status(500).json({ message: "Failed to fetch invite codes" });
     }
   });
 

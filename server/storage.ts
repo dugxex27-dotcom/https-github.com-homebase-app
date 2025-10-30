@@ -38,6 +38,7 @@ export interface IStorage {
   createCompanyInviteCode(inviteCode: InsertCompanyInviteCode): Promise<CompanyInviteCode>;
   getCompanyInviteCode(id: string): Promise<CompanyInviteCode | undefined>;
   getCompanyInviteCodeByCode(code: string): Promise<CompanyInviteCode | undefined>;
+  getCompanyInviteCodes(companyId: string): Promise<CompanyInviteCode[]>;
   updateCompanyInviteCode(id: string, inviteCode: Partial<InsertCompanyInviteCode>): Promise<CompanyInviteCode | undefined>;
   
   // Product methods
@@ -758,6 +759,16 @@ export class MemStorage implements IStorage {
       }
     }
     return undefined;
+  }
+
+  async getCompanyInviteCodes(companyId: string): Promise<CompanyInviteCode[]> {
+    const codes: CompanyInviteCode[] = [];
+    for (const inviteCode of this.companyInviteCodes.values()) {
+      if (inviteCode.companyId === companyId) {
+        codes.push(inviteCode);
+      }
+    }
+    return codes;
   }
 
   async updateCompanyInviteCode(id: string, inviteCodeData: Partial<InsertCompanyInviteCode>): Promise<CompanyInviteCode | undefined> {
@@ -3161,6 +3172,7 @@ class DbStorage implements IStorage {
     this.createCompanyInviteCode = this.memStorage.createCompanyInviteCode.bind(this.memStorage);
     this.getCompanyInviteCode = this.memStorage.getCompanyInviteCode.bind(this.memStorage);
     this.getCompanyInviteCodeByCode = this.memStorage.getCompanyInviteCodeByCode.bind(this.memStorage);
+    this.getCompanyInviteCodes = this.memStorage.getCompanyInviteCodes.bind(this.memStorage);
     this.updateCompanyInviteCode = this.memStorage.updateCompanyInviteCode.bind(this.memStorage);
     this.getProducts = this.memStorage.getProducts.bind(this.memStorage);
     this.getProduct = this.memStorage.getProduct.bind(this.memStorage);
