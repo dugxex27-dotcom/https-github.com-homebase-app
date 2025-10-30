@@ -260,6 +260,26 @@ export default function ServiceRecords() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.serviceType) {
+      toast({
+        title: "Service Type Required",
+        description: "Please select a service type.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!formData.serviceDate) {
+      toast({
+        title: "Service Date Required",
+        description: "Please select a service date.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     saveRecordMutation.mutate(formData);
   };
 
@@ -335,14 +355,14 @@ export default function ServiceRecords() {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="customerName" style={{ color: 'white' }}>Customer Name *</Label>
+                        <Label htmlFor="customerName" style={{ color: 'white' }}>Customer Name</Label>
                         <Input
                           id="customerName"
                           value={formData.customerName}
                           onChange={(e) => handleInputChange('customerName', e.target.value)}
                           placeholder="John Smith"
-                          required
                           style={{ backgroundColor: '#ffffff' }}
+                          data-testid="input-customer-name"
                         />
                       </div>
                       <div>
@@ -354,6 +374,7 @@ export default function ServiceRecords() {
                           onChange={(e) => handleInputChange('customerPhone', e.target.value)}
                           placeholder="(555) 123-4567"
                           style={{ backgroundColor: '#ffffff' }}
+                          data-testid="input-customer-phone"
                         />
                       </div>
                     </div>
@@ -368,17 +389,18 @@ export default function ServiceRecords() {
                           onChange={(e) => handleInputChange('customerEmail', e.target.value)}
                           placeholder="john@example.com"
                           style={{ backgroundColor: '#ffffff' }}
+                          data-testid="input-customer-email"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="customerAddress" style={{ color: 'white' }}>Service Address *</Label>
+                        <Label htmlFor="customerAddress" style={{ color: 'white' }}>Service Address</Label>
                         <Input
                           id="customerAddress"
                           value={formData.customerAddress}
                           onChange={(e) => handleInputChange('customerAddress', e.target.value)}
                           placeholder="123 Main Street, City, State"
-                          required
                           style={{ backgroundColor: '#ffffff' }}
+                          data-testid="input-customer-address"
                         />
                       </div>
                     </div>
@@ -398,7 +420,7 @@ export default function ServiceRecords() {
                       <div>
                         <Label htmlFor="serviceType" style={{ color: 'white' }}>Service Type *</Label>
                         <Select value={formData.serviceType} onValueChange={(value) => handleInputChange('serviceType', value)}>
-                          <SelectTrigger style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:bg-[#afd6f9] hover:text-black transition-colors">
+                          <SelectTrigger style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:bg-[#afd6f9] hover:text-black transition-colors" data-testid="select-service-type">
                             <SelectValue placeholder="Select service type" />
                           </SelectTrigger>
                           <SelectContent>
@@ -409,9 +431,9 @@ export default function ServiceRecords() {
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="status" style={{ color: 'white' }}>Status *</Label>
+                        <Label htmlFor="status" style={{ color: 'white' }}>Status</Label>
                         <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value as any)}>
-                          <SelectTrigger style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:bg-[#afd6f9] hover:text-black transition-colors">
+                          <SelectTrigger style={{ backgroundColor: '#1560a2', color: 'white' }} className="hover:bg-[#afd6f9] hover:text-black transition-colors" data-testid="select-status">
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                           <SelectContent>
@@ -424,15 +446,15 @@ export default function ServiceRecords() {
                     </div>
 
                     <div>
-                      <Label htmlFor="serviceDescription" style={{ color: 'white' }}>Service Description *</Label>
+                      <Label htmlFor="serviceDescription" style={{ color: 'white' }}>Service Description</Label>
                       <Textarea
                         id="serviceDescription"
                         value={formData.serviceDescription}
                         onChange={(e) => handleInputChange('serviceDescription', e.target.value)}
                         placeholder="Detailed description of the service performed..."
                         rows={3}
-                        required
                         style={{ backgroundColor: '#ffffff' }}
+                        data-testid="input-service-description"
                       />
                     </div>
 
@@ -458,8 +480,8 @@ export default function ServiceRecords() {
                           type="date"
                           value={formData.serviceDate}
                           onChange={(e) => handleInputChange('serviceDate', e.target.value)}
-                          required
                           style={{ backgroundColor: '#ffffff' }}
+                          data-testid="input-service-date"
                         />
                       </div>
                       <div>
@@ -470,6 +492,7 @@ export default function ServiceRecords() {
                           onChange={(e) => handleInputChange('duration', e.target.value)}
                           placeholder="2 hours"
                           style={{ backgroundColor: '#ffffff' }}
+                          data-testid="input-duration"
                         />
                       </div>
                       <div>
@@ -486,6 +509,7 @@ export default function ServiceRecords() {
                             step="0.01"
                             min="0"
                             style={{ backgroundColor: '#ffffff' }}
+                            data-testid="input-cost"
                           />
                         </div>
                       </div>
