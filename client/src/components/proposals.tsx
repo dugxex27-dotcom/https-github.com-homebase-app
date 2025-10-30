@@ -67,10 +67,24 @@ export function Proposals({ contractorId }: ProposalsProps) {
 
   const { data: proposals = [], isLoading } = useQuery<Proposal[]>({
     queryKey: ["/api/proposals", contractorId],
+    queryFn: async () => {
+      const response = await fetch(`/api/proposals?contractorId=${contractorId}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch proposals');
+      return response.json();
+    }
   });
 
   const { data: contactedHomeowners = [], isLoading: isLoadingHomeowners } = useQuery<ContactedHomeowner[]>({
     queryKey: ["/api/contractors", contractorId, "contacted-homeowners"],
+    queryFn: async () => {
+      const response = await fetch(`/api/contractors/${contractorId}/contacted-homeowners`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch contacted homeowners');
+      return response.json();
+    }
   });
 
   const createMutation = useMutation({
