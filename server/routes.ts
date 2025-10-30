@@ -31,6 +31,12 @@ const authLimiter = rateLimit({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // IMMEDIATE TEST: Simple test endpoint to verify routing works
+  app.post('/api/test-simple', (req, res) => {
+    console.error("===== SIMPLE TEST ENDPOINT CALLED =====");
+    res.json({ success: true, message: "Test endpoint works!" });
+  });
+
   // Set up Google OAuth authentication (replaces Replit Auth)
   await setupGoogleAuth(app);
 
