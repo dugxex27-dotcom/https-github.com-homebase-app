@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SiGoogle } from "react-icons/si";
+import { Eye, EyeOff } from "lucide-react";
 import logoImage from '@assets/homebase-logo_1756861910640.png';
 
 const loginSchema = z.object({
@@ -74,6 +75,9 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function SignIn() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -327,13 +331,23 @@ export default function SignIn() {
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="Enter your password"
-                            {...field}
-                            data-testid="input-password"
-                            className="text-white placeholder:text-white"
-                          />
+                          <div className="relative">
+                            <Input
+                              type={showLoginPassword ? "text" : "password"}
+                              placeholder="Enter your password"
+                              {...field}
+                              data-testid="input-password"
+                              className="text-white placeholder:text-white pr-10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowLoginPassword(!showLoginPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                              data-testid="button-toggle-login-password"
+                            >
+                              {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -418,13 +432,24 @@ export default function SignIn() {
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="Create a password (min 6 characters)"
-                            {...field}
-                            data-testid="input-password"
-                            style={{ color: '#ffffff' }}
-                          />
+                          <div className="relative">
+                            <Input
+                              type={showRegisterPassword ? "text" : "password"}
+                              placeholder="Create a password (min 6 characters)"
+                              {...field}
+                              data-testid="input-password"
+                              style={{ color: '#ffffff' }}
+                              className="pr-10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                              data-testid="button-toggle-register-password"
+                            >
+                              {showRegisterPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -438,13 +463,24 @@ export default function SignIn() {
                       <FormItem>
                         <FormLabel>Confirm Password</FormLabel>
                         <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="Confirm your password"
-                            {...field}
-                            data-testid="input-confirm-password"
-                            style={{ color: '#ffffff' }}
-                          />
+                          <div className="relative">
+                            <Input
+                              type={showConfirmPassword ? "text" : "password"}
+                              placeholder="Confirm your password"
+                              {...field}
+                              data-testid="input-confirm-password"
+                              style={{ color: '#ffffff' }}
+                              className="pr-10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                              data-testid="button-toggle-confirm-password"
+                            >
+                              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
