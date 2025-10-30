@@ -353,17 +353,15 @@ export default function SignIn() {
                   <FormField
                     control={registerForm.control}
                     name="email"
-                    render={({ field: { onChange, onBlur, name, ref } }) => (
+                    render={({ field }) => (
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
                           <Input
                             type="email"
                             placeholder="Enter your email"
-                            onChange={onChange}
-                            onBlur={onBlur}
-                            name={name}
-                            ref={ref}
+                            {...field}
+                            value={field.value || ""}
                             data-testid="input-register-email"
                             style={{ color: '#ffffff' }}
                           />
