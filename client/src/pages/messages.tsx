@@ -189,7 +189,7 @@ export default function Messages() {
         <Card className="lg:col-span-1 bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700" style={{ backgroundColor: '#f2f2f2' }}>
           {typedUser.role === 'homeowner' ? (
             <Tabs defaultValue="conversations" className="w-full">
-              <TabsList className="w-full" style={{ backgroundColor: '#e0e0e0' }}>
+              <TabsList className="w-full" style={{ backgroundColor: '#b6a6f4' }}>
                 <TabsTrigger value="conversations" className="flex-1">
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Messages
