@@ -268,7 +268,7 @@ export default function SignIn() {
                             placeholder="Enter your email"
                             {...field}
                             data-testid="input-email"
-                            className="text-white"
+                            className="text-white placeholder:text-white"
                           />
                         </FormControl>
                         <FormMessage />
@@ -288,7 +288,7 @@ export default function SignIn() {
                             placeholder="Enter your password"
                             {...field}
                             data-testid="input-password"
-                            className="text-white"
+                            className="text-white placeholder:text-white"
                           />
                         </FormControl>
                         <FormMessage />
