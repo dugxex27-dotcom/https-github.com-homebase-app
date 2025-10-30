@@ -276,10 +276,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Email/password registration
   app.post('/api/auth/register', authLimiter, async (req, res) => {
     try {
-      const { email, password, firstName, lastName, role, zipCode, inviteCode } = req.body;
+      const { 
+        email, password, firstName, lastName, role, zipCode, inviteCode,
+        companyAction, companyName, companyBio, companyPhone, companyInviteCode 
+      } = req.body;
       
       if (!email || !password || !firstName || !lastName || !role || !zipCode) {
         return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Validate contractor company requirements
+      if (role === 'contractor') {
+        if (!companyAction) {
+          return res.status(400).json({ message: "Contractors must either create or join a company" });
+        }
+        if (companyAction === 'create' && (!companyName || !companyBio || !companyPhone)) {
+          return res.status(400).json({ message: "Company name, bio, and phone are required" });
+        }
+        if (companyAction === 'join' && !companyInviteCode) {
+          return res.status(400).json({ message: "Company invite code is required" });
+        }
       }
 
       // Validate email format
@@ -294,12 +310,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(409).json({ message: "Email already registered" });
       }
 
-      // Validate invite code if provided
-      if (inviteCode) {
+      // Validate homeowner invite code if provided
+      if (inviteCode && role === 'homeowner') {
         const isValid = await storage.validateAndUseInviteCode(inviteCode);
         if (!isValid) {
           return res.status(400).json({ message: "Invalid or expired invite code" });
         }
+      }
+
+      // Validate company invite code BEFORE creating user (if contractor joining)
+      let companyToJoin = null;
+      if (role === 'contractor' && companyAction === 'join') {
+        const invite = await storage.getCompanyInviteCodeByCode(companyInviteCode);
+        if (!invite || !invite.isActive || invite.usedBy) {
+          return res.status(400).json({ message: "Invalid or already used company invite code" });
+        }
+        companyToJoin = { invite };
       }
 
       // Hash password with bcrypt
@@ -307,7 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const passwordHash = await bcrypt.hash(password, 10);
 
       // Create user
-      const user = await storage.createUserWithPassword({
+      let user = await storage.createUserWithPassword({
         email,
         passwordHash,
         firstName,
@@ -315,6 +341,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: role as 'homeowner' | 'contractor',
         zipCode
       });
+
+      // Handle contractor company setup
+      if (role === 'contractor') {
+        if (companyAction === 'create') {
+          // Create new company
+          const company = await storage.createCompany({
+            name: companyName,
+            bio: companyBio,
+            phone: companyPhone,
+            email: email,
+            location: zipCode,
+            ownerId: user.id,
+            services: [],
+            licenseNumber: '',
+            licenseMunicipality: '',
+          });
+
+          // Update user with company info (owners can respond to proposals by default)
+          user = await storage.upsertUser({
+            ...user,
+            companyId: company.id,
+            companyRole: 'owner',
+            canRespondToProposals: true
+          });
+        } else if (companyAction === 'join' && companyToJoin) {
+          // Update user with company info
+          user = await storage.upsertUser({
+            ...user,
+            companyId: companyToJoin.invite.companyId,
+            companyRole: 'employee'
+          });
+
+          // Mark invite code as used
+          await storage.updateCompanyInviteCode(companyToJoin.invite.id, {
+            ...companyToJoin.invite,
+            usedBy: user.id,
+            usedAt: new Date(),
+            isActive: false
+          });
+        }
+      }
 
       // Create session
       req.session.user = user;

@@ -31,9 +31,42 @@ const registerSchema = z.object({
     required_error: "Please select your role",
   }),
   inviteCode: z.string().optional(),
+  // Company fields for contractors
+  companyAction: z.enum(["create", "join"]).optional(),
+  companyName: z.string().optional(),
+  companyBio: z.string().optional(),
+  companyPhone: z.string().optional(),
+  companyInviteCode: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
+}).refine((data) => {
+  // Contractors must select a company action
+  if (data.role === "contractor" && !data.companyAction) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Please select whether to create or join a company",
+  path: ["companyAction"],
+}).refine((data) => {
+  // If contractor and creating company, require company fields
+  if (data.role === "contractor" && data.companyAction === "create") {
+    return data.companyName && data.companyBio && data.companyPhone;
+  }
+  return true;
+}, {
+  message: "Company name, bio, and phone are required when creating a company",
+  path: ["companyName"],
+}).refine((data) => {
+  // If contractor and joining company, require invite code
+  if (data.role === "contractor" && data.companyAction === "join") {
+    return data.companyInviteCode;
+  }
+  return true;
+}, {
+  message: "Company invite code is required when joining a company",
+  path: ["companyInviteCode"],
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -64,6 +97,11 @@ export default function SignIn() {
       zipCode: "",
       role: undefined,
       inviteCode: "",
+      companyAction: undefined,
+      companyName: "",
+      companyBio: "",
+      companyPhone: "",
+      companyInviteCode: "",
     },
     mode: "onBlur",
   });
@@ -106,6 +144,11 @@ export default function SignIn() {
         role: data.role,
         zipCode: data.zipCode,
         inviteCode: data.inviteCode || undefined,
+        companyAction: data.companyAction,
+        companyName: data.companyName,
+        companyBio: data.companyBio,
+        companyPhone: data.companyPhone,
+        companyInviteCode: data.companyInviteCode,
       });
       return response.json();
     },
@@ -201,6 +244,7 @@ export default function SignIn() {
   };
 
   const selectedRole = registerForm.watch("role");
+  const companyAction = registerForm.watch("companyAction");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex items-center justify-center p-4">
@@ -464,6 +508,132 @@ export default function SignIn() {
                       </FormItem>
                     )}
                   />
+
+                  {/* Company fields for contractors */}
+                  {selectedRole === 'contractor' && (
+                    <>
+                      <FormField
+                        control={registerForm.control}
+                        name="companyAction"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel>Company Setup</FormLabel>
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                className="flex flex-col space-y-2"
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem 
+                                    value="create" 
+                                    id="create-company"
+                                    data-testid="radio-create-company"
+                                  />
+                                  <Label htmlFor="create-company" className="cursor-pointer">
+                                    Create a new company
+                                  </Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem 
+                                    value="join" 
+                                    id="join-company"
+                                    data-testid="radio-join-company"
+                                  />
+                                  <Label htmlFor="join-company" className="cursor-pointer">
+                                    Join an existing company
+                                  </Label>
+                                </div>
+                              </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {companyAction === 'create' && (
+                        <>
+                          <FormField
+                            control={registerForm.control}
+                            name="companyName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Company Name</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g., ABC Plumbing"
+                                    {...field}
+                                    data-testid="input-company-name"
+                                    style={{ color: '#ffffff' }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={registerForm.control}
+                            name="companyBio"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Company Bio</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Brief description of your company"
+                                    {...field}
+                                    data-testid="input-company-bio"
+                                    style={{ color: '#ffffff' }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={registerForm.control}
+                            name="companyPhone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Company Phone</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="(555) 123-4567"
+                                    {...field}
+                                    data-testid="input-company-phone"
+                                    style={{ color: '#ffffff' }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </>
+                      )}
+
+                      {companyAction === 'join' && (
+                        <FormField
+                          control={registerForm.control}
+                          name="companyInviteCode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Company Invite Code</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Enter code from your company owner"
+                                  {...field}
+                                  data-testid="input-company-invite-code"
+                                  style={{ color: '#ffffff' }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                    </>
+                  )}
 
                   <FormField
                     control={registerForm.control}
