@@ -12,11 +12,11 @@ export async function setupGoogleAuth(app: Express) {
 
   // Get the callback URL based on environment
   const getCallbackURL = () => {
-    if (process.env.REPLIT_DOMAINS) {
-      const domains = process.env.REPLIT_DOMAINS.split(',');
-      return `https://${domains[0]}/auth/google/callback`;
-    }
-    return 'http://localhost:5000/auth/google/callback';
+    // Use hardcoded production domain for gotohomebase
+    const productionDomain = 'gotohomebase.replit.app';
+    const callbackUrl = `https://${productionDomain}/auth/google/callback`;
+    console.log('🔵 Google OAuth callback URL:', callbackUrl);
+    return callbackUrl;
   };
 
   // Configure Google OAuth Strategy
