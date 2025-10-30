@@ -62,6 +62,58 @@ export const referralCredits = pgTable("referral_credits", {
 ]);
 
 // Users table for Replit Auth with role and subscription support
+// Companies table for contractor businesses
+export const companies = pgTable("companies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  bio: text("bio").notNull(),
+  location: text("location").notNull(),
+  ownerId: varchar("owner_id").notNull(), // User ID of the company owner
+  rating: decimal("rating", { precision: 3, scale: 2 }).notNull().default("0"),
+  reviewCount: integer("review_count").notNull().default(0),
+  services: text("services").array().notNull(), // Array of services offered
+  phone: text("phone").notNull(),
+  email: text("email").notNull(),
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  postalCode: text("postal_code"),
+  serviceRadius: integer("service_radius").notNull().default(25), // Service radius in miles
+  hasEmergencyServices: boolean("has_emergency_services").notNull().default(false),
+  businessLogo: text("business_logo"),
+  projectPhotos: text("project_photos").array().default(sql`ARRAY[]::text[]`),
+  website: text("website"),
+  facebook: text("facebook"),
+  instagram: text("instagram"),
+  linkedin: text("linkedin"),
+  googleBusinessUrl: text("google_business_url"),
+  countryId: varchar("country_id").references(() => countries.id),
+  regionId: varchar("region_id").references(() => regions.id),
+  licenseNumber: text("license_number").notNull(),
+  licenseMunicipality: text("license_municipality").notNull(),
+  isLicensed: boolean("is_licensed").notNull().default(true),
+  licenses: text("licenses"), // JSON string of licensing info per regulatory body
+  insuranceInfo: text("insurance_info"), // JSON string of insurance details by region
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Company invite codes table for employees to join companies
+export const companyInviteCodes = pgTable("company_invite_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull().references(() => companies.id, { onDelete: 'cascade' }),
+  code: varchar("code").notNull().unique(),
+  createdBy: varchar("created_by").notNull(), // User ID of who created the invite
+  isActive: boolean("is_active").notNull().default(true),
+  usedBy: varchar("used_by"), // User ID who used this code (nullable until used)
+  usedAt: timestamp("used_at"),
+  expiresAt: timestamp("expires_at"), // Optional expiration
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_company_invite_codes_company").on(table.companyId),
+  index("IDX_company_invite_codes_code").on(table.code),
+]);
+
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
@@ -74,6 +126,9 @@ export const users = pgTable("users", {
   referralCode: varchar("referral_code").unique(),
   referredBy: varchar("referred_by"), // referral code of user who referred this user
   referralCount: integer("referral_count").notNull().default(0),
+  // Company fields for contractors
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: 'set null' }),
+  companyRole: text("company_role"), // 'owner' or 'employee' (nullable for homeowners)
   // Subscription fields
   subscriptionPlanId: varchar("subscription_plan_id").references(() => subscriptionPlans.id, { onDelete: 'set null' }), // FK to subscription_plans.id
   subscriptionStatus: text("subscription_status").default("inactive"), // "active", "inactive", "cancelled", "past_due"
@@ -91,12 +146,15 @@ export const users = pgTable("users", {
   // Index for subscription plan lookups
   index("IDX_users_subscription_plan_id").on(table.subscriptionPlanId),
   index("IDX_users_zip_code").on(table.zipCode),
+  index("IDX_users_company_id").on(table.companyId),
 ]);
 
 export const contractors = pgTable("contractors", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(), // References users.id
+  companyId: varchar("company_id").notNull().references(() => companies.id, { onDelete: 'cascade' }),
   name: text("name").notNull(),
-  company: text("company").notNull(),
+  company: text("company").notNull(), // Kept for backward compatibility, will match company.name
   bio: text("bio").notNull(),
   location: text("location").notNull(),
   distance: decimal("distance", { precision: 5, scale: 2 }),
@@ -308,7 +366,9 @@ export const notifications = pgTable("notifications", {
 
 export const serviceRecords = pgTable("service_records", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  contractorId: varchar("contractor_id").notNull(),
+  contractorId: varchar("contractor_id").notNull(), // Kept for backward compatibility
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: 'set null' }), // Company that performed service
+  employeeId: varchar("employee_id"), // Specific employee who performed service (user_id)
   homeownerId: text("homeowner_id"), // Added to link to homeowner
   houseId: text("house_id"), // Link to specific house for homeowner's multi-property support
   customerName: text("customer_name").notNull(),
@@ -353,10 +413,11 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Contractor reviews table
+// Contractor reviews table (now company reviews)
 export const contractorReviews = pgTable("contractor_reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  contractorId: text("contractor_id").notNull(),
+  contractorId: text("contractor_id").notNull(), // Kept for backward compatibility
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: 'cascade' }), // Company being reviewed
   homeownerId: text("homeowner_id").notNull(),
   rating: integer("rating").notNull(), // 1-5 stars
   comment: text("comment"),
@@ -383,7 +444,9 @@ export const contractorLicenses = pgTable("contractor_licenses", {
 
 export const proposals = pgTable("proposals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  contractorId: text("contractor_id").notNull(),
+  contractorId: text("contractor_id").notNull(), // Kept for backward compatibility
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: 'set null' }), // Company making the proposal
+  createdBy: varchar("created_by"), // Employee who created the proposal (user_id)
   homeownerId: text("homeowner_id"), // nullable until sent
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -555,6 +618,19 @@ export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema
 
 export const insertContractorSchema = createInsertSchema(contractors).omit({
   id: true,
+});
+
+export const insertCompanySchema = createInsertSchema(companies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  rating: true,
+  reviewCount: true,
+});
+
+export const insertCompanyInviteCodeSchema = createInsertSchema(companyInviteCodes).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({
@@ -825,6 +901,10 @@ export type InsertReferralCredit = z.infer<typeof insertReferralCreditSchema>;
 export type ReferralCredit = typeof referralCredits.$inferSelect;
 export type InsertContractor = z.infer<typeof insertContractorSchema>;
 export type Contractor = typeof contractors.$inferSelect;
+export type InsertCompany = z.infer<typeof insertCompanySchema>;
+export type Company = typeof companies.$inferSelect;
+export type InsertCompanyInviteCode = z.infer<typeof insertCompanyInviteCodeSchema>;
+export type CompanyInviteCode = typeof companyInviteCodes.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof products.$inferSelect;
 export type InsertMaintenanceTask = z.infer<typeof insertMaintenanceTaskSchema>;
