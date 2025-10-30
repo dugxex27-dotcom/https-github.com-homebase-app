@@ -135,7 +135,7 @@ export default function Header() {
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="ml-2 text-[#b6a6f4] hover:text-[#b6a6f4]"
+                  className="ml-2 text-[#b6a6f4] hover:text-[#b6a6f4] bg-[#1560a2]"
                   data-testid="button-logout"
                 >
                   <LogOut className="w-4 h-4 mr-1 text-[#b6a6f4]" />
