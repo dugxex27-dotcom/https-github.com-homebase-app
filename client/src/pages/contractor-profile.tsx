@@ -160,18 +160,32 @@ export default function ContractorProfile() {
     queryKey: ['/api/contractor/licenses'],
   });
 
+  // Load company data for business logo and project photos
+  const { data: companyData } = useQuery({
+    queryKey: ['/api/companies', typedUser?.companyId],
+    enabled: !!typedUser?.companyId,
+  });
+
   // Update form data when profile loads
   React.useEffect(() => {
     if (profile) {
       setFormData(prev => ({ ...prev, ...profile }));
-      if ((profile as any).businessLogo) {
-        setLogoPreview((profile as any).businessLogo);
-      }
-      if ((profile as any).projectPhotos && (profile as any).projectPhotos.length > 0) {
-        setPhotosPreviews((profile as any).projectPhotos);
-      }
     }
   }, [profile]);
+
+  // Update form data with company images when company data loads
+  React.useEffect(() => {
+    if (companyData) {
+      if ((companyData as any).businessLogo) {
+        setLogoPreview((companyData as any).businessLogo);
+        setFormData(prev => ({ ...prev, businessLogo: (companyData as any).businessLogo }));
+      }
+      if ((companyData as any).projectPhotos && (companyData as any).projectPhotos.length > 0) {
+        setPhotosPreviews((companyData as any).projectPhotos);
+        setFormData(prev => ({ ...prev, projectPhotos: (companyData as any).projectPhotos }));
+      }
+    }
+  }, [companyData]);
 
   // Update licenses when existing licenses load
   React.useEffect(() => {
@@ -365,16 +379,33 @@ export default function ContractorProfile() {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      // Update profile
+      // Separate contractor data from company data
+      const { businessLogo, projectPhotos, ...contractorData } = data;
+      
+      // Update contractor profile (without businessLogo and projectPhotos)
       const profileResponse = await fetch('/api/contractor/profile', {
         method: 'PUT',
-        body: JSON.stringify(data),
+        body: JSON.stringify(contractorData),
         headers: {
           'Content-Type': 'application/json',
         },
       });
       if (!profileResponse.ok) {
         throw new Error('Failed to update profile');
+      }
+      
+      // Update company with businessLogo and projectPhotos if user has a company
+      if (typedUser?.companyId) {
+        const companyResponse = await fetch(`/api/companies/${typedUser.companyId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ businessLogo, projectPhotos }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!companyResponse.ok) {
+          throw new Error('Failed to update company images');
+        }
       }
       
       // Save licenses - first get existing licenses to determine creates vs updates
@@ -412,6 +443,9 @@ export default function ContractorProfile() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/contractor/profile'] });
       queryClient.invalidateQueries({ queryKey: ['/api/contractor/licenses'] });
+      if (typedUser?.companyId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/companies', typedUser.companyId] });
+      }
     },
     onError: (error) => {
       toast({
