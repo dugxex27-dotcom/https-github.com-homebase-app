@@ -463,6 +463,17 @@ export default function Maintenance() {
     enabled: isAuthenticated && !!homeownerId && !!selectedApplianceId && !isContractor
   });
 
+  // Custom maintenance tasks queries (only for homeowners)
+  const { data: customMaintenanceTasks = [], isLoading: customTasksLoading } = useQuery<CustomMaintenanceTask[]>({
+    queryKey: ['/api/custom-maintenance-tasks', { homeownerId, houseId: selectedHouseId }],
+    queryFn: async () => {
+      const response = await fetch(`/api/custom-maintenance-tasks?houseId=${selectedHouseId}`);
+      if (!response.ok) throw new Error('Failed to fetch custom maintenance tasks');
+      return response.json();
+    },
+    enabled: isAuthenticated && !!homeownerId && !!selectedHouseId && !isContractor
+  });
+
 
   // Function to find previous contractors for similar maintenance tasks
   const findPreviousContractor = (taskCategory: string, taskTitle: string) => {
@@ -1971,9 +1982,73 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
     return tasks;
   };
 
-  const maintenanceTasks = getMaintenanceTasksForMonth(selectedMonth);
+  // Convert custom tasks to MaintenanceTask format based on their frequency
+  const convertCustomTasksToMaintenanceTasks = (customTasks: CustomMaintenanceTask[], currentMonth: number): MaintenanceTask[] => {
+    const convertedTasks: MaintenanceTask[] = [];
+    
+    customTasks.forEach(customTask => {
+      // Skip inactive tasks
+      if (!customTask.isActive) return;
+      
+      // Determine if this task should appear in the current month
+      let shouldAppear = false;
+      
+      switch (customTask.frequencyType) {
+        case 'monthly':
+          // Monthly tasks appear every month
+          shouldAppear = true;
+          break;
+        case 'quarterly':
+          // Quarterly tasks appear every 3 months (1, 4, 7, 10)
+          shouldAppear = currentMonth % 3 === 1;
+          break;
+        case 'biannually':
+          // Bi-annual tasks appear twice a year (months 1 and 7)
+          shouldAppear = currentMonth === 1 || currentMonth === 7;
+          break;
+        case 'annually':
+          // Annual tasks appear in specific months if defined, otherwise in January
+          if (customTask.specificMonths && customTask.specificMonths.length > 0) {
+            shouldAppear = customTask.specificMonths.includes(currentMonth.toString());
+          } else {
+            shouldAppear = currentMonth === 1;
+          }
+          break;
+        case 'custom':
+          // Custom frequency - for now, show in all months (could be enhanced)
+          shouldAppear = true;
+          break;
+        default:
+          shouldAppear = false;
+      }
+      
+      if (shouldAppear) {
+        convertedTasks.push({
+          id: `custom-${customTask.id}`,
+          title: customTask.title,
+          description: customTask.description ?? 'No description provided',
+          month: currentMonth,
+          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"], // Custom tasks appear in all zones
+          priority: customTask.priority,
+          estimatedTime: customTask.estimatedTime ?? 'Not specified',
+          difficulty: customTask.difficulty ?? 'easy',
+          category: customTask.category,
+          tools: customTask.tools ?? null,
+          cost: customTask.cost ?? null,
+        });
+      }
+    });
+    
+    return convertedTasks;
+  };
 
-  const filteredTasks = maintenanceTasks.filter(task => {
+  const maintenanceTasks = getMaintenanceTasksForMonth(selectedMonth);
+  
+  // Convert and merge custom tasks with regular maintenance tasks
+  const customTasksForMonth = convertCustomTasksToMaintenanceTasks(customMaintenanceTasks, selectedMonth);
+  const allTasks = [...maintenanceTasks, ...customTasksForMonth];
+
+  const filteredTasks = allTasks.filter(task => {
     // Filter by climate zone
     if (!task.climateZones.includes(selectedZone)) {
       return false;
@@ -2540,6 +2615,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
               {filteredTasks.map((task) => {
                 const completed = isTaskCompleted(task.id);
                 const previousContractor = findPreviousContractor(task.category, task.title);
+                const isCustomTask = task.id.startsWith('custom-');
                 
                 return (
                   <Card 
@@ -2548,32 +2624,41 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                       completed ? 'border-green-200 dark:border-green-800' : 'border-gray-300 dark:border-gray-700'
                     }`}
                     style={{ backgroundColor: completed ? '#dcfce7' : '#f2f2f2' }}
+                    data-testid={`card-task-${task.id}`}
                   >
                     <CardHeader>
+                      {isCustomTask && (
+                        <Badge className="mb-3 w-fit" style={{ backgroundColor: '#b6a6f4', color: '#2c0f5b' }} data-testid="badge-custom-task">
+                          Custom Task
+                        </Badge>
+                      )}
                       <div className="flex justify-between items-start">
                         <div className="flex items-start space-x-3 flex-1">
                           <Checkbox
                             checked={completed}
                             onCheckedChange={() => toggleTaskCompletion(task.id)}
                             className="mt-1"
+                            data-testid={`checkbox-task-${generateTaskId(task.title)}`}
                           />
-                          <CardTitle className="tracking-tight text-lg font-semibold text-[#9687ad]" style={{ color: '#2c0f5b' }}>
+                          <CardTitle className="tracking-tight text-lg font-semibold text-[#9687ad]" style={{ color: '#2c0f5b' }} data-testid={`title-task-${generateTaskId(task.title)}`}>
                             {task.title}
                           </CardTitle>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge className={`${getPriorityColor(task.priority)} border`}>
+                          <Badge className={`${getPriorityColor(task.priority)} border`} data-testid={`badge-priority-${task.priority}`}>
                             {task.priority} priority
                           </Badge>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowCustomizeTask(showCustomizeTask === task.id ? null : task.id)}
-                            className="p-1 h-7 w-7"
-                            data-testid={`button-customize-${generateTaskId(task.title)}`}
-                          >
-                            <Settings className="w-4 h-4" />
-                          </Button>
+                          {!isCustomTask && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setShowCustomizeTask(showCustomizeTask === task.id ? null : task.id)}
+                              className="p-1 h-7 w-7"
+                              data-testid={`button-customize-${generateTaskId(task.title)}`}
+                            >
+                              <Settings className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardHeader>
