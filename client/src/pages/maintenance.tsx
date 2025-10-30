@@ -56,6 +56,8 @@ interface MaintenanceTask {
 // Form schema for maintenance log creation/editing
 const maintenanceLogFormSchema = insertMaintenanceLogSchema.extend({
   homeownerId: z.string().min(1, "Homeowner ID is required"),
+  homeArea: z.string().optional(),
+  serviceDescription: z.string().optional(),
 });
 
 // Form schema for house creation/editing
@@ -1252,8 +1254,8 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
       homeownerId: log.homeownerId,
       serviceType: log.serviceType,
       serviceDate: log.serviceDate,
-      homeArea: log.homeArea,
-      serviceDescription: log.serviceDescription,
+      homeArea: log.homeArea ?? "",
+      serviceDescription: log.serviceDescription ?? "",
       cost: log.cost || undefined,
       contractorName: log.contractorName ?? "",
       contractorCompany: log.contractorCompany ?? "",
@@ -2506,8 +2508,12 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                             }}>{log.serviceDescription}</h4>
                             <div className="flex items-center gap-3 text-xs mt-1" style={{ color: '#2c0f5b' }}>
                               <span>{new Date(log.serviceDate).toLocaleDateString()}</span>
-                              <span>•</span>
-                              <span>{getHomeAreaLabel(log.homeArea)}</span>
+                              {log.homeArea && (
+                                <>
+                                  <span>•</span>
+                                  <span>{getHomeAreaLabel(log.homeArea)}</span>
+                                </>
+                              )}
                               {log.contractorName && (
                                 <>
                                   <span>•</span>
@@ -3094,10 +3100,12 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                                     <Calendar className="w-4 h-4" />
                                     {new Date(log.serviceDate).toLocaleDateString()}
                                   </span>
-                                  <span className="flex items-center gap-1">
-                                    <MapPin className="w-4 h-4" />
-                                    {getHomeAreaLabel(log.homeArea)}
-                                  </span>
+                                  {log.homeArea && (
+                                    <span className="flex items-center gap-1">
+                                      <MapPin className="w-4 h-4" />
+                                      {getHomeAreaLabel(log.homeArea)}
+                                    </span>
+                                  )}
                                   <span className="px-2 py-1 rounded-full text-xs" style={{ backgroundColor: '#2c0f5b20', color: '#2c0f5b' }}>
                                     {getServiceTypeLabel(log.serviceType)}
                                   </span>

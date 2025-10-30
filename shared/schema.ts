@@ -238,8 +238,8 @@ export const maintenanceLogs = pgTable("maintenance_logs", {
   houseId: text("house_id").notNull(), // references houses table
   serviceDate: text("service_date").notNull(), // Date when service was performed
   serviceType: text("service_type").notNull(), // Type of service performed
-  homeArea: text("home_area").notNull(), // What part of home was serviced (roof, HVAC, plumbing, etc.)
-  serviceDescription: text("service_description").notNull(), // Description of work performed
+  homeArea: text("home_area"), // What part of home was serviced (roof, HVAC, plumbing, etc.) - now optional
+  serviceDescription: text("service_description"), // Description of work performed - now optional
   cost: decimal("cost", { precision: 10, scale: 2 }), // Cost of service
   contractorName: text("contractor_name"), // Name of contractor who performed service
   contractorCompany: text("contractor_company"), // Contractor company
