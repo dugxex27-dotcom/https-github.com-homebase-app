@@ -23,7 +23,7 @@ declare module 'express-session' {
 // Strict rate limiting for authentication endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 login attempts per windowMs
+  max: 100, // Temporarily increased for testing
   message: 'Too many login attempts, please try again after 15 minutes',
   standardHeaders: true,
   legacyHeaders: false,
