@@ -428,6 +428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Email/password login
   app.post('/api/auth/login', authLimiter, async (req, res) => {
+    console.error("===== LOGIN HANDLER CALLED =====", new Date().toISOString());
     try {
       console.log("🔵 Login attempt received:", { email: req.body.email });
       const { email, password } = req.body;
