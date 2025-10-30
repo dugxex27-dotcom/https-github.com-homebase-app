@@ -52,7 +52,7 @@ export interface IStorage {
   deleteHomeApplianceManual(id: string): Promise<boolean>;
   
   // Maintenance log methods
-  getMaintenanceLogs(homeownerId?: string): Promise<MaintenanceLog[]>;
+  getMaintenanceLogs(homeownerId?: string, houseId?: string): Promise<MaintenanceLog[]>;
   getMaintenanceLog(id: string): Promise<MaintenanceLog | undefined>;
   createMaintenanceLog(log: InsertMaintenanceLog): Promise<MaintenanceLog>;
   updateMaintenanceLog(id: string, log: Partial<InsertMaintenanceLog>): Promise<MaintenanceLog | undefined>;
@@ -104,6 +104,7 @@ export interface IStorage {
   updateServiceRecord(id: string, record: Partial<InsertServiceRecord>): Promise<ServiceRecord | undefined>;
   deleteServiceRecord(id: string): Promise<boolean>;
   getHomeownerServiceRecords(homeownerId: string): Promise<ServiceRecord[]>;
+  getServiceRecordsByHomeowner(homeownerId: string, houseId?: string): Promise<ServiceRecord[]>;
   
   // Customer service record operations  
   getCustomerServiceRecords(customerId?: string, customerEmail?: string, customerAddress?: string): Promise<ServiceRecord[]>;
@@ -812,14 +813,20 @@ export class MemStorage implements IStorage {
   }
 
   // Maintenance log methods
-  async getMaintenanceLogs(homeownerId?: string): Promise<MaintenanceLog[]> {
+  async getMaintenanceLogs(homeownerId?: string, houseId?: string): Promise<MaintenanceLog[]> {
     const logs = Array.from(this.maintenanceLogs.values());
     
+    let filtered = logs;
+    
     if (homeownerId) {
-      return logs.filter(log => log.homeownerId === homeownerId);
+      filtered = filtered.filter(log => log.homeownerId === homeownerId);
     }
     
-    return logs.sort((a, b) => new Date(b.serviceDate).getTime() - new Date(a.serviceDate).getTime());
+    if (houseId) {
+      filtered = filtered.filter(log => log.houseId === houseId);
+    }
+    
+    return filtered.sort((a, b) => new Date(b.serviceDate).getTime() - new Date(a.serviceDate).getTime());
   }
 
   async getMaintenanceLog(id: string): Promise<MaintenanceLog | undefined> {
@@ -1359,6 +1366,18 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getServiceRecordsByHomeowner(homeownerId: string, houseId?: string): Promise<ServiceRecord[]> {
+    let filtered = this.serviceRecords.filter(record => 
+      record.homeownerId === homeownerId && record.isVisibleToHomeowner !== false
+    );
+    
+    if (houseId) {
+      filtered = filtered.filter(record => record.houseId === houseId);
+    }
+    
+    return filtered;
+  }
+
   async getServiceRecord(id: string): Promise<ServiceRecord | undefined> {
     return this.serviceRecords.find(record => record.id === id);
   }
@@ -1368,6 +1387,7 @@ export class MemStorage implements IStorage {
       ...serviceRecord,
       id: randomUUID(),
       homeownerId: serviceRecord.homeownerId ?? null,
+      houseId: serviceRecord.houseId ?? null,
       customerPhone: serviceRecord.customerPhone ?? null,
       customerEmail: serviceRecord.customerEmail ?? null,
       cost: serviceRecord.cost ?? "0",

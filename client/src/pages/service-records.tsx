@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import type { House } from "@shared/schema";
 import { 
   Plus, 
   FileText, 
@@ -21,7 +23,8 @@ import {
   Search,
   Filter,
   Edit,
-  Trash2
+  Trash2,
+  Home
 } from "lucide-react";
 
 interface ServiceRecord {
@@ -33,6 +36,7 @@ interface ServiceRecord {
   serviceType: string;
   serviceDescription: string;
   homeArea?: string;
+  houseId?: string;
   serviceDate: string;
   duration: string;
   cost: number;
@@ -95,10 +99,12 @@ const HOME_AREAS = [
 export default function ServiceRecords() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ServiceRecord | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedHouseId, setSelectedHouseId] = useState<string>("");
   
   const [formData, setFormData] = useState({
     customerName: '',
@@ -108,6 +114,7 @@ export default function ServiceRecords() {
     serviceType: '',
     serviceDescription: '',
     homeArea: '',
+    houseId: '',
     serviceDate: '',
     duration: '',
     cost: '',
@@ -120,9 +127,32 @@ export default function ServiceRecords() {
 
   const [materialInput, setMaterialInput] = useState('');
 
+  // Load houses for homeowner
+  const { data: houses = [] } = useQuery<House[]>({
+    queryKey: ['/api/houses'],
+    enabled: user?.role === 'homeowner',
+  });
+
+  // Auto-select first house when houses are loaded
+  useEffect(() => {
+    if (houses.length > 0 && !selectedHouseId) {
+      setSelectedHouseId(houses[0].id);
+    }
+  }, [houses, selectedHouseId]);
+
   // Load service records
   const { data: serviceRecords = [], isLoading } = useQuery<ServiceRecord[]>({
-    queryKey: ['/api/service-records'],
+    queryKey: ['/api/service-records', { houseId: selectedHouseId }],
+    queryFn: async () => {
+      // For homeowners, include houseId parameter; for contractors, fetch all their records
+      const url = user?.role === 'homeowner' && selectedHouseId 
+        ? `/api/service-records?houseId=${selectedHouseId}`
+        : '/api/service-records';
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch service records');
+      return response.json();
+    },
+    enabled: (user?.role === 'contractor') || (user?.role === 'homeowner' && !!selectedHouseId),
   });
 
   // Create/update service record mutation
@@ -199,6 +229,7 @@ export default function ServiceRecords() {
       serviceType: '',
       serviceDescription: '',
       homeArea: '',
+      houseId: selectedHouseId || '',
       serviceDate: '',
       duration: '',
       cost: '',
@@ -246,6 +277,7 @@ export default function ServiceRecords() {
       serviceType: record.serviceType,
       serviceDescription: record.serviceDescription,
       homeArea: record.homeArea || '',
+      houseId: record.houseId || '',
       serviceDate: record.serviceDate,
       duration: record.duration,
       cost: record.cost.toString(),
@@ -269,7 +301,11 @@ export default function ServiceRecords() {
                          record.serviceType.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          record.serviceDescription.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || record.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    
+    // For homeowners, filter by selected house
+    const matchesHouse = user?.role === 'contractor' || !selectedHouseId || record.houseId === selectedHouseId;
+    
+    return matchesSearch && matchesStatus && matchesHouse;
   });
 
   const getStatusColor = (status: string) => {
@@ -589,6 +625,34 @@ export default function ServiceRecords() {
           </div>
         </div>
 
+        {/* House Selection for Homeowners */}
+        {user?.role === 'homeowner' && houses.length > 0 && (
+          <Card className="mb-4" style={{ backgroundColor: '#f2f2f2' }}>
+            <CardContent className="py-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Home className="w-5 h-5" style={{ color: '#1560a2' }} />
+                  <Label className="text-base font-medium" style={{ color: '#1560a2' }}>
+                    Select Property:
+                  </Label>
+                </div>
+                <Select value={selectedHouseId} onValueChange={setSelectedHouseId}>
+                  <SelectTrigger className="w-80 hover:bg-[#afd6f9] hover:text-black transition-colors" style={{ backgroundColor: '#1560a2', color: 'white' }} data-testid="select-house">
+                    <SelectValue placeholder="Choose a house" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {houses.map((house) => (
+                      <SelectItem key={house.id} value={house.id} data-testid={`option-house-${house.id}`}>
+                        {house.name} - {house.address}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Filters and Search */}
         <Card className="mb-6" style={{ backgroundColor: '#f2f2f2' }}>
           <CardContent className="py-4">
@@ -602,12 +666,13 @@ export default function ServiceRecords() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
                     style={{ backgroundColor: '#ffffff' }}
+                    data-testid="input-search"
                   />
                 </div>
               </div>
               <div className="flex gap-2">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40 hover:bg-[#afd6f9] hover:text-black transition-colors" style={{ backgroundColor: '#1560a2', color: 'white' }}>
+                  <SelectTrigger className="w-40 hover:bg-[#afd6f9] hover:text-black transition-colors" style={{ backgroundColor: '#1560a2', color: 'white' }} data-testid="select-status-filter">
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent>

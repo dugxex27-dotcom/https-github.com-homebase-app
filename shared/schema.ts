@@ -310,6 +310,7 @@ export const serviceRecords = pgTable("service_records", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   contractorId: varchar("contractor_id").notNull(),
   homeownerId: text("homeowner_id"), // Added to link to homeowner
+  houseId: text("house_id"), // Link to specific house for homeowner's multi-property support
   customerName: text("customer_name").notNull(),
   customerAddress: text("customer_address").notNull(),
   customerPhone: text("customer_phone"),

@@ -865,7 +865,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Always use authenticated user's ID, ignore query params to prevent IDOR
       const homeownerId = req.session.user.id;
-      const logs = await storage.getMaintenanceLogs(homeownerId);
+      const houseId = req.query.houseId as string;
+      
+      // If houseId is provided, verify it belongs to the user
+      if (houseId) {
+        const house = await storage.getHouse(houseId);
+        if (!house || house.homeownerId !== homeownerId) {
+          return res.status(403).json({ message: "Access denied to house" });
+        }
+      }
+      
+      const logs = await storage.getMaintenanceLogs(homeownerId, houseId);
       res.json(logs);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch maintenance logs" });
@@ -2292,9 +2302,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Service records routes
   app.get('/api/service-records', isAuthenticated, async (req: any, res) => {
     try {
-      const contractorId = req.session.user.id;
-      const serviceRecords = await storage.getServiceRecords(contractorId);
-      res.json(serviceRecords);
+      const userId = req.session.user.id;
+      const userRole = req.session.user.role;
+      const houseId = req.query.houseId as string;
+      
+      // For contractors, fetch their service records
+      if (userRole === 'contractor') {
+        const serviceRecords = await storage.getServiceRecords(userId);
+        res.json(serviceRecords);
+      } 
+      // For homeowners, fetch service records filtered by house
+      else {
+        // If houseId is provided, verify it belongs to the user
+        if (houseId) {
+          const house = await storage.getHouse(houseId);
+          if (!house || house.homeownerId !== userId) {
+            return res.status(403).json({ message: "Access denied to house" });
+          }
+        }
+        
+        const serviceRecords = await storage.getServiceRecordsByHomeowner(userId, houseId);
+        res.json(serviceRecords);
+      }
     } catch (error) {
       console.error("Error fetching service records:", error);
       res.status(500).json({ message: "Failed to fetch service records" });

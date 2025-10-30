@@ -420,13 +420,13 @@ export default function Maintenance() {
 
   // Maintenance log queries and mutations (only for homeowners)
   const { data: maintenanceLogs, isLoading: maintenanceLogsLoading } = useQuery<MaintenanceLog[]>({
-    queryKey: ['/api/maintenance-logs', { homeownerId }],
+    queryKey: ['/api/maintenance-logs', { homeownerId, houseId: selectedHouseId }],
     queryFn: async () => {
-      const response = await fetch('/api/maintenance-logs');
+      const response = await fetch(`/api/maintenance-logs?houseId=${selectedHouseId}`);
       if (!response.ok) throw new Error('Failed to fetch maintenance logs');
       return response.json();
     },
-    enabled: isAuthenticated && !!homeownerId && !isContractor
+    enabled: isAuthenticated && !!homeownerId && !isContractor && !!selectedHouseId
   });
 
   // Home systems queries (only for homeowners)

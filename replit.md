@@ -62,6 +62,11 @@ Preferred communication style: Simple, everyday language.
     - Automatic climate zone detection based on property address using geocoding
     - Address autocomplete functionality for property setup
     - Centralized service records tracking
+    - **House-Based Data Organization**: All maintenance data is separated and filtered by the homeowner's selected property
+        - Maintenance tasks, appliances, custom tasks, maintenance logs, and service records are all filtered by selected house
+        - House selection dropdown on each page allows switching between properties
+        - Backend enforces house ownership verification for security
+        - Server-side filtering reduces payload size and improves performance
     - **Contractor Search Integration**: House selection from maintenance schedule automatically used when finding contractors
         - Prominent banner displays currently selected house and address
         - Dropdown allows switching between properties
