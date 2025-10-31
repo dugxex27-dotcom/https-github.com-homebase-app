@@ -3617,9 +3617,20 @@ class DbStorage implements IStorage {
       : (profileData.yearsExperience ? parseInt(profileData.yearsExperience as any) || 0 : 0);
     
     if (!existingContractor) {
+      // Get user data for required fields (userId and companyId)
+      const user = await this.getUser(contractorId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+      if (!user.companyId) {
+        throw new Error('User must belong to a company to create contractor profile');
+      }
+      
       // Create new contractor profile if it doesn't exist (upsert pattern)
       const newContractor = {
         id: contractorId,
+        userId: contractorId,
+        companyId: user.companyId,
         name: profileData.name || 'Contractor',
         company: profileData.company || 'My Company',
         email: profileData.email || '',
