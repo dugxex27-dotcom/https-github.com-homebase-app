@@ -58,6 +58,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const userId = (req.user as any).id || (req.user as any).claims?.sub;
         if (userId) {
           const fullUser = await storage.getUser(userId);
+          console.log('[DEBUG] storage.getUser returned:', JSON.stringify(fullUser, null, 2));
+          console.log('[DEBUG] companyId:', fullUser?.companyId);
+          console.log('[DEBUG] companyRole:', fullUser?.companyRole);
+          
           if (fullUser) {
             // Sync to session for consistent access
             req.session.isAuthenticated = true;
