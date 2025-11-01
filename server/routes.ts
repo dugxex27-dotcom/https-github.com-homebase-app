@@ -37,6 +37,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true, message: "Test endpoint works!" });
   });
 
+  // DEBUG: Test endpoint to check what Drizzle returns
+  app.get('/api/test-user-data', async (req, res) => {
+    try {
+      const testUser = await storage.getUser('google_103315263202734374496');
+      console.log('[TEST] User from storage:', testUser);
+      res.json({
+        user: testUser,
+        companyId: testUser?.companyId,
+        companyRole: testUser?.companyRole,
+        hasCompanyIdField: testUser?.hasOwnProperty('companyId'),
+        rawKeys: testUser ? Object.keys(testUser) : []
+      });
+    } catch (error) {
+      res.status(500).json({ error: String(error) });
+    }
+  });
+
   // Set up Replit Auth (handles Google OAuth via Replit)
   await setupAuth(app);
 
