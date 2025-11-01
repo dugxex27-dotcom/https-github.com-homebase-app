@@ -137,6 +137,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Refresh session data from database (fixes stale sessions)
+  app.post('/api/auth/refresh-session', async (req: any, res) => {
+    try {
+      if (!req.session?.isAuthenticated || !req.session?.user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const userId = req.session.user.id;
+      const freshUser = await storage.getUser(userId);
+      
+      if (!freshUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Update session with fresh data from database
+      req.session.user = freshUser;
+      
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: "Failed to refresh session" });
+        }
+        console.log(`[SESSION REFRESH] Updated session for ${freshUser.email} with companyId: ${freshUser.companyId}`);
+        res.json({ success: true, user: freshUser });
+      });
+    } catch (error) {
+      console.error("Error refreshing session:", error);
+      res.status(500).json({ message: "Failed to refresh session" });
+    }
+  });
+
   // Generate unique referral code utility function
   function generateUniqueReferralCode(): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
