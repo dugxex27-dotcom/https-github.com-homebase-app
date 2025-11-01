@@ -3333,6 +3333,9 @@ class DbStorage implements IStorage {
   // User operations - DATABASE BACKED for persistence
   async getUser(id: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    console.log('[DEBUG getUser] Raw DB result:', JSON.stringify(result[0], null, 2));
+    console.log('[DEBUG getUser] companyId field:', result[0]?.companyId);
+    console.log('[DEBUG getUser] company_id field:', (result[0] as any)?.company_id);
     return result[0];
   }
 
