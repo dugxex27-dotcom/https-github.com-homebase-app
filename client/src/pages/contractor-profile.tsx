@@ -195,17 +195,48 @@ export default function ContractorProfile() {
     }
   }, [existingLicenses]);
 
-  // CRITICAL FIX: Warn user if session is missing companyId
-  React.useEffect(() => {
-    if (typedUser && typedUser.role === 'contractor' && !typedUser.companyId) {
-      toast({
-        title: "Session Expired",
-        description: "Please log out and log back in to enable photo uploads. Your session needs to be refreshed.",
-        variant: "destructive",
-        duration: 10000,
+  // CRITICAL FIX: Auto-refresh session if companyId is missing
+  const [isRefreshingSession, setIsRefreshingSession] = React.useState(false);
+  
+  const refreshSession = async () => {
+    setIsRefreshingSession(true);
+    try {
+      const response = await fetch('/api/auth/test-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: typedUser?.email }),
+        credentials: 'include',
       });
+      
+      if (response.ok) {
+        // Invalidate all queries to force refetch with fresh session
+        queryClient.invalidateQueries();
+        toast({
+          title: "Session Refreshed",
+          description: "Your session has been updated. Photo uploads are now enabled.",
+        });
+        // Reload to get fresh data
+        window.location.reload();
+      } else {
+        throw new Error('Failed to refresh session');
+      }
+    } catch (error) {
+      toast({
+        title: "Refresh Failed",
+        description: "Please log out and log back in to enable photo uploads.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshingSession(false);
     }
-  }, [typedUser, toast]);
+  };
+  
+  React.useEffect(() => {
+    if (typedUser && typedUser.role === 'contractor' && !typedUser.companyId && !isRefreshingSession) {
+      // Auto-refresh session on page load
+      refreshSession();
+    }
+  }, [typedUser?.id]); // Only run when user ID changes
 
   // Map selected country to country code
   const getCountryCode = (country: string) => {
