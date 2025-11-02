@@ -158,7 +158,14 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
+    console.log('[OAUTH] /api/login called');
+    console.log('[OAUTH] Hostname:', req.hostname);
+    console.log('[OAUTH] Protocol:', req.protocol);
+    console.log('[OAUTH] Headers:', req.headers);
+    
     ensureStrategy(req.hostname);
+    console.log('[OAUTH] Using strategy: replitauth:' + req.hostname);
+    
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
@@ -166,7 +173,14 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
+    console.log('[OAUTH] /api/callback called');
+    console.log('[OAUTH] Callback hostname:', req.hostname);
+    console.log('[OAUTH] Callback query:', req.query);
+    console.log('[OAUTH] Callback error:', req.query.error);
+    
     ensureStrategy(req.hostname);
+    console.log('[OAUTH] Using callback strategy: replitauth:' + req.hostname);
+    
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
