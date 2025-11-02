@@ -699,9 +699,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Image upload endpoint for contractor profiles
   app.post('/api/upload/image', isAuthenticated, async (req: any, res) => {
     try {
+      console.log('[IMAGE UPLOAD] Request received');
+      console.log('[IMAGE UPLOAD] Body keys:', Object.keys(req.body));
+      console.log('[IMAGE UPLOAD] Type:', req.body.type);
+      console.log('[IMAGE UPLOAD] ImageData length:', req.body.imageData?.length);
+      
       const { imageData, type } = req.body; // imageData is base64, type is 'logo' or 'photo'
       
       if (!imageData || !type) {
+        console.log('[IMAGE UPLOAD] Missing data - imageData:', !!imageData, 'type:', !!type);
         return res.status(400).json({ message: "Missing imageData or type" });
       }
 
@@ -709,10 +715,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
       const buffer = Buffer.from(base64Data, 'base64');
       
+      console.log('[IMAGE UPLOAD] Buffer size:', buffer.length);
+      
       // Generate unique filename
       const fileExtension = imageData.match(/^data:image\/(\w+);/)?.[1] || 'jpg';
       const filename = `${randomUUID()}.${fileExtension}`;
       const path = `public/contractor-images/${type}s/${filename}`;
+      
+      console.log('[IMAGE UPLOAD] Uploading to path:', path);
       
       // Upload to object storage
       const objectStorage = new ObjectStorageService();
@@ -720,9 +730,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Return public URL
       const url = `/public/contractor-images/${type}s/${filename}`;
+      console.log('[IMAGE UPLOAD] Upload successful, URL:', url);
       res.json({ url });
     } catch (error) {
-      console.error("Error uploading image:", error);
+      console.error("[IMAGE UPLOAD] Error uploading image:", error);
       res.status(500).json({ message: "Failed to upload image" });
     }
   });
