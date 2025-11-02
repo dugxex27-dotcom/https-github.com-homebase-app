@@ -2788,11 +2788,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           linkedin: '',
           bio: '',
           yearsExperience: '',
-          profileImage: ''
+          profileImage: '',
+          businessLogo: '',
+          projectPhotos: []
         });
       }
 
-      res.json(profile);
+      // CRITICAL FIX: Merge company photos into profile response
+      let profileWithPhotos = { ...profile };
+      if ((profile as any).companyId) {
+        const company = await storage.getCompany((profile as any).companyId);
+        if (company) {
+          profileWithPhotos = {
+            ...profile,
+            businessLogo: company.businessLogo || '',
+            projectPhotos: company.projectPhotos || []
+          };
+        }
+      }
+
+      res.json(profileWithPhotos);
     } catch (error) {
       console.error("Error fetching contractor profile:", error);
       res.status(500).json({ message: "Failed to fetch profile" });
