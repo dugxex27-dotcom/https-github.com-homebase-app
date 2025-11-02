@@ -3682,16 +3682,30 @@ class DbStorage implements IStorage {
       ? profileData.experience 
       : (profileData.yearsExperience ? parseInt(profileData.yearsExperience as any) || 0 : 0);
     
+    // Get user to access companyId
+    const user = await this.getUser(contractorId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    if (!user.companyId) {
+      throw new Error('User must belong to a company to update contractor profile');
+    }
+    
+    // CRITICAL FIX: Update company-level data (projectPhotos, businessLogo) to persist across sessions
+    const companyUpdates: any = {};
+    if (profileData.projectPhotos !== undefined) {
+      companyUpdates.projectPhotos = profileData.projectPhotos;
+    }
+    if (profileData.businessLogo !== undefined) {
+      companyUpdates.businessLogo = profileData.businessLogo;
+    }
+    
+    if (Object.keys(companyUpdates).length > 0) {
+      console.log('[DEBUG] Updating company photos for companyId:', user.companyId, companyUpdates);
+      await this.updateCompany(user.companyId, companyUpdates);
+    }
+    
     if (!existingContractor) {
-      // Get user data for required fields (userId and companyId)
-      const user = await this.getUser(contractorId);
-      if (!user) {
-        throw new Error('User not found');
-      }
-      if (!user.companyId) {
-        throw new Error('User must belong to a company to create contractor profile');
-      }
-      
       // Create new contractor profile if it doesn't exist (upsert pattern)
       const newContractor = {
         id: contractorId,
