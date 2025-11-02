@@ -1057,9 +1057,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const servicesParam = req.query.services as string;
       const services = servicesParam ? servicesParam.split(',').map(s => s.trim()).filter(s => s) : undefined;
       
+      console.log('[CONTRACTOR SEARCH] ==================');
+      console.log('[CONTRACTOR SEARCH] Query:', query);
+      console.log('[CONTRACTOR SEARCH] Location:', location);
+      console.log('[CONTRACTOR SEARCH] Services param:', servicesParam);
+      console.log('[CONTRACTOR SEARCH] Services array:', services);
+      console.log('[CONTRACTOR SEARCH] All query params:', req.query);
+      
       const contractors = await storage.searchContractors(query, location, services);
+      
+      console.log('[CONTRACTOR SEARCH] Results count:', contractors.length);
+      console.log('[CONTRACTOR SEARCH] Results:', contractors.map(c => ({ 
+        id: c.id, 
+        company: c.company, 
+        location: c.location,
+        postalCode: (c as any).postalCode,
+        distance: c.distance,
+        serviceRadius: c.serviceRadius,
+        services: c.services
+      })));
+      console.log('[CONTRACTOR SEARCH] ==================');
+      
       res.json(contractors);
     } catch (error) {
+      console.error('[CONTRACTOR SEARCH] Error:', error);
       res.status(500).json({ message: "Failed to search contractors" });
     }
   });
