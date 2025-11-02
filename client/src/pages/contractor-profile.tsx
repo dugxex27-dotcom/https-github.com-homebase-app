@@ -653,18 +653,66 @@ export default function ContractorProfile() {
         return;
       }
       
-      try {
-        const compressedImage = await compressImage(file, 800, 0.85);
-        setLogoPreview(compressedImage);
-        setFormData(prev => ({ ...prev, businessLogo: compressedImage }));
+      if (!typedUser?.companyId) {
         toast({
-          title: "Logo Uploaded",
-          description: "Image compressed and ready to save.",
+          title: "Session Expired",
+          description: "Please log out and log back in to upload photos.",
+          variant: "destructive",
         });
+        return;
+      }
+      
+      try {
+        // Show loading toast
+        toast({
+          title: "Uploading Logo...",
+          description: "Please wait while we save your logo.",
+        });
+        
+        const compressedImage = await compressImage(file, 800, 0.85);
+        
+        // Upload to object storage immediately
+        const uploadResponse = await fetch('/api/upload-image', {
+          method: 'POST',
+          body: JSON.stringify({ image: compressedImage }),
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        });
+        
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload image');
+        }
+        
+        const { url } = await uploadResponse.json();
+        
+        // Save to database immediately
+        const saveResponse = await fetch(`/api/companies/${typedUser.companyId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ businessLogo: url }),
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        });
+        
+        if (!saveResponse.ok) {
+          throw new Error('Failed to save logo to database');
+        }
+        
+        // Update preview with saved URL
+        setLogoPreview(url);
+        setFormData(prev => ({ ...prev, businessLogo: url }));
+        
+        toast({
+          title: "Logo Saved",
+          description: "Your logo has been uploaded and saved to the database.",
+        });
+        
+        // Invalidate company cache to refetch with new logo
+        queryClient.invalidateQueries({ queryKey: ['/api/companies', typedUser.companyId] });
       } catch (error) {
+        console.error('Logo upload error:', error);
         toast({
           title: "Upload Failed",
-          description: "Failed to process image. Please try again.",
+          description: "Failed to save logo. Please try again.",
           variant: "destructive",
         });
       }
@@ -682,9 +730,24 @@ export default function ContractorProfile() {
         });
         return;
       }
+      
+      if (!typedUser?.companyId) {
+        toast({
+          title: "Session Expired",
+          description: "Please log out and log back in to upload photos.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       const fileArray = Array.from(files);
       let uploadedCount = 0;
+      const newPhotoUrls: string[] = [];
+      
+      toast({
+        title: "Uploading Photos...",
+        description: `Uploading ${fileArray.length} photo(s)...`,
+      });
       
       for (const file of fileArray) {
         if (file.size > 10 * 1024 * 1024) { // 10MB limit per photo before compression
@@ -698,42 +761,166 @@ export default function ContractorProfile() {
 
         try {
           const compressedImage = await compressImage(file, 1200, 0.80);
-          setPhotosPreviews(prev => [...prev, compressedImage]);
-          setFormData(prev => ({
-            ...prev,
-            projectPhotos: [...prev.projectPhotos, compressedImage]
-          }));
+          
+          // Upload to object storage immediately
+          const uploadResponse = await fetch('/api/upload-image', {
+            method: 'POST',
+            body: JSON.stringify({ image: compressedImage }),
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+          });
+          
+          if (!uploadResponse.ok) {
+            throw new Error('Failed to upload image');
+          }
+          
+          const { url } = await uploadResponse.json();
+          newPhotoUrls.push(url);
           uploadedCount++;
         } catch (error) {
-          console.error('Error compressing image:', error);
+          console.error('Error uploading image:', error);
           toast({
             title: "Upload Failed",
-            description: `Failed to process ${file.name}. Please try again.`,
+            description: `Failed to upload ${file.name}. Please try again.`,
             variant: "destructive",
           });
         }
       }
       
       if (uploadedCount > 0) {
-        toast({
-          title: "Photos Uploaded",
-          description: `${uploadedCount} photo(s) compressed and ready to save.`,
-        });
+        try {
+          // Get current photos from database
+          const currentPhotos = formData.projectPhotos.filter(p => p.startsWith('http'));
+          const allPhotos = [...currentPhotos, ...newPhotoUrls];
+          
+          // Save all photos to database immediately
+          const saveResponse = await fetch(`/api/companies/${typedUser.companyId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ projectPhotos: allPhotos }),
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+          });
+          
+          if (!saveResponse.ok) {
+            throw new Error('Failed to save photos to database');
+          }
+          
+          // Update previews with saved URLs
+          setPhotosPreviews(allPhotos);
+          setFormData(prev => ({
+            ...prev,
+            projectPhotos: allPhotos
+          }));
+          
+          toast({
+            title: "Photos Saved",
+            description: `${uploadedCount} photo(s) uploaded and saved to the database.`,
+          });
+          
+          // Invalidate company cache to refetch with new photos
+          queryClient.invalidateQueries({ queryKey: ['/api/companies', typedUser.companyId] });
+        } catch (error) {
+          console.error('Error saving photos:', error);
+          toast({
+            title: "Save Failed",
+            description: "Photos uploaded but failed to save. Please try again.",
+            variant: "destructive",
+          });
+        }
       }
     }
   };
 
-  const removeProjectPhoto = (index: number) => {
-    setPhotosPreviews(prev => prev.filter((_, i) => i !== index));
-    setFormData(prev => ({
-      ...prev,
-      projectPhotos: prev.projectPhotos.filter((_, i) => i !== index)
-    }));
+  const removeProjectPhoto = async (index: number) => {
+    if (!typedUser?.companyId) {
+      toast({
+        title: "Session Expired",
+        description: "Please log out and log back in.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      // Remove from array
+      const updatedPhotos = formData.projectPhotos.filter((_, i) => i !== index);
+      
+      // Save to database immediately
+      const saveResponse = await fetch(`/api/companies/${typedUser.companyId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ projectPhotos: updatedPhotos }),
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      
+      if (!saveResponse.ok) {
+        throw new Error('Failed to remove photo');
+      }
+      
+      // Update UI
+      setPhotosPreviews(prev => prev.filter((_, i) => i !== index));
+      setFormData(prev => ({
+        ...prev,
+        projectPhotos: updatedPhotos
+      }));
+      
+      toast({
+        title: "Photo Removed",
+        description: "Photo has been deleted from the database.",
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['/api/companies', typedUser.companyId] });
+    } catch (error) {
+      console.error('Error removing photo:', error);
+      toast({
+        title: "Remove Failed",
+        description: "Failed to remove photo. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const removeLogo = () => {
-    setLogoPreview('');
-    setFormData(prev => ({ ...prev, businessLogo: '' }));
+  const removeLogo = async () => {
+    if (!typedUser?.companyId) {
+      toast({
+        title: "Session Expired",
+        description: "Please log out and log back in.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      // Save to database immediately
+      const saveResponse = await fetch(`/api/companies/${typedUser.companyId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ businessLogo: '' }),
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      
+      if (!saveResponse.ok) {
+        throw new Error('Failed to remove logo');
+      }
+      
+      // Update UI
+      setLogoPreview('');
+      setFormData(prev => ({ ...prev, businessLogo: '' }));
+      
+      toast({
+        title: "Logo Removed",
+        description: "Logo has been deleted from the database.",
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['/api/companies', typedUser.companyId] });
+    } catch (error) {
+      console.error('Error removing logo:', error);
+      toast({
+        title: "Remove Failed",
+        description: "Failed to remove logo. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
