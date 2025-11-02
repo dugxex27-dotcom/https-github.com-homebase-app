@@ -43,14 +43,18 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
     <div className="bg-card border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/20">
       <div className="flex items-start space-x-4">
         <div className="relative">
-          {contractor.profileImage ? (
+          {(contractor.businessLogo || contractor.profileImage) ? (
             <img
-              src={contractor.profileImage}
-              alt={`${contractor.company} profile photo`}
-              className="w-20 h-20 rounded-full object-cover border-2 border-primary/10"
+              src={contractor.businessLogo || contractor.profileImage}
+              alt={`${contractor.company} logo`}
+              className="w-20 h-20 rounded-lg object-contain border-2 border-primary/10 bg-white p-2"
+              data-testid="contractor-logo"
             />
           ) : (
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+            <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+              <span className="text-lg font-bold text-primary">
+                {contractor.company.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              </span>
             </div>
           )}
 
