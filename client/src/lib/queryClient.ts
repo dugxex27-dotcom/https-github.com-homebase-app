@@ -2,6 +2,16 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
+    // Handle 401 Unauthorized - clear cache and redirect to signin
+    if (res.status === 401) {
+      console.log('[Auth] 401 Unauthorized - clearing cache and redirecting to signin');
+      // Clear all cached data
+      queryClient.clear();
+      // Redirect to signin page
+      window.location.href = '/signin';
+      throw new Error('Unauthorized - redirecting to signin');
+    }
+    
     const text = (await res.text()) || res.statusText;
     throw new Error(`${res.status}: ${text}`);
   }
