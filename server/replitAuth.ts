@@ -210,7 +210,6 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/callback", (req, res, next) => {
     console.log('[AUTH] ===== /api/callback CALLED =====');
-    console.log('[AUTH] Callback headers:', req.headers);
     console.log('[AUTH] Callback hostname:', req.hostname);
     console.log('[AUTH] Callback query:', req.query);
     
@@ -220,84 +219,14 @@ export async function setupAuth(app: Express) {
       return res.redirect("/signin");
     }
     
-    // FIX 2: Normalize hostname to match registered strategies
+    // Normalize hostname to match registered strategies
     const normalizedHost = normalizeHostname(req.hostname, configuredDomains);
-    console.log('[AUTH] Callback - Raw hostname:', req.hostname, '-> Normalized:', normalizedHost);
-    console.log('[AUTH] Attempting to use strategy: replitauth:' + normalizedHost);
+    console.log('[AUTH] Using strategy: replitauth:' + normalizedHost);
     
-    passport.authenticate(`replitauth:${normalizedHost}`, async (err: any, user: any) => {
-      if (err || !user) {
-        console.error("OAuth authentication error:", err);
-        return res.redirect("/signin");
-      }
-      
-      try {
-        // Get the full user record from storage
-        const userId = user.claims?.sub;
-        if (!userId) {
-          console.error("No userId in OAuth claims");
-          return res.redirect("/signin");
-        }
-        
-        // FIX 5: Fetch full user from storage with all fields including companyId
-        const fullUser = await storage.getUser(userId);
-        if (!fullUser) {
-          console.error("User not found in database:", userId);
-          return res.redirect("/signin");
-        }
-        
-        console.log("OAuth callback: User authenticated:", fullUser.email);
-        console.log("OAuth callback: User data - role:", fullUser.role, "companyId:", fullUser.companyId, "companyRole:", fullUser.companyRole);
-        
-        // Regenerate session to prevent fixation attacks
-        req.session.regenerate((regenerateErr) => {
-          if (regenerateErr) {
-            console.error("Session regenerate error:", regenerateErr);
-            return res.redirect("/signin");
-          }
-          
-          // Establish Passport session with req.login()
-          req.login(fullUser, (loginErr) => {
-            if (loginErr) {
-              console.error("Passport login error:", loginErr);
-              return res.redirect("/signin");
-            }
-            
-            // FIX 5: Set session data with full user object including companyId
-            (req.session as any).isAuthenticated = true;
-            (req.session as any).user = fullUser;
-            
-            console.log("OAuth callback: Session established for", fullUser.email);
-            console.log("OAuth callback: Session user data - companyId:", fullUser.companyId, "role:", fullUser.role);
-            
-            // Save session to store before redirecting
-            req.session.save((saveErr) => {
-              if (saveErr) {
-                console.error("Session save error:", saveErr);
-                return res.redirect("/signin");
-              }
-              
-              console.log("OAuth callback: Session saved successfully");
-              console.log("OAuth callback: Final session check - user.companyId:", (req.session as any).user?.companyId);
-              
-              // Check if user needs to complete profile (add zip code)
-              if (!fullUser.zipCode) {
-                return res.redirect("/complete-profile");
-              }
-              
-              // Redirect to appropriate dashboard based on role
-              const redirectPath = fullUser.role === 'contractor' 
-                ? '/contractor-dashboard' 
-                : '/';
-              console.log("OAuth callback: Redirecting to", redirectPath);
-              res.redirect(redirectPath);
-            });
-          });
-        });
-      } catch (error) {
-        console.error("OAuth callback error:", error);
-        res.redirect("/signin");
-      }
+    // Use Replit's recommended simple callback pattern
+    passport.authenticate(`replitauth:${normalizedHost}`, {
+      successReturnToOrRedirect: "/",
+      failureRedirect: "/signin",
     })(req, res, next);
   });
 
