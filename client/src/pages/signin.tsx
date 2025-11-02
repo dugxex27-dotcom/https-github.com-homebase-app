@@ -116,6 +116,9 @@ export default function SignIn() {
       return response.json();
     },
     onSuccess: (data) => {
+      // Invalidate auth query to refresh user state
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
@@ -157,6 +160,9 @@ export default function SignIn() {
       return response.json();
     },
     onSuccess: (data) => {
+      // Invalidate auth query to refresh user state
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      
       toast({
         title: "Account created!",
         description: "Welcome to Home Base. Your account has been created successfully.",
