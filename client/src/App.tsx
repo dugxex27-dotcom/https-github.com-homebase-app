@@ -63,6 +63,9 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       
+      {/* Test upload - always available */}
+      <Route path="/test-upload" component={TestUpload} />
+      
       {/* Complete profile route - accessible to authenticated users */}
       <Route path="/complete-profile" component={CompleteProfile} />
       
