@@ -200,7 +200,6 @@ export async function setupAuth(app: Express) {
     
     try {
       passport.authenticate(`replitauth:${normalizedHost}`, {
-        prompt: "login consent", 
         scope: ["openid", "email", "profile", "offline_access"],
       })(req, res, next);
     } catch (error) {
