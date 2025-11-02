@@ -31,6 +31,52 @@ const authLimiter = rateLimit({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // RAW SQL LOGO UPLOAD - Bypasses ALL ORM issues
+  app.post('/api/upload-logo-raw', async (req, res) => {
+    try {
+      console.error('[RAW-UPLOAD] Request received');
+      const { email, imageData } = req.body;
+      
+      if (!email || !imageData) {
+        return res.status(400).json({ error: 'Missing email or imageData' });
+      }
+      
+      // Query database with RAW SQL
+      const result = await pool.query('SELECT id, email, company_id FROM users WHERE email = $1 LIMIT 1', [email]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      const user = result.rows[0];
+      console.error('[RAW-UPLOAD] User found:', user);
+      console.error('[RAW-UPLOAD] company_id:', user.company_id);
+      
+      if (!user.company_id) {
+        return res.status(400).json({ error: 'User has no company_id in database' });
+      }
+      
+      // Upload image
+      const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      const fileExtension = imageData.match(/^data:image\/(\w+);/)?.[1] || 'jpg';
+      const filename = `${randomUUID()}.${fileExtension}`;
+      const path = `public/contractor-images/logos/${filename}`;
+      
+      const objectStorage = new ObjectStorageService();
+      await objectStorage.uploadFile(path, buffer, `image/${fileExtension}`);
+      const url = `/public/contractor-images/logos/${filename}`;
+      
+      // Update company in database with RAW SQL
+      await pool.query('UPDATE companies SET business_logo = $1 WHERE id = $2', [url, user.company_id]);
+      
+      res.json({ success: true, url, companyId: user.company_id });
+    } catch (error: any) {
+      console.error('[RAW-UPLOAD ERROR]', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
   // IMMEDIATE TEST: Simple test endpoint to verify routing works
   app.post('/api/test-simple', (req, res) => {
     console.error("===== SIMPLE TEST ENDPOINT CALLED =====");

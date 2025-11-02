@@ -82,9 +82,9 @@ export default function TestUpload() {
       
       const email = 'freshandcleangutters@gmail.com';
       console.log('[TEST UPLOAD] Using email:', email);
-      console.log('[TEST UPLOAD] Sending POST to /api/contractor/upload-logo');
+      console.log('[TEST UPLOAD] Sending POST to /api/upload-logo-raw (RAW SQL VERSION)');
       
-      const uploadResponse = await fetch('/api/contractor/upload-logo', {
+      const uploadResponse = await fetch('/api/upload-logo-raw', {
         method: 'POST',
         body: JSON.stringify({ 
           imageData: compressedImage,
