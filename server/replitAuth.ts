@@ -40,7 +40,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'lax',
       maxAge: sessionTtl,
     },
@@ -121,26 +121,27 @@ export async function setupAuth(app: Express) {
     const claims = tokens.claims();
     await upsertUser(claims);
     
-    // CRITICAL FIX: Fetch the FULL user object from database (with companyId, companyRole, etc.)
+    // Fetch the full user record from database to get companyId, companyRole, etc.
     const fullUser = await storage.getUser(claims["sub"]);
     if (!fullUser) {
       return verified(new Error("Failed to create user"));
     }
     
     // Add OAuth tokens to user object
-    updateUserSession(fullUser, tokens);
+    updateUserSession(fullUser as any, tokens);
     verified(null, fullUser);
   };
 
-  // Only set up OAuth strategies if REPLIT_DOMAINS is available
-  let configuredDomains: string[] = [];
-  if (process.env.REPLIT_DOMAINS) {
-    configuredDomains = process.env.REPLIT_DOMAINS.split(",");
-    console.log('[AUTH] Configuring OAuth for domains:', configuredDomains);
-    for (const domain of configuredDomains) {
+  // Keep track of registered strategies
+  const registeredStrategies = new Set<string>();
+
+  // Helper function to ensure strategy exists for a domain
+  const ensureStrategy = (domain: string) => {
+    const strategyName = `replitauth:${domain}`;
+    if (!registeredStrategies.has(strategyName)) {
       const strategy = new Strategy(
         {
-          name: `replitauth:${domain}`,
+          name: strategyName,
           config,
           scope: "openid email profile offline_access",
           callbackURL: `https://${domain}/api/callback`,
@@ -148,97 +149,38 @@ export async function setupAuth(app: Express) {
         verify,
       );
       passport.use(strategy);
+      registeredStrategies.add(strategyName);
       console.log('[AUTH] Registered strategy for domain:', domain);
     }
-    console.log('[AUTH] Replit Auth configured successfully');
-  } else {
-    console.warn('[AUTH] REPLIT_DOMAINS not set - OAuth will not work!');
-  }
+  };
 
-  // FIX 4: Serialize only user ID, deserialize by fetching from storage
-  passport.serializeUser((user: any, cb) => {
-    const userId = user.id || user.claims?.sub;
-    console.log('[AUTH] Serializing user:', userId);
-    cb(null, userId);
-  });
-  
-  passport.deserializeUser(async (userId: string, cb) => {
-    try {
-      console.log('[AUTH] Deserializing user:', userId);
-      const fullUser = await storage.getUser(userId);
-      if (fullUser) {
-        console.log('[AUTH] User deserialized with companyId:', fullUser.companyId);
-        cb(null, fullUser);
-      } else {
-        console.warn('[AUTH] User not found during deserialization:', userId);
-        cb(new Error('User not found'));
-      }
-    } catch (error) {
-      console.error('[AUTH] Error deserializing user:', error);
-      cb(error);
-    }
-  });
+  passport.serializeUser((user: Express.User, cb) => cb(null, user));
+  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    console.log('[AUTH] ===== /api/login CALLED =====');
-    console.log('[AUTH] Request headers:', req.headers);
-    console.log('[AUTH] Request hostname:', req.hostname);
-    
-    // If no OAuth is configured, redirect to signin page for demo login
-    if (!process.env.REPLIT_DOMAINS || configuredDomains.length === 0) {
-      console.log('[AUTH] No REPLIT_DOMAINS - redirecting to signin');
-      return res.redirect("/signin");
-    }
-    
-    // FIX 2: Normalize hostname to match registered strategies
-    const normalizedHost = normalizeHostname(req.hostname, configuredDomains);
-    console.log('[AUTH] Raw hostname:', req.hostname, '-> Normalized:', normalizedHost);
-    console.log('[AUTH] Attempting to use strategy: replitauth:' + normalizedHost);
-    
-    // FIX 3: Touch session before OAuth redirect to ensure it's initialized
-    (req.session as any).oauthHost = normalizedHost;
-    
-    try {
-      passport.authenticate(`replitauth:${normalizedHost}`, {
-        scope: ["openid", "email", "profile", "offline_access"],
-      })(req, res, next);
-    } catch (error) {
-      console.error('[AUTH] Error in passport.authenticate:', error);
-      res.redirect('/signin?error=oauth-failed');
-    }
-  });
-
-  app.get("/api/callback", (req, res, next) => {
-    console.log('[AUTH] ===== /api/callback CALLED =====');
-    console.log('[AUTH] Callback hostname:', req.hostname);
-    console.log('[AUTH] Callback query:', req.query);
-    
-    // If no OAuth is configured, redirect to signin page
-    if (!process.env.REPLIT_DOMAINS || configuredDomains.length === 0) {
-      console.log('[AUTH] No REPLIT_DOMAINS in callback - redirecting');
-      return res.redirect("/signin");
-    }
-    
-    // Normalize hostname to match registered strategies
-    const normalizedHost = normalizeHostname(req.hostname, configuredDomains);
-    console.log('[AUTH] Using strategy: replitauth:' + normalizedHost);
-    
-    // Use Replit's recommended simple callback pattern
-    passport.authenticate(`replitauth:${normalizedHost}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/signin",
+    ensureStrategy(req.hostname);
+    passport.authenticate(`replitauth:${req.hostname}`, {
+      prompt: "login consent",
+      scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
-  app.get("/api/logout", (req, res) => {
+  app.get("/api/callback", (req, res, next) => {
+    ensureStrategy(req.hostname);
+    passport.authenticate(`replitauth:${req.hostname}`, {
+      successReturnToOrRedirect: "/",
+      failureRedirect: "/api/login",
+    })(req, res, next);
+  });
+
+  app.get("/api/logout", async (req, res) => {
     req.logout(() => {
-      req.session.destroy((err) => {
-        if (err) {
-          console.error("Session destroy error:", err);
-        }
-        res.clearCookie('connect.sid');
-        res.redirect("/signin");
-      });
+      res.redirect(
+        client.buildEndSessionUrl(config, {
+          client_id: process.env.REPL_ID!,
+          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+        }).href
+      );
     });
   });
 }
@@ -249,21 +191,32 @@ export const isAuthenticated: RequestHandler = async (req: any, res, next) => {
     return next();
   }
 
-  // Check passport user (Google OAuth login)
-  if (req.user) {
-    // Sync passport user to session format for consistent access
-    const userId = (req.user as any).id || (req.user as any).claims?.sub;
-    if (userId) {
-      const fullUser = await storage.getUser(userId);
-      if (fullUser) {
-        req.session.isAuthenticated = true;
-        req.session.user = fullUser;
-        return next();
-      }
-    }
+  // Check OAuth authentication
+  const user = req.user as any;
+  if (!req.isAuthenticated() || !user?.expires_at) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
-  return res.status(401).json({ message: "Unauthorized" });
+  // Check if token is expired
+  const now = Math.floor(Date.now() / 1000);
+  if (now <= user.expires_at) {
+    return next();
+  }
+
+  // Try to refresh the token
+  const refreshToken = user.refresh_token;
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const config = await getOidcConfig();
+    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+    updateUserSession(user, tokenResponse);
+    return next();
+  } catch (error) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 };
 
 // Role-based authorization middleware
