@@ -850,8 +850,8 @@ export default function ContractorProfile() {
       
       if (uploadedCount > 0) {
         try {
-          // Get current photos from database
-          const currentPhotos = formData.projectPhotos.filter(p => p.startsWith('http'));
+          // Get current photos from database (keep all existing photos)
+          const currentPhotos = formData.projectPhotos;
           const allPhotos = [...currentPhotos, ...newPhotoUrls];
           
           // Save all photos to database immediately
