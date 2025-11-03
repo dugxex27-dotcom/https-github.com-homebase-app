@@ -1718,6 +1718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const logs = await storage.getMaintenanceLogs(homeownerId, houseId);
       res.json(logs);
     } catch (error) {
+      console.error("[ERROR] Failed to fetch maintenance logs:", error);
       res.status(500).json({ message: "Failed to fetch maintenance logs" });
     }
   });
@@ -1815,6 +1816,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tasks = await storage.getCustomMaintenanceTasks(homeownerId, houseId);
       res.json(tasks);
     } catch (error) {
+      console.error("[ERROR] Failed to fetch custom maintenance tasks:", error);
       res.status(500).json({ message: "Failed to fetch custom maintenance tasks" });
     }
   });
@@ -2727,6 +2729,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const systems = await storage.getHomeSystems(homeownerId, houseId);
       res.json(systems);
     } catch (error) {
+      console.error("[ERROR] Failed to fetch home systems:", error);
       res.status(500).json({ message: "Failed to fetch home systems" });
     }
   });
