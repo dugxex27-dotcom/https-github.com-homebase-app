@@ -1069,11 +1069,27 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
 
   // Toggle home system selection
   const toggleHomeSystem = (system: string) => {
-    setHomeSystems(prev => 
-      prev.includes(system) 
-        ? prev.filter(s => s !== system)
-        : [...prev, system]
-    );
+    if (!selectedHouseId) {
+      toast({
+        title: "No house selected",
+        description: "Please select a house first to track its systems.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newSystems = homeSystems.includes(system) 
+      ? homeSystems.filter(s => s !== system)
+      : [...homeSystems, system];
+    
+    // Update local state immediately for UI responsiveness
+    setHomeSystems(newSystems);
+    
+    // Save to database
+    updateHouseMutation.mutate({
+      id: selectedHouseId,
+      data: { homeSystems: newSystems }
+    });
   };
 
   // Handle adding a new home system
