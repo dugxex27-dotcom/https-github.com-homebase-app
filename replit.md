@@ -26,6 +26,7 @@ Preferred communication style: Simple, everyday language.
     - Mapping applied in `DbStorage.getUser()` and `DbStorage.getUserByEmail()` to ensure consistency
     - All API endpoints that return user data fetch fresh data via `storage.getUser()` to apply mapping
     - **Photo Persistence Fix**: Contractor profile photos (projectPhotos, businessLogo) are now persisted to the database-backed `companies` table instead of the in-memory `contractors` table via `updateContractorProfile()` calling `updateCompany()`, ensuring photos survive logout/server restarts
+    - **House Persistence Fix**: Houses are now stored in PostgreSQL database instead of in-memory storage. Database-backed methods implemented in DbStorage class (`getHouses`, `getHouse`, `createHouse`, `updateHouse`, `deleteHouse`) ensure properties persist across sessions and server restarts
 - **Data Flow**: Client requests use TanStack Query, Express routes handle processing, data access is via Drizzle ORM to PostgreSQL, and responses are JSON. Shared TypeScript types ensure end-to-end type safety.
 - **Security**: Enterprise-grade security with Helmet.js headers (CSP, HSTS, X-Frame-Options), express-rate-limit for API protection (100 req/15min general, 5 req/15min auth), CORS whitelist validation, secure session cookies (httpOnly, sameSite), SQL injection and XSS pattern detection, and comprehensive input validation via Zod schemas with custom security utilities.
 

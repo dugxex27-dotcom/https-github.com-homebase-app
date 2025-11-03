@@ -3201,11 +3201,7 @@ class DbStorage implements IStorage {
     this.createCustomMaintenanceTask = this.memStorage.createCustomMaintenanceTask.bind(this.memStorage);
     this.updateCustomMaintenanceTask = this.memStorage.updateCustomMaintenanceTask.bind(this.memStorage);
     this.deleteCustomMaintenanceTask = this.memStorage.deleteCustomMaintenanceTask.bind(this.memStorage);
-    this.getHouses = this.memStorage.getHouses.bind(this.memStorage);
-    this.getHouse = this.memStorage.getHouse.bind(this.memStorage);
-    this.createHouse = this.memStorage.createHouse.bind(this.memStorage);
-    this.updateHouse = this.memStorage.updateHouse.bind(this.memStorage);
-    this.deleteHouse = this.memStorage.deleteHouse.bind(this.memStorage);
+    // Houses are now database-backed - implemented below
     this.getDefaultHouse = this.memStorage.getDefaultHouse.bind(this.memStorage);
     this.getContractorAppointments = this.memStorage.getContractorAppointments.bind(this.memStorage);
     this.getContractorAppointment = this.memStorage.getContractorAppointment.bind(this.memStorage);
@@ -3812,6 +3808,46 @@ class DbStorage implements IStorage {
   async getContractor(id: string): Promise<Contractor | undefined> {
     const result = await db.select().from(contractors).where(eq(contractors.id, id)).limit(1);
     return result[0];
+  }
+
+  // House operations - DATABASE BACKED for persistence
+  async getHouses(homeownerId?: string): Promise<House[]> {
+    if (homeownerId) {
+      return await db.select().from(houses).where(eq(houses.homeownerId, homeownerId));
+    }
+    return await db.select().from(houses);
+  }
+
+  async getHouse(id: string): Promise<House | undefined> {
+    const result = await db.select().from(houses).where(eq(houses.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createHouse(house: InsertHouse): Promise<House> {
+    const newHouse = {
+      ...house,
+      id: randomUUID(),
+      isDefault: house.isDefault ?? false,
+      createdAt: new Date(),
+    };
+    
+    await db.insert(houses).values(newHouse);
+    return (await this.getHouse(newHouse.id))!;
+  }
+
+  async updateHouse(id: string, houseData: Partial<InsertHouse>): Promise<House | undefined> {
+    const existingHouse = await this.getHouse(id);
+    if (!existingHouse) {
+      return undefined;
+    }
+
+    await db.update(houses).set(houseData).where(eq(houses.id, id));
+    return (await this.getHouse(id))!;
+  }
+
+  async deleteHouse(id: string): Promise<boolean> {
+    const result = await db.delete(houses).where(eq(houses.id, id));
+    return true;
   }
 
   // Methods delegated to MemStorage (bound in constructor)
