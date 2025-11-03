@@ -3191,17 +3191,8 @@ class DbStorage implements IStorage {
     this.createHomeApplianceManual = this.memStorage.createHomeApplianceManual.bind(this.memStorage);
     this.updateHomeApplianceManual = this.memStorage.updateHomeApplianceManual.bind(this.memStorage);
     this.deleteHomeApplianceManual = this.memStorage.deleteHomeApplianceManual.bind(this.memStorage);
-    this.getMaintenanceLogs = this.memStorage.getMaintenanceLogs.bind(this.memStorage);
-    this.getMaintenanceLog = this.memStorage.getMaintenanceLog.bind(this.memStorage);
-    this.createMaintenanceLog = this.memStorage.createMaintenanceLog.bind(this.memStorage);
-    this.updateMaintenanceLog = this.memStorage.updateMaintenanceLog.bind(this.memStorage);
-    this.deleteMaintenanceLog = this.memStorage.deleteMaintenanceLog.bind(this.memStorage);
-    this.getCustomMaintenanceTasks = this.memStorage.getCustomMaintenanceTasks.bind(this.memStorage);
-    this.getCustomMaintenanceTask = this.memStorage.getCustomMaintenanceTask.bind(this.memStorage);
-    this.createCustomMaintenanceTask = this.memStorage.createCustomMaintenanceTask.bind(this.memStorage);
-    this.updateCustomMaintenanceTask = this.memStorage.updateCustomMaintenanceTask.bind(this.memStorage);
-    this.deleteCustomMaintenanceTask = this.memStorage.deleteCustomMaintenanceTask.bind(this.memStorage);
-    // Houses are now database-backed - implemented below
+    // Maintenance logs and custom tasks now database-backed - implemented below
+    // Home systems, custom tasks, maintenance logs, and service records are now database-backed
     this.getDefaultHouse = this.memStorage.getDefaultHouse.bind(this.memStorage);
     this.getContractorAppointments = this.memStorage.getContractorAppointments.bind(this.memStorage);
     this.getContractorAppointment = this.memStorage.getContractorAppointment.bind(this.memStorage);
@@ -3217,12 +3208,7 @@ class DbStorage implements IStorage {
     this.markNotificationAsRead = this.memStorage.markNotificationAsRead.bind(this.memStorage);
     // searchContractors, getContractorProfile, and updateContractorProfile now use database-backed methods (defined below)
     this.searchProducts = this.memStorage.searchProducts.bind(this.memStorage);
-    this.getServiceRecords = this.memStorage.getServiceRecords.bind(this.memStorage);
-    this.getServiceRecord = this.memStorage.getServiceRecord.bind(this.memStorage);
-    this.createServiceRecord = this.memStorage.createServiceRecord.bind(this.memStorage);
-    this.updateServiceRecord = this.memStorage.updateServiceRecord.bind(this.memStorage);
-    this.deleteServiceRecord = this.memStorage.deleteServiceRecord.bind(this.memStorage);
-    this.getHomeownerServiceRecords = this.memStorage.getHomeownerServiceRecords.bind(this.memStorage);
+    // Service records now database-backed - implemented below
     this.getCustomerServiceRecords = this.memStorage.getCustomerServiceRecords.bind(this.memStorage);
     this.getConversations = this.memStorage.getConversations.bind(this.memStorage);
     this.getConversation = this.memStorage.getConversation.bind(this.memStorage);
@@ -3243,11 +3229,7 @@ class DbStorage implements IStorage {
     this.createProposal = this.memStorage.createProposal.bind(this.memStorage);
     this.updateProposal = this.memStorage.updateProposal.bind(this.memStorage);
     this.deleteProposal = this.memStorage.deleteProposal.bind(this.memStorage);
-    this.getHomeSystems = this.memStorage.getHomeSystems.bind(this.memStorage);
-    this.getHomeSystem = this.memStorage.getHomeSystem.bind(this.memStorage);
-    this.createHomeSystem = this.memStorage.createHomeSystem.bind(this.memStorage);
-    this.updateHomeSystem = this.memStorage.updateHomeSystem.bind(this.memStorage);
-    this.deleteHomeSystem = this.memStorage.deleteHomeSystem.bind(this.memStorage);
+    // Home systems now database-backed - implemented below
     this.getPushSubscriptions = this.memStorage.getPushSubscriptions.bind(this.memStorage);
     this.getPushSubscription = this.memStorage.getPushSubscription.bind(this.memStorage);
     this.createPushSubscription = this.memStorage.createPushSubscription.bind(this.memStorage);
@@ -3848,6 +3830,220 @@ class DbStorage implements IStorage {
   async deleteHouse(id: string): Promise<boolean> {
     const result = await db.delete(houses).where(eq(houses.id, id));
     return true;
+  }
+
+  // Home Systems operations - DATABASE BACKED for persistence
+  async getHomeSystems(homeownerId?: string, houseId?: string): Promise<HomeSystem[]> {
+    let query = db.select().from(homeSystems);
+    
+    if (homeownerId && houseId) {
+      return await query.where(and(eq(homeSystems.homeownerId, homeownerId), eq(homeSystems.houseId, houseId)));
+    } else if (homeownerId) {
+      return await query.where(eq(homeSystems.homeownerId, homeownerId));
+    } else if (houseId) {
+      return await query.where(eq(homeSystems.houseId, houseId));
+    }
+    
+    return await query;
+  }
+
+  async getHomeSystem(id: string): Promise<HomeSystem | undefined> {
+    const result = await db.select().from(homeSystems).where(eq(homeSystems.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createHomeSystem(system: InsertHomeSystem): Promise<HomeSystem> {
+    const newSystem = {
+      ...system,
+      id: randomUUID(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    await db.insert(homeSystems).values(newSystem);
+    return (await this.getHomeSystem(newSystem.id))!;
+  }
+
+  async updateHomeSystem(id: string, systemData: Partial<InsertHomeSystem>): Promise<HomeSystem | undefined> {
+    const existing = await this.getHomeSystem(id);
+    if (!existing) return undefined;
+
+    const updatedData = {
+      ...systemData,
+      updatedAt: new Date()
+    };
+
+    await db.update(homeSystems).set(updatedData).where(eq(homeSystems.id, id));
+    return (await this.getHomeSystem(id))!;
+  }
+
+  async deleteHomeSystem(id: string): Promise<boolean> {
+    await db.delete(homeSystems).where(eq(homeSystems.id, id));
+    return true;
+  }
+
+  async getHomeSystemsByHomeowner(homeownerId: string): Promise<HomeSystem[]> {
+    return await db.select().from(homeSystems).where(eq(homeSystems.homeownerId, homeownerId));
+  }
+
+  // Custom Maintenance Tasks operations - DATABASE BACKED for persistence
+  async getCustomMaintenanceTasks(homeownerId?: string, houseId?: string): Promise<CustomMaintenanceTask[]> {
+    let query = db.select().from(customMaintenanceTasks);
+    
+    if (homeownerId && houseId) {
+      return await query.where(and(eq(customMaintenanceTasks.homeownerId, homeownerId), eq(customMaintenanceTasks.houseId, houseId)));
+    } else if (homeownerId) {
+      return await query.where(eq(customMaintenanceTasks.homeownerId, homeownerId));
+    } else if (houseId) {
+      return await query.where(eq(customMaintenanceTasks.houseId, houseId));
+    }
+    
+    return await query;
+  }
+
+  async getCustomMaintenanceTask(id: string): Promise<CustomMaintenanceTask | undefined> {
+    const result = await db.select().from(customMaintenanceTasks).where(eq(customMaintenanceTasks.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createCustomMaintenanceTask(task: InsertCustomMaintenanceTask): Promise<CustomMaintenanceTask> {
+    const newTask = {
+      ...task,
+      id: randomUUID(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    await db.insert(customMaintenanceTasks).values(newTask);
+    return (await this.getCustomMaintenanceTask(newTask.id))!;
+  }
+
+  async updateCustomMaintenanceTask(id: string, taskData: Partial<InsertCustomMaintenanceTask>): Promise<CustomMaintenanceTask | undefined> {
+    const existing = await this.getCustomMaintenanceTask(id);
+    if (!existing) return undefined;
+
+    const updatedData = {
+      ...taskData,
+      updatedAt: new Date()
+    };
+
+    await db.update(customMaintenanceTasks).set(updatedData).where(eq(customMaintenanceTasks.id, id));
+    return (await this.getCustomMaintenanceTask(id))!;
+  }
+
+  async deleteCustomMaintenanceTask(id: string): Promise<boolean> {
+    await db.delete(customMaintenanceTasks).where(eq(customMaintenanceTasks.id, id));
+    return true;
+  }
+
+  // Maintenance Logs operations - DATABASE BACKED for persistence
+  async getMaintenanceLogs(homeownerId?: string, houseId?: string): Promise<MaintenanceLog[]> {
+    let query = db.select().from(maintenanceLogs);
+    
+    if (homeownerId && houseId) {
+      return await query.where(and(eq(maintenanceLogs.homeownerId, homeownerId), eq(maintenanceLogs.houseId, houseId)));
+    } else if (homeownerId) {
+      return await query.where(eq(maintenanceLogs.homeownerId, homeownerId));
+    } else if (houseId) {
+      return await query.where(eq(maintenanceLogs.houseId, houseId));
+    }
+    
+    return await query;
+  }
+
+  async getMaintenanceLog(id: string): Promise<MaintenanceLog | undefined> {
+    const result = await db.select().from(maintenanceLogs).where(eq(maintenanceLogs.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createMaintenanceLog(log: InsertMaintenanceLog): Promise<MaintenanceLog> {
+    const newLog = {
+      ...log,
+      id: randomUUID(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    await db.insert(maintenanceLogs).values(newLog);
+    return (await this.getMaintenanceLog(newLog.id))!;
+  }
+
+  async updateMaintenanceLog(id: string, logData: Partial<InsertMaintenanceLog>): Promise<MaintenanceLog | undefined> {
+    const existing = await this.getMaintenanceLog(id);
+    if (!existing) return undefined;
+
+    const updatedData = {
+      ...logData,
+      updatedAt: new Date()
+    };
+
+    await db.update(maintenanceLogs).set(updatedData).where(eq(maintenanceLogs.id, id));
+    return (await this.getMaintenanceLog(id))!;
+  }
+
+  async deleteMaintenanceLog(id: string): Promise<boolean> {
+    await db.delete(maintenanceLogs).where(eq(maintenanceLogs.id, id));
+    return true;
+  }
+
+  async getMaintenanceLogsByHomeowner(homeownerId: string): Promise<MaintenanceLog[]> {
+    return await db.select().from(maintenanceLogs).where(eq(maintenanceLogs.homeownerId, homeownerId));
+  }
+
+  // Service Records operations - DATABASE BACKED for persistence
+  async getServiceRecords(contractorId?: string, homeownerId?: string): Promise<ServiceRecord[]> {
+    if (contractorId && homeownerId) {
+      return await db.select().from(serviceRecords).where(
+        and(eq(serviceRecords.contractorId, contractorId), eq(serviceRecords.homeownerId, homeownerId))
+      );
+    } else if (contractorId) {
+      return await db.select().from(serviceRecords).where(eq(serviceRecords.contractorId, contractorId));
+    } else if (homeownerId) {
+      return await db.select().from(serviceRecords).where(eq(serviceRecords.homeownerId, homeownerId));
+    }
+    return await db.select().from(serviceRecords);
+  }
+
+  async getServiceRecord(id: string): Promise<ServiceRecord | undefined> {
+    const result = await db.select().from(serviceRecords).where(eq(serviceRecords.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createServiceRecord(record: InsertServiceRecord): Promise<ServiceRecord> {
+    const newRecord = {
+      ...record,
+      id: randomUUID(),
+      createdAt: new Date()
+    };
+    
+    await db.insert(serviceRecords).values(newRecord);
+    return (await this.getServiceRecord(newRecord.id))!;
+  }
+
+  async updateServiceRecord(id: string, recordData: Partial<InsertServiceRecord>): Promise<ServiceRecord | undefined> {
+    const existing = await this.getServiceRecord(id);
+    if (!existing) return undefined;
+
+    await db.update(serviceRecords).set(recordData).where(eq(serviceRecords.id, id));
+    return (await this.getServiceRecord(id))!;
+  }
+
+  async deleteServiceRecord(id: string): Promise<boolean> {
+    await db.delete(serviceRecords).where(eq(serviceRecords.id, id));
+    return true;
+  }
+
+  async getHomeownerServiceRecords(homeownerId: string): Promise<ServiceRecord[]> {
+    return await db.select().from(serviceRecords).where(eq(serviceRecords.homeownerId, homeownerId));
+  }
+
+  async getServiceRecordsByHomeowner(homeownerId: string, houseId?: string): Promise<ServiceRecord[]> {
+    if (houseId) {
+      return await db.select().from(serviceRecords).where(
+        and(eq(serviceRecords.homeownerId, homeownerId), eq(serviceRecords.houseId, houseId))
+      );
+    }
+    return await db.select().from(serviceRecords).where(eq(serviceRecords.homeownerId, homeownerId));
   }
 
   // Methods delegated to MemStorage (bound in constructor)
