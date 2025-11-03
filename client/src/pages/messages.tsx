@@ -19,7 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, Send, User, Calendar, Plus, Users, FileText, DollarSign, Clock, Star } from "lucide-react";
+import { MessageCircle, Send, User, Calendar, Plus, Users, FileText, DollarSign, Clock, Star, Image as ImageIcon, X } from "lucide-react";
 import { insertProposalSchema } from "@shared/schema";
 import { z } from "zod";
 import type { User as UserType, Conversation, Message, Contractor, Proposal, ContractorReview } from "@shared/schema";
@@ -35,6 +35,8 @@ export default function Messages() {
   const typedUser = user as UserType | undefined;
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isComposeDialogOpen, setIsComposeDialogOpen] = useState(false);
   const [composeForm, setComposeForm] = useState({
     subject: "",
@@ -120,7 +122,7 @@ export default function Messages() {
 
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: async (messageData: { message: string }) => {
+    mutationFn: async (messageData: { message: string; imageUrl?: string }) => {
       const response = await fetch(`/api/conversations/${selectedConversationId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -134,12 +136,71 @@ export default function Messages() {
       queryClient.invalidateQueries({ queryKey: ['/api/conversations', selectedConversationId, 'messages'] });
       queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
       setNewMessage("");
+      setSelectedImage(null);
+      setImagePreview(null);
     }
   });
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedConversationId) return;
-    sendMessageMutation.mutate({ message: newMessage });
+  const handleSendMessage = async () => {
+    if ((!newMessage.trim() && !selectedImage) || !selectedConversationId) return;
+
+    let imageUrl: string | undefined;
+
+    // Upload image if selected
+    if (selectedImage) {
+      try {
+        const response = await fetch('/api/upload/message-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ imageData: selectedImage })
+        });
+        
+        if (!response.ok) throw new Error('Failed to upload image');
+        const data = await response.json();
+        imageUrl = data.url;
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to upload image. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    sendMessageMutation.mutate({ 
+      message: newMessage || "",
+      imageUrl 
+    });
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "Image size must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      setSelectedImage(result);
+      setImagePreview(result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
   };
 
   // Send message to multiple contractors
@@ -812,7 +873,16 @@ export default function Messages() {
                                 : 'bg-gray-100 text-gray-900'
                             }`}
                           >
-                            <p className="whitespace-pre-wrap">{message.message}</p>
+                            {(message as any).imageUrl && (
+                              <img 
+                                src={(message as any).imageUrl} 
+                                alt="Message attachment" 
+                                className="rounded-lg mb-2 max-w-full cursor-pointer hover:opacity-90"
+                                onClick={() => window.open((message as any).imageUrl, '_blank')}
+                                data-testid={`message-image-${message.id}`}
+                              />
+                            )}
+                            {message.message && <p className="whitespace-pre-wrap">{message.message}</p>}
                             <p className={`text-xs mt-1 ${
                               message.senderId === typedUser.id 
                                 ? typedUser.role === 'contractor'
@@ -831,7 +901,39 @@ export default function Messages() {
 
                 {/* Message Input */}
                 <div className="p-4 border-t">
+                  {imagePreview && (
+                    <div className="mb-2 relative inline-block">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        className="max-w-xs max-h-40 rounded-lg"
+                      />
+                      <button
+                        onClick={handleRemoveImage}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        data-testid="button-remove-image"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                   <div className="flex gap-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      className="hidden"
+                      id="message-image-input"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById('message-image-input')?.click()}
+                      className="self-end"
+                      data-testid="button-upload-image"
+                    >
+                      <ImageIcon className="h-4 w-4" />
+                    </Button>
                     <Textarea
                       placeholder="Type your message..."
                       value={newMessage}
@@ -849,7 +951,7 @@ export default function Messages() {
                     />
                     <Button
                       onClick={handleSendMessage}
-                      disabled={!newMessage.trim() || sendMessageMutation.isPending}
+                      disabled={(!newMessage.trim() && !selectedImage) || sendMessageMutation.isPending}
                       className={`self-end ${
                         typedUser.role === 'contractor'
                           ? 'bg-blue-800 hover:bg-blue-900 text-white'
