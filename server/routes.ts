@@ -396,6 +396,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Message image upload endpoint
+  app.post('/api/upload/message-image', isAuthenticated, async (req: any, res) => {
+    try {
+      const { imageData } = req.body;
+      
+      if (!imageData) {
+        return res.status(400).json({ error: 'Missing imageData' });
+      }
+      
+      // Upload image
+      const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      const fileExtension = imageData.match(/^data:image\/(\w+);/)?.[1] || 'jpg';
+      const filename = `${randomUUID()}.${fileExtension}`;
+      const path = `public/message-images/${filename}`;
+      
+      await objectStorageService.uploadFile(path, buffer, `image/${fileExtension}`);
+      const url = `/public/message-images/${filename}`;
+      
+      res.json({ success: true, url });
+    } catch (error: any) {
+      console.error('[MESSAGE IMAGE UPLOAD ERROR]', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Simple homeowner demo login
   app.post('/api/auth/homeowner-demo-login', authLimiter, async (req, res) => {
     try {
