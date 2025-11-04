@@ -4434,7 +4434,7 @@ Important: Only recommend service types from the available list. Be specific and
           { role: "user", content: `Problem: ${problem}` }
         ],
         response_format: { type: "json_object" },
-        max_completion_tokens: 500
+        max_completion_tokens: 2000
       });
 
       console.log('[AI] Response received:', JSON.stringify(response, null, 2));
