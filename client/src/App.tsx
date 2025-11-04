@@ -24,6 +24,7 @@ import AdminDashboard from "./pages/admin";
 import CompleteProfile from "./pages/complete-profile";
 import ManageTeam from "./pages/manage-team";
 import TestUpload from "./pages/test-upload";
+import AIContractorHelp from "./pages/ai-contractor-help";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -85,11 +86,13 @@ function Router() {
       {typedUser?.role === 'homeowner' && (
         <>
           <Route path="/contractors" component={Contractors} />
+          <Route path="/find-contractors" component={Contractors} />
           <Route path="/products" component={Products} />
           <Route path="/contractor/:id" component={ContractorDetail} />
           <Route path="/service-records" component={HomeownerServiceRecords} />
           <Route path="/account" component={HomeownerAccount} />
           <Route path="/achievements" component={Achievements} />
+          <Route path="/ai-help" component={AIContractorHelp} />
         </>
       )}
       

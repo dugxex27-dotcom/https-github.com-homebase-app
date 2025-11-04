@@ -12,6 +12,7 @@ import pushRoutes from "./push-routes";
 import { pushService } from "./push-service";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { pool, db } from "./db";
+import OpenAI from "openai";
 
 // Extend session data interface
 declare module 'express-session' {
@@ -4368,6 +4369,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching achievement progress:", error);
       res.status(500).json({ message: "Failed to fetch achievement progress" });
+    }
+  });
+
+  // AI Contractor Recommendation - using Replit AI Integrations blueprint
+  // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+  const openai = new OpenAI({
+    baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+    apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY
+  });
+
+  const AVAILABLE_SERVICES = [
+    "Appliance Installation", "Appliance Repair & Maintenance", "Basement Remodeling", "Bathroom Remodeling",
+    "Cabinet Installation", "Carpet Installation", "Closet Organization", "Concrete & Masonry",
+    "Custom Carpentry", "Custom Home Building", "Deck Construction", "Drainage Solutions",
+    "Drywall & Spackling Repair", "Dumpster Rental", "Electrical Services", "Epoxy Flooring",
+    "Exterior Painting", "Fence Installation", "Fire & Water Damage Restoration", "Furniture Assembly",
+    "Garage Door Services", "General Contracting", "Gutter Cleaning and Repair", "Gutter Installation",
+    "Handyman Services", "Hardwood Flooring", "Holiday Light Installation", "Home Inspection",
+    "House Cleaning", "HVAC Services", "Interior Painting", "Irrigation Systems",
+    "Junk Removal", "Kitchen Remodeling", "Laminate & Vinyl Flooring", "Landscape Design",
+    "Lawn & Landscaping", "Masonry & Paver Installation", "Mold Remediation", "Pest Control",
+    "Plumbing Services", "Pool Installation", "Pool Maintenance", "Pressure Washing",
+    "Roofing Services", "Security System Installation", "Septic Services", "Siding Installation",
+    "Snow Removal", "Tile Installation", "Tree Service & Trimming", "Trim & Finish Carpentry",
+    "Windows & Door Installation"
+  ];
+
+  app.post('/api/ai/contractor-recommendation', isAuthenticated, async (req: any, res) => {
+    try {
+      const { problem } = req.body;
+
+      if (!problem || typeof problem !== 'string' || problem.trim().length < 10) {
+        return res.status(400).json({ 
+          message: "Please provide a detailed description of your problem (at least 10 characters)" 
+        });
+      }
+
+      console.log('[AI] Processing contractor recommendation request');
+
+      const systemPrompt = `You are a helpful home maintenance expert assistant. Your job is to analyze home problems and recommend which type of contractor the homeowner should contact.
+
+Available contractor service types:
+${AVAILABLE_SERVICES.join(', ')}
+
+Analyze the problem and provide:
+1. A brief explanation of possible causes (1-2 sentences)
+2. The recommended contractor service type(s) from the available list (pick 1-3 most relevant)
+3. A brief explanation of why this contractor type is recommended
+
+Respond ONLY in valid JSON format with this exact structure:
+{
+  "possibleCauses": "Brief explanation of what might be causing this problem",
+  "recommendedServices": ["Service Type 1", "Service Type 2"],
+  "explanation": "Why these contractor types are recommended for this problem"
+}
+
+Important: Only recommend service types from the available list. Be specific and helpful.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-5",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Problem: ${problem}` }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 500,
+        temperature: 0.7
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        console.error('[AI] No content in AI response');
+        return res.status(500).json({ 
+          message: "AI service returned an empty response. Please try again.",
+          details: "No response content"
+        });
+      }
+
+      let recommendation;
+      try {
+        recommendation = JSON.parse(content);
+      } catch (parseError) {
+        console.error('[AI] Failed to parse AI response:', parseError);
+        return res.status(500).json({ 
+          message: "AI service returned an invalid response format. Please try again.",
+          details: "JSON parse error"
+        });
+      }
+      
+      console.log('[AI] Recommendation generated successfully');
+      res.json(recommendation);
+
+    } catch (error) {
+      console.error("[AI] Error generating contractor recommendation:", error);
+      
+      // Provide more specific error messages based on error type
+      if (error instanceof Error) {
+        // Check for OpenAI API errors
+        if (error.message.includes('model') || error.message.includes('gpt')) {
+          return res.status(500).json({ 
+            message: "AI model error. Please contact support if this persists.",
+            details: error.message
+          });
+        }
+        
+        return res.status(500).json({ 
+          message: "Failed to generate recommendation. Please try again.",
+          details: error.message
+        });
+      }
+      
+      res.status(500).json({ 
+        message: "An unexpected error occurred. Please try again.",
+        details: "Unknown error"
+      });
     }
   });
 
