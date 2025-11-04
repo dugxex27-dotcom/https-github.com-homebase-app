@@ -4428,25 +4428,19 @@ Respond ONLY in valid JSON format with this exact structure:
 Important: Only recommend service types from the available list. Be specific and helpful.`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Problem: ${problem}` }
         ],
         response_format: { type: "json_object" },
-        max_completion_tokens: 2000
+        max_tokens: 500,
+        temperature: 0.7
       });
 
-      console.log('[AI] Response received:', JSON.stringify(response, null, 2));
-      console.log('[AI] Choices:', response.choices);
-      console.log('[AI] First choice:', response.choices[0]);
-      
       const content = response.choices[0]?.message?.content;
-      console.log('[AI] Content:', content);
-      
       if (!content) {
         console.error('[AI] No content in AI response');
-        console.error('[AI] Full response object:', JSON.stringify(response, null, 2));
         return res.status(500).json({ 
           message: "AI service returned an empty response. Please try again.",
           details: "No response content"
