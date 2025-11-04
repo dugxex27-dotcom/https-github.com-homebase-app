@@ -1404,33 +1404,6 @@ export class MemStorage implements IStorage {
         
         return hasRequestedService || shouldIncludeHandyman;
       });
-      
-      // Sort results: exact service matches first, then handymen
-      contractors.sort((a, b) => {
-        const aHasExactMatch = a.services.some(contractorService => 
-          services.some(requestedService => 
-            contractorService.toLowerCase() === requestedService.toLowerCase()
-          )
-        );
-        const bHasExactMatch = b.services.some(contractorService => 
-          services.some(requestedService => 
-            contractorService.toLowerCase() === requestedService.toLowerCase()
-          )
-        );
-        
-        const aIsHandyman = a.services.some(s => s.toLowerCase() === 'handyman services');
-        const bIsHandyman = b.services.some(s => s.toLowerCase() === 'handyman services');
-        
-        // Specialists with exact matches first
-        if (aHasExactMatch && !aIsHandyman && (!bHasExactMatch || bIsHandyman)) return -1;
-        if (bHasExactMatch && !bIsHandyman && (!aHasExactMatch || aIsHandyman)) return 1;
-        
-        // Handymen come after specialists
-        if (aIsHandyman && !bIsHandyman) return 1;
-        if (bIsHandyman && !aIsHandyman) return -1;
-        
-        return 0;
-      });
     }
     
     return contractors.filter(contractor => {
@@ -3658,33 +3631,6 @@ class DbStorage implements IStorage {
           !services.some(s => excludeHandymanServices.includes(s.toLowerCase()));
         
         return hasRequestedService || shouldIncludeHandyman;
-      });
-      
-      // Sort results: exact service matches first, then handymen
-      results.sort((a, b) => {
-        const aHasExactMatch = a.services.some(contractorService => 
-          services.some(requestedService => 
-            contractorService.toLowerCase() === requestedService.toLowerCase()
-          )
-        );
-        const bHasExactMatch = b.services.some(contractorService => 
-          services.some(requestedService => 
-            contractorService.toLowerCase() === requestedService.toLowerCase()
-          )
-        );
-        
-        const aIsHandyman = a.services.some(s => s.toLowerCase() === 'handyman services');
-        const bIsHandyman = b.services.some(s => s.toLowerCase() === 'handyman services');
-        
-        // Specialists with exact matches first
-        if (aHasExactMatch && !aIsHandyman && (!bHasExactMatch || bIsHandyman)) return -1;
-        if (bHasExactMatch && !bIsHandyman && (!aHasExactMatch || aIsHandyman)) return 1;
-        
-        // Handymen come after specialists
-        if (aIsHandyman && !bIsHandyman) return 1;
-        if (bIsHandyman && !aIsHandyman) return -1;
-        
-        return 0;
       });
     }
     
