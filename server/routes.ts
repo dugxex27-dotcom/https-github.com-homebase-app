@@ -4423,12 +4423,22 @@ IMPORTANT SERVICE GUIDANCE:
 - Brick/stone/paver walkways, retaining walls, chimneys → "Masonry & Paver Installation" or "Concrete & Masonry"
 - Interior wall holes, cracks, texture repair → "Drywall & Spackling Repair"
 - Kitchen/bathroom updates, cabinet work → "Kitchen Remodeling" or "Bathroom Remodeling"
-- Small repairs, odd jobs, multiple small tasks → "Handyman Services"
+
+HANDYMAN SERVICES GUIDANCE:
+Many common home problems can be solved by EITHER a specialist OR a handyman. Consider suggesting "Handyman Services" as an additional option for:
+- Minor plumbing fixes (running toilets, leaky faucets, basic repairs)
+- Basic electrical work (replacing outlets, switches, light fixtures)
+- Small drywall repairs, painting touch-ups
+- Door/window adjustments, weatherstripping
+- Minor carpentry (shelving, trim work, small fixes)
+- General home repairs that don't require specialized licensing
+
+For most problems, recommend BOTH the specialist AND handyman option to give homeowners flexibility. Only omit handyman if the problem requires specialized licensing (major electrical/plumbing) or specialized equipment (roofing, HVAC).
 
 Analyze the problem and provide:
 1. A brief explanation of possible causes (1-2 sentences)
 2. The recommended contractor service type(s) from the available list (pick 1-3 most relevant)
-3. A brief explanation of why this contractor type is recommended
+3. A brief explanation of why these contractor type(s) are recommended
 
 Respond ONLY in valid JSON format with this exact structure:
 {
@@ -4437,7 +4447,7 @@ Respond ONLY in valid JSON format with this exact structure:
   "explanation": "Why these contractor types are recommended for this problem"
 }
 
-Important: Only recommend service types from the available list. Match problems to services carefully using the guidance above.`;
+Important: Only recommend service types from the available list. Match problems to services carefully using the guidance above. When appropriate, include both specialist and handyman options.`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
