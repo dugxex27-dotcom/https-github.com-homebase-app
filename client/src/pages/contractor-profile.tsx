@@ -174,16 +174,46 @@ export default function ContractorProfile() {
     }
   }, [profile]);
 
-  // Update form data with company images when company data loads
+  // Update form data with company data when it loads (images, bio, experience)
   React.useEffect(() => {
     if (companyData) {
+      const updates: any = {};
+      
+      // Update logo
       if ((companyData as any).businessLogo) {
         setLogoPreview((companyData as any).businessLogo);
-        setFormData(prev => ({ ...prev, businessLogo: (companyData as any).businessLogo }));
+        updates.businessLogo = (companyData as any).businessLogo;
       }
+      
+      // Update project photos
       if ((companyData as any).projectPhotos && (companyData as any).projectPhotos.length > 0) {
         setPhotosPreviews((companyData as any).projectPhotos);
-        setFormData(prev => ({ ...prev, projectPhotos: (companyData as any).projectPhotos }));
+        updates.projectPhotos = (companyData as any).projectPhotos;
+      }
+      
+      // Update bio
+      if ((companyData as any).bio) {
+        updates.bio = (companyData as any).bio;
+      }
+      
+      // Update years of experience - convert number to string for the select field
+      if ((companyData as any).experience !== undefined && (companyData as any).experience !== null) {
+        const exp = (companyData as any).experience;
+        // Map experience number to the select dropdown values
+        let experienceValue = '';
+        if (exp === 0) experienceValue = '0';
+        else if (exp >= 1 && exp <= 2) experienceValue = '1-2';
+        else if (exp >= 3 && exp <= 5) experienceValue = '3-5';
+        else if (exp >= 6 && exp <= 10) experienceValue = '6-10';
+        else if (exp >= 11 && exp <= 15) experienceValue = '11-15';
+        else if (exp >= 16 && exp <= 20) experienceValue = '16-20';
+        else if (exp > 20) experienceValue = '20+';
+        
+        updates.yearsExperience = experienceValue;
+      }
+      
+      if (Object.keys(updates).length > 0) {
+        setFormData(prev => ({ ...prev, ...updates }));
       }
     }
   }, [companyData]);
@@ -541,9 +571,21 @@ export default function ContractorProfile() {
           companyUpdate.bio = data.bio;
         }
         
-        // Add experience if provided (convert string to number)
+        // Add experience if provided (convert dropdown value to number)
         if (data.yearsExperience) {
-          companyUpdate.experience = parseInt(data.yearsExperience) || 0;
+          // Convert experience dropdown values to numbers (use middle of range)
+          let experienceNum = 0;
+          const expValue = data.yearsExperience;
+          if (expValue === '0') experienceNum = 0;
+          else if (expValue === '1-2') experienceNum = 2;
+          else if (expValue === '3-5') experienceNum = 4;
+          else if (expValue === '6-10') experienceNum = 8;
+          else if (expValue === '11-15') experienceNum = 13;
+          else if (expValue === '16-20') experienceNum = 18;
+          else if (expValue === '20+') experienceNum = 25;
+          else experienceNum = parseInt(expValue) || 0;
+          
+          companyUpdate.experience = experienceNum;
         }
         
         const companyResponse = await fetch(`/api/companies/${typedUser.companyId}`, {
