@@ -139,12 +139,11 @@ export function ObjectUploader({
     <div>
       <Button 
         onClick={() => setShowModal(true)} 
-        className={buttonClassName}
+        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary-foreground hover:bg-primary/90 py-2 h-8 px-3 text-xs bg-[#1560a2]"
         data-testid={`button-upload-${fileType}`}
       >
         {children}
       </Button>
-
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <Card className="w-full max-w-2xl max-h-[80vh] overflow-hidden">
