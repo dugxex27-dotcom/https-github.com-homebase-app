@@ -749,20 +749,20 @@ export function Proposals({ contractorId }: ProposalsProps) {
                   <div className="flex items-center flex-wrap gap-2 ml-4">
                     <Button
                       size="sm"
-                      variant="outline"
                       onClick={() => handleEdit(proposal)}
                       data-testid={`button-edit-proposal-${proposal.id}`}
                       className="h-8 px-3 text-xs"
+                      style={{ backgroundColor: '#1560a2', color: 'white' }}
                     >
                       <Edit className="w-3 h-3 mr-1" />
                       Edit
                     </Button>
                     <Button
                       size="sm"
-                      variant="outline"
                       onClick={() => handleDelete(proposal.id)}
                       data-testid={`button-delete-proposal-${proposal.id}`}
                       className="h-8 px-3 text-xs"
+                      style={{ backgroundColor: '#1560a2', color: 'white' }}
                     >
                       <Trash2 className="w-3 h-3 mr-1" />
                       Delete
