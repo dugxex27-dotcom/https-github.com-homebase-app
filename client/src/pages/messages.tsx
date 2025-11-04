@@ -972,11 +972,11 @@ export default function Messages() {
                     {!isReviewSectionOpen ? (
                       <Button
                         onClick={() => setIsReviewSectionOpen(true)}
-                        variant="outline"
                         className="w-full"
+                        style={{ backgroundColor: '#b6a6f4', color: 'white' }}
                         data-testid="button-open-review"
                       >
-                        <Star className="h-4 w-4 mr-2" style={{ color: '#b6a6f4' }} />
+                        <Star className="h-4 w-4 mr-2" />
                         {existingReview ? 'View Your Review' : 'Leave a Review'}
                       </Button>
                     ) : (
