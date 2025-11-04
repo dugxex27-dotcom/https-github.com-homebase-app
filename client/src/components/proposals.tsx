@@ -14,7 +14,7 @@ import { z } from "zod";
 import { insertProposalSchema, type Proposal } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus, FileText, Calendar, DollarSign, Clock, Edit, Trash2, Upload, Download, PenTool } from "lucide-react";
+import { Plus, FileText, Calendar, DollarSign, Clock, Edit, Trash2, Upload, Download, PenTool, ImageIcon } from "lucide-react";
 import { ObjectUploader } from "./ObjectUploader";
 import { ESignature } from "./ESignature";
 
