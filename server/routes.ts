@@ -4413,6 +4413,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 Available contractor service types:
 ${AVAILABLE_SERVICES.join(', ')}
 
+IMPORTANT SERVICE GUIDANCE:
+- Window/door leaks, drafts, exterior water intrusion → "Siding Installation" or "Windows & Door Installation"
+- Interior water stains, ceiling leaks, missing shingles → "Roofing Services"
+- Clogged gutters, water overflow from gutters → "Gutter Cleaning and Repair"
+- Toilet/sink/drain issues, water pressure problems → "Plumbing Services"
+- No heat/AC, thermostat issues, air quality → "HVAC Services"
+- Outlet/switch/breaker problems, lights flickering → "Electrical Services"
+- Brick/stone/paver walkways, retaining walls, chimneys → "Masonry & Paver Installation" or "Concrete & Masonry"
+- Interior wall holes, cracks, texture repair → "Drywall & Spackling Repair"
+- Kitchen/bathroom updates, cabinet work → "Kitchen Remodeling" or "Bathroom Remodeling"
+- Small repairs, odd jobs, multiple small tasks → "Handyman Services"
+
 Analyze the problem and provide:
 1. A brief explanation of possible causes (1-2 sentences)
 2. The recommended contractor service type(s) from the available list (pick 1-3 most relevant)
@@ -4425,7 +4437,7 @@ Respond ONLY in valid JSON format with this exact structure:
   "explanation": "Why these contractor types are recommended for this problem"
 }
 
-Important: Only recommend service types from the available list. Be specific and helpful.`;
+Important: Only recommend service types from the available list. Match problems to services carefully using the guidance above.`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
