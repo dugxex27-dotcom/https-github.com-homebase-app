@@ -182,8 +182,8 @@ export function ObjectUploader({
                   data-testid="input-file-select"
                 />
                 <Button
-                  variant="outline"
                   onClick={() => document.getElementById('file-input')?.click()}
+                  style={{ backgroundColor: '#1560a2', color: 'white' }}
                   data-testid="button-select-files"
                 >
                   Choose Files
@@ -243,12 +243,13 @@ export function ObjectUploader({
 
             {/* Footer */}
             <div className="p-6 border-t flex justify-end space-x-2">
-              <Button variant="outline" onClick={closeModal} data-testid="button-cancel-upload">
+              <Button onClick={closeModal} style={{ backgroundColor: '#1560a2', color: 'white' }} data-testid="button-cancel-upload">
                 Cancel
               </Button>
               <Button
                 onClick={uploadFiles}
                 disabled={files.length === 0 || uploading}
+                style={{ backgroundColor: '#1560a2', color: 'white' }}
                 data-testid="button-upload-files"
               >
                 {uploading ? "Uploading..." : `Upload ${files.length} file(s)`}
