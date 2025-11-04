@@ -522,14 +522,33 @@ export default function ContractorProfile() {
       }
       console.log('[DEBUG] Profile updated successfully');
       
-      // Update company with businessLogo and projectPhotos if user has a company
+      // Update company with businessLogo, projectPhotos, bio, and experience if user has a company
       if (typedUser?.companyId) {
-        console.log('[DEBUG] Updating company images for companyId:', typedUser.companyId);
+        console.log('[DEBUG] Updating company data for companyId:', typedUser.companyId);
         console.log('[DEBUG] Logo URL:', businessLogo);
         console.log('[DEBUG] Photo URLs count:', projectPhotos.length);
+        console.log('[DEBUG] Bio:', data.bio ? 'yes' : 'no');
+        console.log('[DEBUG] Years Experience:', data.yearsExperience || 'not set');
+        
+        // Build company update payload with bio and experience
+        const companyUpdate: any = { 
+          businessLogo, 
+          projectPhotos,
+        };
+        
+        // Add bio if provided
+        if (data.bio) {
+          companyUpdate.bio = data.bio;
+        }
+        
+        // Add experience if provided (convert string to number)
+        if (data.yearsExperience) {
+          companyUpdate.experience = parseInt(data.yearsExperience) || 0;
+        }
+        
         const companyResponse = await fetch(`/api/companies/${typedUser.companyId}`, {
           method: 'PUT',
-          body: JSON.stringify({ businessLogo, projectPhotos }),
+          body: JSON.stringify(companyUpdate),
           headers: {
             'Content-Type': 'application/json',
           },
@@ -538,11 +557,11 @@ export default function ContractorProfile() {
         if (!companyResponse.ok) {
           const errorText = await companyResponse.text();
           console.error('[DEBUG] Company update failed:', companyResponse.status, errorText);
-          throw new Error(`Failed to update company images: ${errorText}`);
+          throw new Error(`Failed to update company data: ${errorText}`);
         }
-        console.log('[DEBUG] Company images updated successfully');
+        console.log('[DEBUG] Company data updated successfully');
       } else {
-        console.warn('[DEBUG] No companyId found - skipping company image update');
+        console.warn('[DEBUG] No companyId found - skipping company update');
       }
       
       // Save licenses - first get existing licenses to determine creates vs updates
