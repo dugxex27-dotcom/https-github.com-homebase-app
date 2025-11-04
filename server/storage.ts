@@ -3242,13 +3242,7 @@ class DbStorage implements IStorage {
     this.searchProducts = this.memStorage.searchProducts.bind(this.memStorage);
     // Service records now database-backed - implemented below
     this.getCustomerServiceRecords = this.memStorage.getCustomerServiceRecords.bind(this.memStorage);
-    // getConversations now database-backed - implemented below
-    this.getConversation = this.memStorage.getConversation.bind(this.memStorage);
-    this.createConversation = this.memStorage.createConversation.bind(this.memStorage);
-    this.getMessages = this.memStorage.getMessages.bind(this.memStorage);
-    this.createMessage = this.memStorage.createMessage.bind(this.memStorage);
-    this.markMessagesAsRead = this.memStorage.markMessagesAsRead.bind(this.memStorage);
-    this.getUnreadMessageCount = this.memStorage.getUnreadMessageCount.bind(this.memStorage);
+    // Messaging operations now database-backed - implemented below
     this.getContactedHomeowners = this.memStorage.getContactedHomeowners.bind(this.memStorage);
     this.getContractorReviews = this.memStorage.getContractorReviews.bind(this.memStorage);
     this.getReviewsByHomeowner = this.memStorage.getReviewsByHomeowner.bind(this.memStorage);
@@ -3747,32 +3741,117 @@ class DbStorage implements IStorage {
     }
   }
 
-  // Get conversations - DATABASE BACKED to properly fetch company names
+  // Messaging operations - DATABASE BACKED for persistence
+  
   async getConversations(userId: string, userType: 'homeowner' | 'contractor'): Promise<(Conversation & { otherPartyName: string; unreadCount: number })[]> {
-    // Get conversations from memory storage first
-    const conversations = await this.memStorage.getConversations(userId, userType);
+    // Query conversations from database
+    const convs = await db
+      .select()
+      .from(conversations)
+      .where(
+        userType === 'homeowner' 
+          ? eq(conversations.homeownerId, userId)
+          : eq(conversations.contractorId, userId)
+      );
     
-    // Enrich with company names for contractors
+    // Enrich with other party names and unread counts
     const enriched = await Promise.all(
-      conversations.map(async (conv) => {
+      convs.map(async (conv) => {
+        let otherPartyName = "Unknown";
+        
         if (userType === 'homeowner') {
-          // Get contractor's company name from database
+          // Get contractor's company name
           const contractorUser = await this.getUser(conv.contractorId);
           if (contractorUser && contractorUser.companyId) {
             const company = await this.getCompany(contractorUser.companyId);
-            if (company) {
-              return {
-                ...conv,
-                otherPartyName: company.name
-              };
-            }
+            otherPartyName = company?.name || "Contractor";
+          } else {
+            otherPartyName = "Contractor";
           }
+        } else {
+          // Get homeowner name
+          const homeowner = await this.getUser(conv.homeownerId);
+          otherPartyName = homeowner?.firstName || homeowner?.email || "Homeowner";
         }
-        return conv;
+        
+        // Count unread messages
+        const unreadMessages = await db
+          .select()
+          .from(messages)
+          .where(
+            and(
+              eq(messages.conversationId, conv.id),
+              eq(messages.isRead, false),
+              not(eq(messages.senderId, userId))
+            )
+          );
+        
+        return {
+          ...conv,
+          otherPartyName,
+          unreadCount: unreadMessages.length
+        };
       })
     );
     
     return enriched;
+  }
+
+  async getConversation(id: string): Promise<Conversation | undefined> {
+    const result = await db.select().from(conversations).where(eq(conversations.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createConversation(conversation: InsertConversation): Promise<Conversation> {
+    const result = await db.insert(conversations).values(conversation).returning();
+    return result[0];
+  }
+
+  async getMessages(conversationId: string): Promise<Message[]> {
+    return await db
+      .select()
+      .from(messages)
+      .where(eq(messages.conversationId, conversationId))
+      .orderBy(messages.createdAt);
+  }
+
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const result = await db.insert(messages).values(message).returning();
+    
+    // Update conversation's lastMessageAt
+    await db
+      .update(conversations)
+      .set({ lastMessageAt: new Date() })
+      .where(eq(conversations.id, message.conversationId));
+    
+    return result[0];
+  }
+
+  async markMessagesAsRead(conversationId: string, userId: string): Promise<void> {
+    await db
+      .update(messages)
+      .set({ isRead: true, readAt: new Date() })
+      .where(
+        and(
+          eq(messages.conversationId, conversationId),
+          not(eq(messages.senderId, userId)),
+          eq(messages.isRead, false)
+        )
+      );
+  }
+
+  async getUnreadMessageCount(userId: string): Promise<number> {
+    const unreadMessages = await db
+      .select()
+      .from(messages)
+      .where(
+        and(
+          not(eq(messages.senderId, userId)),
+          eq(messages.isRead, false)
+        )
+      );
+    
+    return unreadMessages.length;
   }
 
   // Contractor profile operations - DATABASE BACKED for persistence
