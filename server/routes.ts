@@ -4434,8 +4434,7 @@ Important: Only recommend service types from the available list. Be specific and
           { role: "user", content: `Problem: ${problem}` }
         ],
         response_format: { type: "json_object" },
-        max_completion_tokens: 500,
-        temperature: 0.7
+        max_completion_tokens: 500
       });
 
       const content = response.choices[0]?.message?.content;
