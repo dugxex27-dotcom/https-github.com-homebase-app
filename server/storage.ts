@@ -3694,9 +3694,15 @@ class DbStorage implements IStorage {
   // Helper method to estimate distance between zip codes
   // This is a simplified version - real implementation should use actual geocoding
   private estimateDistanceByZipCode(zip1: string, zip2: string): number {
-    // Extract numeric part of zip codes
-    const num1 = parseInt(zip1.replace(/\D/g, '').substring(0, 5));
-    const num2 = parseInt(zip2.replace(/\D/g, '').substring(0, 5));
+    // Extract zip code from potentially full address strings
+    // Match 5-digit zip codes
+    const extractZip = (str: string): number => {
+      const match = str.match(/\b(\d{5})\b/);
+      return match ? parseInt(match[1]) : NaN;
+    };
+    
+    const num1 = extractZip(zip1);
+    const num2 = extractZip(zip2);
     
     if (isNaN(num1) || isNaN(num2)) return 999; // Return large distance if invalid
     
