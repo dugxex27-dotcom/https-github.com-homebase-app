@@ -1254,15 +1254,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const location = req.query.location as string;
       const servicesParam = req.query.services as string;
       const services = servicesParam ? servicesParam.split(',').map(s => s.trim()).filter(s => s) : undefined;
+      const maxDistance = req.query.maxDistance ? parseFloat(req.query.maxDistance as string) : undefined;
       
       console.log('[CONTRACTOR SEARCH] ==================');
       console.log('[CONTRACTOR SEARCH] Query:', query);
       console.log('[CONTRACTOR SEARCH] Location:', location);
       console.log('[CONTRACTOR SEARCH] Services param:', servicesParam);
       console.log('[CONTRACTOR SEARCH] Services array:', services);
+      console.log('[CONTRACTOR SEARCH] Max Distance (homeowner search radius):', maxDistance);
       console.log('[CONTRACTOR SEARCH] All query params:', req.query);
       
-      const contractors = await storage.searchContractors(query, location, services);
+      const contractors = await storage.searchContractors(query, location, services, maxDistance);
       
       // Enrich contractors with company logos
       const enrichedContractors = await Promise.all(

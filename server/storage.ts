@@ -104,7 +104,7 @@ export interface IStorage {
   markNotificationAsRead(id: string): Promise<boolean>;
   
   // Search methods
-  searchContractors(query: string, location?: string, services?: string[]): Promise<Contractor[]>;
+  searchContractors(query: string, location?: string, services?: string[], maxDistance?: number): Promise<Contractor[]>;
   searchProducts(query: string): Promise<Product[]>;
   
   // Contractor profile operations
@@ -1372,7 +1372,7 @@ export class MemStorage implements IStorage {
   }
 
   // Search methods
-  async searchContractors(query: string, location?: string, services?: string[]): Promise<Contractor[]> {
+  async searchContractors(query: string, location?: string, services?: string[], maxDistance?: number): Promise<Contractor[]> {
     let contractors = Array.from(this.contractors.values());
     
     // Filter by services - include both exact matches AND handymen (who can do most basic repairs)
@@ -1416,11 +1416,16 @@ export class MemStorage implements IStorage {
       const matchesLocation = !location || 
         contractor.location.toLowerCase().includes(location.toLowerCase());
       
-      // Only show contractors whose service area overlaps with homeowner's location
-      // This means the contractor's service radius must be >= the distance to the homeowner
-      const withinServiceArea = !contractor.distance || contractor.serviceRadius >= parseFloat(contractor.distance);
+      // Two-way radius check: both contractor's service radius AND homeowner's search radius must intersect
+      let radiiIntersect = true;
+      if (contractor.distance) {
+        const distance = parseFloat(contractor.distance);
+        const contractorReachesHomeowner = contractor.serviceRadius >= distance;
+        const homeownerReachesContractor = !maxDistance || distance <= maxDistance;
+        radiiIntersect = contractorReachesHomeowner && homeownerReachesContractor;
+      }
       
-      return matchesQuery && matchesLocation && withinServiceArea;
+      return matchesQuery && matchesLocation && radiiIntersect;
     });
   }
 
@@ -3553,7 +3558,9 @@ class DbStorage implements IStorage {
     return results.map(contractor => ({ ...contractor, isBoosted: false }));
   }
 
-  async searchContractors(query: string, location?: string, services?: string[]): Promise<Contractor[]> {
+  async searchContractors(query: string, location?: string, services?: string[], maxDistance?: number): Promise<Contractor[]> {
+    console.log('[SEARCH-DEBUG] searchContractors called with:', { query, location, services, maxDistance });
+    
     // Query companies and join with users to get owner info and zip code
     const companyResults = await db
       .select({
@@ -3628,11 +3635,30 @@ class DbStorage implements IStorage {
             return contractor;
           });
           
-          // Filter by service radius
+          // Filter by BOTH service radius and homeowner search radius (two-way check)
+          // Show contractor only if BOTH radii intersect
           results = results.filter(contractor => {
             if (!contractor.distance) return true;
             const distanceToHomeowner = parseFloat(contractor.distance);
-            return contractor.serviceRadius >= distanceToHomeowner;
+            
+            // Check 1: Contractor's service radius must reach the homeowner
+            const contractorReachesHomeowner = contractor.serviceRadius >= distanceToHomeowner;
+            
+            // Check 2: Homeowner's search radius must reach the contractor (if specified)
+            const homeownerReachesContractor = !maxDistance || distanceToHomeowner <= maxDistance;
+            
+            console.log('[RADIUS-CHECK]', {
+              contractor: contractor.company,
+              distance: distanceToHomeowner,
+              contractorServiceRadius: contractor.serviceRadius,
+              homeownerSearchRadius: maxDistance,
+              contractorReachesHomeowner,
+              homeownerReachesContractor,
+              bothIntersect: contractorReachesHomeowner && homeownerReachesContractor
+            });
+            
+            // Both radii must intersect
+            return contractorReachesHomeowner && homeownerReachesContractor;
           });
         }
       } catch (error) {
