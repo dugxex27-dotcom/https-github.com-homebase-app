@@ -928,9 +928,9 @@ export default function Messages() {
                     />
                     <Button
                       type="button"
-                      variant="outline"
                       onClick={() => document.getElementById('message-image-input')?.click()}
                       className="self-end"
+                      style={{ backgroundColor: '#1560a2', color: 'white' }}
                       data-testid="button-upload-image"
                     >
                       <ImageIcon className="h-4 w-4" />
