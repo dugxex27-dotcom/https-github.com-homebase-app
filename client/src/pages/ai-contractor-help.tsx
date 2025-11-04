@@ -23,13 +23,11 @@ export default function AIContractorHelp() {
 
   const recommendationMutation = useMutation({
     mutationFn: async (problemDescription: string) => {
-      const response = await apiRequest('/api/ai/contractor-recommendation', {
-        method: 'POST',
-        body: JSON.stringify({ problem: problemDescription }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await apiRequest(
+        '/api/ai/contractor-recommendation',
+        'POST',
+        { problem: problemDescription }
+      );
       return response.json();
     },
     onSuccess: (data: AIRecommendation) => {
