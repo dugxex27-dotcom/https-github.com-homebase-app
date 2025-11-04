@@ -19,7 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, Send, User, Calendar, Plus, Users, FileText, DollarSign, Clock, Star, Image as ImageIcon, X } from "lucide-react";
+import { MessageCircle, Send, User, Calendar, Plus, Users, FileText, DollarSign, Clock, Star, Image as ImageIcon, X, File, Paperclip } from "lucide-react";
 import { insertProposalSchema } from "@shared/schema";
 import { z } from "zod";
 import type { User as UserType, Conversation, Message, Contractor, Proposal, ContractorReview } from "@shared/schema";
@@ -37,6 +37,7 @@ export default function Messages() {
   const [newMessage, setNewMessage] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<Array<{file: File, preview: string, type: string}>>([]);
   const [isComposeDialogOpen, setIsComposeDialogOpen] = useState(false);
   const [composeForm, setComposeForm] = useState({
     subject: "",
@@ -125,7 +126,7 @@ export default function Messages() {
 
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: async (messageData: { message: string; imageUrl?: string }) => {
+    mutationFn: async (messageData: { message: string; imageUrl?: string; attachments?: string[] }) => {
       const response = await fetch(`/api/conversations/${selectedConversationId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -141,15 +142,17 @@ export default function Messages() {
       setNewMessage("");
       setSelectedImage(null);
       setImagePreview(null);
+      setSelectedFiles([]);
     }
   });
 
   const handleSendMessage = async () => {
-    if ((!newMessage.trim() && !selectedImage) || !selectedConversationId) return;
+    if ((!newMessage.trim() && !selectedImage && selectedFiles.length === 0) || !selectedConversationId) return;
 
     let imageUrl: string | undefined;
+    let attachmentUrls: string[] = [];
 
-    // Upload image if selected
+    // Upload single image if selected (backward compatibility)
     if (selectedImage) {
       try {
         const response = await fetch('/api/upload/message-image', {
@@ -172,9 +175,49 @@ export default function Messages() {
       }
     }
 
+    // Upload multiple files if selected
+    if (selectedFiles.length > 0) {
+      try {
+        const filesData = await Promise.all(
+          selectedFiles.map(async ({ file, preview }) => {
+            const reader = new FileReader();
+            return new Promise<{fileData: string, fileName: string, fileType: string}>((resolve) => {
+              reader.onloadend = () => {
+                resolve({
+                  fileData: reader.result as string,
+                  fileName: file.name,
+                  fileType: file.type
+                });
+              };
+              reader.readAsDataURL(file);
+            });
+          })
+        );
+
+        const response = await fetch('/api/upload/files', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ files: filesData })
+        });
+        
+        if (!response.ok) throw new Error('Failed to upload files');
+        const data = await response.json();
+        attachmentUrls = data.urls;
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to upload files. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     sendMessageMutation.mutate({ 
       message: newMessage || "",
-      imageUrl 
+      imageUrl,
+      attachments: attachmentUrls.length > 0 ? attachmentUrls : undefined
     });
   };
 
@@ -204,6 +247,55 @@ export default function Messages() {
   const handleRemoveImage = () => {
     setSelectedImage(null);
     setImagePreview(null);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newFiles: Array<{file: File, preview: string, type: string}> = [];
+    
+    Array.from(files).forEach(file => {
+      // Check file size (max 10MB per file)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: `File ${file.name} is too large. Maximum size is 10MB`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create preview for images
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newFiles.push({
+            file,
+            preview: reader.result as string,
+            type: 'image'
+          });
+          if (newFiles.length === files.length) {
+            setSelectedFiles(prev => [...prev, ...newFiles]);
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // For non-image files, use file type as preview
+        newFiles.push({
+          file,
+          preview: file.name,
+          type: file.type.includes('pdf') ? 'pdf' : 'document'
+        });
+        if (newFiles.length === files.length) {
+          setSelectedFiles(prev => [...prev, ...newFiles]);
+        }
+      }
+    });
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   // Send message to multiple contractors
@@ -953,6 +1045,40 @@ export default function Messages() {
                                 data-testid={`message-image-${message.id}`}
                               />
                             )}
+                            {(message as any).attachments && (message as any).attachments.length > 0 && (
+                              <div className="mb-2 space-y-1">
+                                {(message as any).attachments.map((url: string, idx: number) => {
+                                  const filename = url.split('/').pop() || 'file';
+                                  const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(filename);
+                                  const isPdf = /\.pdf$/i.test(filename);
+                                  
+                                  return isImage ? (
+                                    <img 
+                                      key={idx}
+                                      src={url} 
+                                      alt={`Attachment ${idx + 1}`} 
+                                      className="rounded-lg mb-1 max-w-full cursor-pointer hover:opacity-90"
+                                      onClick={() => window.open(url, '_blank')}
+                                    />
+                                  ) : (
+                                    <a
+                                      key={idx}
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={`flex items-center gap-2 p-2 rounded ${
+                                        message.senderId === typedUser.id
+                                          ? 'bg-white/20 hover:bg-white/30'
+                                          : 'bg-gray-200 hover:bg-gray-300'
+                                      }`}
+                                    >
+                                      {isPdf ? <FileText className="h-4 w-4" /> : <File className="h-4 w-4" />}
+                                      <span className="text-sm truncate">{filename}</span>
+                                    </a>
+                                  );
+                                })}
+                              </div>
+                            )}
                             {message.message && <p className="whitespace-pre-wrap">{message.message}</p>}
                             <p className={`text-xs mt-1 ${
                               message.senderId === typedUser.id 
@@ -988,6 +1114,40 @@ export default function Messages() {
                       </button>
                     </div>
                   )}
+                  {selectedFiles.length > 0 && (
+                    <div className="mb-2 flex flex-wrap gap-2">
+                      {selectedFiles.map((file, index) => (
+                        <div key={index} className="relative">
+                          {file.type === 'image' ? (
+                            <div className="relative inline-block">
+                              <img 
+                                src={file.preview} 
+                                alt={file.file.name}
+                                className="max-w-xs max-h-24 rounded-lg"
+                              />
+                              <button
+                                onClick={() => handleRemoveFile(index)}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-lg pr-8 relative">
+                              {file.type === 'pdf' ? <FileText className="h-4 w-4" /> : <File className="h-4 w-4" />}
+                              <span className="text-sm truncate max-w-[150px]">{file.file.name}</span>
+                              <button
+                                onClick={() => handleRemoveFile(index)}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <input
                       type="file"
@@ -996,14 +1156,33 @@ export default function Messages() {
                       className="hidden"
                       id="message-image-input"
                     />
+                    <input
+                      type="file"
+                      accept="image/*,.pdf,.doc,.docx"
+                      multiple
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      id="message-files-input"
+                    />
                     <Button
                       type="button"
                       onClick={() => document.getElementById('message-image-input')?.click()}
                       className="self-end"
                       style={{ backgroundColor: '#1560a2', color: 'white' }}
                       data-testid="button-upload-image"
+                      title="Upload image"
                     >
                       <ImageIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => document.getElementById('message-files-input')?.click()}
+                      className="self-end"
+                      style={{ backgroundColor: '#1560a2', color: 'white' }}
+                      data-testid="button-upload-files"
+                      title="Attach files (images, PDFs, documents)"
+                    >
+                      <Paperclip className="h-4 w-4" />
                     </Button>
                     <Textarea
                       placeholder="Type your message..."
@@ -1022,7 +1201,7 @@ export default function Messages() {
                     />
                     <Button
                       onClick={handleSendMessage}
-                      disabled={(!newMessage.trim() && !selectedImage) || sendMessageMutation.isPending}
+                      disabled={(!newMessage.trim() && !selectedImage && selectedFiles.length === 0) || sendMessageMutation.isPending}
                       className={`self-end ${
                         typedUser.role === 'contractor'
                           ? 'bg-blue-800 hover:bg-blue-900 text-white'
