@@ -424,7 +424,8 @@ export const messages = pgTable("messages", {
   senderId: text("sender_id").notNull(), // user ID who sent the message
   senderType: text("sender_type").notNull(), // "homeowner" or "contractor"
   message: text("message").notNull(),
-  imageUrl: text("image_url"), // Optional image attachment
+  imageUrl: text("image_url"), // Optional image attachment (legacy - for backward compatibility)
+  attachments: text("attachments").array().default(sql`'{}'::text[]`), // Array of file URLs (images, PDFs, docs)
   isRead: boolean("is_read").default(false).notNull(),
   readAt: timestamp("read_at"),
   createdAt: timestamp("created_at").defaultNow(),

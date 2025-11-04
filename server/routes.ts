@@ -469,6 +469,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Universal file upload endpoint for messages and proposals
+  app.post('/api/upload/files', isAuthenticated, async (req: any, res) => {
+    try {
+      const { files } = req.body; // files is an array of { fileData: base64, fileName: string, fileType: string }
+      
+      if (!files || !Array.isArray(files) || files.length === 0) {
+        return res.status(400).json({ error: 'Missing files array' });
+      }
+      
+      const uploadedUrls: string[] = [];
+      
+      for (const file of files) {
+        const { fileData, fileName, fileType } = file;
+        
+        if (!fileData || !fileName) {
+          continue; // Skip invalid files
+        }
+        
+        // Extract base64 data (remove data:...;base64, prefix if present)
+        const base64Data = fileData.includes('base64,') 
+          ? fileData.split('base64,')[1] 
+          : fileData;
+        const buffer = Buffer.from(base64Data, 'base64');
+        
+        // Get file extension from fileName or fileType
+        const fileExtension = fileName.split('.').pop() || 'bin';
+        const uniqueFilename = `${randomUUID()}.${fileExtension}`;
+        const path = `public/attachments/${uniqueFilename}`;
+        
+        // Determine MIME type
+        let mimeType = fileType || 'application/octet-stream';
+        if (fileExtension === 'pdf') mimeType = 'application/pdf';
+        else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+          mimeType = `image/${fileExtension === 'jpg' ? 'jpeg' : fileExtension}`;
+        } else if (['doc', 'docx'].includes(fileExtension)) {
+          mimeType = 'application/msword';
+        }
+        
+        await objectStorageService.uploadFile(path, buffer, mimeType);
+        uploadedUrls.push(`/public/attachments/${uniqueFilename}`);
+      }
+      
+      res.json({ success: true, urls: uploadedUrls });
+    } catch (error: any) {
+      console.error('[FILE UPLOAD ERROR]', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Simple homeowner demo login
   app.post('/api/auth/homeowner-demo-login', authLimiter, async (req, res) => {
     try {
