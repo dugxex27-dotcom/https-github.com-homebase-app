@@ -104,7 +104,7 @@ export interface IStorage {
   markNotificationAsRead(id: string): Promise<boolean>;
   
   // Search methods
-  searchContractors(query: string, location?: string): Promise<Contractor[]>;
+  searchContractors(query: string, location?: string, services?: string[]): Promise<Contractor[]>;
   searchProducts(query: string): Promise<Product[]>;
   
   // Contractor profile operations
@@ -1372,8 +1372,66 @@ export class MemStorage implements IStorage {
   }
 
   // Search methods
-  async searchContractors(query: string, location?: string): Promise<Contractor[]> {
-    const contractors = Array.from(this.contractors.values());
+  async searchContractors(query: string, location?: string, services?: string[]): Promise<Contractor[]> {
+    let contractors = Array.from(this.contractors.values());
+    
+    // Filter by services - include both exact matches AND handymen (who can do most basic repairs)
+    if (services && services.length > 0) {
+      contractors = contractors.filter(contractor => {
+        // Check if contractor offers the requested service(s)
+        const hasRequestedService = contractor.services.some(contractorService => 
+          services.some(requestedService => 
+            contractorService.toLowerCase() === requestedService.toLowerCase()
+          )
+        );
+        
+        // Also include handymen for most searches (they handle basic repairs)
+        const excludeHandymanServices = [
+          'roofing services',
+          'hvac services',
+          'septic services',
+          'pool installation',
+          'custom home building',
+          'general contracting'
+        ];
+        
+        const isHandyman = contractor.services.some(s => 
+          s.toLowerCase() === 'handyman services'
+        );
+        
+        const shouldIncludeHandyman = isHandyman && 
+          !services.some(s => excludeHandymanServices.includes(s.toLowerCase()));
+        
+        return hasRequestedService || shouldIncludeHandyman;
+      });
+      
+      // Sort results: exact service matches first, then handymen
+      contractors.sort((a, b) => {
+        const aHasExactMatch = a.services.some(contractorService => 
+          services.some(requestedService => 
+            contractorService.toLowerCase() === requestedService.toLowerCase()
+          )
+        );
+        const bHasExactMatch = b.services.some(contractorService => 
+          services.some(requestedService => 
+            contractorService.toLowerCase() === requestedService.toLowerCase()
+          )
+        );
+        
+        const aIsHandyman = a.services.some(s => s.toLowerCase() === 'handyman services');
+        const bIsHandyman = b.services.some(s => s.toLowerCase() === 'handyman services');
+        
+        // Specialists with exact matches first
+        if (aHasExactMatch && !aIsHandyman && (!bHasExactMatch || bIsHandyman)) return -1;
+        if (bHasExactMatch && !bIsHandyman && (!aHasExactMatch || aIsHandyman)) return 1;
+        
+        // Handymen come after specialists
+        if (aIsHandyman && !bIsHandyman) return 1;
+        if (bIsHandyman && !aIsHandyman) return -1;
+        
+        return 0;
+      });
+    }
     
     return contractors.filter(contractor => {
       const matchesQuery = query === "" || 
@@ -3571,14 +3629,62 @@ class DbStorage implements IStorage {
       }
     }
     
-    // Filter by services - contractor must offer at least one of the requested services
+    // Filter by services - include both exact matches AND handymen (who can do most basic repairs)
     if (services && services.length > 0) {
       results = results.filter(contractor => {
-        return contractor.services.some(contractorService => 
+        // Check if contractor offers the requested service(s)
+        const hasRequestedService = contractor.services.some(contractorService => 
           services.some(requestedService => 
             contractorService.toLowerCase() === requestedService.toLowerCase()
           )
         );
+        
+        // Also include handymen for most searches (they handle basic repairs)
+        // Exclude handymen only for highly specialized services that require licensing/equipment
+        const excludeHandymanServices = [
+          'roofing services',
+          'hvac services',
+          'septic services',
+          'pool installation',
+          'custom home building',
+          'general contracting'
+        ];
+        
+        const isHandyman = contractor.services.some(s => 
+          s.toLowerCase() === 'handyman services'
+        );
+        
+        const shouldIncludeHandyman = isHandyman && 
+          !services.some(s => excludeHandymanServices.includes(s.toLowerCase()));
+        
+        return hasRequestedService || shouldIncludeHandyman;
+      });
+      
+      // Sort results: exact service matches first, then handymen
+      results.sort((a, b) => {
+        const aHasExactMatch = a.services.some(contractorService => 
+          services.some(requestedService => 
+            contractorService.toLowerCase() === requestedService.toLowerCase()
+          )
+        );
+        const bHasExactMatch = b.services.some(contractorService => 
+          services.some(requestedService => 
+            contractorService.toLowerCase() === requestedService.toLowerCase()
+          )
+        );
+        
+        const aIsHandyman = a.services.some(s => s.toLowerCase() === 'handyman services');
+        const bIsHandyman = b.services.some(s => s.toLowerCase() === 'handyman services');
+        
+        // Specialists with exact matches first
+        if (aHasExactMatch && !aIsHandyman && (!bHasExactMatch || bIsHandyman)) return -1;
+        if (bHasExactMatch && !bIsHandyman && (!aHasExactMatch || aIsHandyman)) return 1;
+        
+        // Handymen come after specialists
+        if (aIsHandyman && !bIsHandyman) return 1;
+        if (bIsHandyman && !aIsHandyman) return -1;
+        
+        return 0;
       });
     }
     
