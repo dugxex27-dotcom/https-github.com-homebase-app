@@ -199,17 +199,8 @@ export default function ContractorProfile() {
       // Update years of experience - convert number to string for the select field
       if ((companyData as any).experience !== undefined && (companyData as any).experience !== null) {
         const exp = (companyData as any).experience;
-        // Map experience number to the select dropdown values
-        let experienceValue = '';
-        if (exp === 0) experienceValue = '0';
-        else if (exp >= 1 && exp <= 2) experienceValue = '1-2';
-        else if (exp >= 3 && exp <= 5) experienceValue = '3-5';
-        else if (exp >= 6 && exp <= 10) experienceValue = '6-10';
-        else if (exp >= 11 && exp <= 15) experienceValue = '11-15';
-        else if (exp >= 16 && exp <= 20) experienceValue = '16-20';
-        else if (exp > 20) experienceValue = '20+';
-        
-        updates.yearsExperience = experienceValue;
+        // Convert to string, or "20+" if over 20
+        updates.yearsExperience = exp > 20 ? '20+' : String(exp);
       }
       
       if (Object.keys(updates).length > 0) {
@@ -571,20 +562,10 @@ export default function ContractorProfile() {
           companyUpdate.bio = data.bio;
         }
         
-        // Add experience if provided (convert dropdown value to number)
+        // Add experience if provided (convert string to number)
         if (data.yearsExperience) {
-          // Convert experience dropdown values to numbers (use middle of range)
-          let experienceNum = 0;
-          const expValue = data.yearsExperience;
-          if (expValue === '0') experienceNum = 0;
-          else if (expValue === '1-2') experienceNum = 2;
-          else if (expValue === '3-5') experienceNum = 4;
-          else if (expValue === '6-10') experienceNum = 8;
-          else if (expValue === '11-15') experienceNum = 13;
-          else if (expValue === '16-20') experienceNum = 18;
-          else if (expValue === '20+') experienceNum = 25;
-          else experienceNum = parseInt(expValue) || 0;
-          
+          // Convert to number, or 25 for "20+"
+          const experienceNum = data.yearsExperience === '20+' ? 25 : parseInt(data.yearsExperience) || 0;
           companyUpdate.experience = experienceNum;
         }
         
@@ -1718,11 +1699,26 @@ export default function ContractorProfile() {
                   <SelectValue placeholder="Select years of experience" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1-2">1-2 years</SelectItem>
-                  <SelectItem value="3-5">3-5 years</SelectItem>
-                  <SelectItem value="6-10">6-10 years</SelectItem>
-                  <SelectItem value="11-15">11-15 years</SelectItem>
-                  <SelectItem value="16-20">16-20 years</SelectItem>
+                  <SelectItem value="1">1 year</SelectItem>
+                  <SelectItem value="2">2 years</SelectItem>
+                  <SelectItem value="3">3 years</SelectItem>
+                  <SelectItem value="4">4 years</SelectItem>
+                  <SelectItem value="5">5 years</SelectItem>
+                  <SelectItem value="6">6 years</SelectItem>
+                  <SelectItem value="7">7 years</SelectItem>
+                  <SelectItem value="8">8 years</SelectItem>
+                  <SelectItem value="9">9 years</SelectItem>
+                  <SelectItem value="10">10 years</SelectItem>
+                  <SelectItem value="11">11 years</SelectItem>
+                  <SelectItem value="12">12 years</SelectItem>
+                  <SelectItem value="13">13 years</SelectItem>
+                  <SelectItem value="14">14 years</SelectItem>
+                  <SelectItem value="15">15 years</SelectItem>
+                  <SelectItem value="16">16 years</SelectItem>
+                  <SelectItem value="17">17 years</SelectItem>
+                  <SelectItem value="18">18 years</SelectItem>
+                  <SelectItem value="19">19 years</SelectItem>
+                  <SelectItem value="20">20 years</SelectItem>
                   <SelectItem value="20+">20+ years</SelectItem>
                 </SelectContent>
               </Select>
