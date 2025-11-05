@@ -22,7 +22,8 @@ Preferred communication style: Simple, everyday language.
 - **Frontend**: React 18 with TypeScript, Wouter for routing, TanStack Query for state management, and Tailwind CSS for styling. Vite is used for development and builds.
 - **Backend**: Node.js with Express.js, written in TypeScript with ES modules, implementing a RESTful API with JSON responses.
 - **Database**: PostgreSQL with Drizzle ORM for type-safe operations and Drizzle Kit for schema management.
-    - **Persistence**: All critical data, including contractor profiles, project photos, houses, home maintenance data (systems, tasks, logs, service records), conversations, and messages, are persisted in PostgreSQL.
+    - **Persistence**: All critical data, including contractor profiles, contractor licenses, project photos, houses, home maintenance data (systems, tasks, logs, service records), conversations, and messages, are persisted in PostgreSQL.
+    - **Contractor Licenses**: Database-backed storage in `contractor_licenses` table with full CRUD operations (create, read, update, soft-delete). Multiple licenses per contractor are supported with type, number, municipality, state, and expiry date tracking.
     - **Contractor Search**: Enhanced `searchContractors()` to query the `companies` table, joining with `users` for zip codes, and implementing a two-way radius check for accurate matching.
     - **Messaging**: Conversations and messages are stored in PostgreSQL, ensuring persistence. Automatic notifications are sent for new messages, linking directly to the messages page.
 - **Data Flow**: Client requests use TanStack Query, Express routes handle processing, Drizzle ORM accesses PostgreSQL, and responses are JSON, with shared TypeScript types ensuring end-to-end type safety.

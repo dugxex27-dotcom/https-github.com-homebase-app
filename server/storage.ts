@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type Company, type InsertCompany, type CompanyInviteCode, type InsertCompanyInviteCode, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type HomeownerConnectionCode, type InsertHomeownerConnectionCode, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, type TaskCompletion, type InsertTaskCompletion, type Achievement, type InsertAchievement, type AchievementDefinition, type InsertAchievementDefinition, type UserAchievement, type InsertUserAchievement, type SearchAnalytics, type InsertSearchAnalytics, type InviteCode, type InsertInviteCode, users, contractors, companies, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks, taskCompletions, achievements, achievementDefinitions, userAchievements, maintenanceLogs, searchAnalytics, inviteCodes, houses, homeSystems, customMaintenanceTasks, serviceRecords, homeownerConnectionCodes, conversations, messages, proposals } from "@shared/schema";
+import { type Contractor, type InsertContractor, type Company, type InsertCompany, type CompanyInviteCode, type InsertCompanyInviteCode, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type HomeownerConnectionCode, type InsertHomeownerConnectionCode, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, type TaskCompletion, type InsertTaskCompletion, type Achievement, type InsertAchievement, type AchievementDefinition, type InsertAchievementDefinition, type UserAchievement, type InsertUserAchievement, type SearchAnalytics, type InsertSearchAnalytics, type InviteCode, type InsertInviteCode, users, contractors, companies, contractorLicenses, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks, taskCompletions, achievements, achievementDefinitions, userAchievements, maintenanceLogs, searchAnalytics, inviteCodes, houses, homeSystems, customMaintenanceTasks, serviceRecords, homeownerConnectionCodes, conversations, messages, proposals } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { eq, ne, isNotNull, and, or, isNull, not } from "drizzle-orm";
@@ -3228,11 +3228,7 @@ class DbStorage implements IStorage {
     // Bind all MemStorage methods (except database-backed ones)
     // getContractors and getContractor now use database-backed methods (defined below)
     this.createContractor = this.memStorage.createContractor.bind(this.memStorage);
-    this.getContractorLicenses = this.memStorage.getContractorLicenses.bind(this.memStorage);
-    this.getContractorLicense = this.memStorage.getContractorLicense.bind(this.memStorage);
-    this.createContractorLicense = this.memStorage.createContractorLicense.bind(this.memStorage);
-    this.updateContractorLicense = this.memStorage.updateContractorLicense.bind(this.memStorage);
-    this.deleteContractorLicense = this.memStorage.deleteContractorLicense.bind(this.memStorage);
+    // Contractor licenses now database-backed - implemented below (getContractorLicenses, createContractorLicense, updateContractorLicense, deleteContractorLicense)
     // Company methods - now database backed (getCompany, createCompany, updateCompany, getCompanyEmployees)
     this.createCompanyInviteCode = this.memStorage.createCompanyInviteCode.bind(this.memStorage);
     this.getCompanyInviteCode = this.memStorage.getCompanyInviteCode.bind(this.memStorage);
@@ -4080,6 +4076,68 @@ class DbStorage implements IStorage {
   async getCompanyByReferralCode(code: string): Promise<Company | undefined> {
     const result = await db.select().from(companies).where(eq(companies.referralCode, code)).limit(1);
     return result[0];
+  }
+
+  // Contractor license operations - DATABASE BACKED for persistence
+  async getContractorLicenses(contractorId: string): Promise<ContractorLicense[]> {
+    const result = await db.select()
+      .from(contractorLicenses)
+      .where(and(
+        eq(contractorLicenses.contractorId, contractorId),
+        eq(contractorLicenses.isActive, true)
+      ));
+    return result;
+  }
+
+  async getContractorLicense(id: string): Promise<ContractorLicense | undefined> {
+    const result = await db.select()
+      .from(contractorLicenses)
+      .where(eq(contractorLicenses.id, id))
+      .limit(1);
+    return result[0];
+  }
+
+  async createContractorLicense(license: InsertContractorLicense): Promise<ContractorLicense> {
+    const newLicense = {
+      ...license,
+      id: randomUUID(),
+      licenseType: license.licenseType ?? 'General Contractor',
+      isActive: license.isActive ?? true,
+      expiryDate: license.expiryDate ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    await db.insert(contractorLicenses).values(newLicense);
+    return (await this.getContractorLicense(newLicense.id))!;
+  }
+
+  async updateContractorLicense(id: string, contractorId: string, licenseData: Partial<InsertContractorLicense>): Promise<ContractorLicense | undefined> {
+    const existingLicense = await this.getContractorLicense(id);
+    if (!existingLicense || existingLicense.contractorId !== contractorId) {
+      return undefined;
+    }
+
+    const updatedData = {
+      ...licenseData,
+      updatedAt: new Date()
+    };
+    
+    await db.update(contractorLicenses).set(updatedData).where(eq(contractorLicenses.id, id));
+    return (await this.getContractorLicense(id))!;
+  }
+
+  async deleteContractorLicense(id: string, contractorId: string): Promise<boolean> {
+    const existingLicense = await this.getContractorLicense(id);
+    if (!existingLicense || existingLicense.contractorId !== contractorId) {
+      return false;
+    }
+
+    // Soft delete by setting isActive to false
+    await db.update(contractorLicenses)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(contractorLicenses.id, id));
+    return true;
   }
 
   // Get contractor by ID - DATABASE BACKED
