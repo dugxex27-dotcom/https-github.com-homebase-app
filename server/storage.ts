@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type Company, type InsertCompany, type CompanyInviteCode, type InsertCompanyInviteCode, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, type TaskCompletion, type InsertTaskCompletion, type Achievement, type InsertAchievement, type AchievementDefinition, type InsertAchievementDefinition, type UserAchievement, type InsertUserAchievement, type SearchAnalytics, type InsertSearchAnalytics, type InviteCode, type InsertInviteCode, users, contractors, companies, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks, taskCompletions, achievements, achievementDefinitions, userAchievements, maintenanceLogs, searchAnalytics, inviteCodes, houses, homeSystems, customMaintenanceTasks, serviceRecords, conversations, messages, proposals } from "@shared/schema";
+import { type Contractor, type InsertContractor, type Company, type InsertCompany, type CompanyInviteCode, type InsertCompanyInviteCode, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type HomeownerConnectionCode, type InsertHomeownerConnectionCode, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, type TaskCompletion, type InsertTaskCompletion, type Achievement, type InsertAchievement, type AchievementDefinition, type InsertAchievementDefinition, type UserAchievement, type InsertUserAchievement, type SearchAnalytics, type InsertSearchAnalytics, type InviteCode, type InsertInviteCode, users, contractors, companies, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks, taskCompletions, achievements, achievementDefinitions, userAchievements, maintenanceLogs, searchAnalytics, inviteCodes, houses, homeSystems, customMaintenanceTasks, serviceRecords, homeownerConnectionCodes, conversations, messages, proposals } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { eq, ne, isNotNull, and, or, isNull, not } from "drizzle-orm";
@@ -124,6 +124,14 @@ export interface IStorage {
   
   // Customer service record operations  
   getCustomerServiceRecords(customerId?: string, customerEmail?: string, customerAddress?: string): Promise<ServiceRecord[]>;
+
+  // Homeowner connection code operations
+  createHomeownerConnectionCode(code: InsertHomeownerConnectionCode): Promise<HomeownerConnectionCode>;
+  getHomeownerConnectionCode(id: string): Promise<HomeownerConnectionCode | undefined>;
+  getHomeownerConnectionCodeByCode(code: string): Promise<HomeownerConnectionCode | undefined>;
+  getHomeownerConnectionCodes(homeownerId: string): Promise<HomeownerConnectionCode[]>;
+  validateAndUseConnectionCode(code: string): Promise<{ homeownerId: string; houseId: string | null } | null>;
+  deactivateConnectionCode(id: string): Promise<boolean>;
 
   // Messaging operations
   getConversations(userId: string, userType: 'homeowner' | 'contractor'): Promise<(Conversation & { otherPartyName: string; unreadCount: number })[]>;
@@ -4376,6 +4384,69 @@ class DbStorage implements IStorage {
 
   async deleteProposal(id: string): Promise<boolean> {
     const result = await db.delete(proposals).where(eq(proposals.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Homeowner connection code operations (database-backed)
+  async createHomeownerConnectionCode(codeData: InsertHomeownerConnectionCode): Promise<HomeownerConnectionCode> {
+    const result = await db.insert(homeownerConnectionCodes).values(codeData).returning();
+    return result[0];
+  }
+
+  async getHomeownerConnectionCode(id: string): Promise<HomeownerConnectionCode | undefined> {
+    const result = await db.select().from(homeownerConnectionCodes).where(eq(homeownerConnectionCodes.id, id));
+    return result[0];
+  }
+
+  async getHomeownerConnectionCodeByCode(code: string): Promise<HomeownerConnectionCode | undefined> {
+    const result = await db.select().from(homeownerConnectionCodes).where(eq(homeownerConnectionCodes.code, code));
+    return result[0];
+  }
+
+  async getHomeownerConnectionCodes(homeownerId: string): Promise<HomeownerConnectionCode[]> {
+    return await db.select().from(homeownerConnectionCodes)
+      .where(eq(homeownerConnectionCodes.homeownerId, homeownerId))
+      .orderBy(homeownerConnectionCodes.createdAt);
+  }
+
+  async validateAndUseConnectionCode(code: string): Promise<{ homeownerId: string; houseId: string | null } | null> {
+    const connectionCode = await this.getHomeownerConnectionCodeByCode(code);
+    
+    if (!connectionCode) {
+      return null;
+    }
+
+    // Check if code is active
+    if (!connectionCode.isActive) {
+      return null;
+    }
+
+    // Check if code has expired
+    if (new Date() > new Date(connectionCode.expiresAt)) {
+      return null;
+    }
+
+    // Check usage limit
+    if (connectionCode.usageLimit !== null && connectionCode.usageCount >= connectionCode.usageLimit) {
+      return null;
+    }
+
+    // Increment usage count
+    await db.update(homeownerConnectionCodes)
+      .set({ usageCount: connectionCode.usageCount + 1 })
+      .where(eq(homeownerConnectionCodes.id, connectionCode.id));
+
+    return {
+      homeownerId: connectionCode.homeownerId,
+      houseId: connectionCode.houseId
+    };
+  }
+
+  async deactivateConnectionCode(id: string): Promise<boolean> {
+    const result = await db.update(homeownerConnectionCodes)
+      .set({ isActive: false })
+      .where(eq(homeownerConnectionCodes.id, id))
+      .returning();
     return result.length > 0;
   }
 
