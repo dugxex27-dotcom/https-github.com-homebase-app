@@ -385,7 +385,7 @@ export function ContractorCodeEntry() {
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="Enter 8-character code"
               maxLength={8}
-              className="font-mono text-lg"
+              className="font-mono text-lg placeholder:text-white placeholder:opacity-70"
               data-testid="input-connection-code"
               style={{ backgroundColor: '#1560a2', color: 'white', borderColor: '#1560a2' }}
             />
