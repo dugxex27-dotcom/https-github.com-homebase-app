@@ -689,7 +689,7 @@ export default function HomeownerAccount() {
                       Transfer a House
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="[&>button]:text-white [&>button:hover]:text-white">
                     <DialogHeader>
                       <DialogTitle style={{ color: '#ffffff' }}>Transfer House Ownership</DialogTitle>
                       <DialogDescription style={{ color: '#ffffff' }}>
