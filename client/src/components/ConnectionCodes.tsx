@@ -129,6 +129,7 @@ export function HomeownerConnectionCodes() {
                     onClick={() => regenerateMutation.mutate()}
                     disabled={regenerateMutation.isPending}
                     data-testid="button-regenerate-code"
+                    style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     {regenerateMutation.isPending ? "Regenerating..." : "Regenerate Code"}
