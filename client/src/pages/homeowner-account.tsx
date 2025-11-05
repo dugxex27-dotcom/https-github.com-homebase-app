@@ -691,14 +691,14 @@ export default function HomeownerAccount() {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle style={{ color: '#2c0f5b' }}>Transfer House Ownership</DialogTitle>
-                      <DialogDescription style={{ color: '#2c0f5b' }}>
+                      <DialogTitle style={{ color: '#ffffff' }}>Transfer House Ownership</DialogTitle>
+                      <DialogDescription style={{ color: '#ffffff' }}>
                         Send an invitation to transfer ownership of one of your houses to another homeowner.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="house-select" style={{ color: '#2c0f5b' }}>Select House</Label>
+                        <Label htmlFor="house-select" style={{ color: '#ffffff' }}>Select House</Label>
                         <Select 
                           value={transferData.houseId} 
                           onValueChange={(value) => setTransferData(prev => ({ ...prev, houseId: value }))}
@@ -717,7 +717,7 @@ export default function HomeownerAccount() {
                       </div>
                       
                       <div>
-                        <Label htmlFor="recipient-email" style={{ color: '#2c0f5b' }}>Recipient Email</Label>
+                        <Label htmlFor="recipient-email" style={{ color: '#ffffff' }}>Recipient Email</Label>
                         <Input
                           id="recipient-email"
                           type="email"
@@ -729,7 +729,7 @@ export default function HomeownerAccount() {
                       </div>
                       
                       <div>
-                        <Label htmlFor="transfer-note" style={{ color: '#2c0f5b' }}>Transfer Note (Optional)</Label>
+                        <Label htmlFor="transfer-note" style={{ color: '#ffffff' }}>Transfer Note (Optional)</Label>
                         <Textarea
                           id="transfer-note"
                           placeholder="Add a note for the recipient..."
