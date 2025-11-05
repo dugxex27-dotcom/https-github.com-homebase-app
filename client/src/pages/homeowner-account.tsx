@@ -208,17 +208,17 @@ export default function HomeownerAccount() {
   // House transfer queries and mutations
   const { data: houses } = useQuery({
     queryKey: ['/api/houses'],
-    queryFn: () => apiRequest('GET', '/api/houses'),
+    queryFn: () => apiRequest('/api/houses', 'GET'),
   });
 
   const { data: transfers, refetch: refetchTransfers } = useQuery({
     queryKey: ['/api/house-transfers'],
-    queryFn: () => apiRequest('GET', '/api/house-transfers'),
+    queryFn: () => apiRequest('/api/house-transfers', 'GET'),
   });
 
   const createTransferMutation = useMutation({
     mutationFn: async (data: typeof transferData) => {
-      return await apiRequest('POST', '/api/house-transfers', data);
+      return await apiRequest('/api/house-transfers', 'POST', data);
     },
     onSuccess: () => {
       toast({
