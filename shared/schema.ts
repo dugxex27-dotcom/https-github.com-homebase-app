@@ -406,6 +406,19 @@ export const serviceRecords = pgTable("service_records", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Homeowner connection codes for contractors to add service records
+export const homeownerConnectionCodes = pgTable("homeowner_connection_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  homeownerId: text("homeowner_id").notNull(), // Homeowner who generated the code
+  houseId: text("house_id"), // Optional: specific house for the connection
+  code: text("code").notNull().unique(), // The shareable code (8-character alphanumeric)
+  expiresAt: timestamp("expires_at").notNull(), // When the code expires
+  isActive: boolean("is_active").notNull().default(true), // Can be manually deactivated
+  usageLimit: integer("usage_limit").default(1), // How many times the code can be used (null = unlimited)
+  usageCount: integer("usage_count").notNull().default(0), // How many times it's been used
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Conversations table for messaging between homeowners and contractors
 export const conversations = pgTable("conversations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -709,6 +722,12 @@ export const insertServiceRecordSchema = createInsertSchema(serviceRecords).omit
   createdAt: true,
 });
 
+export const insertHomeownerConnectionCodeSchema = createInsertSchema(homeownerConnectionCodes).omit({
+  id: true,
+  createdAt: true,
+  usageCount: true,
+});
+
 export const insertConversationSchema = createInsertSchema(conversations).omit({
   id: true,
   createdAt: true,
@@ -942,6 +961,8 @@ export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type InsertServiceRecord = z.infer<typeof insertServiceRecordSchema>;
 export type ServiceRecord = typeof serviceRecords.$inferSelect;
+export type InsertHomeownerConnectionCode = z.infer<typeof insertHomeownerConnectionCodeSchema>;
+export type HomeownerConnectionCode = typeof homeownerConnectionCodes.$inferSelect;
 export type InsertConversation = z.infer<typeof insertConversationSchema>;
 export type Conversation = typeof conversations.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
