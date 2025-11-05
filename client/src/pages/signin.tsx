@@ -352,11 +352,11 @@ export default function SignIn() {
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Google OAuth Button */}
+            {/* Google OAuth Button - Hidden */}
             <Button
               type="button"
               variant="outline"
-              className="w-full flex items-center justify-center gap-2"
+              className="w-full flex items-center justify-center gap-2 hidden"
               onClick={handleGoogleLogin}
               data-testid="button-google-oauth"
               style={{ color: '#ffffff' }}
@@ -365,7 +365,7 @@ export default function SignIn() {
               Continue with Google
             </Button>
 
-            <div className="relative">
+            <div className="relative hidden">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
               </div>
