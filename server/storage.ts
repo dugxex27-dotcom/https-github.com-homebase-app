@@ -125,13 +125,10 @@ export interface IStorage {
   // Customer service record operations  
   getCustomerServiceRecords(customerId?: string, customerEmail?: string, customerAddress?: string): Promise<ServiceRecord[]>;
 
-  // Homeowner connection code operations
-  createHomeownerConnectionCode(code: InsertHomeownerConnectionCode): Promise<HomeownerConnectionCode>;
-  getHomeownerConnectionCode(id: string): Promise<HomeownerConnectionCode | undefined>;
-  getHomeownerConnectionCodeByCode(code: string): Promise<HomeownerConnectionCode | undefined>;
-  getHomeownerConnectionCodes(homeownerId: string): Promise<HomeownerConnectionCode[]>;
-  validateAndUseConnectionCode(code: string): Promise<{ homeownerId: string; houseId: string | null } | null>;
-  deactivateConnectionCode(id: string): Promise<boolean>;
+  // Permanent connection code operations (attached to user)
+  getOrCreatePermanentConnectionCode(userId: string): Promise<string>;
+  validatePermanentConnectionCode(code: string): Promise<{ homeownerId: string; homeownerName: string; homeownerEmail: string; homeownerZipCode: string | null } | null>;
+  regeneratePermanentConnectionCode(userId: string): Promise<string>;
 
   // Messaging operations
   getConversations(userId: string, userType: 'homeowner' | 'contractor'): Promise<(Conversation & { otherPartyName: string; unreadCount: number })[]>;
@@ -4445,67 +4442,86 @@ class DbStorage implements IStorage {
     return result.length > 0;
   }
 
-  // Homeowner connection code operations (database-backed)
-  async createHomeownerConnectionCode(codeData: InsertHomeownerConnectionCode): Promise<HomeownerConnectionCode> {
-    const result = await db.insert(homeownerConnectionCodes).values(codeData).returning();
-    return result[0];
+  // Permanent connection code operations (attached to user)
+  private generateConnectionCode(): string {
+    const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Excluding similar-looking characters
+    let code = '';
+    const randomBytes = require('crypto').randomBytes(8);
+    for (let i = 0; i < 8; i++) {
+      code += characters[randomBytes[i] % characters.length];
+    }
+    return code;
   }
 
-  async getHomeownerConnectionCode(id: string): Promise<HomeownerConnectionCode | undefined> {
-    const result = await db.select().from(homeownerConnectionCodes).where(eq(homeownerConnectionCodes.id, id));
-    return result[0];
+  async getOrCreatePermanentConnectionCode(userId: string): Promise<string> {
+    const user = await db.select().from(users).where(eq(users.id, userId));
+    if (!user[0]) {
+      throw new Error('User not found');
+    }
+
+    // If user already has a connection code, return it
+    if (user[0].connectionCode) {
+      return user[0].connectionCode;
+    }
+
+    // Generate a new unique code
+    let code = this.generateConnectionCode();
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    while (attempts < maxAttempts) {
+      const existing = await db.select().from(users).where(eq(users.connectionCode, code));
+      if (existing.length === 0) {
+        // Code is unique, save it
+        await db.update(users)
+          .set({ connectionCode: code })
+          .where(eq(users.id, userId));
+        return code;
+      }
+      // Code collision, try again
+      code = this.generateConnectionCode();
+      attempts++;
+    }
+
+    throw new Error('Failed to generate unique connection code');
   }
 
-  async getHomeownerConnectionCodeByCode(code: string): Promise<HomeownerConnectionCode | undefined> {
-    const result = await db.select().from(homeownerConnectionCodes).where(eq(homeownerConnectionCodes.code, code));
-    return result[0];
-  }
-
-  async getHomeownerConnectionCodes(homeownerId: string): Promise<HomeownerConnectionCode[]> {
-    return await db.select().from(homeownerConnectionCodes)
-      .where(eq(homeownerConnectionCodes.homeownerId, homeownerId))
-      .orderBy(homeownerConnectionCodes.createdAt);
-  }
-
-  async validateAndUseConnectionCode(code: string): Promise<{ homeownerId: string; houseId: string | null } | null> {
-    const connectionCode = await this.getHomeownerConnectionCodeByCode(code);
+  async validatePermanentConnectionCode(code: string): Promise<{ homeownerId: string; homeownerName: string; homeownerEmail: string; homeownerZipCode: string | null } | null> {
+    const user = await db.select().from(users).where(eq(users.connectionCode, code));
     
-    if (!connectionCode) {
+    if (!user[0] || user[0].role !== 'homeowner') {
       return null;
     }
-
-    // Check if code is active
-    if (!connectionCode.isActive) {
-      return null;
-    }
-
-    // Check if code has expired
-    if (new Date() > new Date(connectionCode.expiresAt)) {
-      return null;
-    }
-
-    // Check usage limit
-    if (connectionCode.usageLimit !== null && connectionCode.usageCount >= connectionCode.usageLimit) {
-      return null;
-    }
-
-    // Increment usage count
-    await db.update(homeownerConnectionCodes)
-      .set({ usageCount: connectionCode.usageCount + 1 })
-      .where(eq(homeownerConnectionCodes.id, connectionCode.id));
 
     return {
-      homeownerId: connectionCode.homeownerId,
-      houseId: connectionCode.houseId
+      homeownerId: user[0].id,
+      homeownerName: `${user[0].firstName || ''} ${user[0].lastName || ''}`.trim() || 'Unknown',
+      homeownerEmail: user[0].email || '',
+      homeownerZipCode: user[0].zipCode
     };
   }
 
-  async deactivateConnectionCode(id: string): Promise<boolean> {
-    const result = await db.update(homeownerConnectionCodes)
-      .set({ isActive: false })
-      .where(eq(homeownerConnectionCodes.id, id))
-      .returning();
-    return result.length > 0;
+  async regeneratePermanentConnectionCode(userId: string): Promise<string> {
+    // Generate a new unique code
+    let code = this.generateConnectionCode();
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    while (attempts < maxAttempts) {
+      const existing = await db.select().from(users).where(eq(users.connectionCode, code));
+      if (existing.length === 0) {
+        // Code is unique, save it
+        await db.update(users)
+          .set({ connectionCode: code })
+          .where(eq(users.id, userId));
+        return code;
+      }
+      // Code collision, try again
+      code = this.generateConnectionCode();
+      attempts++;
+    }
+
+    throw new Error('Failed to generate unique connection code');
   }
 
   // Methods delegated to MemStorage (bound in constructor)
