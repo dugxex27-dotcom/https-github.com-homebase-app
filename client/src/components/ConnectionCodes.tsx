@@ -369,16 +369,16 @@ export function ContractorCodeEntry() {
   };
 
   return (
-    <Card>
+    <Card style={{ backgroundColor: '#f2f2f2' }}>
       <CardHeader>
-        <CardTitle>Enter Homeowner Connection Code</CardTitle>
-        <CardDescription>
+        <CardTitle style={{ color: '#1560a2' }}>Enter Homeowner Connection Code</CardTitle>
+        <CardDescription style={{ color: '#000000' }}>
           Enter the code provided by the homeowner to add service records
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label>Connection Code</Label>
+          <Label style={{ color: '#1560a2' }}>Connection Code</Label>
           <div className="flex gap-2">
             <Input
               value={code}
@@ -387,11 +387,13 @@ export function ContractorCodeEntry() {
               maxLength={8}
               className="font-mono text-lg"
               data-testid="input-connection-code"
+              style={{ backgroundColor: '#1560a2', color: 'white', borderColor: '#1560a2' }}
             />
             <Button
               onClick={handleValidate}
               disabled={validateMutation.isPending || !code.trim()}
               data-testid="button-validate-code"
+              style={{ backgroundColor: '#1560a2', color: 'white' }}
             >
               {validateMutation.isPending ? "Validating..." : "Validate"}
             </Button>
@@ -399,9 +401,9 @@ export function ContractorCodeEntry() {
         </div>
 
         {homeownerInfo && (
-          <div className="p-4 border rounded-lg bg-muted space-y-2" data-testid="div-homeowner-info">
-            <h3 className="font-semibold">Connected to:</h3>
-            <div className="space-y-1 text-sm">
+          <div className="p-4 border rounded-lg space-y-2" data-testid="div-homeowner-info" style={{ backgroundColor: '#e6f2ff', borderColor: '#1560a2' }}>
+            <h3 className="font-semibold" style={{ color: '#1560a2' }}>Connected to:</h3>
+            <div className="space-y-1 text-sm" style={{ color: '#000000' }}>
               <div><strong>Name:</strong> {homeownerInfo.homeownerName}</div>
               <div><strong>Email:</strong> {homeownerInfo.homeownerEmail}</div>
               <div><strong>Zip Code:</strong> {homeownerInfo.homeownerZipCode}</div>
@@ -414,6 +416,7 @@ export function ContractorCodeEntry() {
                 onClick={() => window.location.href = `/service-records?homeownerId=${homeownerInfo.homeownerId}&houseId=${homeownerInfo.houseId || ""}`}
                 className="w-full"
                 data-testid="button-add-service-record"
+                style={{ backgroundColor: '#1560a2', color: 'white' }}
               >
                 Add Service Record
               </Button>
