@@ -707,7 +707,7 @@ export default function HomeownerAccount() {
                             <SelectValue placeholder="Choose a house to transfer" />
                           </SelectTrigger>
                           <SelectContent>
-                            {(houses as any)?.map((house: any) => (
+                            {Array.isArray(houses) && houses.map((house: any) => (
                               <SelectItem key={house.id} value={house.id}>
                                 {house.address || house.nickname || `House ${house.id}`}
                               </SelectItem>
@@ -759,11 +759,11 @@ export default function HomeownerAccount() {
                 </Dialog>
 
                 {/* Incoming Transfers (pending acceptance) */}
-                {transfers && (transfers as any).filter((t: any) => t.status === 'pending' && t.toHomeownerEmail === (user as any)?.email).length > 0 && (
+                {Array.isArray(transfers) && (transfers as any).filter((t: any) => t.status === 'pending' && t.toHomeownerEmail === (user as any)?.email).length > 0 && (
                   <div>
                     <h4 className="font-medium mb-3 text-blue-600">Incoming House Transfers</h4>
                     <div className="space-y-2">
-                      {(transfers as any).filter((t: any) => t.status === 'pending' && t.toHomeownerEmail === (user as any)?.email).map((transfer: any) => (
+                      {Array.isArray(transfers) && (transfers as any).filter((t: any) => t.status === 'pending' && t.toHomeownerEmail === (user as any)?.email).map((transfer: any) => (
                         <div key={transfer.id} className="flex flex-col gap-3 p-4 border rounded-lg bg-blue-50">
                           <div className="flex-1">
                             <p className="font-medium text-sm" data-testid={`transfer-from-${transfer.id}`}>
@@ -810,11 +810,11 @@ export default function HomeownerAccount() {
                 )}
 
                 {/* Transfers Awaiting Confirmation */}
-                {transfers && (transfers as any).filter((t: any) => t.status === 'accepted').length > 0 && (
+                {Array.isArray(transfers) && (transfers as any).filter((t: any) => t.status === 'accepted').length > 0 && (
                   <div>
                     <h4 className="font-medium mb-3 text-orange-600">Transfers Awaiting Your Confirmation</h4>
                     <div className="space-y-2">
-                      {(transfers as any).filter((t: any) => t.status === 'accepted').map((transfer: any) => (
+                      {Array.isArray(transfers) && (transfers as any).filter((t: any) => t.status === 'accepted').map((transfer: any) => (
                         <div key={transfer.id} className="flex items-center justify-between p-3 border rounded-lg bg-orange-50">
                           <div className="flex-1">
                             <p className="font-medium text-sm" data-testid={`transfer-email-${transfer.id}`}>
@@ -845,11 +845,11 @@ export default function HomeownerAccount() {
                 )}
 
                 {/* Existing Transfers List */}
-                {transfers && (transfers as any).length > 0 && (
+                {Array.isArray(transfers) && transfers.length > 0 && (
                   <div>
                     <h4 className="font-medium mb-3">Recent Transfers</h4>
                     <div className="space-y-2">
-                      {(transfers as any).slice(0, 3).map((transfer: any) => (
+                      {Array.isArray(transfers) && transfers.slice(0, 3).map((transfer: any) => (
                         <div key={transfer.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex-1">
                             <p className="font-medium text-sm" data-testid={`transfer-email-${transfer.id}`}>
@@ -879,7 +879,7 @@ export default function HomeownerAccount() {
                   </div>
                 )}
 
-                {transfers && (transfers as any).length === 0 && (
+                {Array.isArray(transfers) && transfers.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-4">
                     No house transfers yet. Click "Transfer a House" to get started.
                   </p>
