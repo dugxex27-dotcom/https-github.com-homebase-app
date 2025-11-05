@@ -50,6 +50,7 @@ export default function Messages() {
     wouldRecommend: true
   });
   const [isReviewSectionOpen, setIsReviewSectionOpen] = useState(false);
+  const [isProposalSectionOpen, setIsProposalSectionOpen] = useState(false);
   const [isProposalDialogOpen, setIsProposalDialogOpen] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null);
   const [isProposalDetailOpen, setIsProposalDetailOpen] = useState(false);
@@ -1159,59 +1160,81 @@ export default function Messages() {
                 {/* Proposals Section - Only for homeowners viewing contractor conversations */}
                 {typedUser?.role === 'homeowner' && contractorIdForReview && (
                   <div className="p-4 border-t bg-white" data-testid="section-proposals">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-gray-900 flex items-center gap-2" style={{ color: '#2c0f5b' }}>
-                        <FileText className="h-5 w-5" style={{ color: '#b6a6f4' }} />
-                        Proposals from {selectedConversation?.otherPartyName}
-                      </h3>
-                    </div>
-                    
-                    {proposalsLoading ? (
-                      <div className="text-center text-gray-500 py-4">Loading proposals...</div>
-                    ) : proposals.filter(p => p.contractorId === contractorIdForReview).length === 0 ? (
-                      <div className="text-center text-gray-500 py-4 bg-gray-50 rounded-lg">
-                        No proposals yet from this contractor.
-                      </div>
+                    {!isProposalSectionOpen ? (
+                      <Button
+                        onClick={() => setIsProposalSectionOpen(true)}
+                        className="w-full"
+                        style={{ backgroundColor: '#b6a6f4', color: 'white' }}
+                        data-testid="button-open-proposals"
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        View Proposals ({proposals.filter(p => p.contractorId === contractorIdForReview).length})
+                      </Button>
                     ) : (
-                      <div className="space-y-2">
-                        {proposals
-                          .filter(p => p.contractorId === contractorIdForReview)
-                          .map((proposal) => (
-                            <div 
-                              key={proposal.id} 
-                              className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                              onClick={() => {
-                                setSelectedProposal(proposal);
-                                setIsProposalDetailOpen(true);
-                              }}
-                              data-testid={`proposal-item-${proposal.id}`}
-                            >
-                              <div className="flex items-center justify-between mb-1">
-                                <h4 className="font-medium text-gray-900">{proposal.title}</h4>
-                                <Badge variant={
-                                  proposal.status === 'sent' ? 'default' :
-                                  proposal.status === 'accepted' ? 'default' :
-                                  proposal.status === 'rejected' ? 'destructive' :
-                                  'secondary'
-                                } style={
-                                  proposal.status === 'accepted' ? { backgroundColor: '#10b981', color: 'white' } : {}
-                                }>
-                                  {proposal.status}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-gray-600 line-clamp-1">{proposal.description}</p>
-                              <div className="flex items-center gap-4 text-sm text-gray-600 mt-2">
-                                <div className="flex items-center gap-1">
-                                  <DollarSign className="h-3 w-3" />
-                                  <span>${parseFloat(proposal.estimatedCost).toLocaleString()}</span>
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-semibold text-gray-900 flex items-center gap-2" style={{ color: '#2c0f5b' }}>
+                            <FileText className="h-5 w-5" style={{ color: '#b6a6f4' }} />
+                            Proposals from {selectedConversation?.otherPartyName}
+                          </h3>
+                          <Button
+                            onClick={() => setIsProposalSectionOpen(false)}
+                            variant="ghost"
+                            size="sm"
+                            data-testid="button-close-proposals"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        {proposalsLoading ? (
+                          <div className="text-center text-gray-500 py-4">Loading proposals...</div>
+                        ) : proposals.filter(p => p.contractorId === contractorIdForReview).length === 0 ? (
+                          <div className="text-center text-gray-500 py-4 bg-gray-50 rounded-lg">
+                            No proposals yet from this contractor.
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {proposals
+                              .filter(p => p.contractorId === contractorIdForReview)
+                              .map((proposal) => (
+                                <div 
+                                  key={proposal.id} 
+                                  className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                                  onClick={() => {
+                                    setSelectedProposal(proposal);
+                                    setIsProposalDetailOpen(true);
+                                  }}
+                                  data-testid={`proposal-item-${proposal.id}`}
+                                >
+                                  <div className="flex items-center justify-between mb-1">
+                                    <h4 className="font-medium text-gray-900">{proposal.title}</h4>
+                                    <Badge variant={
+                                      proposal.status === 'sent' ? 'default' :
+                                      proposal.status === 'accepted' ? 'default' :
+                                      proposal.status === 'rejected' ? 'destructive' :
+                                      'secondary'
+                                    } style={
+                                      proposal.status === 'accepted' ? { backgroundColor: '#10b981', color: 'white' } : {}
+                                    }>
+                                      {proposal.status}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-sm text-gray-600 line-clamp-1">{proposal.description}</p>
+                                  <div className="flex items-center gap-4 text-sm text-gray-600 mt-2">
+                                    <div className="flex items-center gap-1">
+                                      <DollarSign className="h-3 w-3" />
+                                      <span>${parseFloat(proposal.estimatedCost).toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      <span>{proposal.estimatedDuration}</span>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  <span>{proposal.estimatedDuration}</span>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                              ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
