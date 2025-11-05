@@ -56,10 +56,11 @@ Preferred communication style: Simple, everyday language.
     - **For Contractors**: Create and send detailed proposals from message conversations with scope, cost, duration, materials, and warranty information
     - **For Homeowners**: Clickable proposal list in messages page opens detailed dialog showing full proposal information (scope, materials, notes, etc.) with accept/reject buttons
     - **Notifications**: Homeowners receive high-priority notifications when contractors create or send proposals
-- **Connection Code System**: QR codes and shareable codes for homeowners to connect with contractors:
-    - **For Homeowners**: Generate 8-character alphanumeric codes with customizable expiration (hours) and usage limits. Each code can be optionally linked to a specific property. QR codes can be generated for easy scanning.
-    - **For Contractors**: Enter or scan homeowner-provided codes to validate connection and add service records. Upon validation, contractor receives homeowner details and property information.
-    - **Features**: Time-limited codes, usage tracking, code deactivation, QR code generation with qrcode library
+- **Permanent Connection Code System**: Each homeowner has a permanent, user-attached connection code for simplified contractor access:
+    - **For Homeowners**: Every homeowner automatically gets a unique 8-character permanent code attached to their account. Displayed with QR code for easy sharing. Optional code regeneration available if needed.
+    - **For Contractors**: Enter or scan homeowner-provided codes to validate connection and add service records. Upon validation, contractor receives homeowner details (name, email, zip code).
+    - **Features**: Permanent codes (no expiration/usage limits), automatic generation on first access, QR code generation with qrcode library, one code per homeowner account
+    - **Database**: Connection code stored in `users.connection_code` field with unique constraint
 - **API Endpoints**: Structured for contractors, products, houses, notifications, proposals, connection codes, search analytics, and admin functions.
 
 ## External Dependencies
