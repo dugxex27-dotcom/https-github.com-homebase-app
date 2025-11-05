@@ -540,23 +540,18 @@ export default function Messages() {
       <div className="container mx-auto p-6">
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
-        {/* Conversations and Proposals List */}
+        {/* Conversations List */}
         <Card className="lg:col-span-1 bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700" style={{ backgroundColor: '#f2f2f2' }}>
           {typedUser.role === 'homeowner' ? (
-            <Tabs defaultValue="conversations" className="w-full">
-              <TabsList className="w-full" style={{ backgroundColor: '#b6a6f4', color: 'white' }}>
-                <TabsTrigger value="conversations" className="flex-1" style={{ color: 'white' }}>
-                  <MessageCircle className="h-4 w-4 mr-2" />
+            <>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5" />
                   Messages
-                </TabsTrigger>
-                <TabsTrigger value="proposals" className="flex-1" style={{ color: 'white' }}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  Proposals
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="conversations" className="mt-0">
-                <ScrollArea className="h-[550px]">
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <ScrollArea className="h-[500px]">
                   {conversationsLoading ? (
                     <div className="p-4 text-center text-gray-500">Loading conversations...</div>
                   ) : conversations.length === 0 ? (
@@ -602,62 +597,8 @@ export default function Messages() {
                     ))
                   )}
                 </ScrollArea>
-              </TabsContent>
-
-              <TabsContent value="proposals" className="mt-0">
-                <ScrollArea className="h-[550px]">
-                  {proposalsLoading ? (
-                    <div className="p-4 text-center text-gray-500">Loading proposals...</div>
-                  ) : proposals.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500">
-                      No proposals yet. Contractors you've messaged can send you proposals.
-                    </div>
-                  ) : (
-                    proposals.map((proposal) => (
-                      <div 
-                        key={proposal.id} 
-                        className="p-4 border-b hover:bg-gray-50 cursor-pointer transition-colors"
-                        onClick={() => {
-                          setSelectedProposal(proposal);
-                          setIsProposalDetailOpen(true);
-                        }}
-                        data-testid={`proposal-item-${proposal.id}`}
-                      >
-                        <div className="mb-2">
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-medium text-gray-900">{proposal.title}</h3>
-                            <Badge variant={
-                              proposal.status === 'sent' ? 'default' :
-                              proposal.status === 'accepted' ? 'default' :
-                              proposal.status === 'rejected' ? 'destructive' :
-                              'secondary'
-                            } style={
-                              proposal.status === 'accepted' ? { backgroundColor: '#10b981', color: 'white' } : {}
-                            }>
-                              {proposal.status}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{proposal.description}</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mt-2">
-                          <div className="flex items-center gap-1">
-                            <DollarSign className="h-3 w-3" />
-                            <span>${parseFloat(proposal.estimatedCost).toLocaleString()}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            <span>{proposal.estimatedDuration}</span>
-                          </div>
-                        </div>
-                        <div className="text-xs text-gray-400 mt-2">
-                          Valid until: {new Date(proposal.validUntil).toLocaleDateString()}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </ScrollArea>
-              </TabsContent>
-            </Tabs>
+              </CardContent>
+            </>
           ) : (
             // Contractor view - just conversations
             <>
@@ -1214,6 +1155,67 @@ export default function Messages() {
                     </Button>
                   </div>
                 </div>
+
+                {/* Proposals Section - Only for homeowners viewing contractor conversations */}
+                {typedUser?.role === 'homeowner' && contractorIdForReview && (
+                  <div className="p-4 border-t bg-white" data-testid="section-proposals">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-gray-900 flex items-center gap-2" style={{ color: '#2c0f5b' }}>
+                        <FileText className="h-5 w-5" style={{ color: '#b6a6f4' }} />
+                        Proposals from {selectedConversation?.otherPartyName}
+                      </h3>
+                    </div>
+                    
+                    {proposalsLoading ? (
+                      <div className="text-center text-gray-500 py-4">Loading proposals...</div>
+                    ) : proposals.filter(p => p.contractorId === contractorIdForReview).length === 0 ? (
+                      <div className="text-center text-gray-500 py-4 bg-gray-50 rounded-lg">
+                        No proposals yet from this contractor.
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {proposals
+                          .filter(p => p.contractorId === contractorIdForReview)
+                          .map((proposal) => (
+                            <div 
+                              key={proposal.id} 
+                              className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                              onClick={() => {
+                                setSelectedProposal(proposal);
+                                setIsProposalDetailOpen(true);
+                              }}
+                              data-testid={`proposal-item-${proposal.id}`}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <h4 className="font-medium text-gray-900">{proposal.title}</h4>
+                                <Badge variant={
+                                  proposal.status === 'sent' ? 'default' :
+                                  proposal.status === 'accepted' ? 'default' :
+                                  proposal.status === 'rejected' ? 'destructive' :
+                                  'secondary'
+                                } style={
+                                  proposal.status === 'accepted' ? { backgroundColor: '#10b981', color: 'white' } : {}
+                                }>
+                                  {proposal.status}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-600 line-clamp-1">{proposal.description}</p>
+                              <div className="flex items-center gap-4 text-sm text-gray-600 mt-2">
+                                <div className="flex items-center gap-1">
+                                  <DollarSign className="h-3 w-3" />
+                                  <span>${parseFloat(proposal.estimatedCost).toLocaleString()}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  <span>{proposal.estimatedDuration}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Review Section - Only for homeowners viewing contractor conversations after messages exchanged */}
                 {typedUser?.role === 'homeowner' && contractorIdForReview && messages.length > 0 && (
