@@ -2086,7 +2086,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                             className="mt-1"
                             data-testid={`checkbox-task-${generateTaskId(task.title)}`}
                           />
-                          <CardTitle className="tracking-tight text-lg font-semibold text-[#9687ad]" style={{ color: '#ffffff' }} data-testid={`title-task-${generateTaskId(task.title)}`}>
+                          <CardTitle className="tracking-tight text-lg font-semibold text-[#9687ad]" style={{ color: '#2c0f5b' }} data-testid={`title-task-${generateTaskId(task.title)}`}>
                             {task.title}
                           </CardTitle>
                         </div>
