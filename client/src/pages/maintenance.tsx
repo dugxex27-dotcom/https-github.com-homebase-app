@@ -1347,657 +1347,78 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
     return HOME_AREAS.find(a => a.value === area)?.label || area;
   };
 
-  // Generate maintenance tasks based on month and location
+  // Map climate zones to regions in US_MAINTENANCE_DATA
+  const getRegionFromClimateZone = (zone: string): string => {
+    const mapping: { [key: string]: string } = {
+      'pacific-northwest': 'Pacific Northwest',
+      'northeast': 'Northeast',
+      'southeast': 'Southeast',
+      'midwest': 'Midwest',
+      'southwest': 'Southwest',
+      'mountain-west': 'Mountain West',
+      'california': 'West Coast',
+      'great-plains': 'Midwest'
+    };
+    return mapping[zone] || 'Midwest';
+  };
+
+  // Generate maintenance tasks based on month and location using US_MAINTENANCE_DATA
   const getMaintenanceTasksForMonth = (month: number): MaintenanceTask[] => {
-    const isWinter = month === 12 || month === 1 || month === 2;
-    const isSpring = month === 3 || month === 4 || month === 5;
-    const isSummer = month === 6 || month === 7 || month === 8;
-    const isFall = month === 9 || month === 10 || month === 11;
-
     const tasks: MaintenanceTask[] = [];
-
-    // Universal monthly tasks
-    tasks.push(
-      {
-        id: "monthly-smoke-detectors",
-        title: "Test Smoke and Carbon Monoxide Detectors",
-        description: "Check batteries and functionality by pressing test buttons. Replace batteries if chirping or low.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "high",
-        estimatedTime: "15 minutes",
-        difficulty: "easy",
-        category: "Safety",
-        tools: ["9V batteries"],
-        cost: "$10-15"
-      },
-      {
-        id: "monthly-hvac-filter",
-        title: "Change HVAC Air Filters",
-        description: "Replace air filters every 30-60 days, more frequently during heavy use seasons. Check size and MERV rating.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "high",
-        estimatedTime: "10 minutes",
-        difficulty: "easy",
-        category: "HVAC",
-        tools: ["New air filter"],
-        cost: "$15-40"
-      },
-      {
-        id: "monthly-water-check",
-        title: "Check Water Systems",
-        description: "Test water pressure, look for leaks under sinks, and run garbage disposal with citrus peels.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "medium",
-        estimatedTime: "15 minutes",
-        difficulty: "easy",
-        category: "Plumbing",
-        tools: ["Baking soda", "Vinegar", "Citrus peels"],
-        cost: "$0-5"
-      }
-    );
-
-    // Winter tasks (December, January, February)
-    if (isWinter) {
-      // Cold climate winter tasks
-      if (["pacific-northwest", "northeast", "midwest", "mountain-west"].includes(selectedZone)) {
-        tasks.push({
-          id: "winter-heating-check",
-          title: "Inspect Heating System Operation",
-          description: month === 12 ? "Schedule professional HVAC maintenance before peak winter season." : 
-                      month === 1 ? "Monitor heating system efficiency and check for unusual sounds or smells." :
-                      "Check heating vents for blockages and ensure consistent heating throughout home.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "midwest", "mountain-west"],
-          priority: "high",
-          estimatedTime: month === 12 ? "2 hours" : "30 minutes",
-          difficulty: month === 12 ? "moderate" : "easy",
-          category: "HVAC",
-          tools: month === 12 ? null : ["Flashlight"],
-          cost: month === 12 ? "$100-200" : "$0"
-        });
-      }
-
-      // Mild climate winter tasks
-      if (["southeast", "southwest", "california"].includes(selectedZone)) {
-        tasks.push({
-          id: "winter-mild-maintenance",
-          title: "Winter Home Preparation",
-          description: month === 12 ? "Clean and inspect fireplace and chimney if applicable." :
-                      month === 1 ? "Check for any moisture issues and inspect exterior paint for winter damage." :
-                      "Prune dormant trees and shrubs, clean and store outdoor furniture.",
-          month: month,
-          climateZones: ["southeast", "southwest", "california"],
-          priority: "medium",
-          estimatedTime: "1-2 hours",
-          difficulty: "moderate",
-          category: month === 2 ? "Landscaping" : "General",
-          tools: month === 2 ? ["Pruning shears", "Garden gloves"] : ["Flashlight", "Cleaning supplies"],
-          cost: "$10-30"
-        });
-      }
-
-      // Winter garden protection and planning
-      if (month === 12) {
-        tasks.push({
-          id: "winter-plant-protection",
-          title: "Winter Plant Protection",
-          description: "Check plant protection measures during cold snaps. Monitor for rodent damage to trees and shrubs. Plan next year's garden layout and order seed catalogs. Maintain bird feeders and water sources.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "medium",
-          estimatedTime: "1-2 hours",
-          difficulty: "easy",
-          category: "Landscaping",
-          tools: ["Tree guards", "Bird seed", "Garden planning materials"],
-          cost: "$15-40"
-        });
-      }
-
-      if (month === 1) {
-        tasks.push({
-          id: "winter-garden-planning",
-          title: "Garden Planning and Equipment Maintenance",
-          description: "Plan garden layout for the coming year. Order seeds and plants from catalogs. Clean and sharpen garden tools during dormant season. Check stored bulbs and tubers for rot or damage.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "low",
-          estimatedTime: "2-3 hours",
-          difficulty: "easy",
-          category: "Landscaping",
-          tools: ["Tool sharpener", "Oil for tools", "Garden planning books/apps"],
-          cost: "$20-50"
-        });
-      }
-
-      if (month === 2) {
-        tasks.push({
-          id: "late-winter-garden-prep",
-          title: "Late Winter Garden Preparation",
-          description: "Begin pruning fruit trees and grape vines during dormancy. Start seeds indoors for early spring planting. Check and repair garden structures like trellises and fences. Remove heavy snow from evergreen branches.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "medium",
-          estimatedTime: "3-4 hours",
-          difficulty: "moderate",
-          category: "Landscaping",
-          tools: ["Pruning shears", "Seed starting supplies", "Repair materials", "Soft brush for snow"],
-          cost: "$30-80"
-        });
-      }
+    
+    // Get the region data based on selected climate zone
+    const regionName = getRegionFromClimateZone(selectedZone);
+    const regionData = US_MAINTENANCE_DATA[regionName];
+    
+    if (!regionData) {
+      console.error(`No data found for region: ${regionName}`);
+      return tasks;
     }
-
-    // Spring tasks (March, April, May)
-    if (isSpring) {
+    
+    const monthData = regionData.monthlyTasks[month];
+    if (!monthData) {
+      console.error(`No data found for month: ${month} in region: ${regionName}`);
+      return tasks;
+    }
+    
+    const allClimateZones = ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"];
+    
+    // Convert seasonal tasks to MaintenanceTask objects
+    monthData.seasonal.forEach((taskTitle, index) => {
       tasks.push({
-        id: "spring-exterior-prep",
-        title: "Spring Exterior Maintenance",
-        description: month === 3 ? "Inspect roof for winter damage and check gutters for clogs or damage." :
-                    month === 4 ? "Power wash deck, patio, and exterior siding. Check exterior paint." :
-                    "Deep clean windows inside and out, inspect and repair window screens.",
+        id: `seasonal-${month}-${index}`,
+        title: taskTitle,
+        description: taskTitle, // Using title as description
         month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "high",
-        estimatedTime: month === 4 ? "3-4 hours" : "2-3 hours",
-        difficulty: "moderate",
-        category: month === 3 ? "Roofing" : month === 4 ? "Exterior" : "Windows",
-        tools: month === 3 ? ["Ladder", "Binoculars"] : 
-              month === 4 ? ["Power washer", "Cleaning supplies"] : 
-              ["Window cleaner", "Squeegee", "Repair kit"],
-        cost: month === 3 ? "$0-50" : month === 4 ? "$20-40" : "$15-35"
+        climateZones: allClimateZones,
+        priority: monthData.priority,
+        estimatedTime: "30-60 minutes",
+        difficulty: "easy",
+        category: "General Maintenance",
+        tools: null,
+        cost: null
       });
-
-      // Additional spring tasks
-      if (month === 3) {
-        tasks.push({
-          id: "spring-hvac-transition",
-          title: "HVAC System Transition",
-          description: "Schedule professional HVAC maintenance to transition from heating to cooling season. Change filters, test air conditioning operation, and clean outdoor unit.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "2-3 hours",
-          difficulty: "moderate",
-          category: "HVAC",
-          tools: ["New air filter", "Garden hose", "Cleaning supplies"],
-          cost: "$100-200"
-        });
-
-        // Spring soil preparation and fertilizing
-        tasks.push({
-          id: "spring-soil-prep",
-          title: "Soil Preparation and Spring Fertilizing",
-          description: "Test soil pH and nutrient levels. Add compost or organic matter to garden beds. Apply pre-emergent herbicide to prevent weeds. Fertilize established lawn areas with spring fertilizer.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "3-4 hours",
-          difficulty: "moderate",
-          category: "Landscaping",
-          tools: ["Soil test kit", "Compost", "Spring fertilizer", "Spreader", "Garden spade"],
-          cost: "$40-80"
-        });
-      }
-
-      if (month === 4) {
-        // Cool season planting and pruning
-        tasks.push({
-          id: "spring-cool-season-planting",
-          title: "Cool Season Planting and Pruning",
-          description: "Plant cool-season vegetables and flowers. Prune roses, fruit trees, and flowering shrubs after last frost. Remove dead or damaged branches from trees and shrubs.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "midwest", "mountain-west"],
-          priority: "high",
-          estimatedTime: "4-6 hours",
-          difficulty: "moderate",
-          category: "Landscaping",
-          tools: ["Pruning shears", "Hand saw", "Garden gloves", "Plant stakes", "Mulch"],
-          cost: "$50-120"
-        });
-
-        // Warm climate spring planting
-        tasks.push({
-          id: "spring-warm-season-prep",
-          title: "Warm Season Garden Preparation",
-          description: "Plant warm-season flowers and vegetables. Begin summer prep for heat-tolerant plants. Install irrigation systems or repair existing ones. Apply mulch to retain moisture.",
-          month: month,
-          climateZones: ["southeast", "southwest", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "3-5 hours",
-          difficulty: "moderate",
-          category: "Landscaping",
-          tools: ["Seeds/plants", "Irrigation supplies", "Mulch", "Garden tools", "Plant food"],
-          cost: "$60-150"
-        });
-      }
-
-      if (month === 5) {
-        tasks.push({
-          id: "spring-lawn-equipment",
-          title: "Lawn Equipment Preparation",
-          description: "Service lawn mower and garden tools for summer season. Change oil, sharpen blades, check spark plug, and clean air filter. Test all equipment before first use.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "medium",
-          estimatedTime: "2-3 hours",
-          difficulty: "moderate",
-          category: "Landscaping",
-          tools: ["Motor oil", "Spark plug", "Air filter", "Blade sharpener"],
-          cost: "$30-60"
-        });
-
-        // Late spring planting and pest control
-        tasks.push({
-          id: "late-spring-garden-care",
-          title: "Late Spring Garden Care and Pest Management",
-          description: "Plant heat-loving annuals and vegetables after last frost date. Apply organic pest control measures. Deadhead spring flowers. Begin regular watering schedule for new plantings.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "3-4 hours",
-          difficulty: "moderate",
-          category: "Landscaping",
-          tools: ["Plants/seeds", "Organic pest spray", "Watering equipment", "Garden scissors", "Plant supports"],
-          cost: "$40-100"
-        });
-      }
-    }
-
-    // Summer tasks (June, July, August)
-    if (isSummer) {
-      // Hot climate summer tasks
-      if (["southeast", "southwest", "california", "great-plains"].includes(selectedZone)) {
-        tasks.push({
-          id: "summer-cooling-maintenance",
-          title: "Cooling System Maintenance",
-          description: month === 6 ? "Deep clean AC filters and check refrigerant levels professionally." :
-                      month === 7 ? "Monitor AC efficiency, clean vents and registers throughout home." :
-                      "Inspect AC ductwork for leaks and ensure optimal cooling performance.",
-          month: month,
-          climateZones: ["southeast", "southwest", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: month === 6 ? "2 hours" : "1 hour",
-          difficulty: month === 6 ? "moderate" : "easy",
-          category: "HVAC",
-          tools: ["New air filter", "Vacuum", "Cleaning supplies"],
-          cost: month === 6 ? "$50-100" : "$0-25"
-        });
-      }
-
-      // Annual water heater maintenance (June)
-      if (month === 6) {
-        tasks.push({
-          id: "annual-water-heater-flush",
-          title: "Flush Water Heater",
-          description: "Drain and flush water heater tank to remove sediment buildup, improving efficiency and extending lifespan. Turn off power/gas, connect hose to drain valve, and flush until water runs clear.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "medium",
-          estimatedTime: "2-3 hours",
-          difficulty: "moderate",
-          category: "Plumbing",
-          tools: ["Garden hose", "Bucket", "Pipe wrench", "Safety gloves"],
-          cost: "$0-25",
-          systemRequirements: ["gas-water-heater", "electric-water-heater"]
-        });
-
-        // Summer garden maintenance
-        tasks.push({
-          id: "summer-garden-setup",
-          title: "Summer Garden Establishment",
-          description: "Establish deep watering schedule for plants. Install shade structures for sensitive plants. Apply summer mulch to conserve moisture. Begin regular feeding schedule for flowering plants and vegetables.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "3-5 hours",
-          difficulty: "moderate",
-          category: "Landscaping",
-          tools: ["Mulch", "Shade cloth", "Drip irrigation", "Plant fertilizer", "Watering timer"],
-          cost: "$60-150"
-        });
-      }
-
-      if (month === 7) {
-        // Peak summer garden care
-        tasks.push({
-          id: "peak-summer-garden-care",
-          title: "Peak Summer Garden Maintenance",
-          description: "Monitor plants for heat stress and adjust watering. Deadhead flowers to encourage blooming. Harvest vegetables regularly. Apply organic pest control for summer insects. Prune spring-flowering shrubs.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "2-3 hours weekly",
-          difficulty: "easy",
-          category: "Landscaping",
-          tools: ["Pruning shears", "Harvest baskets", "Organic pest spray", "Watering equipment"],
-          cost: "$20-40"
-        });
-      }
-
-      if (month === 8) {
-        // Late summer garden tasks
-        tasks.push({
-          id: "late-summer-garden-prep",
-          title: "Late Summer Garden Preparation",
-          description: "Plant fall vegetables and cool-season flowers. Begin seed collection from favorite plants. Reduce fertilizing to help plants prepare for dormancy. Plan fall garden layout and order bulbs.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "medium",
-          estimatedTime: "2-4 hours",
-          difficulty: "moderate",
-          category: "Landscaping",
-          tools: ["Seeds/plants", "Seed envelopes", "Garden notebook", "Planting tools"],
-          cost: "$30-80"
-        });
-      }
-    }
-
-    // Fall tasks (September, October, November)
-    if (isFall) {
-      // Cold climate fall winterization
-      if (["pacific-northwest", "northeast", "midwest", "mountain-west"].includes(selectedZone)) {
-        tasks.push({
-          id: "fall-winterization",
-          title: "Fall Winterization Prep",
-          description: month === 9 ? "Inspect and service heating system before cold weather arrives." :
-                      month === 10 ? "Winterize outdoor water systems, drain and store hoses." :
-                      "Final exterior home inspection, seal gaps and cracks before winter.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "midwest", "mountain-west"],
-          priority: "high",
-          estimatedTime: month === 9 ? "2-3 hours" : "1-2 hours",
-          difficulty: "moderate",
-          category: month === 9 ? "HVAC" : month === 10 ? "Plumbing" : "Weatherization",
-          tools: month === 10 ? ["Hose storage", "Shut-off tools"] : ["Caulk", "Weather stripping"],
-          cost: "$25-75"
-        });
-      }
-
-      // Gutter maintenance for all climates
-      if (month === 10) {
-        tasks.push({
-          id: "fall-gutter-cleaning",
-          title: "Clean and Inspect Gutters",
-          description: "Remove leaves and debris from gutters and downspouts. Check for proper drainage, loose brackets, and leaks. Install gutter guards if needed to prevent future clogs.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "3-4 hours",
-          difficulty: "moderate",
-          category: "Exterior",
-          tools: ["Ladder", "Garden hose", "Gutter scoop", "Work gloves", "Bucket"],
-          cost: "$10-30"
-        });
-      }
-
-      // Chimney and fireplace preparation
-      if (month === 11) {
-        tasks.push({
-          id: "fall-chimney-prep",
-          title: "Chimney and Fireplace Inspection",
-          description: "Inspect chimney for cracks, loose mortar, or animal nests. Clean fireplace, check damper operation, and test smoke and carbon monoxide detectors near fireplace.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "1-2 hours",
-          difficulty: "moderate",
-          category: "Safety",
-          tools: ["Flashlight", "Cleaning supplies", "Ladder", "Drop cloth"],
-          cost: "$0-50",
-          systemRequirements: ["wood-stove"]
-        });
-      }
-
-      // Fall garden tasks
-      if (month === 9) {
-        tasks.push({
-          id: "fall-garden-transition",
-          title: "Fall Garden Transition",
-          description: "Plant spring-blooming bulbs for next year. Begin harvesting and preserving summer crops. Start composting fallen leaves. Apply fall fertilizer to lawn areas. Begin reducing watering frequency.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "3-4 hours",
-          difficulty: "moderate",
-          category: "Landscaping",
-          tools: ["Bulbs", "Compost bin", "Fall fertilizer", "Harvest containers", "Bulb planter"],
-          cost: "$50-120"
-        });
-      }
-
-      if (month === 10) {
-        tasks.push({
-          id: "fall-leaf-management",
-          title: "Fall Leaf Management and Tree Care",
-          description: "Rake and compost fallen leaves or use as mulch. Remove diseased plant material. Plant trees and shrubs (ideal time for root establishment). Apply dormant oil to fruit trees.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "4-6 hours",
-          difficulty: "moderate",
-          category: "Landscaping",
-          tools: ["Rake", "Compost bin", "Tree stakes", "Dormant oil", "Pruning shears"],
-          cost: "$30-100"
-        });
-      }
-
-      if (month === 11) {
-        tasks.push({
-          id: "winter-garden-prep",
-          title: "Winter Garden Preparation",
-          description: "Cut back perennials and ornamental grasses. Protect tender plants with burlap or covers. Drain and store garden hoses. Apply winter mulch around trees and shrubs. Clean and store garden tools.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "3-5 hours",
-          difficulty: "moderate",
-          category: "Landscaping",
-          tools: ["Pruning shears", "Burlap", "Winter mulch", "Tool oil", "Storage containers"],
-          cost: "$40-90"
-        });
-      }
-    }
-
-    // System-specific tasks
-    tasks.push(
-      {
-        id: "monthly-gas-furnace",
-        title: "Check Gas Furnace Filter and Vents",
-        description: "Inspect furnace filter for clogs and ensure all vents are unobstructed for proper airflow. Check thermostat settings and listen for unusual noises. Replace filter every 1-3 months depending on usage.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "medium",
-        estimatedTime: "15 minutes",
-        difficulty: "easy",
-        category: "HVAC",
-        tools: ["Replacement filter (if needed)"],
-        cost: "$0-25",
-        systemRequirements: ["gas-furnace"]
-      },
-      {
-        id: "monthly-electric-furnace",
-        title: "Electric Furnace Maintenance Check",
-        description: "Inspect electric furnace filter and heating elements. Check electrical connections for corrosion or loose wires. Ensure proper airflow and thermostat operation.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "medium",
-        estimatedTime: "20 minutes",
-        difficulty: "easy",
-        category: "HVAC",
-        tools: ["Flashlight", "Replacement filter"],
-        cost: "$0-25",
-        systemRequirements: ["electric-furnace"]
-      },
-      {
-        id: "monthly-central-ac",
-        title: "Central Air Conditioning Maintenance",
-        description: "Clean or replace AC filter, check outdoor unit for debris, and inspect thermostat settings. During cooling season, monitor indoor temperature consistency and energy usage.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "high",
-        estimatedTime: "30 minutes",
-        difficulty: "easy",
-        category: "HVAC",
-        tools: ["New filter", "Garden hose", "Soft brush"],
-        cost: "$15-40",
-        systemRequirements: ["central-ac"]
-      },
-      {
-        id: "monthly-septic-system",
-        title: "Septic System Inspection",
-        description: "Check septic tank area for odors, wet spots, or lush grass growth. Avoid excessive water usage and never flush non-biodegradable items. Schedule pumping every 3-5 years.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "medium",
-        estimatedTime: "15 minutes",
-        difficulty: "easy",
-        category: "Plumbing",
-        tools: null,
-        cost: "$0",
-        systemRequirements: ["septic"]
-      },
-      {
-        id: "monthly-sump-pump",
-        title: "Sump Pump Operation Test",
-        description: "Pour water into sump pit to test pump activation. Check discharge pipe for clogs and ensure pump removes water efficiently. Test backup power source if equipped.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "high",
-        estimatedTime: "10 minutes",
-        difficulty: "easy",
-        category: "Plumbing",
-        tools: ["Bucket of water"],
-        cost: "$0",
-        systemRequirements: ["sump-pump"]
-      },
-      {
-        id: "monthly-water-softener",
-        title: "Water Softener Salt Level Check",
-        description: "Check salt level in brine tank and refill when salt is below 1/3 full. Clean salt bridge if present and ensure proper water softener regeneration cycle operation.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "medium",
-        estimatedTime: "10 minutes",
-        difficulty: "easy",
-        category: "Plumbing",
-        tools: ["Water softener salt"],
-        cost: "$5-15",
-        systemRequirements: ["water-softener"]
-      },
-      {
-        id: "monthly-security-system",
-        title: "Security System Check",
-        description: "Test all sensors, cameras, and alarm functions. Check battery levels in wireless devices and clean camera lenses. Review access codes and ensure system is properly armed.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "high",
-        estimatedTime: "20 minutes",
-        difficulty: "easy",
-        category: "Security",
-        tools: ["Replacement batteries", "Cleaning cloth"],
-        cost: "$10-20",
-        systemRequirements: ["security-system"]
-      },
-      {
-        id: "monthly-irrigation-system",
-        title: "Irrigation System Check",
-        description: "Inspect sprinkler heads for clogs or damage. Test system zones and adjust timing based on season and weather. Check for leaks in lines and fittings. Clean filter screens and adjust water pressure.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "medium",
-        estimatedTime: "30-45 minutes",
-        difficulty: "easy",
-        category: "Landscaping",
-        tools: ["Sprinkler tool", "Wire brush", "Replacement sprinkler heads"],
-        cost: "$10-30",
-        systemRequirements: ["sprinkler-system"]
-      },
-      {
-        id: "monthly-heat-pump",
-        title: "Clean Heat Pump Outdoor Unit",
-        description: "Remove debris from around outdoor unit and check for ice buildup in winter.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "california"],
-        priority: "medium",
-        estimatedTime: "20 minutes",
-        difficulty: "easy",
-        category: "HVAC",
-        tools: ["Garden hose", "Soft brush"],
-        cost: "$0",
-        systemRequirements: ["heat-pump"]
-      },
-      {
-        id: "monthly-generator",
-        title: "Test Backup Generator",
-        description: "Run generator for 15-30 minutes to ensure proper operation and check fuel levels.",
-        month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "high",
-        estimatedTime: "30 minutes",
-        difficulty: "moderate",
-        category: "Electrical",
-        tools: null,
-        cost: "$0",
-        systemRequirements: ["generator"]
-      }
-    );
-
-    // Pool tasks (summer only)
-    if (isSummer) {
-      tasks.push(
-        {
-          id: "summer-pool",
-          title: "Pool Maintenance and Chemical Balance",
-          description: "Test and balance pool chemicals, clean skimmer baskets, and brush pool walls.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "1-2 hours",
-          difficulty: "moderate",
-          category: "Pool",
-          tools: ["Pool test kit", "Pool chemicals", "Pool brush", "Skimmer net"],
-          cost: "$30-60",
-          systemRequirements: ["pool"]
-        },
-        {
-          id: "summer-spa",
-          title: "Hot Tub/Spa Water Treatment",
-          description: "Test water chemistry, clean filters, and check for proper heating and circulation.",
-          month: month,
-          climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-          priority: "high",
-          estimatedTime: "45 minutes",
-          difficulty: "moderate",
-          category: "Spa",
-          tools: ["Spa test strips", "Spa chemicals"],
-          cost: "$25-45",
-          systemRequirements: ["spa"]
-        }
-      );
-    }
-
-    // Solar panel tasks
-    if (isSummer || month === 3 || month === 9) {
+    });
+    
+    // Convert weather-specific tasks to MaintenanceTask objects
+    monthData.weatherSpecific.forEach((taskTitle, index) => {
       tasks.push({
-        id: `solar-${month}`,
-        title: isSummer ? "Clean Solar Panels" : "Solar Panel System Inspection",
-        description: isSummer ? 
-          "Remove dust, pollen, and debris from solar panels to maintain efficiency." :
-          "Check mounting hardware, wiring connections, and monitor system performance data.",
+        id: `weather-${month}-${index}`,
+        title: taskTitle,
+        description: taskTitle, // Using title as description
         month: month,
-        climateZones: ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"],
-        priority: "medium",
-        estimatedTime: isSummer ? "2-3 hours" : "1 hour",
-        difficulty: "moderate",
-        category: "Solar",
-        tools: isSummer ? ["Garden hose", "Soft brush", "Squeegee"] : ["Multimeter", "Binoculars"],
-        cost: isSummer ? "$0-20" : "$0",
-        systemRequirements: ["solar-panels"]
+        climateZones: allClimateZones,
+        priority: monthData.priority,
+        estimatedTime: "30-60 minutes",
+        difficulty: "easy",
+        category: "Weather-Specific",
+        tools: null,
+        cost: null
       });
-    }
+    });
 
+    // Tasks are now loaded from US_MAINTENANCE_DATA above
+    
     return tasks;
   };
 
