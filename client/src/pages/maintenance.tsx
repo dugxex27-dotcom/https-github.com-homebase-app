@@ -2017,10 +2017,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                       <div key={log.id} className="mt-3 p-3 rounded-lg border-gray-300 dark:border-gray-700" style={{ backgroundColor: '#f2f2f2' }}>
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <h4 className="font-medium text-sm" style={{ 
-                              color: log.contractorName === 'Sarah Chen' && log.serviceDate === '2024-06-19' ? '#3c258e' : 
-                                     log.serviceDescription?.includes('HVAC') || log.serviceDescription?.includes('gutter') ? '#2c0f5b' : '#ffffff' 
-                            }}>{log.serviceDescription}</h4>
+                            <h4 className="font-medium text-sm" style={{ color: '#2c0f5b' }}>{log.serviceDescription}</h4>
                             <div className="flex items-center gap-3 text-xs mt-1" style={{ color: '#2c0f5b' }}>
                               <span>{new Date(log.serviceDate).toLocaleDateString()}</span>
                               {log.homeArea && (
