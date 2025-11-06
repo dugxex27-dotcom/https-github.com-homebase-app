@@ -2159,8 +2159,8 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                       <Collapsible open={showCustomizeTask === task.id}>
                         <CollapsibleContent>
                           <div className="border rounded-lg p-4 bg-slate-50 dark:bg-slate-800">
-                            <h4 className="font-medium mb-3 flex items-center" style={{ color: '#ffffff' }}>
-                              <Settings className="w-4 h-4 mr-2" style={{ color: '#ffffff' }} />
+                            <h4 className="font-medium mb-3 flex items-center" style={{ color: '#2c0f5b' }}>
+                              <Settings className="w-4 h-4 mr-2" style={{ color: '#2c0f5b' }} />
                               Customize This Task
                             </h4>
                             
@@ -2186,7 +2186,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                                         }}
                                         data-testid={`checkbox-enable-${taskId}`}
                                       />
-                                      <label htmlFor={`enable-${taskId}`} className="text-sm font-medium" style={{ color: '#ffffff' }}>
+                                      <label htmlFor={`enable-${taskId}`} className="text-sm font-medium" style={{ color: '#2c0f5b' }}>
                                         Enable this task
                                       </label>
                                     </div>
@@ -2198,7 +2198,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                                           deleteTaskOverrideMutation.mutate(taskId);
                                         }}
                                         className="text-xs"
-                                        style={{ color: '#ffffff', borderColor: '#ffffff' }}
+                                        style={{ color: '#2c0f5b', borderColor: '#2c0f5b' }}
                                         data-testid={`button-reset-${taskId}`}
                                       >
                                         Reset to Default
@@ -2208,7 +2208,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
 
                                   {/* Frequency Control */}
                                   <div>
-                                    <label className="text-sm font-medium mb-2 block" style={{ color: '#ffffff' }}>
+                                    <label className="text-sm font-medium mb-2 block" style={{ color: '#2c0f5b' }}>
                                       Task Frequency
                                     </label>
                                     <Select
@@ -2245,7 +2245,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
 
                                   {/* Show current customization status */}
                                   {currentOverride && (
-                                    <div className="text-xs bg-blue-50 dark:bg-blue-900/20 p-2 rounded" style={{ color: '#ffffff' }}>
+                                    <div className="text-xs bg-blue-50 dark:bg-blue-900/20 p-2 rounded" style={{ color: '#2c0f5b' }}>
                                       <strong>Current customization:</strong>
                                       {currentOverride.isEnabled ? 
                                         ` Enabled, ${currentOverride.frequencyType || 'default'} frequency` :
