@@ -2407,52 +2407,83 @@ export class MemStorage implements IStorage {
 
   // Task override operations for customizing default regional tasks
   async getTaskOverrides(homeownerId: string, houseId: string): Promise<TaskOverride[]> {
-    const overrides: TaskOverride[] = [];
-    for (const override of this.taskOverrides.values()) {
-      if (override.homeownerId === homeownerId && override.houseId === houseId) {
-        overrides.push(override);
-      }
+    try {
+      const result = await db.select()
+        .from(taskOverrides)
+        .where(and(
+          eq(taskOverrides.homeownerId, homeownerId),
+          eq(taskOverrides.houseId, houseId)
+        ));
+      return result;
+    } catch (error) {
+      console.error("Error fetching task overrides from database:", error);
+      return [];
     }
-    return overrides;
   }
 
   async getTaskOverride(homeownerId: string, houseId: string, taskId: string): Promise<TaskOverride | undefined> {
-    for (const override of this.taskOverrides.values()) {
-      if (override.homeownerId === homeownerId && override.houseId === houseId && override.taskId === taskId) {
-        return override;
-      }
+    try {
+      const result = await db.select()
+        .from(taskOverrides)
+        .where(and(
+          eq(taskOverrides.homeownerId, homeownerId),
+          eq(taskOverrides.houseId, houseId),
+          eq(taskOverrides.taskId, taskId)
+        ))
+        .limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("Error fetching task override from database:", error);
+      return undefined;
     }
-    return undefined;
   }
 
   async upsertTaskOverride(overrideData: InsertTaskOverride): Promise<TaskOverride> {
-    // Look for existing override
-    const existingOverride = await this.getTaskOverride(overrideData.homeownerId, overrideData.houseId, overrideData.taskId);
-    
-    const override: TaskOverride = {
-      id: existingOverride?.id || randomUUID(),
-      homeownerId: overrideData.homeownerId,
-      houseId: overrideData.houseId,
-      taskId: overrideData.taskId,
-      isEnabled: overrideData.isEnabled ?? true,
-      frequencyType: overrideData.frequencyType || null,
-      frequencyValue: overrideData.frequencyValue || null,
-      specificMonths: overrideData.specificMonths || null,
-      notes: overrideData.notes || null,
-      createdAt: existingOverride?.createdAt || new Date(),
-      updatedAt: new Date(),
-    };
-
-    this.taskOverrides.set(override.id, override);
-    return override;
+    try {
+      const result = await db.insert(taskOverrides)
+        .values({
+          homeownerId: overrideData.homeownerId,
+          houseId: overrideData.houseId,
+          taskId: overrideData.taskId,
+          isEnabled: overrideData.isEnabled ?? true,
+          frequencyType: overrideData.frequencyType || null,
+          frequencyValue: overrideData.frequencyValue || null,
+          specificMonths: overrideData.specificMonths || null,
+          notes: overrideData.notes || null,
+        })
+        .onConflictDoUpdate({
+          target: [taskOverrides.homeownerId, taskOverrides.houseId, taskOverrides.taskId],
+          set: {
+            isEnabled: overrideData.isEnabled ?? true,
+            frequencyType: overrideData.frequencyType || null,
+            frequencyValue: overrideData.frequencyValue || null,
+            specificMonths: overrideData.specificMonths || null,
+            notes: overrideData.notes || null,
+            updatedAt: new Date(),
+          },
+        })
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error upserting task override:", error);
+      throw error;
+    }
   }
 
   async deleteTaskOverride(homeownerId: string, houseId: string, taskId: string): Promise<boolean> {
-    const existing = await this.getTaskOverride(homeownerId, houseId, taskId);
-    if (!existing) {
+    try {
+      const result = await db.delete(taskOverrides)
+        .where(and(
+          eq(taskOverrides.homeownerId, homeownerId),
+          eq(taskOverrides.houseId, houseId),
+          eq(taskOverrides.taskId, taskId)
+        ))
+        .returning();
+      return result.length > 0;
+    } catch (error) {
+      console.error("Error deleting task override:", error);
       return false;
     }
-    return this.taskOverrides.delete(existing.id);
   }
 
   // Regional data operations for international expansion
