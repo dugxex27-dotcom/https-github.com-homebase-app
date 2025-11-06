@@ -40,14 +40,14 @@ export default function Header() {
   return (
     <header className="bg-gray-50 dark:bg-gray-900 shadow-sm border-b border-gray-300 dark:border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
+        <div className="flex justify-between items-end h-16 pb-2">
+          <div className="flex items-end">
             <Link href="/">
               <Logo className="h-10 w-auto text-primary cursor-pointer" />
             </Link>
           </div>
           
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex items-end space-x-8">
             {isAdmin && (
               <Link href="/admin" className={`text-gray-700 hover:text-primary transition-colors ${
                 location === '/admin' ? 'text-primary font-medium' : ''
@@ -120,11 +120,11 @@ export default function Header() {
             )}
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-end space-x-4">
             {isAuthenticated && (typedUser?.role === 'homeowner' || typedUser?.role === 'contractor') && <Notifications />}
             
             {isAuthenticated && typedUser && (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-end space-x-2">
                 <Badge variant={typedUser.role === 'homeowner' ? 'default' : 'secondary'}>
                   {typedUser.role === 'homeowner' ? 'Homeowner' : 'Contractor'}
                 </Badge>
