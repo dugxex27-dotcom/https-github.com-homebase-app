@@ -2107,6 +2107,24 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                               <Settings className="w-4 h-4" />
                             </Button>
                           )}
+                          {isCustomTask && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                // Scroll to the Custom Maintenance Tasks section
+                                document.querySelector('[data-custom-tasks-section]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                toast({
+                                  title: "Edit Custom Task",
+                                  description: "Use the Edit button in the Custom Maintenance Tasks section below to modify this task."
+                                });
+                              }}
+                              className="p-1 h-7 w-7"
+                              data-testid={`button-edit-custom-${task.id}`}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardHeader>
@@ -2374,7 +2392,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
 
 
         {/* Custom Maintenance Tasks Section */}
-        <div className="mt-12">
+        <div className="mt-12" data-custom-tasks-section>
           <CustomMaintenanceTasks 
             homeownerId={homeownerId} 
             houseId={selectedHouseId}
