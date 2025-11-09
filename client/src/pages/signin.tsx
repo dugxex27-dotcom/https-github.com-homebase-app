@@ -738,19 +738,19 @@ export default function SignIn() {
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   type="button"
-                  variant="outline"
                   className="w-full"
                   onClick={handleDemoLogin}
                   data-testid="button-demo-homeowner"
+                  style={{ backgroundColor: '#2c0f5b', color: 'white' }}
                 >
                   Homeowner Demo
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
                   className="w-full"
                   onClick={handleContractorDemoLogin}
                   data-testid="button-demo-contractor"
+                  style={{ backgroundColor: '#1560a2', color: 'white' }}
                 >
                   Contractor Demo
                 </Button>
