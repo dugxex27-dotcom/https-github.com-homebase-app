@@ -1710,9 +1710,8 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                     <Button 
                       onClick={() => window.location.href = '/contractors'}
                       size="lg"
-                      variant="outline"
-                      className="px-8 py-3 text-lg font-semibold text-[#ffffff]"
-                      style={{ borderColor: '#2c0f5b', color: '#ffffff' }}
+                      className="px-8 py-3 text-lg font-semibold"
+                      style={{ backgroundColor: '#1560a2', color: 'white' }}
                       data-testid="button-find-contractors-general"
                     >
                       <MapPin className="w-5 h-5 mr-2" />
@@ -1852,7 +1851,6 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                   {/* Find Contractors Button */}
                   {selectedHouseId && houses.length > 0 && (
                     <Button
-                      variant="outline"
                       size="sm"
                       onClick={() => {
                         const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
@@ -1862,8 +1860,8 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                           window.location.href = `/contractors?location=${encodedAddress}`;
                         }
                       }}
-                      className="whitespace-nowrap px-8 py-3 text-lg font-semibold text-[#ffffff]" 
-                      style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                      className="whitespace-nowrap px-8 py-3 text-lg font-semibold" 
+                      style={{ backgroundColor: '#1560a2', color: 'white' }}
                       data-testid="button-find-contractors"
                     >
                       <MapPin className="w-4 h-4 mr-1" />
