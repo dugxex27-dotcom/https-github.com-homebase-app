@@ -1,4 +1,5 @@
 import { Switch, Route } from "wouter";
+import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -29,6 +30,17 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
+  
+  // Set data-role attribute on body for role-based theming
+  useEffect(() => {
+    const typedUser = user as { role?: string } | undefined;
+    const role = typedUser?.role || 'homeowner';
+    document.body.setAttribute('data-role', role);
+    
+    return () => {
+      document.body.removeAttribute('data-role');
+    };
+  }, [user]);
 
   // Show loading screen while checking authentication
   if (isLoading) {

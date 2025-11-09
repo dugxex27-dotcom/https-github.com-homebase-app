@@ -2,60 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===================================
+   HOMEBASE DESIGN TOKENS
+   =================================== */
+
 :root {
-  --background: #2c0f5b;
-  --foreground: hsl(260, 20%, 25%);
-  --muted: hsl(250, 12%, 80%);
-  --muted-foreground: hsl(260, 10%, 45%);
-  --popover: hsl(0, 0%, 95%);
-  --popover-foreground: hsl(260, 20%, 25%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(260, 20%, 25%);
-  --border: hsl(250, 10%, 88%);
-  --input: hsl(250, 10%, 88%);
-  --primary: hsl(260, 80%, 30%);
-  --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(250, 20%, 92%);
-  --secondary-foreground: hsl(260, 20%, 25%);
-  --accent: hsl(245, 25%, 88%);
-  --accent-foreground: hsl(260, 20%, 25%);
-  --destructive: hsl(0, 45%, 35%);
-  --destructive-foreground: hsl(0, 0%, 100%);
-  --ring: hsl(260, 30%, 70%);
-  --radius: 0.75rem;
-  --success: hsl(140, 45%, 55%);
-  --success-foreground: hsl(0, 0%, 100%);
-  --warning: hsl(35, 85%, 60%);
-  --warning-foreground: hsl(0, 0%, 100%);
-  --neutral: hsl(250, 15%, 85%);
+  /* Spacing Scale */
+  --spacing-xs: 0.25rem;    /* 4px */
+  --spacing-sm: 0.5rem;     /* 8px */
+  --spacing-md: 1rem;       /* 16px */
+  --spacing-lg: 1.5rem;     /* 24px */
+  --spacing-xl: 2rem;       /* 32px */
+  --spacing-2xl: 3rem;      /* 48px */
+  --spacing-3xl: 4rem;      /* 64px */
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;    /* 6px */
+  --radius-md: 0.5rem;      /* 8px */
+  --radius-lg: 0.75rem;     /* 12px */
+  --radius-xl: 1rem;        /* 16px */
+  --radius-2xl: 1.5rem;     /* 24px */
+  --radius-full: 9999px;
+  --radius: var(--radius-lg);
+  
+  /* Shadow Scale */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  
+  /* Typography */
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --text-xs: 0.75rem;       /* 12px */
+  --text-sm: 0.875rem;      /* 14px */
+  --text-base: 1rem;        /* 16px */
+  --text-lg: 1.125rem;      /* 18px */
+  --text-xl: 1.25rem;       /* 20px */
+  --text-2xl: 1.5rem;       /* 24px */
+  --text-3xl: 1.875rem;     /* 30px */
+  --text-4xl: 2.25rem;      /* 36px */
 }
 
+/* Homeowner Theme (Purple) - Default */
+:root, [data-role="homeowner"] {
+  /* Brand Colors */
+  --brand-primary: hsl(260, 65%, 55%);
+  --brand-primary-dark: hsl(260, 80%, 30%);
+  --brand-primary-light: hsl(260, 50%, 70%);
+  
+  /* Semantic Colors */
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(260, 20%, 20%);
+  --muted: hsl(250, 12%, 96%);
+  --muted-foreground: hsl(260, 10%, 45%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(260, 20%, 20%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(260, 20%, 20%);
+  --border: hsl(250, 10%, 88%);
+  --input: hsl(250, 10%, 88%);
+  
+  /* Action Colors */
+  --primary: hsl(260, 65%, 55%);
+  --primary-hover: hsl(260, 70%, 48%);
+  --primary-active: hsl(260, 75%, 42%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  
+  --secondary: hsl(250, 20%, 96%);
+  --secondary-hover: hsl(250, 20%, 92%);
+  --secondary-foreground: hsl(260, 20%, 20%);
+  
+  --accent: hsl(245, 25%, 92%);
+  --accent-foreground: hsl(260, 20%, 20%);
+  
+  /* Status Colors */
+  --destructive: hsl(0, 65%, 51%);
+  --destructive-hover: hsl(0, 70%, 45%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  
+  --success: hsl(142, 71%, 45%);
+  --success-foreground: hsl(0, 0%, 100%);
+  
+  --warning: hsl(38, 92%, 50%);
+  --warning-foreground: hsl(0, 0%, 100%);
+  
+  --info: hsl(199, 89%, 48%);
+  --info-foreground: hsl(0, 0%, 100%);
+  
+  --neutral: hsl(250, 10%, 75%);
+  
+  /* Focus & Ring */
+  --ring: hsl(260, 65%, 55%);
+  --ring-offset: hsl(0, 0%, 100%);
+}
+
+/* Contractor Theme (Blue/Red) */
+[data-role="contractor"] {
+  /* Brand Colors */
+  --brand-primary: hsl(4, 90%, 58%);
+  --brand-primary-dark: hsl(4, 85%, 48%);
+  --brand-primary-light: hsl(4, 90%, 70%);
+  
+  /* Action Colors */
+  --primary: hsl(4, 90%, 58%);
+  --primary-hover: hsl(4, 90%, 52%);
+  --primary-active: hsl(4, 90%, 46%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  
+  /* Focus & Ring */
+  --ring: hsl(4, 90%, 58%);
+}
+
+/* Dark Mode */
 .dark {
-  --background: #2c0f5b;
+  --background: hsl(260, 25%, 8%);
   --foreground: hsl(250, 25%, 92%);
   --muted: hsl(260, 15%, 15%);
   --muted-foreground: hsl(250, 15%, 65%);
-  --popover: hsl(0, 0%, 95%);
+  --popover: hsl(260, 20%, 12%);
   --popover-foreground: hsl(250, 25%, 92%);
   --card: hsl(260, 18%, 12%);
   --card-foreground: hsl(250, 25%, 92%);
-  --border: hsl(260, 12%, 20%);
+  --border: hsl(260, 12%, 24%);
   --input: hsl(260, 12%, 20%);
-  --primary: hsl(260, 80%, 30%);
-  --primary-foreground: hsl(0, 0%, 100%);
   --secondary: hsl(260, 15%, 18%);
+  --secondary-hover: hsl(260, 15%, 22%);
   --secondary-foreground: hsl(250, 25%, 92%);
   --accent: hsl(260, 15%, 18%);
   --accent-foreground: hsl(250, 25%, 92%);
-  --destructive: hsl(0, 45%, 35%);
-  --destructive-foreground: hsl(0, 0%, 100%);
-  --ring: hsl(260, 30%, 70%);
-  --radius: 0.75rem;
-  --success: hsl(140, 45%, 55%);
-  --success-foreground: hsl(0, 0%, 100%);
-  --warning: hsl(35, 85%, 60%);
-  --warning-foreground: hsl(0, 0%, 100%);
-  --neutral: hsl(260, 20%, 8%);
+  --neutral: hsl(260, 20%, 25%);
+  --ring-offset: hsl(260, 25%, 8%);
 }
 
 @layer base {
@@ -65,5 +143,44 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  
+  /* Focus Styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2;
+  }
+  
+  /* Remove focus ring for mouse users */
+  *:focus:not(:focus-visible) {
+    @apply outline-none ring-0;
+  }
+}
+
+@layer components {
+  /* Consistent Card Padding */
+  .card-padding {
+    @apply p-6;
+  }
+  
+  .card-padding-sm {
+    @apply p-4;
+  }
+  
+  .card-padding-lg {
+    @apply p-8;
+  }
+  
+  /* Consistent Section Spacing */
+  .section-spacing {
+    @apply space-y-6;
+  }
+  
+  .section-spacing-sm {
+    @apply space-y-4;
+  }
+  
+  .section-spacing-lg {
+    @apply space-y-8;
   }
 }
