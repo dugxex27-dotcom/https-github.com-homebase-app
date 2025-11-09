@@ -335,7 +335,7 @@ export default function SignIn() {
             className="h-24 w-auto mx-auto mb-4"
             data-testid="img-logo"
           />
-          <p className="text-lg" style={{ color: '#ffffff' }}>
+          <p className="text-lg text-muted-foreground">
             Your trusted home services marketplace
           </p>
         </div>
@@ -359,7 +359,6 @@ export default function SignIn() {
               className="w-full flex items-center justify-center gap-2 hidden"
               onClick={handleGoogleLogin}
               data-testid="button-google-oauth"
-              style={{ color: '#ffffff' }}
             >
               <SiGoogle className="w-5 h-5" />
               Continue with Google
@@ -370,7 +369,7 @@ export default function SignIn() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground" style={{ color: '#ffffff' }}>
+                <span className="bg-background px-2 text-muted-foreground">
                   Or continue with email
                 </span>
               </div>
@@ -391,7 +390,6 @@ export default function SignIn() {
                             placeholder="Enter your email"
                             {...field}
                             data-testid="input-email"
-                            className="text-white placeholder:text-white"
                           />
                         </FormControl>
                         <FormMessage />
@@ -412,12 +410,12 @@ export default function SignIn() {
                               placeholder="Enter your password"
                               {...field}
                               data-testid="input-password"
-                              className="text-white placeholder:text-white pr-10"
+                              className="pr-10"
                             />
                             <button
                               type="button"
                               onClick={() => setShowLoginPassword(!showLoginPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                               data-testid="button-toggle-login-password"
                             >
                               {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -444,7 +442,6 @@ export default function SignIn() {
                     type="submit"
                     className="w-full"
                     disabled={loginMutation.isPending}
-                    style={{ background: '#3c258e' }}
                     data-testid="button-login"
                   >
                     {loginMutation.isPending ? 'Signing in...' : 'Sign In'}
@@ -466,7 +463,6 @@ export default function SignIn() {
                               placeholder="First name"
                               {...field}
                               data-testid="input-first-name"
-                              style={{ color: '#ffffff' }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -485,7 +481,6 @@ export default function SignIn() {
                               placeholder="Last name"
                               {...field}
                               data-testid="input-last-name"
-                              style={{ color: '#ffffff' }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -499,8 +494,7 @@ export default function SignIn() {
                     <input
                       type="email"
                       placeholder="Enter your email"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-2"
-                      style={{ color: '#ffffff' }}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-2"
                       data-testid="input-register-email"
                       {...registerForm.register("email")}
                     />
@@ -524,13 +518,12 @@ export default function SignIn() {
                               placeholder="Create a password (min 6 characters)"
                               {...field}
                               data-testid="input-password"
-                              style={{ color: '#ffffff' }}
                               className="pr-10"
                             />
                             <button
                               type="button"
                               onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                               data-testid="button-toggle-register-password"
                             >
                               {showRegisterPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -555,13 +548,12 @@ export default function SignIn() {
                               placeholder="Confirm your password"
                               {...field}
                               data-testid="input-confirm-password"
-                              style={{ color: '#ffffff' }}
                               className="pr-10"
                             />
                             <button
                               type="button"
                               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                               data-testid="button-toggle-confirm-password"
                             >
                               {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -584,7 +576,6 @@ export default function SignIn() {
                             placeholder="Enter your zip code"
                             {...field}
                             data-testid="input-zip-code"
-                            style={{ color: '#ffffff' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -649,7 +640,6 @@ export default function SignIn() {
                                 placeholder="e.g., ABC Plumbing"
                                 {...field}
                                 data-testid="input-company-name"
-                                style={{ color: '#ffffff' }}
                               />
                             </FormControl>
                             <FormMessage />
@@ -668,7 +658,6 @@ export default function SignIn() {
                                 placeholder="Brief description of your company"
                                 {...field}
                                 data-testid="input-company-bio"
-                                style={{ color: '#ffffff' }}
                               />
                             </FormControl>
                             <FormMessage />
@@ -687,7 +676,6 @@ export default function SignIn() {
                                 placeholder="(555) 123-4567"
                                 {...field}
                                 data-testid="input-company-phone"
-                                style={{ color: '#ffffff' }}
                               />
                             </FormControl>
                             <FormMessage />
@@ -708,7 +696,6 @@ export default function SignIn() {
                             placeholder="Enter invite code if you have one"
                             {...field}
                             data-testid="input-invite-code"
-                            style={{ color: '#ffffff' }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -720,9 +707,6 @@ export default function SignIn() {
                     type="submit"
                     className="w-full"
                     disabled={registerMutation.isPending}
-                    style={{ 
-                      background: selectedRole === 'contractor' ? '#518ebc' : '#3c258e'
-                    }}
                     data-testid="button-register"
                   >
                     {registerMutation.isPending ? 'Creating account...' : 'Create Account'}
@@ -758,7 +742,6 @@ export default function SignIn() {
                   className="w-full"
                   onClick={handleDemoLogin}
                   data-testid="button-demo-homeowner"
-                  style={{ color: '#ffffff' }}
                 >
                   Homeowner Demo
                 </Button>
@@ -768,7 +751,6 @@ export default function SignIn() {
                   className="w-full"
                   onClick={handleContractorDemoLogin}
                   data-testid="button-demo-contractor"
-                  style={{ color: '#ffffff' }}
                 >
                   Contractor Demo
                 </Button>
