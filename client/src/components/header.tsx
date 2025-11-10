@@ -199,7 +199,7 @@ export default function Header() {
                 <Badge 
                   variant={typedUser.role === 'homeowner' ? 'default' : 'outline'} 
                   size="default"
-                  className={typedUser.role === 'contractor' ? 'border-white text-white' : ''}
+                  className={typedUser.role === 'contractor' ? 'border-white bg-white text-[#1560a2]' : ''}
                 >
                   {typedUser.role === 'homeowner' ? 'Homeowner' : 'Contractor'}
                 </Badge>
