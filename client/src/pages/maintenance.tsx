@@ -2024,10 +2024,10 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                                   <span>{getHomeAreaLabel(log.homeArea)}</span>
                                 </>
                               )}
-                              {log.contractorName && (
+                              {log.contractorCompany && (
                                 <>
                                   <span>•</span>
-                                  <span>{log.contractorName}</span>
+                                  <span>{log.contractorCompany}</span>
                                 </>
                               )}
                             </div>
