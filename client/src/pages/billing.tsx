@@ -131,6 +131,10 @@ export default function Billing() {
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-start gap-2">
                     <Check className="h-5 w-5 text-purple-600 mt-0.5" />
+                    <span><strong>14-day free trial</strong></span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-purple-600 mt-0.5" />
                     <span>Up to <strong>2 properties</strong></span>
                   </li>
                   <li className="flex items-start gap-2">
@@ -190,6 +194,10 @@ export default function Billing() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-purple-600 mt-0.5" />
+                    <span><strong>14-day free trial</strong></span>
+                  </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-5 w-5 text-purple-600 mt-0.5" />
                     <span>Up to <strong>10 properties</strong></span>
