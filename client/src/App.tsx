@@ -26,6 +26,7 @@ import CompleteProfile from "./pages/complete-profile";
 import ManageTeam from "./pages/manage-team";
 import TestUpload from "./pages/test-upload";
 import AIContractorHelp from "./pages/ai-contractor-help";
+import Billing from "./pages/billing";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -105,6 +106,7 @@ function Router() {
           <Route path="/account" component={HomeownerAccount} />
           <Route path="/achievements" component={Achievements} />
           <Route path="/ai-help" component={AIContractorHelp} />
+          <Route path="/billing" component={Billing} />
         </>
       )}
       

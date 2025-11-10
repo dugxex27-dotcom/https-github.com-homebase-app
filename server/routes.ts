@@ -311,6 +311,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return result;
   }
 
+  // Get current user data
+  app.get('/api/user', async (req: any, res) => {
+    try {
+      if (!req.session?.isAuthenticated || !req.session?.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const userId = req.session.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      return res.json(user);
+    } catch (error: any) {
+      console.error('Error fetching user:', error);
+      return res.status(500).json({ message: "Failed to fetch user data" });
+    }
+  });
+
   // Get or create user's referral code
   app.get('/api/user/referral-code', async (req: any, res) => {
     try {
