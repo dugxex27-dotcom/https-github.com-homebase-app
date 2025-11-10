@@ -212,7 +212,7 @@ export default function Header() {
                   onClick={handleLogout}
                   data-testid="button-logout"
                   aria-label="Sign out"
-                  className={typedUser.role === 'contractor' ? 'border-white text-white hover:bg-white/10' : ''}
+                  className={typedUser.role === 'contractor' ? 'border-white bg-white text-[#1560a2] hover:bg-white/90' : ''}
                 >
                   <LogOut className="w-4 h-4" />
                   <span className="hidden sm:inline">Sign Out</span>
