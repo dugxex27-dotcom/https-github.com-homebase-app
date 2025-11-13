@@ -81,6 +81,14 @@ Preferred communication style: Simple, everyday language.
     - **Pending**: Stripe integration (requires API keys)
 - **Real Estate Agent Affiliate System**:
     - **Agent Role**: Third user type focused solely on earning referral commissions (no subscription required)
+    - **Profile Picture Upload**:
+        - Agents can upload profile pictures via Profile Settings card in account page
+        - Storage in object storage with key pattern: `profile-pictures/{userId}/{uuid}.{ext}`
+        - Supported formats: JPEG, PNG, WEBP (max 5MB)
+        - Auto-upload on file select with preview and loading spinner
+        - Profile images display in homeowner maintenance page when agent referred them
+        - Fallback to User icon if no picture or load error
+        - profileImageUrl stored in users table (not agent_profiles)
     - **Referral Tracking**:
         - Auto-generated unique 8-character referral codes for each agent (format: ABCDEFGHJKLMNPQRSTUVWXYZ23456789)
         - Shareable referral links with QR code generation (using qrcode library)
