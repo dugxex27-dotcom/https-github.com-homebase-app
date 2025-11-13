@@ -18,7 +18,7 @@ import { insertMaintenanceLogSchema, insertCustomMaintenanceTaskSchema, insertHo
 import type { MaintenanceLog, House, CustomMaintenanceTask, HomeSystem, TaskOverride, HomeAppliance, HomeApplianceManual } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud, Monitor, Book, ExternalLink, Upload, Trophy, Mail, Handshake } from "lucide-react";
+import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud, Monitor, Book, ExternalLink, Upload, Trophy, Mail, Handshake, Globe } from "lucide-react";
 import { AppointmentScheduler } from "@/components/appointment-scheduler";
 import { CustomMaintenanceTasks } from "@/components/custom-maintenance-tasks";
 import { US_MAINTENANCE_DATA, getRegionFromClimateZone, getCurrentMonthTasks } from "@shared/location-maintenance-data";
@@ -2102,8 +2102,29 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                         )}
                       </div>
                     </div>
-                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                      <p className="text-sm" style={{ color: '#666666' }}>
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                      {referringAgent.officeAddress && (
+                        <div className="flex items-center gap-2 text-sm" style={{ color: '#666666' }}>
+                          <Building2 className="w-4 h-4" style={{ color: '#2c0f5b' }} />
+                          <span data-testid="text-agent-office">{referringAgent.officeAddress}</span>
+                        </div>
+                      )}
+                      {referringAgent.website && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Globe className="w-4 h-4" style={{ color: '#2c0f5b' }} />
+                          <a 
+                            href={referringAgent.website} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="hover:underline"
+                            style={{ color: '#2c0f5b' }}
+                            data-testid="link-agent-website"
+                          >
+                            Visit Website
+                          </a>
+                        </div>
+                      )}
+                      <p className="text-sm pt-2" style={{ color: '#666666' }}>
                         Thank you for joining Home Base through {referringAgent.firstName}'s referral! Feel free to reach out if you have any questions.
                       </p>
                     </div>

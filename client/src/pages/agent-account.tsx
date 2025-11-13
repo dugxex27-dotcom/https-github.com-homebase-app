@@ -47,6 +47,14 @@ const verificationFormSchema = z.object({
 
 type VerificationFormData = z.infer<typeof verificationFormSchema>;
 
+const contactInfoSchema = z.object({
+  phone: z.string().max(20).optional().or(z.literal('')),
+  website: z.string().url({ message: "Please enter a valid URL (e.g., https://example.com)" }).max(2048).optional().or(z.literal('')).or(z.literal('https://')),
+  officeAddress: z.string().max(255).optional().or(z.literal('')),
+});
+
+type ContactInfoData = z.infer<typeof contactInfoSchema>;
+
 export default function AgentAccount() {
   const { toast } = useToast();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -76,6 +84,26 @@ export default function AgentAccount() {
         : "",
     },
   });
+
+  const contactForm = useForm<ContactInfoData>({
+    resolver: zodResolver(contactInfoSchema),
+    defaultValues: {
+      phone: agentProfile?.phone || "",
+      website: agentProfile?.website || "",
+      officeAddress: agentProfile?.officeAddress || "",
+    },
+  });
+
+  // Update contact form when agent profile loads
+  useEffect(() => {
+    if (agentProfile) {
+      contactForm.reset({
+        phone: agentProfile.phone || "",
+        website: agentProfile.website || "",
+        officeAddress: agentProfile.officeAddress || "",
+      });
+    }
+  }, [agentProfile]);
 
   const submitVerificationMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -131,6 +159,27 @@ export default function AgentAccount() {
         URL.revokeObjectURL(uploadPreviewUrl);
         setUploadPreviewUrl(null);
       }
+    },
+  });
+
+  const updateContactInfoMutation = useMutation({
+    mutationFn: async (data: ContactInfoData) => {
+      const response = await apiRequest("/api/agent/profile", "PUT", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/agent/profile"] });
+      toast({
+        title: "Contact information updated!",
+        description: "Your contact information has been saved successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update contact information. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -377,6 +426,94 @@ export default function AgentAccount() {
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Contact Information */}
+        <Card className="mb-8 bg-white dark:bg-gray-800 border-emerald-200 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-gray-900 dark:text-white">Contact Information</CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
+              Add your contact details to be displayed to homeowners you've referred
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...contactForm}>
+              <form onSubmit={contactForm.handleSubmit((data) => updateContactInfoMutation.mutate(data))} className="space-y-4">
+                <FormField
+                  control={contactForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="(555) 123-4567"
+                          {...field}
+                          data-testid="input-agent-phone"
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        Optional - Your phone number will be visible to referred homeowners
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={contactForm.control}
+                  name="website"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Website</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://your-website.com"
+                          {...field}
+                          data-testid="input-agent-website"
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        Optional - Your professional or company website
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={contactForm.control}
+                  name="officeAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Real Estate Office</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="123 Main St, City, State 12345"
+                          {...field}
+                          data-testid="input-agent-office"
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        Optional - The office where you work
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  className="w-full border-emerald-500 text-emerald-700 hover:bg-emerald-50"
+                  variant="outline"
+                  disabled={updateContactInfoMutation.isPending}
+                  data-testid="button-save-contact-info"
+                >
+                  {updateContactInfoMutation.isPending ? 'Saving...' : 'Save Contact Information'}
+                </Button>
+              </form>
+            </Form>
           </CardContent>
         </Card>
 
