@@ -130,7 +130,7 @@ export default function ContractorCard({ contractor }: ContractorCardProps) {
               className="flex-1"
             />
             <Link href={`/contractor/${contractor.id}`} className="flex-shrink-0">
-              <Button variant="outline" size="sm" className="px-3 whitespace-nowrap" style={{ color: '#ffffff' }}>
+              <Button variant="outline" size="sm" className="px-3 whitespace-nowrap" style={{ backgroundColor: '#2c0f5b', color: '#ffffff', borderColor: '#2c0f5b' }}>
                 View Profile
               </Button>
             </Link>

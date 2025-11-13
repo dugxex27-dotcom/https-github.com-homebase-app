@@ -4987,14 +4987,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'mold', 'moisture', 'humidity', 'ventilation', 'energy', 'efficiency', 'solar'
     ];
     
-    // Blocked topic keywords - clearly off-topic
+    // Blocked topic keywords - use specific multi-word phrases to avoid false positives
     const blockedKeywords = [
-      'weather forecast', 'stock market', 'cryptocurrency', 'bitcoin', 'recipe', 'cooking',
-      'joke', 'funny', 'entertainment', 'movie', 'music', 'sports', 'politics', 'election',
-      'health advice', 'medical', 'doctor', 'medicine', 'disease', 'symptom',
-      'legal advice', 'lawyer', 'court', 'lawsuit', 'tax', 'accounting',
-      'relationship', 'dating', 'marriage', 'therapy', 'mental health',
-      'travel', 'vacation', 'hotel', 'flight', 'restaurant', 'shopping'
+      // Weather & Nature (non-home)
+      'weather forecast', 'weather tomorrow', 'weather today', 'temperature outside', 
+      'will it rain', 'climate change', 'global warming',
+      
+      // Food & Cooking (be specific to avoid blocking appliance repair)
+      'recipe for', 'how to cook', 'cooking recipe', 'baking recipe', 'dinner recipe',
+      'lunch recipe', 'breakfast recipe', 'food recipe', 'ingredient list',
+      
+      // Entertainment
+      'tell me a joke', 'funny joke', 'make me laugh', 'comedy show', 'movie recommendation',
+      'what movie', 'film recommendation', 'tv show recommendation', 'music recommendation',
+      'song recommendation', 'netflix show', 'youtube video', 'video game', 'play a game',
+      
+      // Sports (use specific phrases)
+      'sports score', 'game score', 'who won the game', 'sports team', 'football score',
+      'basketball score', 'baseball score', 'soccer match', 'championship game',
+      
+      // Finance & Business (non-home, be specific)
+      'stock market', 'stock price', 'cryptocurrency price', 'bitcoin price', 'crypto trading',
+      'investment advice', 'stock portfolio', 'forex trading', 'tax return', 'tax advice',
+      'irs form', 'accounting service',
+      
+      // Health & Medical
+      'medical advice', 'health advice', 'see a doctor', 'doctor appointment', 'medicine for',
+      'prescription for', 'disease symptom', 'illness symptom', 'mental health', 'therapy session',
+      'covid test', 'vaccine appointment',
+      
+      // Legal
+      'legal advice', 'lawyer consultation', 'attorney help', 'lawsuit help', 'divorce lawyer',
+      'court case',
+      
+      // Relationships & Personal
+      'dating advice', 'relationship advice', 'girlfriend problem', 'boyfriend problem',
+      'marriage counseling', 'love advice',
+      
+      // Travel & Transportation
+      'vacation destination', 'travel destination', 'hotel booking', 'flight booking',
+      'airline ticket', 'cruise ship', 'passport application',
+      
+      // Shopping & Retail (non-home)
+      'shopping mall', 'retail store', 'amazon deal', 'black friday deal', 'coupon code',
+      
+      // Education & School
+      'homework help', 'school assignment', 'college application', 'exam preparation',
+      
+      // Technology (non-home, be specific)
+      'smartphone repair', 'iphone problem', 'android app', 'computer virus', 'laptop repair',
+      'social media', 'facebook account', 'instagram post', 'twitter feed',
+      
+      // Politics & News
+      'political news', 'election results', 'president elect', 'breaking news', 'news story',
+      
+      // Pets (non-home maintenance)
+      'dog training', 'cat behavior', 'pet grooming', 'veterinary care', 'pet food',
+      
+      // Miscellaneous clearly off-topic
+      'fashion advice', 'clothing style', 'makeup tutorial', 'hair salon', 'car repair',
+      'automobile service', 'book recommendation', 'novel summary', 'poem about',
+      'religious advice'
     ];
     
     // Check for blocked topics first
