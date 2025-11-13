@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,9 +11,10 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { CheckCircle, Clock, XCircle, Upload, AlertCircle, FileCheck } from "lucide-react";
+import { apiRequest, apiFileUpload, queryClient } from "@/lib/queryClient";
+import { CheckCircle, Clock, XCircle, Upload, AlertCircle, FileCheck, User, Camera } from "lucide-react";
 
 const US_STATES = [
   { code: "AL", name: "Alabama" }, { code: "AK", name: "Alaska" }, { code: "AZ", name: "Arizona" },
@@ -52,8 +53,17 @@ export default function AgentAccount() {
   const [uploadId, setUploadId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Profile picture states
+  const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
+  const [uploadPreviewUrl, setUploadPreviewUrl] = useState<string | null>(null);
+  const [isUploadingProfilePicture, setIsUploadingProfilePicture] = useState(false);
+
   const { data: verificationStatus, isLoading } = useQuery({
     queryKey: ["/api/agent/verification-status"],
+  });
+
+  const { data: agentProfile, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ["/api/agent/profile"],
   });
 
   const form = useForm<VerificationFormData>({
@@ -89,6 +99,84 @@ export default function AgentAccount() {
       });
     },
   });
+
+  const uploadProfilePictureMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await apiFileUpload('/api/agent/profile-picture', formData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/agent/profile"] });
+      toast({
+        title: "Profile picture updated!",
+        description: "Your profile picture has been updated successfully.",
+      });
+      setProfilePictureFile(null);
+      if (uploadPreviewUrl) {
+        URL.revokeObjectURL(uploadPreviewUrl);
+        setUploadPreviewUrl(null);
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload profile picture. Please try again.",
+        variant: "destructive",
+      });
+      setProfilePictureFile(null);
+      if (uploadPreviewUrl) {
+        URL.revokeObjectURL(uploadPreviewUrl);
+        setUploadPreviewUrl(null);
+      }
+    },
+  });
+
+  // Cleanup preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (uploadPreviewUrl) {
+        URL.revokeObjectURL(uploadPreviewUrl);
+      }
+    };
+  }, [uploadPreviewUrl]);
+
+  const handleProfilePictureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a JPEG, PNG, or WEBP image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: "File size must be less than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setUploadPreviewUrl(previewUrl);
+    setProfilePictureFile(file);
+
+    // Auto-upload
+    uploadProfilePictureMutation.mutate(file);
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -224,6 +312,73 @@ export default function AgentAccount() {
             Verify your real estate license to start earning referral commissions
           </p>
         </div>
+
+        {/* Profile Settings */}
+        <Card className="mb-8 bg-white dark:bg-gray-800 border-emerald-200 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-gray-900 dark:text-white">Profile Settings</CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
+              Update your profile picture
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                <Avatar className="w-24 h-24 ring-4 ring-emerald-500/20">
+                  <AvatarImage 
+                    src={uploadPreviewUrl || (agentProfile?.profileImageUrl ? `/public/${agentProfile.profileImageUrl}` : '')}
+                    alt="Profile picture"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <AvatarFallback className="bg-emerald-100 text-emerald-700">
+                    <User className="w-12 h-12" />
+                  </AvatarFallback>
+                </Avatar>
+                {uploadProfilePictureMutation.isPending && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                    <div className="animate-spin rounded-full h-8 w-8 border-4 border-white border-t-transparent"></div>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <div className="space-y-2">
+                  <label 
+                    htmlFor="profile-picture-upload" 
+                    className="inline-block"
+                  >
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-emerald-500 text-emerald-700 hover:bg-emerald-50"
+                      disabled={uploadProfilePictureMutation.isPending}
+                      asChild
+                      data-testid="button-upload-profile-picture"
+                    >
+                      <span className="cursor-pointer">
+                        <Camera className="w-4 h-4 mr-2" />
+                        {uploadProfilePictureMutation.isPending ? 'Uploading...' : (agentProfile?.profileImageUrl ? 'Replace Photo' : 'Upload Photo')}
+                      </span>
+                    </Button>
+                  </label>
+                  <Input
+                    id="profile-picture-upload"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handleProfilePictureChange}
+                    className="hidden"
+                    disabled={uploadProfilePictureMutation.isPending}
+                    data-testid="input-profile-picture"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    JPEG, PNG, or WEBP (max 5MB). Your photo will be visible to homeowners who use your referral code.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Status Banner */}
         <Card className="mb-8 bg-white dark:bg-gray-800 border-emerald-200 shadow-lg">

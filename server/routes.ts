@@ -1803,7 +1803,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Agent profile not found" });
       }
 
-      res.json(profile);
+      // Also fetch user data to get profileImageUrl
+      const user = await storage.getUser(userId);
+      
+      res.json({
+        ...profile,
+        profileImageUrl: user?.profileImageUrl || null,
+      });
     } catch (error) {
       console.error("Error fetching agent profile:", error);
       res.status(500).json({ message: "Failed to fetch agent profile" });

@@ -33,6 +33,20 @@ export async function apiRequest(
   return res;
 }
 
+export async function apiFileUpload(
+  url: string,
+  formData: FormData,
+): Promise<Response> {
+  const res = await fetch(url, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  });
+
+  await throwIfResNotOk(res);
+  return res;
+}
+
 type UnauthorizedBehavior = "returnNull" | "throw";
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
