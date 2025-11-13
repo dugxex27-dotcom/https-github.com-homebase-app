@@ -92,17 +92,17 @@ export default function Landing() {
 
           {/* Real Estate Agent Card */}
           <Card 
-            className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-400"
+            className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-emerald-400"
             onClick={() => handleRoleSelection('agent')}
             data-testid="card-role-agent"
           >
             <CardContent className="p-8 text-center">
               <div className="mb-6 flex justify-center">
-                <div className="p-4 rounded-full bg-blue-100">
-                  <Building2 className="h-12 w-12 text-blue-600" />
+                <div className="p-4 rounded-full bg-emerald-100">
+                  <Building2 className="h-12 w-12 text-emerald-600" />
                 </div>
               </div>
-              <h2 className="text-2xl font-bold mb-3" style={{ color: '#1560a2' }}>
+              <h2 className="text-2xl font-bold mb-3" style={{ color: '#059669' }}>
                 I'm a Real Estate Agent
               </h2>
               <p className="text-gray-600 mb-6">
@@ -116,7 +116,7 @@ export default function Landing() {
               </ul>
               <Button 
                 className="w-full"
-                style={{ backgroundColor: '#1560a2', color: 'white' }}
+                style={{ backgroundColor: '#059669', color: 'white' }}
                 data-testid="button-agent-signup"
               >
                 Become an Affiliate
