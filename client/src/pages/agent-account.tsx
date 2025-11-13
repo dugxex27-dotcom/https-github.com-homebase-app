@@ -205,33 +205,33 @@ export default function AgentAccount() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #059669 0%, #047857 100%)' }}>
         <Header />
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">Loading...</div>
+          <div className="text-center" style={{ color: '#ffffff' }}>Loading...</div>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #059669 0%, #047857 100%)' }}>
       <Header />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Agent Account Verification</h1>
-          <p className="text-lg text-muted-foreground">
+          <h1 className="text-3xl font-bold mb-2" style={{ color: '#ffffff' }}>Agent Account Verification</h1>
+          <p className="text-lg" style={{ color: '#a7f3d0' }}>
             Verify your real estate license to start earning referral commissions
           </p>
         </div>
 
         {/* Status Banner */}
-        <Card className="mb-8">
+        <Card className="mb-8 bg-white dark:bg-gray-800 border-emerald-200 shadow-lg">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Verification Status</CardTitle>
-                <CardDescription>Current status of your agent verification</CardDescription>
+                <CardTitle className="text-gray-900 dark:text-white">Verification Status</CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">Current status of your agent verification</CardDescription>
               </div>
               {getStatusBadge(verificationStatus?.verificationStatus || 'not_submitted')}
             </div>
@@ -281,10 +281,10 @@ export default function AgentAccount() {
 
         {/* Verification Form */}
         {verificationStatus?.verificationStatus !== 'approved' && verificationStatus?.verificationStatus !== 'pending_review' && (
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-emerald-200 shadow-lg">
             <CardHeader>
-              <CardTitle>Submit Verification</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">Submit Verification</CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
                 Provide your real estate license information and upload a copy of your state-issued ID
               </CardDescription>
             </CardHeader>

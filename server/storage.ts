@@ -3808,6 +3808,12 @@ class DbStorage implements IStorage {
     this.trackSearch = this.memStorage.trackSearch.bind(this.memStorage);
     this.getSearchAnalytics = this.memStorage.getSearchAnalytics.bind(this.memStorage);
     this.getAdminStats = this.memStorage.getAdminStats.bind(this.memStorage);
+    // Agent methods
+    this.getAgentProfile = this.memStorage.getAgentProfile.bind(this.memStorage);
+    this.getAffiliateReferrals = this.memStorage.getAffiliateReferrals.bind(this.memStorage);
+    this.getAgentStats = this.memStorage.getAgentStats.bind(this.memStorage);
+    this.submitAgentVerification = this.memStorage.submitAgentVerification.bind(this.memStorage);
+    this.getAgentVerificationStatus = this.memStorage.getAgentVerificationStatus.bind(this.memStorage);
   }
 
   // User operations - DATABASE BACKED for persistence
