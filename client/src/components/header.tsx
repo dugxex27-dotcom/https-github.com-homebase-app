@@ -189,6 +189,18 @@ export default function Header() {
                 </Link>
               </>
             )}
+            {typedUser?.role === 'agent' && (
+              <>
+                <Link 
+                  href="/agent-dashboard" 
+                  className={getNavLinkClass(location === '/agent-dashboard')}
+                  aria-current={location === '/agent-dashboard' ? 'page' : undefined}
+                  data-testid="link-agent-dashboard"
+                >
+                  Dashboard
+                </Link>
+              </>
+            )}
           </nav>
 
           <div className="flex items-center gap-3">
@@ -201,7 +213,7 @@ export default function Header() {
                   size="default"
                   className={typedUser.role === 'contractor' ? 'border-white bg-white text-[#1560a2]' : ''}
                 >
-                  {typedUser.role === 'homeowner' ? 'Homeowner' : 'Contractor'}
+                  {typedUser.role === 'homeowner' ? 'Homeowner' : typedUser.role === 'contractor' ? 'Contractor' : 'Agent'}
                 </Badge>
                 <span className={`text-sm font-medium hidden lg:inline ${typedUser.role === 'contractor' ? 'text-white' : 'text-foreground'}`}>
                   {typedUser.firstName || typedUser.email}

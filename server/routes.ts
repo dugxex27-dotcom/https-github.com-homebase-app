@@ -1770,6 +1770,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Agent-specific routes
+  app.get("/api/agent/profile", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      const userRole = req.session?.user?.role;
+
+      if (userRole !== 'agent') {
+        return res.status(403).json({ message: "Forbidden: Agent access only" });
+      }
+
+      const profile = await storage.getAgentProfile(userId);
+      if (!profile) {
+        return res.status(404).json({ message: "Agent profile not found" });
+      }
+
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching agent profile:", error);
+      res.status(500).json({ message: "Failed to fetch agent profile" });
+    }
+  });
+
+  app.get("/api/agent/referrals", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      const userRole = req.session?.user?.role;
+
+      if (userRole !== 'agent') {
+        return res.status(403).json({ message: "Forbidden: Agent access only" });
+      }
+
+      const agentProfile = await storage.getAgentProfile(userId);
+      if (!agentProfile) {
+        return res.status(404).json({ message: "Agent profile not found" });
+      }
+
+      const referrals = await storage.getAffiliateReferrals(userId);
+      
+      // Join with user data to get referee details
+      const referralsWithUserDetails = await Promise.all(
+        referrals.map(async (referral) => {
+          const user = await storage.getUser(referral.referredUserId);
+          return {
+            ...referral,
+            refereeName: user ? `${user.firstName} ${user.lastName}`.trim() : 'Unknown',
+            refereeEmail: user?.email || '',
+          };
+        })
+      );
+
+      res.json(referralsWithUserDetails);
+    } catch (error) {
+      console.error("Error fetching agent referrals:", error);
+      res.status(500).json({ message: "Failed to fetch agent referrals" });
+    }
+  });
+
+  app.get("/api/agent/stats", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      const userRole = req.session?.user?.role;
+
+      if (userRole !== 'agent') {
+        return res.status(403).json({ message: "Forbidden: Agent access only" });
+      }
+
+      const agentProfile = await storage.getAgentProfile(userId);
+      if (!agentProfile) {
+        return res.status(404).json({ message: "Agent profile not found" });
+      }
+
+      const stats = await storage.getAgentStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching agent stats:", error);
+      res.status(500).json({ message: "Failed to fetch agent stats" });
+    }
+  });
+
+  app.get("/api/referral/validate/:code", async (req, res) => {
+    try {
+      const { code } = req.params;
+      
+      const user = await storage.getUserByReferralCode(code);
+      
+      if (!user) {
+        return res.json({ valid: false });
+      }
+
+      const agentName = `${user.firstName} ${user.lastName}`.trim() || user.email;
+      res.json({ 
+        valid: true, 
+        agentName 
+      });
+    } catch (error) {
+      console.error("Error validating referral code:", error);
+      res.status(500).json({ message: "Failed to validate referral code" });
+    }
+  });
+
   // Product routes
   app.get("/api/products", async (req, res) => {
     try {

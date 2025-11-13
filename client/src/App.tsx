@@ -28,6 +28,7 @@ import TestUpload from "./pages/test-upload";
 import AIContractorHelp from "./pages/ai-contractor-help";
 import Billing from "./pages/billing";
 import Landing from "./pages/landing";
+import AgentDashboard from "./pages/agent-dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -120,6 +121,14 @@ function Router() {
           <Route path="/contractor-profile" component={ContractorProfile} />
           <Route path="/service-records" component={ServiceRecords} />
           <Route path="/manage-team" component={ManageTeam} />
+        </>
+      )}
+      
+      {/* Agent-specific routes */}
+      {typedUser?.role === 'agent' && (
+        <>
+          <Route path="/agent-dashboard" component={AgentDashboard} />
+          <Route path="/billing" component={Billing} />
         </>
       )}
       

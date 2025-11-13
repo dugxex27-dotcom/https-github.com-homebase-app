@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,10 +43,11 @@ const registerSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string().min(1, "Please confirm your password"),
   zipCode: z.string().min(5, "Please enter a valid zip code").max(10, "Zip code is too long"),
-  role: z.enum(["homeowner", "contractor"], {
+  role: z.enum(["homeowner", "contractor", "agent"], {
     required_error: "Please select your role",
   }),
   inviteCode: z.string().optional(),
+  referralCode: z.string().optional(),
   // Company fields for contractors (only create, not join)
   companyName: z.string().optional(),
   companyBio: z.string().optional(),
@@ -59,7 +60,7 @@ const registerSchema = z.object({
   if (data.role === "contractor") {
     return data.companyName && data.companyBio && data.companyPhone;
   }
-  return true;
+  return true; // Skip validation for homeowners and agents
 }, {
   message: "Company name, bio, and phone are required for contractors",
   path: ["companyName"],
@@ -102,12 +103,28 @@ export default function SignIn() {
       zipCode: "",
       role: undefined,
       inviteCode: "",
+      referralCode: "",
       companyName: "",
       companyBio: "",
       companyPhone: "",
     },
     mode: "onBlur",
   });
+
+  // Parse URL parameters and pre-fill form on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roleParam = urlParams.get('role');
+    const refParam = urlParams.get('ref');
+
+    if (roleParam && (roleParam === 'homeowner' || roleParam === 'contractor' || roleParam === 'agent')) {
+      registerForm.setValue('role', roleParam as 'homeowner' | 'contractor' | 'agent');
+    }
+
+    if (refParam) {
+      registerForm.setValue('referralCode', refParam);
+    }
+  }, [registerForm]);
 
   const forgotPasswordForm = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -144,6 +161,8 @@ export default function SignIn() {
       const role = data.user?.role || 'homeowner';
       if (role === 'contractor') {
         setLocation('/contractor-dashboard');
+      } else if (role === 'agent') {
+        setLocation('/agent-dashboard');
       } else {
         setLocation('/');
       }
@@ -167,6 +186,7 @@ export default function SignIn() {
         role: data.role,
         zipCode: data.zipCode,
         inviteCode: data.inviteCode || undefined,
+        referralCode: data.referralCode || undefined,
         companyName: data.companyName,
         companyBio: data.companyBio,
         companyPhone: data.companyPhone,
@@ -186,6 +206,8 @@ export default function SignIn() {
       const role = data.user?.role || 'homeowner';
       if (role === 'contractor') {
         setLocation('/contractor-dashboard');
+      } else if (role === 'agent') {
+        setLocation('/agent-dashboard');
       } else {
         setLocation('/');
       }
@@ -324,6 +346,7 @@ export default function SignIn() {
   };
 
   const selectedRole = registerForm.watch("role");
+  const referralCodeValue = registerForm.watch("referralCode");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex items-center justify-center p-4">
@@ -615,6 +638,16 @@ export default function SignIn() {
                                 Contractor
                               </Label>
                             </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem 
+                                value="agent" 
+                                id="agent"
+                                data-testid="radio-agent"
+                              />
+                              <Label htmlFor="agent" className="cursor-pointer">
+                                Real Estate Agent
+                              </Label>
+                            </div>
                           </RadioGroup>
                         </FormControl>
                         <FormMessage />
@@ -702,6 +735,28 @@ export default function SignIn() {
                       </FormItem>
                     )}
                   />
+
+                  {/* Referral Code field - shown if ?ref param present */}
+                  {referralCodeValue && (
+                    <FormField
+                      control={registerForm.control}
+                      name="referralCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Referral Code</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              readOnly
+                              data-testid="input-referral-code"
+                              className="bg-muted"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
                   <Button
                     type="submit"
