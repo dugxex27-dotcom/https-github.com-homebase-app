@@ -314,6 +314,7 @@ export interface IStorage {
   getAffiliateReferrals(agentId: string): Promise<AffiliateReferral[]>;
   getAffiliateReferral(id: string): Promise<AffiliateReferral | undefined>;
   getAffiliateReferralByUserId(userId: string): Promise<AffiliateReferral | undefined>;
+  getReferringAgentForHomeowner(homeownerId: string): Promise<{ firstName: string; lastName: string; email: string | null; phone: string | null; referralCode: string; } | undefined>;
   createAffiliateReferral(referral: InsertAffiliateReferral): Promise<AffiliateReferral>;
   updateAffiliateReferral(id: string, referral: Partial<InsertAffiliateReferral>): Promise<AffiliateReferral | undefined>;
   
@@ -3529,6 +3530,34 @@ export class MemStorage implements IStorage {
       .where(eq(affiliateReferrals.referredUserId, userId))
       .limit(1);
     return referral;
+  }
+
+  async getReferringAgentForHomeowner(homeownerId: string): Promise<{ firstName: string; lastName: string; email: string | null; phone: string | null; referralCode: string; } | undefined> {
+    // Get the affiliate referral record for this homeowner
+    const referral = await this.getAffiliateReferralByUserId(homeownerId);
+    if (!referral) {
+      return undefined;
+    }
+
+    // Get the agent's user information
+    const agent = await this.getUser(referral.agentId);
+    if (!agent) {
+      return undefined;
+    }
+
+    // Get the agent's profile to get the referral code
+    const agentProfile = await this.getAgentProfile(referral.agentId);
+    if (!agentProfile) {
+      return undefined;
+    }
+
+    return {
+      firstName: agent.firstName || 'Agent',
+      lastName: agent.lastName || '',
+      email: agent.email,
+      phone: agent.phone,
+      referralCode: agentProfile.referralCode,
+    };
   }
 
   async createAffiliateReferral(referral: InsertAffiliateReferral): Promise<AffiliateReferral> {
