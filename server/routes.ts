@@ -13,6 +13,15 @@ import { pushService } from "./push-service";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { pool, db } from "./db";
 import OpenAI from "openai";
+import multer from "multer";
+
+// Configure multer for memory storage
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max
+  }
+});
 
 // Extend session data interface
 declare module 'express-session' {
@@ -30,6 +39,15 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Don't count successful logins
+});
+
+// Rate limiting for file uploads to prevent disk exhaustion
+const uploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // Max 10 uploads per hour per IP
+  message: 'Too many upload attempts, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1850,6 +1868,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Agent verification routes
+  app.post("/api/agent/upload-state-id", isAuthenticated, uploadLimiter, upload.single('stateId'), async (req: any, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      const userRole = req.session?.user?.role;
+
+      if (userRole !== 'agent') {
+        return res.status(403).json({ message: "Forbidden: Agent access only" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Validate file type
+      const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+      if (!allowedMimeTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({ message: "Invalid file type. Only JPEG, PNG, WEBP, and PDF are allowed" });
+      }
+
+      // Validate file size (10MB max)
+      const maxSize = 10 * 1024 * 1024;
+      if (req.file.size > maxSize) {
+        return res.status(400).json({ message: "File size must be less than 10MB" });
+      }
+
+      // Generate checksum for file integrity
+      const crypto = await import('crypto');
+      const fileBuffer = req.file.buffer;
+      const checksum = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+
+      // Upload to object storage (private directory) with secure path handling
+      const path = await import('path');
+      const fs = await import('fs');
+      
+      // Normalize and secure base directory
+      const baseDir = path.resolve(process.cwd(), '.private', 'agent-verification');
+      
+      // Generate hash-based opaque ID (no user ID or timestamp in filename)
+      const uploadId = crypto.randomUUID();
+      const fileExtension = req.file.mimetype.includes('pdf') ? 'pdf' : 'jpg';
+      const secureFilename = `${uploadId}.${fileExtension}`;
+      const absoluteStoragePath = path.join(baseDir, secureFilename);
+      
+      // Validate path is within baseDir (prevent traversal)
+      if (!absoluteStoragePath.startsWith(baseDir)) {
+        return res.status(400).json({ message: "Invalid file path" });
+      }
+      
+      // Ensure directory exists
+      if (!fs.existsSync(baseDir)) {
+        fs.mkdirSync(baseDir, { recursive: true });
+      }
+
+      // Write file to storage
+      fs.writeFileSync(absoluteStoragePath, fileBuffer);
+
+      // Store metadata server-side for verification
+      await storage.storeUploadMetadata(uploadId, {
+        userId,
+        originalFilename: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        checksum,
+        storagePath: absoluteStoragePath,
+      });
+
+      // Return opaque upload ID (no filesystem details)
+      res.json({
+        uploadId,
+        originalFilename: req.file.originalname,
+      });
+    } catch (error) {
+      console.error("Error uploading state ID:", error);
+      res.status(500).json({ message: "Failed to upload state ID" });
+    }
+  });
+
   app.get("/api/agent/verification-status", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.user?.id;
@@ -1880,10 +1975,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden: Agent access only" });
       }
 
-      const { licenseNumber, licenseState, licenseExpiration, stateIdStorageKey, stateIdOriginalFilename, stateIdMimeType, stateIdFileSize, stateIdChecksum } = req.body;
+      // Import and use validation schema
+      const { agentVerificationSubmissionSchema } = await import("@shared/schema");
+      
+      // Validate request body with Zod
+      const validationResult = agentVerificationSubmissionSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: validationResult.error.flatten().fieldErrors 
+        });
+      }
 
-      if (!licenseNumber || !licenseState || !licenseExpiration || !stateIdStorageKey) {
-        return res.status(400).json({ message: "Missing required fields" });
+      const validatedData = validationResult.data;
+
+      // Retrieve server-stored upload metadata
+      const uploadMetadata = await storage.getUploadMetadata(validatedData.uploadId);
+      
+      if (!uploadMetadata) {
+        return res.status(400).json({ message: "Upload not found or expired" });
+      }
+
+      // Validate ownership - uploaded file must belong to current user
+      if (uploadMetadata.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized: Upload does not belong to you" });
       }
 
       const agentProfile = await storage.getAgentProfile(userId);
@@ -1891,16 +2007,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Agent profile not found" });
       }
 
+      // Use server-verified metadata instead of client-supplied values
       const updated = await storage.submitAgentVerification(userId, {
-        licenseNumber,
-        licenseState,
-        licenseExpiration: new Date(licenseExpiration),
-        stateIdStorageKey,
-        stateIdOriginalFilename,
-        stateIdMimeType,
-        stateIdFileSize,
-        stateIdChecksum,
+        licenseNumber: validatedData.licenseNumber,
+        licenseState: validatedData.licenseState,
+        licenseExpiration: new Date(validatedData.licenseExpiration),
+        stateIdStorageKey: uploadMetadata.storagePath,
+        stateIdOriginalFilename: uploadMetadata.originalFilename,
+        stateIdMimeType: uploadMetadata.mimeType,
+        stateIdFileSize: uploadMetadata.fileSize,
+        stateIdChecksum: uploadMetadata.checksum,
       });
+
+      // Clean up upload metadata after successful submission (keep file)
+      await storage.deleteUploadMetadata(validatedData.uploadId, false);
 
       // Create audit record
       await storage.createVerificationAudit({

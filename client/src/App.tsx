@@ -32,6 +32,7 @@ import AIContractorHelp from "./pages/ai-contractor-help";
 import Billing from "./pages/billing";
 import Landing from "./pages/landing";
 import AgentDashboard from "./pages/agent-dashboard";
+import AgentAccount from "./pages/agent-account";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -134,6 +135,7 @@ function Router() {
       {typedUser?.role === 'agent' && (
         <>
           <Route path="/agent-dashboard" component={AgentDashboard} />
+          <Route path="/agent-account" component={AgentAccount} />
           <Route path="/billing" component={Billing} />
         </>
       )}

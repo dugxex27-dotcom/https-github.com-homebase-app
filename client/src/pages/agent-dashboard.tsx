@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Link } from "wouter";
 import Header from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
-import { Users, DollarSign, TrendingUp, Copy, Share2, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Users, DollarSign, TrendingUp, Copy, Share2, CheckCircle, Clock, XCircle, AlertCircle, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import QRCode from "qrcode";
 import type { User as UserType } from "@shared/schema";
@@ -53,6 +55,11 @@ export default function AgentDashboard() {
 
   const { data: stats } = useQuery<AgentStats>({
     queryKey: ["/api/agent/stats"],
+    enabled: !!typedUser,
+  });
+
+  const { data: verificationStatus } = useQuery<{ verificationStatus: string; reviewNotes?: string }>({
+    queryKey: ["/api/agent/verification-status"],
     enabled: !!typedUser,
   });
 
@@ -148,6 +155,29 @@ export default function AgentDashboard() {
           <h1 className="text-3xl font-bold text-foreground mb-2">Agent Dashboard</h1>
           <p className="text-lg text-muted-foreground">Track your referrals and earnings</p>
         </div>
+
+        {/* Verification Status Banner */}
+        {verificationStatus?.verificationStatus !== 'approved' && (
+          <Alert className="mb-6 border-yellow-200 bg-yellow-50">
+            <AlertCircle className="h-4 w-4 text-yellow-600" />
+            <AlertTitle className="text-yellow-800">Verification Required</AlertTitle>
+            <AlertDescription className="text-yellow-700">
+              {verificationStatus?.verificationStatus === 'pending_review' ? (
+                <span>Your verification is under review. You'll be able to earn commissions once approved.</span>
+              ) : verificationStatus?.verificationStatus === 'rejected' || verificationStatus?.verificationStatus === 'resubmit_required' ? (
+                <span>Your verification was rejected. Please resubmit your information.</span>
+              ) : (
+                <span>You must verify your real estate license to start earning referral commissions.</span>
+              )}
+              <Link href="/agent-account">
+                <Button variant="link" className="h-auto p-0 ml-2 text-yellow-800 hover:text-yellow-900">
+                  {verificationStatus?.verificationStatus === 'pending_review' ? 'View Status' : 'Get Verified'}
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

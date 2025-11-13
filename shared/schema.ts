@@ -1096,6 +1096,19 @@ export const insertAgentProfileSchema = createInsertSchema(agentProfiles).omit({
 export type InsertAgentProfile = z.infer<typeof insertAgentProfileSchema>;
 export type AgentProfile = typeof agentProfiles.$inferSelect;
 
+// Agent verification submission validation schema
+export const agentVerificationSubmissionSchema = z.object({
+  licenseNumber: z.string().min(1, "License number is required").max(100),
+  licenseState: z.string().length(2, "State must be 2-letter code").transform((v) => v.toUpperCase()),
+  licenseExpiration: z.string().refine((date) => {
+    const parsed = new Date(date);
+    return !isNaN(parsed.getTime()) && parsed > new Date();
+  }, "License must not be expired"),
+  uploadId: z.string().uuid("Invalid upload ID"),
+});
+
+export type AgentVerificationSubmission = z.infer<typeof agentVerificationSubmissionSchema>;
+
 // Affiliate referrals table - tracks each referral made by an agent
 export const affiliateReferrals = pgTable("affiliate_referrals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

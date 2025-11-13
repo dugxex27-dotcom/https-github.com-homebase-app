@@ -3347,6 +3347,86 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  // Upload metadata storage (in-memory for file upload tracking)
+  private uploadedFiles = new Map<string, {
+    userId: string;
+    originalFilename: string;
+    mimeType: string;
+    fileSize: number;
+    checksum: string;
+    storagePath: string;
+    uploadedAt: Date;
+  }>();
+
+  async storeUploadMetadata(uploadId: string, metadata: {
+    userId: string;
+    originalFilename: string;
+    mimeType: string;
+    fileSize: number;
+    checksum: string;
+    storagePath: string;
+  }): Promise<void> {
+    this.uploadedFiles.set(uploadId, {
+      ...metadata,
+      uploadedAt: new Date(),
+    });
+  }
+
+  async getUploadMetadata(uploadId: string): Promise<{
+    userId: string;
+    originalFilename: string;
+    mimeType: string;
+    fileSize: number;
+    checksum: string;
+    storagePath: string;
+    uploadedAt: Date;
+  } | undefined> {
+    const metadata = this.uploadedFiles.get(uploadId);
+    
+    // Check expiration (1 hour)
+    if (metadata) {
+      const expirationMs = 60 * 60 * 1000; // 1 hour
+      const age = Date.now() - metadata.uploadedAt.getTime();
+      
+      if (age > expirationMs) {
+        // Expired - cleanup and return undefined
+        await this.deleteUploadMetadata(uploadId, true);
+        return undefined;
+      }
+    }
+    
+    return metadata;
+  }
+
+  async cleanupExpiredUploads(): Promise<void> {
+    const expirationMs = 60 * 60 * 1000; // 1 hour
+    const now = Date.now();
+    
+    for (const [uploadId, metadata] of this.uploadedFiles.entries()) {
+      const age = now - metadata.uploadedAt.getTime();
+      if (age > expirationMs) {
+        await this.deleteUploadMetadata(uploadId, true);
+      }
+    }
+  }
+
+  async deleteUploadMetadata(uploadId: string, cleanupFile: boolean = false): Promise<void> {
+    if (cleanupFile) {
+      const metadata = this.uploadedFiles.get(uploadId);
+      if (metadata?.storagePath) {
+        try {
+          const fs = await import('fs');
+          if (fs.existsSync(metadata.storagePath)) {
+            fs.unlinkSync(metadata.storagePath);
+          }
+        } catch (error) {
+          console.error('Failed to cleanup uploaded file:', error);
+        }
+      }
+    }
+    this.uploadedFiles.delete(uploadId);
+  }
+
   // Agent verification operations
   async submitAgentVerification(agentId: string, data: {
     licenseNumber: string;
@@ -3373,6 +3453,11 @@ export class MemStorage implements IStorage {
         stateIdUploadedAt: now,
         verificationStatus: 'pending_review',
         verificationRequestedAt: now,
+        // Clear review metadata on resubmission
+        verifiedAt: null,
+        lastRejectedAt: null,
+        reviewedByAdminId: null,
+        reviewNotes: null,
         updatedAt: now,
       })
       .where(eq(agentProfiles.agentId, agentId))
@@ -3577,6 +3662,17 @@ export class MemStorage implements IStorage {
 // Database-backed storage for users (OAuth persistence)
 class DbStorage implements IStorage {
   private memStorage: MemStorage;
+  
+  // Upload metadata storage (in-memory for file upload tracking)
+  private uploadedFiles = new Map<string, {
+    userId: string;
+    originalFilename: string;
+    mimeType: string;
+    fileSize: number;
+    checksum: string;
+    storagePath: string;
+    uploadedAt: Date;
+  }>();
 
   constructor() {
     this.memStorage = new MemStorage();
@@ -5006,6 +5102,76 @@ class DbStorage implements IStorage {
       homeSystemsTransferred: systemsResult.length,
       serviceRecordsTransferred: recordsResult.length,
     };
+  }
+
+  // Upload metadata storage methods
+  async storeUploadMetadata(uploadId: string, metadata: {
+    userId: string;
+    originalFilename: string;
+    mimeType: string;
+    fileSize: number;
+    checksum: string;
+    storagePath: string;
+  }): Promise<void> {
+    this.uploadedFiles.set(uploadId, {
+      ...metadata,
+      uploadedAt: new Date(),
+    });
+  }
+
+  async getUploadMetadata(uploadId: string): Promise<{
+    userId: string;
+    originalFilename: string;
+    mimeType: string;
+    fileSize: number;
+    checksum: string;
+    storagePath: string;
+    uploadedAt: Date;
+  } | undefined> {
+    const metadata = this.uploadedFiles.get(uploadId);
+    
+    // Check expiration (1 hour)
+    if (metadata) {
+      const expirationMs = 60 * 60 * 1000; // 1 hour
+      const age = Date.now() - metadata.uploadedAt.getTime();
+      
+      if (age > expirationMs) {
+        // Expired - cleanup and return undefined
+        await this.deleteUploadMetadata(uploadId, true);
+        return undefined;
+      }
+    }
+    
+    return metadata;
+  }
+
+  async cleanupExpiredUploads(): Promise<void> {
+    const expirationMs = 60 * 60 * 1000; // 1 hour
+    const now = Date.now();
+    
+    for (const [uploadId, metadata] of this.uploadedFiles.entries()) {
+      const age = now - metadata.uploadedAt.getTime();
+      if (age > expirationMs) {
+        await this.deleteUploadMetadata(uploadId, true);
+      }
+    }
+  }
+
+  async deleteUploadMetadata(uploadId: string, cleanupFile: boolean = false): Promise<void> {
+    if (cleanupFile) {
+      const metadata = this.uploadedFiles.get(uploadId);
+      if (metadata?.storagePath) {
+        try {
+          const fs = await import('fs');
+          if (fs.existsSync(metadata.storagePath)) {
+            fs.unlinkSync(metadata.storagePath);
+          }
+        } catch (error) {
+          console.error('Failed to cleanup uploaded file:', error);
+        }
+      }
+    }
+    this.uploadedFiles.delete(uploadId);
   }
 
   // Methods delegated to MemStorage (bound in constructor)
