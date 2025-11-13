@@ -2040,6 +2040,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Agent profile picture upload endpoint
+  app.post("/api/agent/profile-picture", isAuthenticated, uploadLimiter, upload.single('image'), async (req: any, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      const userRole = req.session?.user?.role;
+
+      if (userRole !== 'agent') {
+        return res.status(403).json({ message: "Forbidden: Agent access only" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Validate file type (only images)
+      const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedMimeTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({ message: "Invalid file type. Only JPEG, PNG, and WEBP images are allowed" });
+      }
+
+      // Validate file size (5MB max)
+      const maxSize = 5 * 1024 * 1024;
+      if (req.file.size > maxSize) {
+        return res.status(400).json({ message: "File size must be less than 5MB" });
+      }
+
+      // Generate unique filename
+      const crypto = await import('crypto');
+      const fileExtension = req.file.mimetype.split('/')[1];
+      const uniqueId = crypto.randomUUID();
+      const storageKey = `profile-pictures/${userId}/${uniqueId}.${fileExtension}`;
+
+      // Upload to object storage (public directory)
+      await objectStorageService.uploadFile(storageKey, req.file.buffer, req.file.mimetype);
+
+      // Get the current user to check for old profile picture
+      const currentUser = await storage.getUser(userId);
+      const oldProfileImageUrl = currentUser?.profileImageUrl;
+
+      // Update user's profile image URL
+      await storage.upsertUser({
+        id: userId,
+        profileImageUrl: storageKey,
+      });
+
+      // TODO: Delete old profile picture from object storage if it exists
+      // This would require implementing a deleteFile method in ObjectStorageService
+
+      // Return the storage key (frontend will construct URL)
+      res.json({ 
+        storageKey,
+        message: "Profile picture uploaded successfully"
+      });
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      res.status(500).json({ message: "Failed to upload profile picture" });
+    }
+  });
+
   app.get("/api/referral/validate/:code", async (req, res) => {
     try {
       const { code } = req.params;

@@ -2037,9 +2037,24 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg" style={{ backgroundColor: '#2c0f5b' }}>
-                          <Handshake className="w-5 h-5" style={{ color: '#b6a6f4' }} />
-                        </div>
+                        {referringAgent.profileImageUrl ? (
+                          <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-purple-200 dark:border-purple-800">
+                            <img 
+                              src={`/public/${referringAgent.profileImageUrl}`}
+                              alt={`${referringAgent.firstName} ${referringAgent.lastName}`}
+                              className="w-full h-full object-cover"
+                              data-testid="img-agent-profile"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.parentElement!.innerHTML = `<div class="w-full h-full flex items-center justify-center" style="background-color: #2c0f5b"><svg class="w-7 h-7" style="color: #b6a6f4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg></div>`;
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2c0f5b' }}>
+                            <User className="w-7 h-7" style={{ color: '#b6a6f4' }} />
+                          </div>
+                        )}
                         <div>
                           <h3 className="font-semibold" style={{ color: '#2c0f5b' }}>
                             Your Real Estate Agent
@@ -2047,11 +2062,13 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                           <p className="text-sm" style={{ color: '#666666' }}>
                             {referringAgent.firstName} {referringAgent.lastName}
                           </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded" style={{ color: '#2c0f5b' }}>
-                              Referral Code: {referringAgent.referralCode}
-                            </span>
-                          </div>
+                          {referringAgent.referralCode && (
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded" style={{ color: '#2c0f5b' }}>
+                                Referral Code: {referringAgent.referralCode}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="flex gap-2">
