@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, apiFileUpload, queryClient } from "@/lib/queryClient";
-import { CheckCircle, Clock, XCircle, Upload, AlertCircle, FileCheck, User, Camera } from "lucide-react";
+import { CheckCircle, Clock, XCircle, Upload, AlertCircle, FileCheck, User, Camera, Mail } from "lucide-react";
 
 const US_STATES = [
   { code: "AL", name: "Alabama" }, { code: "AK", name: "Alaska" }, { code: "AZ", name: "Arizona" },
@@ -789,6 +789,21 @@ export default function AgentAccount() {
             </Dialog>
           </CardContent>
         </Card>
+
+        {/* Contact Us Button */}
+        <div className="mt-8 flex justify-center">
+          <Button 
+            variant="outline" 
+            asChild
+            data-testid="button-contact-us"
+            className="flex items-center gap-2"
+          >
+            <a href="mailto:gotohomebase2025@gmail.com">
+              <Mail className="w-4 h-4" />
+              Contact Us
+            </a>
+          </Button>
+        </div>
       </main>
     </div>
   );

@@ -1982,6 +1982,21 @@ export default function ContractorProfile() {
         </CardContent>
       </Card>
 
+      {/* Contact Us Button */}
+      <div className="mt-8 flex justify-center">
+        <Button 
+          variant="outline" 
+          asChild
+          data-testid="button-contact-us"
+          className="flex items-center gap-2"
+        >
+          <a href="mailto:gotohomebase2025@gmail.com">
+            <Mail className="w-4 h-4" />
+            Contact Us
+          </a>
+        </Button>
+      </div>
+
       </div>
     </div>
   );
