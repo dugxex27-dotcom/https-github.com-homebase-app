@@ -12,7 +12,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SiGoogle } from "react-icons/si";
 import { Eye, EyeOff } from "lucide-react";
 import logoImage from '@assets/homebase-logo_1756861910640.png';
 
@@ -223,10 +222,6 @@ export default function SignInHomeowner() {
     resetPasswordMutation.mutate(data);
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = '/api/login';
-  };
-
   const referralCodeValue = registerForm.watch("referralCode");
 
   return (
@@ -252,28 +247,6 @@ export default function SignInHomeowner() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2"
-              onClick={handleGoogleLogin}
-              data-testid="button-google-oauth-homeowner"
-            >
-              <SiGoogle className="w-5 h-5" />
-              Continue with Google
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with email
-                </span>
-              </div>
-            </div>
-
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'register')}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login" data-testid="tab-login-homeowner">Login</TabsTrigger>
