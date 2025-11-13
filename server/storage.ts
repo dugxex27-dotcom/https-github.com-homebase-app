@@ -285,6 +285,7 @@ export interface IStorage {
     maxHousesAllowed?: number;
     subscriptionStatus?: string;
   }): Promise<User>;
+  cancelUserAccount(userId: string, role: string): Promise<{ success: boolean; message: string }>;
 
   // Invite code methods
   validateAndUseInviteCode(code: string): Promise<boolean>;
@@ -3173,6 +3174,22 @@ export class MemStorage implements IStorage {
     return user;
   }
 
+  async cancelUserAccount(userId: string, role: string): Promise<{ success: boolean; message: string }> {
+    const user = this.users.get(userId);
+    if (!user) {
+      return { success: false, message: 'User not found' };
+    }
+
+    // Update user account status
+    user.accountStatus = 'cancelled';
+    user.accountCancelledAt = new Date();
+    user.subscriptionStatus = 'cancelled';
+    user.updatedAt = new Date();
+    
+    this.users.set(userId, user);
+    return { success: true, message: 'Account cancelled successfully' };
+  }
+
   // Invite code methods
   async validateAndUseInviteCode(code: string): Promise<boolean> {
     const inviteCode = Array.from(this.inviteCodesMap.values()).find(ic => ic.code === code);
@@ -4027,6 +4044,45 @@ class DbStorage implements IStorage {
       maxHousesAllowed: data.maxHousesAllowed ?? null,
       subscriptionStatus: data.subscriptionStatus ?? null,
     });
+  }
+
+  async cancelUserAccount(userId: string, role: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const user = await this.getUser(userId);
+      if (!user) {
+        return { success: false, message: 'User not found' };
+      }
+
+      // For contractors who own a company, check if they can cancel
+      if (role === 'contractor' && user.companyRole === 'owner') {
+        // Check if there are other employees in the company
+        const employees = await this.db.select().from(users).where(eq(users.companyId, user.companyId!));
+        if (employees.length > 1) {
+          return { 
+            success: false, 
+            message: 'Company owners must transfer ownership or remove all employees before cancelling their account' 
+          };
+        }
+      }
+
+      // Update account status to cancelled
+      await this.db
+        .update(users)
+        .set({
+          accountStatus: 'cancelled',
+          accountCancelledAt: new Date(),
+          subscriptionStatus: 'cancelled',
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, userId));
+
+      console.log(`[ACCOUNT_CANCELLATION] User ${userId} (${role}) cancelled their account at ${new Date().toISOString()}`);
+      
+      return { success: true, message: 'Account cancelled successfully' };
+    } catch (error) {
+      console.error('Error cancelling user account:', error);
+      return { success: false, message: 'Failed to cancel account' };
+    }
   }
 
   // Contractor operations - DATABASE BACKED for persistence

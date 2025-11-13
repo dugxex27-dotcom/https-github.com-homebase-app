@@ -288,6 +288,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Cancel account endpoint
+  app.delete('/api/account', async (req: any, res) => {
+    try {
+      // Check authentication
+      const userId = req.session?.user?.id || (req.user as any)?.id;
+      const userRole = req.session?.user?.role || (req.user as any)?.role;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      // Cancel the account
+      const result = await storage.cancelUserAccount(userId, userRole);
+      
+      if (!result.success) {
+        return res.status(400).json({ message: result.message });
+      }
+
+      // Log out the user after cancellation
+      req.logout((err: any) => {
+        if (err) {
+          console.error('Logout error after account cancellation:', err);
+        }
+        req.session.destroy((sessionErr: any) => {
+          if (sessionErr) {
+            console.error('Session destruction error:', sessionErr);
+          }
+          res.json({ success: true, message: result.message });
+        });
+      });
+    } catch (error) {
+      console.error('Error cancelling account:', error);
+      res.status(500).json({ message: 'Failed to cancel account' });
+    }
+  });
+
   // Refresh session data from database (fixes stale sessions)
   app.post('/api/auth/refresh-session', async (req: any, res) => {
     try {
