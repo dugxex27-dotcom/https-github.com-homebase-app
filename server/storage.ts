@@ -3871,6 +3871,11 @@ class DbStorage implements IStorage {
       return undefined;
     }
     
+    // Reject cancelled accounts
+    if (rawUser.accountStatus === 'cancelled') {
+      return undefined;
+    }
+    
     // WORKAROUND: Manually map snake_case to camelCase if Drizzle casing fails
     // This ensures companyId and companyRole are always populated correctly
     const user: any = { ...rawUser };
@@ -3900,6 +3905,11 @@ class DbStorage implements IStorage {
     const rawUser = result[0];
     
     if (!rawUser) {
+      return undefined;
+    }
+    
+    // Reject cancelled accounts
+    if (rawUser.accountStatus === 'cancelled') {
       return undefined;
     }
     
