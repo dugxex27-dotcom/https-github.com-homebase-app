@@ -147,6 +147,8 @@ export const users = pgTable("users", {
   stripePriceId: varchar("stripe_price_id"), // Current Stripe price ID for the subscription
   subscriptionStartDate: timestamp("subscription_start_date"),
   subscriptionEndDate: timestamp("subscription_end_date"),
+  accountStatus: text("account_status").notNull().default("active"), // "active", "cancelled", "deleted"
+  accountCancelledAt: timestamp("account_cancelled_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
