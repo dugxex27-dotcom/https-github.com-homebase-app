@@ -225,7 +225,7 @@ export default function SignInAgent() {
   const referralCodeValue = registerForm.watch("referralCode");
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(to bottom, #e6f2ff, #f0f7ff)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(to bottom, #f5f0ff, #faf7ff)' }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <img 
@@ -234,7 +234,7 @@ export default function SignInAgent() {
             className="h-24 w-auto mx-auto mb-4"
             data-testid="img-logo-agent"
           />
-          <h1 className="text-2xl font-bold mb-2" style={{ color: '#1560a2' }}>Earn Commissions as an Affiliate</h1>
+          <h1 className="text-2xl font-bold mb-2 text-primary">Earn Commissions as an Affiliate</h1>
           <p className="text-lg text-muted-foreground">
             Your trusted home services marketplace
           </p>
@@ -309,8 +309,7 @@ export default function SignInAgent() {
                       <button
                         type="button"
                         onClick={() => setShowForgotPassword(true)}
-                        className="text-sm hover:underline"
-                        style={{ color: '#1560a2' }}
+                        className="text-sm text-primary hover:underline"
                         data-testid="link-forgot-password-agent"
                       >
                         Forgot password?
@@ -319,9 +318,8 @@ export default function SignInAgent() {
 
                     <Button
                       type="submit"
-                      className="w-full text-white"
+                      className="w-full"
                       disabled={loginMutation.isPending}
-                      style={{ backgroundColor: '#1560a2' }}
                       data-testid="button-login-agent"
                     >
                       {loginMutation.isPending ? 'Signing in...' : 'Sign In'}
@@ -496,9 +494,8 @@ export default function SignInAgent() {
 
                     <Button
                       type="submit"
-                      className="w-full text-white"
+                      className="w-full"
                       disabled={registerMutation.isPending}
-                      style={{ backgroundColor: '#1560a2' }}
                       data-testid="button-register-agent"
                     >
                       {registerMutation.isPending ? 'Creating account...' : 'Create Account'}
@@ -564,9 +561,8 @@ export default function SignInAgent() {
                     </Button>
                     <Button
                       type="submit"
-                      className="flex-1 text-white"
+                      className="flex-1"
                       disabled={forgotPasswordMutation.isPending}
-                      style={{ backgroundColor: '#1560a2' }}
                       data-testid="button-send-reset-code-agent"
                     >
                       {forgotPasswordMutation.isPending ? 'Sending...' : 'Send Reset Code'}
@@ -686,9 +682,8 @@ export default function SignInAgent() {
                     </Button>
                     <Button
                       type="submit"
-                      className="flex-1 text-white"
+                      className="flex-1"
                       disabled={resetPasswordMutation.isPending}
-                      style={{ backgroundColor: '#1560a2' }}
                       data-testid="button-reset-password-agent"
                     >
                       {resetPasswordMutation.isPending ? 'Resetting...' : 'Reset Password'}
