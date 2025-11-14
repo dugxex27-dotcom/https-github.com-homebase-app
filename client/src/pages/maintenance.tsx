@@ -1768,9 +1768,31 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
 
   // Check if task is completed
   const isTaskCompleted = (taskId: string) => {
+    // First check local state
     const currentYear = new Date().getFullYear();
     const taskKey = getTaskKey(taskId, selectedMonth, currentYear);
-    return completedTasks[taskKey] || false;
+    if (completedTasks[taskKey]) return true;
+    
+    // Also check maintenance logs for task completions
+    if (maintenanceLogs) {
+      // Extract task title from taskId (remove month/year suffix)
+      const task = filteredTasks.find(t => t.id === taskId);
+      if (task) {
+        // Check if there's a maintenance log for this task in the current month
+        const hasLog = maintenanceLogs.some(log => {
+          const logDate = new Date(log.serviceDate);
+          const logMonth = logDate.getMonth() + 1;
+          const logYear = logDate.getFullYear();
+          return log.serviceType === task.title && 
+                 logMonth === selectedMonth && 
+                 logYear === currentYear &&
+                 (log.completionMethod === 'diy' || log.completionMethod === 'contractor');
+        });
+        if (hasLog) return true;
+      }
+    }
+    
+    return false;
   };
 
   // Reset all tasks for current month/year
