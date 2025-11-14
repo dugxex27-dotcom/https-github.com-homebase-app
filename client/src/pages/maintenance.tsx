@@ -349,6 +349,104 @@ const HOME_SYSTEMS = {
   ]
 };
 
+// DIY Savings Tracker Component
+function DIYSavingsTracker({ houseId }: { houseId: string }) {
+  if (!houseId) return null;
+  
+  const { data, isLoading, isError } = useQuery<{ totalSavings: number; taskCount: number }>({
+    queryKey: ['/api/houses', houseId, 'diy-savings'],
+    enabled: !!houseId,
+  });
+
+  const formattedSavings = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(data?.totalSavings || 0);
+
+  return (
+    <section className="py-8" style={{ backgroundColor: '#2c0f5b' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto">
+          <Card style={{ backgroundColor: '#f2f2f2' }} data-testid="diy-savings-tracker">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-full bg-gradient-to-br from-green-500 to-emerald-600">
+                  <PiggyBank className="w-6 h-6 text-white" />
+                </div>
+                <CardTitle style={{ color: '#2c0f5b' }} className="flex-1">DIY Savings Tracker</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{ borderColor: '#6d28d9' }}></div>
+                    <p className="mt-4 text-sm text-gray-600">Loading savings data...</p>
+                  </div>
+                </div>
+              ) : isError ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <AlertTriangle className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
+                    <p className="text-sm font-medium text-gray-700">Unable to load savings data</p>
+                    <p className="text-xs text-gray-500 mt-2">Please try refreshing the page</p>
+                  </div>
+                </div>
+              ) : (data?.totalSavings === 0 && data?.taskCount === 0) ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <PiggyBank className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-sm font-medium text-gray-700">No DIY savings yet</p>
+                    <p className="text-xs text-gray-500 mt-2">Complete maintenance tasks yourself to start saving money!</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="text-center md:text-left">
+                    <p className="text-sm font-medium text-gray-600 mb-2">Total DIY Savings</p>
+                    <div className="flex items-baseline gap-2 justify-center md:justify-start">
+                      <span 
+                        className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent"
+                        data-testid="total-savings-amount"
+                      >
+                        {formattedSavings}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">Money saved by doing it yourself</p>
+                  </div>
+                  <div className="text-center md:text-left">
+                    <p className="text-sm font-medium text-gray-600 mb-2">DIY Tasks Completed</p>
+                    <div className="flex items-baseline gap-2 justify-center md:justify-start">
+                      <span 
+                        className="text-4xl font-bold"
+                        style={{ color: '#2c0f5b' }}
+                        data-testid="diy-task-count"
+                      >
+                        {data?.taskCount || 0}
+                      </span>
+                      <span className="text-lg text-gray-500">tasks</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Avg savings: {data && data.taskCount > 0 ? new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      }).format(data.totalSavings / data.taskCount) : '$0'} per task
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Maintenance() {
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedZone, setSelectedZone] = useState<string>("pacific-northwest");
@@ -1668,6 +1766,9 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
           </div>
         </section>
       )}
+
+      {/* DIY Savings Tracker Section */}
+      {userRole === 'homeowner' && selectedHouseId && <DIYSavingsTracker houseId={selectedHouseId} />}
 
       <div className="container mx-auto px-4 py-4">
         <div className="mb-8">
