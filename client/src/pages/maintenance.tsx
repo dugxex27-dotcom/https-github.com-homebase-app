@@ -642,7 +642,7 @@ function TaskCard({
 
             {/* Find Contractor Link */}
             <a
-              href={`/contractors?category=${encodeURIComponent(task.category)}&service=${encodeURIComponent(task.title)}`}
+              href={`/contractors?category=${encodeURIComponent(task.category)}&service=${encodeURIComponent(task.title)}&houseId=${selectedHouseId}&maxDistance=20`}
               className="text-blue-600 hover:text-blue-700 font-medium underline ml-auto"
               data-testid={`link-find-contractor-${task.id}`}
             >

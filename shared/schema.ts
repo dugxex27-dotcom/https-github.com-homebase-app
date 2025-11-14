@@ -79,6 +79,8 @@ export const companies = pgTable("companies", {
   city: text("city"),
   state: text("state"),
   postalCode: text("postal_code"),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }), // Geocoded latitude
+  longitude: decimal("longitude", { precision: 11, scale: 8 }), // Geocoded longitude
   serviceRadius: integer("service_radius").notNull().default(25), // Service radius in miles
   hasEmergencyServices: boolean("has_emergency_services").notNull().default(false),
   businessLogo: text("business_logo"),
@@ -371,6 +373,8 @@ export const houses = pgTable("houses", {
   regionId: varchar("region_id").references(() => regions.id), // nullable for backward compatibility  
   climateZoneId: varchar("climate_zone_id").references(() => climateZones.id), // nullable for backward compatibility
   postalCode: text("postal_code"), // For international address support
+  latitude: decimal("latitude", { precision: 10, scale: 8 }), // Geocoded latitude
+  longitude: decimal("longitude", { precision: 11, scale: 8 }), // Geocoded longitude
   createdAt: timestamp("created_at").defaultNow(),
 });
 

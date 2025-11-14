@@ -129,12 +129,38 @@ export default function Contractors() {
     const params = new URLSearchParams(location.split('?')[1] || '');
     const searchQuery = params.get('q') || '';
     const searchLocation = params.get('location') || '';
+    const category = params.get('category') || '';
+    const service = params.get('service') || '';
+    const houseId = params.get('houseId') || '';
+    const maxDistance = params.get('maxDistance') || '';
     
-    if (searchQuery || searchLocation) {
-      // Use search endpoint when there are search parameters
-      setFilters({ searchQuery, searchLocation });
-      setHasAppliedFilters(true); // Enable search when URL params exist
+    // Build filters from URL params
+    const urlFilters: any = {};
+    if (searchQuery) urlFilters.searchQuery = searchQuery;
+    if (searchLocation) urlFilters.searchLocation = searchLocation;
+    if (category || service) urlFilters.services = [category, service].filter(Boolean);
+    if (maxDistance) {
+      const parsedDistance = parseInt(maxDistance);
+      if (!isNaN(parsedDistance) && parsedDistance > 0) {
+        urlFilters.maxDistance = parsedDistance;
+      }
+    }
+    if (houseId) urlFilters.houseId = houseId;
+    
+    if (Object.keys(urlFilters).length > 0) {
+      // Set filters and enable search when URL params exist
+      setFilters(urlFilters);
+      setHasAppliedFilters(true);
       hasInitializedFromUrl.current = true;
+      
+      // Pre-select the house and distance in UI
+      if (houseId) setSelectedHouseId(houseId);
+      if (maxDistance) setSelectedDistance(maxDistance);
+      // Pre-select services in UI
+      if (category || service) {
+        const servicesToSelect = [category, service].filter(Boolean);
+        setSelectedServices(servicesToSelect);
+      }
     }
   }, [location]);
 
@@ -200,6 +226,7 @@ export default function Contractors() {
       if (filters.availableThisWeek) params.set('availableThisWeek', 'true');
       if (filters.hasEmergencyServices) params.set('hasEmergencyServices', 'true');
       if (filters.maxDistance) params.set('maxDistance', filters.maxDistance.toString());
+      if (filters.houseId) params.set('houseId', filters.houseId);
       
       if (filters.searchQuery || filters.searchLocation) {
         // Add search parameters
@@ -249,7 +276,10 @@ export default function Contractors() {
       case 'most-reviews':
         return b.reviewCount - a.reviewCount;
       case 'distance':
-        return parseFloat(a.distance || '0') - parseFloat(b.distance || '0');
+        // Treat missing distance as Infinity so contractors without location data sort last
+        const distA = a.distance ? parseFloat(a.distance) : Infinity;
+        const distB = b.distance ? parseFloat(b.distance) : Infinity;
+        return distA - distB;
       default:
         return 0;
     }

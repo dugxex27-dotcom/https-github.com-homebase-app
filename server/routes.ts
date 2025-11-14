@@ -14,6 +14,7 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { pool, db } from "./db";
 import OpenAI from "openai";
 import multer from "multer";
+import { geocodeAddress, calculateDistance } from "./geocoding-service";
 
 // Configure multer for memory storage
 const upload = multer({ 
@@ -1355,12 +1356,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hasEmergencyServices: req.query.hasEmergencyServices === 'true',
         maxDistance: req.query.maxDistance ? parseFloat(req.query.maxDistance as string) : undefined,
       };
+      
+      const houseId = req.query.houseId as string;
 
       const contractors = await storage.getContractors(filters);
       
+      // If houseId is provided, filter contractors by distance
+      let filteredContractors = contractors;
+      if (houseId && filters.maxDistance) {
+        const house = await storage.getHouse(houseId);
+        if (house && house.latitude && house.longitude) {
+          const houseLat = parseFloat(house.latitude);
+          const houseLon = parseFloat(house.longitude);
+          
+          console.log('[DISTANCE FILTER] House location:', { lat: houseLat, lon: houseLon, maxDistance: filters.maxDistance });
+          
+          filteredContractors = [];
+          for (const contractor of contractors) {
+            // Get company location for the contractor
+            if ((contractor as any).companyId) {
+              const company = await storage.getCompany((contractor as any).companyId);
+              if (company && company.latitude && company.longitude) {
+                const companyLat = parseFloat(company.latitude);
+                const companyLon = parseFloat(company.longitude);
+                const distance = calculateDistance(houseLat, houseLon, companyLat, companyLon);
+                
+                console.log('[DISTANCE FILTER] Company:', company.name, 'Distance:', distance, 'miles');
+                
+                // Include contractor if within maxDistance AND within their service radius
+                const effectiveRadius = Math.min(filters.maxDistance, company.serviceRadius);
+                if (distance <= effectiveRadius) {
+                  filteredContractors.push({
+                    ...contractor,
+                    distance: distance.toString()
+                  } as any);
+                }
+              } else {
+                // Company exists but doesn't have geocoded coordinates - include anyway
+                console.log('[DISTANCE FILTER] Company has no coordinates, including contractor');
+                filteredContractors.push(contractor);
+              }
+            } else {
+              // Contractor has no company - include anyway
+              console.log('[DISTANCE FILTER] Contractor has no company, including anyway');
+              filteredContractors.push(contractor);
+            }
+          }
+          
+          console.log('[DISTANCE FILTER] Filtered from', contractors.length, 'to', filteredContractors.length, 'contractors');
+        } else {
+          console.log('[DISTANCE FILTER] House not found or missing coordinates:', houseId);
+        }
+      }
+      
       // Enrich contractors with company logos
       const enrichedContractors = await Promise.all(
-        contractors.map(async (contractor) => {
+        filteredContractors.map(async (contractor) => {
           if ((contractor as any).companyId) {
             const company = await storage.getCompany((contractor as any).companyId);
             if (company) {
@@ -1573,7 +1624,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ownerId: userId
       });
 
-      const company = await storage.createCompany(companyData);
+      // Geocode the company address to get coordinates
+      let geocoded = null;
+      if (companyData.address) {
+        geocoded = await geocodeAddress(companyData.address);
+      }
+
+      const companyDataWithCoords = {
+        ...companyData,
+        ...(geocoded && {
+          latitude: geocoded.latitude.toString(),
+          longitude: geocoded.longitude.toString()
+        })
+      };
+
+      const company = await storage.createCompany(companyDataWithCoords);
 
       // Update user's company info (reuse already-fetched user)
       await storage.upsertUser({
@@ -1628,7 +1693,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const partialData = insertCompanySchema.partial().omit({ ownerId: true }).parse(req.body);
       console.log('[Company Update] Validated data:', JSON.stringify(partialData, null, 2));
       
-      const updatedCompany = await storage.updateCompany(req.params.id, partialData);
+      // If address is being updated, re-geocode it
+      let updateData = { ...partialData };
+      if (partialData.address && partialData.address !== company.address) {
+        const geocoded = await geocodeAddress(partialData.address);
+        if (geocoded) {
+          updateData.latitude = geocoded.latitude.toString();
+          updateData.longitude = geocoded.longitude.toString();
+        }
+      }
+      
+      const updatedCompany = await storage.updateCompany(req.params.id, updateData);
       console.log('[Company Update] Update successful. Logo:', updatedCompany?.businessLogo ? 'SET' : 'EMPTY', 'Photos:', updatedCompany?.projectPhotos?.length || 0);
 
       res.json(updatedCompany);
@@ -3165,10 +3240,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Create house with authenticated user's ID
+      // Geocode the address to get coordinates
+      let geocoded = null;
+      if (validatedData.address) {
+        geocoded = await geocodeAddress(validatedData.address);
+      }
+      
+      // Create house with authenticated user's ID and geocoded coordinates
       const houseData = {
         ...validatedData,
-        homeownerId
+        homeownerId,
+        ...(geocoded && {
+          latitude: geocoded.latitude.toString(),
+          longitude: geocoded.longitude.toString()
+        })
       };
       
       const house = await storage.createHouse(houseData);
@@ -3210,7 +3295,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate request body (excluding homeownerId which cannot be changed)
       const validatedData = insertHouseSchema.omit({ homeownerId: true }).partial().parse(req.body);
       
-      const house = await storage.updateHouse(req.params.id, validatedData);
+      // If address is being updated, re-geocode it
+      let updateData = { ...validatedData };
+      if (validatedData.address && validatedData.address !== existingHouse.address) {
+        const geocoded = await geocodeAddress(validatedData.address);
+        if (geocoded) {
+          updateData.latitude = geocoded.latitude.toString();
+          updateData.longitude = geocoded.longitude.toString();
+        }
+      }
+      
+      const house = await storage.updateHouse(req.params.id, updateData);
       if (!house) {
         return res.status(404).json({ message: "House not found" });
       }
