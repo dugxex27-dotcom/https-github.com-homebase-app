@@ -58,6 +58,10 @@ Preferred communication style: Simple, everyday language.
     - **Contractor Search Integration**: Auto-populates contractor search location from the selected house.
 - **Marketplace**: Functionality for listing and browsing DIY products with search analytics.
 - **Maintenance Guidance**: Seasonal home maintenance schedule with location-based recommendations.
+    - **Individual Task Priorities**: Traffic light color-coded priority badges (red for high, yellow for medium, green for low) on each maintenance task
+    - Task priorities are set individually based on safety criticality and urgency, with fallback to month-level priority
+    - Implemented for January and February in both Northeast and Pacific Northwest regions
+    - Priority system helps homeowners identify the most critical tasks to complete first
 - **Notifications**: Enhanced bi-directional notification system:
     - **Homeowner Notifications**: Appointment reminders, maintenance task alerts, message replies from contractors, and high-priority proposal notifications
     - **Contractor Notifications**: New message alerts when homeowners send messages
