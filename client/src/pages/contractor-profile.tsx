@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CardDescription } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/header";
@@ -1042,6 +1043,13 @@ export default function ContractorProfile() {
   const referralCode = (referralData as any)?.referralCode || '';
   const referralLink = (referralData as any)?.referralLink || '';
   const referralCount = (referralData as any)?.referralCount || 0;
+  
+  // Contractors have a $20/month subscription
+  const subscriptionCost = 20;
+  const referralsNeeded = subscriptionCost;
+  const referralsRemaining = Math.max(0, referralsNeeded - referralCount);
+  const progressPercentage = Math.min(100, (referralCount / referralsNeeded) * 100);
+  
   const shareMessage = `Join me on Home Base! Use my referral code ${referralCode} and I get $1 off when you subscribe. You'll get the full Home Base experience at regular price while helping me save money! Perfect for contractors! Sign up here: ${referralLink}`;
 
   const copyToClipboard = async (text: string) => {
@@ -1771,6 +1779,28 @@ export default function ContractorProfile() {
                 </div>
                 <div className="text-sm text-gray-600">Total Earned</div>
               </div>
+            </div>
+
+            {/* Progress to Free Subscription */}
+            <div className="p-4 bg-white rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium" style={{ color: '#1560a2' }}>
+                  Progress to Free Subscription
+                </span>
+                <span className="text-sm font-bold" style={{ color: '#1560a2' }}>
+                  {referralCount}/{referralsNeeded}
+                </span>
+              </div>
+              <Progress value={progressPercentage} className="h-3 mb-2" />
+              <p className="text-sm text-center" style={{ color: referralsRemaining === 0 ? '#10b981' : '#6b7280' }}>
+                {referralsRemaining === 0 ? (
+                  <span className="font-bold">🎉 You've earned a free subscription!</span>
+                ) : (
+                  <>
+                    <span className="font-bold">{referralsRemaining} more referral{referralsRemaining !== 1 ? 's' : ''}</span> until your subscription is free!
+                  </>
+                )}
+              </p>
             </div>
 
             {/* Referral Code */}
