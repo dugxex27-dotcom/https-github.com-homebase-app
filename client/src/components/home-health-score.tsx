@@ -5,6 +5,7 @@ import { Home, TrendingUp, TrendingDown, CheckCircle, AlertCircle } from "lucide
 
 interface HomeHealthScoreProps {
   houseId: string;
+  houseName: string;
 }
 
 interface HealthScoreData {
@@ -14,7 +15,7 @@ interface HealthScoreData {
   totalExpectedTasks: number;
 }
 
-export default function HomeHealthScore({ houseId }: HomeHealthScoreProps) {
+export default function HomeHealthScore({ houseId, houseName }: HomeHealthScoreProps) {
   const { data: scoreData, isLoading } = useQuery<HealthScoreData>({
     queryKey: ['/api/houses', houseId, 'health-score'],
     enabled: !!houseId,
@@ -22,11 +23,16 @@ export default function HomeHealthScore({ houseId }: HomeHealthScoreProps) {
 
   if (isLoading) {
     return (
-      <Card className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950">
+      <Card className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 border-purple-200 dark:border-purple-800">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Home className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            Home Health Score
+          <CardTitle className="tracking-tight text-foreground flex flex-col items-center gap-2 w-full text-center">
+            <div className="flex items-center gap-2 text-[23px] font-bold">
+              <Home className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              {houseName}
+            </div>
+            <div className="text-base font-medium text-gray-600 dark:text-gray-400">
+              Home Health Score
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -67,9 +73,14 @@ export default function HomeHealthScore({ houseId }: HomeHealthScoreProps) {
   return (
     <Card className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 border-purple-200 dark:border-purple-800">
       <CardHeader className="pb-3">
-        <CardTitle className="tracking-tight text-foreground flex items-center gap-2 w-full text-[23px] text-center font-bold">
-          <Home className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-          Home Health Score
+        <CardTitle className="tracking-tight text-foreground flex flex-col items-center gap-2 w-full text-center">
+          <div className="flex items-center gap-2 text-[23px] font-bold">
+            <Home className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            {houseName}
+          </div>
+          <div className="text-base font-medium text-gray-600 dark:text-gray-400">
+            Home Health Score
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>

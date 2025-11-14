@@ -2270,11 +2270,17 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
       </section>
 
       {/* Home Health Score Section */}
-      {userRole === 'homeowner' && selectedHouseId && (
+      {userRole === 'homeowner' && houses.length > 0 && (
         <section className="py-8" style={{ backgroundColor: '#2c0f5b' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-5xl mx-auto">
-              <HomeHealthScore houseId={selectedHouseId} />
+            <div className={`grid gap-6 ${houses.length === 1 ? 'max-w-5xl mx-auto' : houses.length === 2 ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+              {houses.map((house: House) => (
+                <HomeHealthScore 
+                  key={house.id} 
+                  houseId={house.id} 
+                  houseName={house.name}
+                />
+              ))}
             </div>
           </div>
         </section>
