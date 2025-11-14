@@ -433,7 +433,7 @@ export default function HomeownerAccount() {
                     <h4 className="font-medium" style={{ color: '#2c0f5b' }}>Change Password</h4>
                     <p className="text-sm text-gray-600">Update your account password</p>
                   </div>
-                  <Button variant="outline" size="sm" data-testid="button-change-password" style={{ color: 'white' }}>
+                  <Button variant="outline" size="sm" data-testid="button-change-password" style={{ color: '#2c0f5b' }}>
                     Change
                   </Button>
                 </div>
