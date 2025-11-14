@@ -255,6 +255,11 @@ export const customMaintenanceTasks = pgTable("custom_maintenance_tasks", {
   difficulty: text("difficulty").default('easy'), // 'easy', 'moderate', 'difficult'
   tools: text("tools").array(),
   cost: text("cost"),
+  // Cost estimates for professional vs DIY
+  proLow: decimal("pro_low", { precision: 10, scale: 2 }), // Minimum professional cost
+  proHigh: decimal("pro_high", { precision: 10, scale: 2 }), // Maximum professional cost
+  materialsLow: decimal("materials_low", { precision: 10, scale: 2 }), // Minimum materials cost for DIY
+  materialsHigh: decimal("materials_high", { precision: 10, scale: 2 }), // Maximum materials cost for DIY
   // Frequency settings
   frequencyType: text("frequency_type").notNull(), // 'monthly', 'quarterly', 'biannually', 'annually', 'custom'
   frequencyValue: integer("frequency_value"), // for custom frequency in days
