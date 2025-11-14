@@ -1302,9 +1302,11 @@ export default function Maintenance() {
       if (!response.ok) throw new Error('Failed to complete task');
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/maintenance-logs'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/houses'] }); // Refresh house data including DIY savings
+      queryClient.invalidateQueries({ queryKey: ['/api/houses'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/houses', variables.houseId, 'diy-savings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/houses', variables.houseId, 'health-score'] });
       toast({ title: "Success", description: "Task marked as complete!" });
     },
     onError: () => {
