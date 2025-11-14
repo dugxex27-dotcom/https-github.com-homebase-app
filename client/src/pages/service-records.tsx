@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -320,7 +319,6 @@ export default function ServiceRecords() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="container mx-auto py-8 px-4">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-gray-200 rounded w-1/4"></div>
@@ -333,8 +331,6 @@ export default function ServiceRecords() {
 
   return (
     <div className="min-h-screen" style={{ background: '#1560a2' }}>
-      <Header />
-      
       <main className="container mx-auto py-8 px-4 max-w-7xl">
         <div className="mb-8 p-6 rounded-lg" style={{ background: '#f2f2f2' }}>
           <div className="flex justify-between items-center">

@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import Header from "@/components/header";
 import { Sparkles, Search, Loader2, AlertCircle } from "lucide-react";
 
 interface AIRecommendation {
@@ -106,8 +105,6 @@ export default function AIContractorHelp() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-purple-50">
-      <Header />
-      
       <div className="container mx-auto py-8 px-4 max-w-4xl">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">

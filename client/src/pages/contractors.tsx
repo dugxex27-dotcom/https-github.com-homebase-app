@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import Header from "@/components/header";
 import ContractorCard from "@/components/contractor-card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -326,7 +325,6 @@ export default function Contractors() {
   if (error) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Contractors</h2>
@@ -339,7 +337,6 @@ export default function Contractors() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
-      <Header />
       {/* Hero Section */}
       <section className="py-16" style={{ background: '#2c0f5b' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

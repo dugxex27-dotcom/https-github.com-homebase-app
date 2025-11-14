@@ -6,7 +6,6 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -461,17 +460,14 @@ export default function Messages() {
 
   if (!typedUser) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
-        <Header />
-        <div className="container mx-auto p-6">
-          <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700" style={{ backgroundColor: '#f2f2f2' }}>
-            <CardContent className="p-8 text-center">
-              <MessageCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
-              <p className="text-gray-600">Please sign in to view your messages.</p>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="container mx-auto p-6">
+        <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700" style={{ backgroundColor: '#f2f2f2' }}>
+          <CardContent className="p-8 text-center">
+            <MessageCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
+            <p className="text-gray-600">Please sign in to view your messages.</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -480,8 +476,6 @@ export default function Messages() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: bgColor }}>
-      <Header />
-      
       {/* Hero Section */}
       <section className="pt-12 pb-4" style={{ backgroundColor: bgColor }}>
         <div className="container mx-auto px-6">

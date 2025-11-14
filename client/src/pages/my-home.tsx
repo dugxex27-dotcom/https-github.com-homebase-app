@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import Header from "@/components/header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -130,7 +129,6 @@ export default function MyHome() {
   if (authLoading) {
     return (
       <div className="min-h-screen" style={{ background: '#2c0f5b' }}>
-        <Header />
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="text-2xl font-bold text-white mb-2">Loading...</div>
@@ -518,7 +516,6 @@ export default function MyHome() {
   if (housesLoading) {
     return (
       <div className="min-h-screen" style={{ background: '#2c0f5b' }}>
-        <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <div className="text-2xl font-bold text-white mb-2">Loading...</div>
@@ -530,7 +527,6 @@ export default function MyHome() {
 
   return (
     <div className="min-h-screen" style={{ background: '#2c0f5b' }}>
-      <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-4" data-testid="text-page-title">

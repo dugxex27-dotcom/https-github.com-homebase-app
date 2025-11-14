@@ -21,7 +21,6 @@ import {
   Mail,
   Phone
 } from "lucide-react";
-import Header from "@/components/header";
 
 export default function HouseTransferAccept() {
   const [, params] = useRoute("/house-transfer/:token");
@@ -65,7 +64,6 @@ export default function HouseTransferAccept() {
   if (!token) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <Card className="max-w-md mx-auto">
             <CardHeader>
@@ -88,7 +86,6 @@ export default function HouseTransferAccept() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <Card className="max-w-md mx-auto">
             <CardContent className="pt-6">
@@ -109,7 +106,6 @@ export default function HouseTransferAccept() {
   if (error || !transfer) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <Card className="max-w-md mx-auto">
             <CardHeader>
@@ -148,7 +144,6 @@ export default function HouseTransferAccept() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <Card>

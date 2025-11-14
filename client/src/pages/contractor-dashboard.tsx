@@ -1,4 +1,3 @@
-import Header from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Proposals } from "@/components/proposals";
@@ -24,7 +23,6 @@ export default function ContractorDashboard() {
   
   return (
     <div className="min-h-screen" style={{ background: '#1560a2' }}>
-      <Header />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-[#1560a2]">
         <div className="mb-8 p-6 rounded-lg" style={{ background: '#f2f2f2' }}>
           <h1 className="text-3xl font-bold mb-2" style={{ color: '#1560a2' }}>Contractor Dashboard</h1>

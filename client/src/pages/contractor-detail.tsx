@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
-import Header from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -60,7 +59,6 @@ export default function ContractorDetail() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <main className="container mx-auto px-4 py-8">
           <div className="text-center">Loading contractor details...</div>
         </main>
@@ -71,7 +69,6 @@ export default function ContractorDetail() {
   if (error || !contractor) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <main className="container mx-auto px-4 py-8">
           <Card>
             <CardContent className="pt-6">
@@ -106,7 +103,6 @@ export default function ContractorDetail() {
 
   return (
     <div className="min-h-screen dark:bg-gray-900 bg-[#3c258e]">
-      <Header />
       {/* Hero Section */}
       <section className="py-12" style={{ backgroundColor: '#3c258e' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

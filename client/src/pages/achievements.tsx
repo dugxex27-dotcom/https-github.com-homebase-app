@@ -22,7 +22,6 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import Header from "@/components/header";
 
 // Backend achievement definition with user progress
 interface AchievementWithProgress {
@@ -68,7 +67,6 @@ export default function Achievements() {
   if (isLoading) {
     return (
       <>
-        <Header />
         <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
           <div className="container mx-auto px-4 py-8">
             <h1 className="text-4xl font-bold mb-2 text-white">Achievements</h1>
@@ -108,7 +106,6 @@ export default function Achievements() {
 
   return (
     <>
-      <Header />
       <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
         <div className="container mx-auto px-4 py-8">
           {/* Page Header */}

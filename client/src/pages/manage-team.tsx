@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -162,7 +161,6 @@ export default function ManageTeam() {
   if (companyLoading || membersLoading) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#1560a2' }}>
-        <Header />
         <div className="flex items-center justify-center h-96">
           <div style={{ color: '#afd6f9' }}>Loading...</div>
         </div>
@@ -173,7 +171,6 @@ export default function ManageTeam() {
   if (!company) {
     return (
       <div className="min-h-screen bg-[#1560a2]">
-        <Header />
         <div className="max-w-4xl mx-auto px-4 py-8">
           <Card>
             <CardHeader>
@@ -190,8 +187,6 @@ export default function ManageTeam() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#1560a2' }}>
-      <Header />
-      
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2" style={{ color: 'white' }} data-testid="text-manage-team-title">

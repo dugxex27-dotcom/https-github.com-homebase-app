@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Header from "@/components/header";
 import ProductCard from "@/components/product-card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -75,7 +74,6 @@ export default function Products() {
   if (error) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
-        <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Products</h2>
@@ -88,8 +86,6 @@ export default function Products() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
-      <Header />
-      
       {/* Hero Section */}
       <section className="py-16" style={{ backgroundColor: '#2c0f5b' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
