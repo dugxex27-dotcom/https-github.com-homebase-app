@@ -34,6 +34,7 @@ import Landing from "./pages/landing";
 import AgentDashboard from "./pages/agent-dashboard";
 import AgentAccount from "./pages/agent-account";
 import Onboarding from "./pages/onboarding";
+import HouseholdProfile from "./pages/household-profile";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -104,6 +105,7 @@ function Router() {
       
       {/* Always available routes */}
       <Route path="/maintenance" component={Maintenance} />
+      <Route path="/household-profile/:id" component={HouseholdProfile} />
       <Route path="/messages" component={Messages} />
       <Route path="/my-home" component={MyHome} />
       <Route path="/signin" component={SignIn} />
