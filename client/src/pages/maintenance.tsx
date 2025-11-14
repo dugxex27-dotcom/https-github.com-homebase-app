@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/header";
+import HomeHealthScore from "@/components/home-health-score";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -482,6 +483,9 @@ export default function Maintenance() {
     email: string | null;
     phone: string | null;
     referralCode: string;
+    profileImageUrl?: string | null;
+    officeAddress?: string | null;
+    website?: string | null;
   } | null>({
     queryKey: ['/api/referring-agent'],
     queryFn: async () => {
@@ -636,7 +640,7 @@ export default function Maintenance() {
   });
 
   const upsertTaskOverrideMutation = useMutation({
-    mutationFn: async (data: { taskId: string; isEnabled?: boolean; frequencyType?: string; specificMonths?: string[]; notes?: string }) => {
+    mutationFn: async (data: { taskId: string; isEnabled?: boolean; frequencyType?: string; specificMonths?: string[]; notes?: string; customDescription?: string }) => {
       const response = await fetch(`/api/houses/${selectedHouseId}/task-overrides`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1629,6 +1633,18 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
           </div>
         </div>
       </section>
+
+      {/* Home Health Score Section */}
+      {userRole === 'homeowner' && selectedHouseId && (
+        <section className="py-8" style={{ backgroundColor: '#2c0f5b' }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-5xl mx-auto">
+              <HomeHealthScore houseId={selectedHouseId} />
+            </div>
+          </div>
+        </section>
+      )}
+
       <div className="container mx-auto px-4 py-4">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 text-center text-[#ffffff]" style={{ color: '#ffffff' }}>
