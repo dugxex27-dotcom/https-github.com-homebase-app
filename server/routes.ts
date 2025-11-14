@@ -6,8 +6,8 @@ import { setupGoogleAuth } from "./googleAuth";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import rateLimit from "express-rate-limit";
-import { eq } from "drizzle-orm";
-import { insertHomeApplianceSchema, insertHomeApplianceManualSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema, insertHouseTransferSchema, insertContractorAnalyticsSchema, insertTaskOverrideSchema, insertCountrySchema, insertRegionSchema, insertClimateZoneSchema, insertRegulatoryBodySchema, insertRegionalMaintenanceTaskSchema, insertTaskCompletionSchema, insertAchievementSchema, insertCompanySchema, insertCompanyInviteCodeSchema, passwordResetTokens } from "@shared/schema";
+import { eq, and, or, lte, isNull } from "drizzle-orm";
+import { insertHomeApplianceSchema, insertHomeApplianceManualSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema, insertHouseTransferSchema, insertContractorAnalyticsSchema, insertTaskOverrideSchema, insertCountrySchema, insertRegionSchema, insertClimateZoneSchema, insertRegulatoryBodySchema, insertRegionalMaintenanceTaskSchema, insertTaskCompletionSchema, insertAchievementSchema, insertCompanySchema, insertCompanyInviteCodeSchema, passwordResetTokens, taskCompletions, maintenanceTasks, customMaintenanceTasks } from "@shared/schema";
 import pushRoutes from "./push-routes";
 import { pushService } from "./push-service";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
@@ -3259,6 +3259,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(response);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch maintenance tasks" });
+    }
+  });
+
+  // Get home health score for a house
+  app.get("/api/houses/:id/health-score", isAuthenticated, requirePropertyOwner, async (req: any, res) => {
+    try {
+      const houseId = req.params.id;
+      const homeownerId = req.session.user.id;
+      
+      // Verify house ownership
+      const house = await storage.getHouse(houseId);
+      if (!house || house.homeownerId !== homeownerId) {
+        return res.status(404).json({ message: "House not found" });
+      }
+
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth() + 1; // 1-12
+
+      // Get all completed tasks for this house in the current year
+      const completedTasks = await db.select()
+        .from(taskCompletions)
+        .where(
+          and(
+            eq(taskCompletions.houseId, houseId),
+            eq(taskCompletions.year, currentYear)
+          )
+        );
+
+      const completedCount = completedTasks.length;
+
+      // Get all seasonal maintenance tasks for past months (including current)
+      const seasonalTasks = await db.select()
+        .from(maintenanceTasks)
+        .where(
+          lte(maintenanceTasks.month, currentMonth)
+        );
+
+      // Filter seasonal tasks by climate zone
+      const applicableTasks = seasonalTasks.filter(task => 
+        task.climateZones.includes(house.climateZone || '')
+      );
+
+      // Get custom tasks for this house
+      const customTasks = await db.select()
+        .from(customMaintenanceTasks)
+        .where(
+          and(
+            eq(customMaintenanceTasks.homeownerId, homeownerId),
+            or(
+              eq(customMaintenanceTasks.houseId, houseId),
+              isNull(customMaintenanceTasks.houseId)
+            ),
+            eq(customMaintenanceTasks.isActive, true)
+          )
+        );
+
+      // Calculate expected tasks (seasonal + custom)
+      const expectedTasksCount = applicableTasks.length + customTasks.length;
+
+      // Missed tasks = expected tasks - completed tasks
+      const missedCount = Math.max(0, expectedTasksCount - completedCount);
+
+      // Calculate score: +4 per completed, -4 per missed
+      const score = (completedCount * 4) - (missedCount * 4);
+
+      res.json({
+        score,
+        completedTasks: completedCount,
+        missedTasks: missedCount,
+        totalExpectedTasks: expectedTasksCount
+      });
+    } catch (error) {
+      console.error("Error calculating home health score:", error);
+      res.status(500).json({ message: "Failed to calculate home health score" });
     }
   });
 
