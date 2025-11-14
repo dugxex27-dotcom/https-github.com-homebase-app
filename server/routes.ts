@@ -4334,9 +4334,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "House not found" });
       }
 
-      const savings = await storage.getHouseDIYSavings(houseId);
+      // Get all maintenance logs for this house with DIY completions
+      const logs = await storage.getMaintenanceLogs({ homeownerId, houseId });
       
-      res.json(savings);
+      // Calculate total savings from DIY task completions
+      const diyLogs = logs.filter(log => log.completionMethod === 'diy' && log.diySavingsAmount);
+      const totalSavings = diyLogs.reduce((sum, log) => sum + parseFloat(log.diySavingsAmount || '0'), 0);
+      const diyTasksCompleted = diyLogs.length;
+      const averageSavingsPerTask = diyTasksCompleted > 0 ? totalSavings / diyTasksCompleted : 0;
+      
+      res.json({
+        totalSavings: parseFloat(totalSavings.toFixed(2)),
+        diyTasksCompleted,
+        averageSavingsPerTask: parseFloat(averageSavingsPerTask.toFixed(2))
+      });
     } catch (error) {
       console.error("Error fetching DIY savings:", error);
       res.status(500).json({ message: "Failed to fetch DIY savings" });
