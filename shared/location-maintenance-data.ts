@@ -1,7 +1,10 @@
 // Geographic and seasonal maintenance recommendations for US regions
+import { CostEstimate } from './cost-baselines';
+
 export interface MaintenanceTaskItem {
   title: string;
   description: string;
+  costEstimate?: CostEstimate; // Optional professional cost estimate and DIY materials cost
 }
 
 export interface LocationMaintenanceData {
