@@ -2035,7 +2035,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
         toolsAndSupplies: taskItem.toolsAndSupplies,
         month: month,
         climateZones: allClimateZones,
-        priority: monthData.priority,
+        priority: taskItem.priority || monthData.priority, // Use task priority or fall back to month priority
         estimatedTime: "30-60 minutes",
         difficulty: "easy",
         category: "General Maintenance",
@@ -2061,7 +2061,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
         toolsAndSupplies: taskItem.toolsAndSupplies,
         month: month,
         climateZones: allClimateZones,
-        priority: monthData.priority,
+        priority: taskItem.priority || monthData.priority, // Use task priority or fall back to month priority
         estimatedTime: "30-60 minutes",
         difficulty: "easy",
         category: "Weather-Specific",
