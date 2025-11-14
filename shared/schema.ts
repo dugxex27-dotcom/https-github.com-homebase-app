@@ -569,9 +569,10 @@ export const taskCompletions = pgTable("task_completions", {
   completedAt: timestamp("completed_at").notNull().defaultNow(),
   month: integer("month").notNull(), // 1-12, month when task was completed
   year: integer("year").notNull(), // year when task was completed
+  completionMethod: text("completion_method").notNull().default("professional"), // "diy" or "professional"
   estimatedCost: decimal("estimated_cost", { precision: 10, scale: 2 }), // estimated cost before doing task
   actualCost: decimal("actual_cost", { precision: 10, scale: 2 }), // actual cost paid
-  costSavings: decimal("cost_savings", { precision: 10, scale: 2 }), // calculated savings
+  costSavings: decimal("cost_savings", { precision: 10, scale: 2 }), // calculated savings (for DIY tasks)
   notes: text("notes"), // optional completion notes
   documentsUploaded: integer("documents_uploaded").default(0), // count of receipts/photos uploaded
   createdAt: timestamp("created_at").defaultNow(),

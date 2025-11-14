@@ -253,6 +253,7 @@ export interface IStorage {
   createTaskCompletion(completion: InsertTaskCompletion): Promise<TaskCompletion>;
   getTaskCompletionsByMonth(homeownerId: string, year: number, month: number): Promise<TaskCompletion[]>;
   getMonthlyStreak(homeownerId: string): Promise<{ currentStreak: number; longestStreak: number }>;
+  getHouseDIYSavings(houseId: string): Promise<{ totalSavings: number; taskCount: number }>;
 
   // Achievement operations for milestone tracking
   getAchievements(homeownerId: string): Promise<Achievement[]>;
@@ -2877,6 +2878,24 @@ export class MemStorage implements IStorage {
     }
 
     return { currentStreak, longestStreak };
+  }
+
+  async getHouseDIYSavings(houseId: string): Promise<{ totalSavings: number; taskCount: number }> {
+    const result = await db.select({
+      totalSavings: sql<number>`COALESCE(SUM(${taskCompletions.costSavings}), 0)`,
+      taskCount: sql<number>`COUNT(*)`
+    })
+      .from(taskCompletions)
+      .where(and(
+        eq(taskCompletions.houseId, houseId),
+        eq(taskCompletions.completionMethod, 'diy'),
+        isNotNull(taskCompletions.costSavings)
+      ));
+    
+    return {
+      totalSavings: parseFloat(result[0]?.totalSavings?.toString() || '0'),
+      taskCount: parseInt(result[0]?.taskCount?.toString() || '0', 10)
+    };
   }
 
   // Achievement operations
