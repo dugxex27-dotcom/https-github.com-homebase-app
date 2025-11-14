@@ -556,14 +556,33 @@ export const homeSystems = pgTable("home_systems", {
 export const pushSubscriptions = pgTable("push_subscriptions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: text("user_id").notNull(), // links to users table
-  endpoint: text("endpoint").notNull(),
-  p256dhKey: text("p256dh_key").notNull(),
-  authKey: text("auth_key").notNull(),
+  provider: text("provider").notNull().default("web-push"), // "web-push" or "fcm"
+  endpoint: text("endpoint"), // nullable for FCM (only web-push uses this)
+  p256dhKey: text("p256dh_key"), // nullable for FCM (only web-push uses this)
+  authKey: text("auth_key"), // nullable for FCM (only web-push uses this)
+  token: text("token"), // FCM device token (nullable for web-push)
+  deviceInfo: jsonb("device_info"), // Device metadata (browser, OS, etc.)
   userAgent: text("user_agent"), // to identify device/browser
+  lastSeenAt: timestamp("last_seen_at"), // Last time this subscription was verified active
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const notificationPreferences = pgTable("notification_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: text("user_id").notNull(), // links to users table
+  notificationType: text("notification_type").notNull(), // "messages", "appointments", "maintenance", "proposals", "referrals", "scheduled_jobs", "contractor_updates"
+  channels: text("channels").array().notNull().default(sql`'{push}'::text[]`), // Array of enabled channels: "push", "email", "sms"
+  isEnabled: boolean("is_enabled").notNull().default(true), // Global toggle for this notification type
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Unique constraint: one preference row per user per notification type
+  uniqueIndex("UX_notification_preferences_user_type").on(table.userId, table.notificationType),
+  // Performance index for querying user's preferences
+  index("IDX_notification_preferences_user").on(table.userId),
+]);
 
 export const contractorBoosts = pgTable("contractor_boosts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -688,6 +707,16 @@ export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions
 
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;
+
+// Notification preference types
+export const insertNotificationPreferenceSchema = createInsertSchema(notificationPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type NotificationPreference = typeof notificationPreferences.$inferSelect;
+export type InsertNotificationPreference = z.infer<typeof insertNotificationPreferenceSchema>;
 
 export const insertContractorSchema = createInsertSchema(contractors).omit({
   id: true,
