@@ -45,6 +45,7 @@ const AgentAccount = lazy(() => import("./pages/agent-account"));
 // Lazy-loaded pages - Admin
 const AdminDashboard = lazy(() => import("./pages/admin"));
 const AdminSupport = lazy(() => import("./pages/admin-support"));
+const DeveloperConsole = lazy(() => import("./pages/developer-console"));
 
 // Lazy-loaded pages - Support
 const Support = lazy(() => import("./pages/support"));
@@ -124,6 +125,7 @@ function Router() {
         {/* Admin routes */}
         {isAdmin && (
           <>
+            <Route path="/admin/developer-console" component={DeveloperConsole} />
             <Route path="/admin/support/:id" component={AdminSupport} />
             <Route path="/admin/support" component={AdminSupport} />
             <Route path="/admin" component={AdminDashboard} />
