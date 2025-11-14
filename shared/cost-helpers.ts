@@ -3,6 +3,7 @@
 import { getCostEstimate, CostEstimate } from './cost-baselines';
 import { MaintenanceTaskItem } from './location-maintenance-data';
 import { getTaskPriority, TaskPriority } from './priority-classifier';
+import { generateTaskContent } from './task-content-generator';
 
 /**
  * Infer category from task title and description
@@ -167,7 +168,7 @@ export function inferTaskDifficulty(title: string, description: string): 'easy' 
 }
 
 /**
- * Enrich a maintenance task with cost estimate and priority based on its category and difficulty
+ * Enrich a maintenance task with cost estimate, priority, and action-oriented content
  */
 export function enrichTaskWithCost(
   task: MaintenanceTaskItem,
@@ -184,10 +185,25 @@ export function enrichTaskWithCost(
   // Get priority using classifier (respects existing priority, checks overrides, then classifies)
   const priority = getTaskPriority(task, fallbackPriority);
   
+  // Generate action summary, steps, and tools/supplies if not already present
+  let actionSummary = task.actionSummary;
+  let steps = task.steps;
+  let toolsAndSupplies = task.toolsAndSupplies;
+  
+  if (!actionSummary || !steps || !toolsAndSupplies) {
+    const generated = generateTaskContent(task.title, task.description);
+    actionSummary = task.actionSummary || generated.actionSummary;
+    steps = task.steps || generated.steps;
+    toolsAndSupplies = task.toolsAndSupplies || generated.toolsAndSupplies;
+  }
+  
   return {
     ...task,
     costEstimate,
     priority,
+    actionSummary,
+    steps,
+    toolsAndSupplies,
   };
 }
 
