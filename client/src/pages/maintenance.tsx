@@ -19,10 +19,12 @@ import { insertMaintenanceLogSchema, insertCustomMaintenanceTaskSchema, insertHo
 import type { MaintenanceLog, House, CustomMaintenanceTask, HomeSystem, TaskOverride, HomeAppliance, HomeApplianceManual } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud, Monitor, Book, ExternalLink, Upload, Trophy, Mail, Handshake, Globe } from "lucide-react";
+import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud, Monitor, Book, ExternalLink, Upload, Trophy, Mail, Handshake, Globe, TrendingDown, PiggyBank } from "lucide-react";
 import { AppointmentScheduler } from "@/components/appointment-scheduler";
 import { CustomMaintenanceTasks } from "@/components/custom-maintenance-tasks";
 import { US_MAINTENANCE_DATA, getRegionFromClimateZone, getCurrentMonthTasks } from "@shared/location-maintenance-data";
+import { enrichTasksWithCosts } from "@shared/cost-helpers";
+import { formatCostEstimate, formatDIYSavings, type CostEstimate } from "@shared/cost-baselines";
 
 // Google Maps API type declarations
 declare global {
@@ -51,6 +53,7 @@ interface MaintenanceTask {
   tools: string[] | null;
   cost: string | null;
   systemRequirements?: string[];
+  costEstimate?: CostEstimate;
 }
 
 
@@ -1409,8 +1412,11 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
     
     const allClimateZones = ["pacific-northwest", "northeast", "southeast", "midwest", "southwest", "mountain-west", "california", "great-plains"];
     
+    // Enrich seasonal tasks with cost estimates
+    const enrichedSeasonalTasks = enrichTasksWithCosts(monthData.seasonal, regionName);
+    
     // Convert seasonal tasks to MaintenanceTask objects
-    monthData.seasonal.forEach((taskItem, index) => {
+    enrichedSeasonalTasks.forEach((taskItem, index) => {
       tasks.push({
         id: `seasonal-${month}-${index}`,
         title: taskItem.title,
@@ -1422,12 +1428,16 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
         difficulty: "easy",
         category: "General Maintenance",
         tools: null,
-        cost: null
+        cost: null,
+        costEstimate: taskItem.costEstimate,
       });
     });
     
+    // Enrich weather-specific tasks with cost estimates
+    const enrichedWeatherTasks = enrichTasksWithCosts(monthData.weatherSpecific, regionName);
+    
     // Convert weather-specific tasks to MaintenanceTask objects
-    monthData.weatherSpecific.forEach((taskItem, index) => {
+    enrichedWeatherTasks.forEach((taskItem, index) => {
       tasks.push({
         id: `weather-${month}-${index}`,
         title: taskItem.title,
@@ -1439,7 +1449,8 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
         difficulty: "easy",
         category: "Weather-Specific",
         tools: null,
-        cost: null
+        cost: null,
+        costEstimate: taskItem.costEstimate,
       });
     });
 
@@ -1489,6 +1500,18 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
       }
       
       if (shouldAppear) {
+        // Build cost estimate from custom task data if available
+        let costEstimate: CostEstimate | undefined;
+        if (customTask.proLow) {
+          costEstimate = {
+            proLow: parseFloat(customTask.proLow),
+            proHigh: customTask.proHigh ? parseFloat(customTask.proHigh) : undefined,
+            materialsLow: customTask.materialsLow ? parseFloat(customTask.materialsLow) : undefined,
+            materialsHigh: customTask.materialsHigh ? parseFloat(customTask.materialsHigh) : undefined,
+            currency: 'USD',
+          };
+        }
+        
         convertedTasks.push({
           id: `custom-${customTask.id}`,
           title: customTask.title,
@@ -1501,6 +1524,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
           category: customTask.category,
           tools: customTask.tools ?? null,
           cost: customTask.cost ?? null,
+          costEstimate,
         });
       }
     });
@@ -2298,6 +2322,36 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                       <p className="leading-relaxed" style={{ color: '#2c0f5b' }}>
                         {displayDescription}
                       </p>
+
+                      {/* Professional Cost & DIY Savings */}
+                      {task.costEstimate && (
+                        <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 rounded-lg p-3 border border-purple-200 dark:border-purple-800">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="flex items-start gap-2">
+                              <DollarSign className="w-4 h-4 mt-0.5 text-purple-600 dark:text-purple-400" />
+                              <div className="flex-1">
+                                <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                                  Professional Cost
+                                </div>
+                                <div className="text-base font-semibold text-purple-700 dark:text-purple-300">
+                                  {formatCostEstimate(task.costEstimate)}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <PiggyBank className="w-4 h-4 mt-0.5 text-green-600 dark:text-green-400" />
+                              <div className="flex-1">
+                                <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                                  DIY Savings
+                                </div>
+                                <div className="text-base font-semibold text-green-700 dark:text-green-300">
+                                  {formatDIYSavings(task.costEstimate)}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center">
