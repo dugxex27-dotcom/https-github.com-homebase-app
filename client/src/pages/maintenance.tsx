@@ -56,7 +56,7 @@ interface MaintenanceTask {
   category: string;
   tools: string[] | null;
   cost: string | null;
-  systemRequirements?: string[];
+  systemRequirements?: string[]; // Home systems required for this task
   costEstimate?: CostEstimate;
   impact?: string; // What happens if not completed
   impactCost?: string; // Potential costs if not done
@@ -1992,6 +1992,84 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
     return mapping[zone] || 'Midwest';
   };
 
+  // Map tasks to required home systems based on task title keywords
+  const getSystemRequirementsForTask = (taskTitle: string): string[] | undefined => {
+    const title = taskTitle.toLowerCase();
+    const requirements: string[] = [];
+
+    // Heating systems
+    if (title.includes('furnace') || title.includes('heating system') || title.includes('heat pump') || title.includes('boiler')) {
+      if (title.includes('gas') || title.includes('oil')) {
+        requirements.push(title.includes('gas') ? 'gas-furnace' : 'oil-furnace');
+      } else {
+        requirements.push('gas-furnace', 'oil-furnace', 'electric-furnace', 'heat-pump', 'boiler');
+      }
+    }
+
+    // Cooling systems
+    if (title.includes('air condition') || title.includes(' ac ') || title.includes('cooling') || title.includes('a/c')) {
+      requirements.push('central-ac', 'window-ac', 'mini-split');
+    }
+
+    // Water heaters
+    if (title.includes('water heater')) {
+      requirements.push('gas-water-heater', 'electric-water-heater', 'tankless-gas', 'tankless-electric');
+    }
+
+    // Pool
+    if (title.includes('pool')) {
+      requirements.push('pool');
+    }
+
+    // Spa/Hot tub
+    if (title.includes('spa') || title.includes('hot tub')) {
+      requirements.push('spa');
+    }
+
+    // Generator
+    if (title.includes('generator')) {
+      requirements.push('generator');
+    }
+
+    // Septic
+    if (title.includes('septic')) {
+      requirements.push('septic');
+    }
+
+    // Sump pump
+    if (title.includes('sump pump')) {
+      requirements.push('sump-pump');
+    }
+
+    // Sprinkler/Irrigation system
+    if (title.includes('sprinkler') || title.includes('irrigation')) {
+      requirements.push('sprinkler-system');
+    }
+
+    // Solar panels
+    if (title.includes('solar panel')) {
+      requirements.push('solar-panels');
+    }
+
+    // Fireplace/wood stove
+    if (title.includes('fireplace') || title.includes('chimney') || title.includes('wood stove')) {
+      requirements.push('wood-stove');
+    }
+
+    // Well water
+    if (title.includes('well water') || title.includes('well pump')) {
+      requirements.push('well-water');
+    }
+
+    // Water softener
+    if (title.includes('water softener')) {
+      requirements.push('water-softener');
+    }
+
+    // Return undefined if no specific systems required (general maintenance tasks)
+    return requirements.length > 0 ? requirements : undefined;
+  };
+
   // Generate maintenance tasks based on month and location using US_MAINTENANCE_DATA
   const getMaintenanceTasksForMonth = (month: number): MaintenanceTask[] => {
     const tasks: MaintenanceTask[] = [];
@@ -2033,6 +2111,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
         category: "General Maintenance",
         tools: null,
         cost: null,
+        systemRequirements: getSystemRequirementsForTask(taskItem.title),
         costEstimate: taskItem.costEstimate,
         impact: taskItem.impact,
         impactCost: taskItem.impactCost,
@@ -2059,6 +2138,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
         category: "Weather-Specific",
         tools: null,
         cost: null,
+        systemRequirements: getSystemRequirementsForTask(taskItem.title),
         costEstimate: taskItem.costEstimate,
         impact: taskItem.impact,
         impactCost: taskItem.impactCost,
