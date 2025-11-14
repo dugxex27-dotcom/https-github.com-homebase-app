@@ -421,7 +421,7 @@ export default function HomeownerAccount() {
                     <h4 className="font-medium" style={{ color: '#2c0f5b' }}>Two-Factor Authentication</h4>
                     <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
                   </div>
-                  <Button variant="outline" size="sm" data-testid="button-setup-2fa" style={{ color: 'white' }}>
+                  <Button variant="outline" size="sm" data-testid="button-setup-2fa" style={{ color: '#2c0f5b' }}>
                     Setup
                   </Button>
                 </div>
