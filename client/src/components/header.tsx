@@ -86,8 +86,19 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/" aria-label="Home">
-              <Logo className={typedUser?.role === 'contractor' ? 'h-10 w-auto text-white cursor-pointer hover:opacity-80 transition-opacity' : 'h-10 w-auto text-primary cursor-pointer hover:opacity-80 transition-opacity'} />
+            <Link href="/" aria-label="Home" data-testid="link-home-logo">
+              <button
+                className={`
+                  p-2 rounded-xl transition-all duration-200 
+                  ${typedUser?.role === 'contractor' 
+                    ? 'hover:bg-white/20 active:bg-white/30' 
+                    : 'hover:bg-primary/10 active:bg-primary/20'
+                  }
+                `}
+                aria-label="Return to homepage"
+              >
+                <Logo className={typedUser?.role === 'contractor' ? 'h-10 w-auto text-white' : 'h-10 w-auto text-primary'} />
+              </button>
             </Link>
           </div>
           
