@@ -125,25 +125,25 @@ export default function Contractors() {
   // Map task categories to actual service names in the contractors list
   const mapCategoryToServices = (category: string): string[] => {
     const categoryMap: Record<string, string[]> = {
-      'hvac': ['HVAC Installation', 'HVAC Services'],
-      'plumbing': ['Plumbing Services'],
-      'electrical': ['Electrical Services'],
-      'roofing': ['Roofing Services'],
-      'landscaping': ['Lawn & Landscaping', 'Landscape Design'],
-      'painting': ['Interior Painting', 'Exterior Painting'],
-      'flooring': ['Carpet Installation', 'Hardwood Flooring', 'Laminate & Vinyl Flooring', 'Tile Installation'],
-      'exterior': ['Exterior Painting', 'Pressure Washing', 'Siding Installation'],
-      'carpentry': ['Trim & Finish Carpentry', 'Deck Building & Repair'],
-      'foundation': ['Foundation Repair'],
-      'appliance': ['Appliance Repair'],
-      'garage': ['Garage Door Services'],
-      'gutter': ['Gutter Cleaning & Repair'],
-      'insulation': ['Insulation Services'],
-      'tree': ['Tree Service & Trimming']
+      'hvac': ['HVAC Installation', 'HVAC Services', 'Handyman Services'],
+      'plumbing': ['Plumbing Services', 'Handyman Services'],
+      'electrical': ['Electrical Services', 'Handyman Services'],
+      'roofing': ['Roofing Services', 'Handyman Services'],
+      'landscaping': ['Lawn & Landscaping', 'Landscape Design', 'Handyman Services'],
+      'painting': ['Interior Painting', 'Exterior Painting', 'Handyman Services'],
+      'flooring': ['Carpet Installation', 'Hardwood Flooring', 'Laminate & Vinyl Flooring', 'Tile Installation', 'Handyman Services'],
+      'exterior': ['Exterior Painting', 'Pressure Washing', 'Siding Installation', 'Handyman Services'],
+      'carpentry': ['Trim & Finish Carpentry', 'Deck Building & Repair', 'Handyman Services'],
+      'foundation': ['Foundation Repair', 'Handyman Services'],
+      'appliance': ['Appliance Repair', 'Handyman Services'],
+      'garage': ['Garage Door Services', 'Handyman Services'],
+      'gutter': ['Gutter Cleaning & Repair', 'Handyman Services'],
+      'insulation': ['Insulation Services', 'Handyman Services'],
+      'tree': ['Tree Service & Trimming', 'Handyman Services']
     };
     
     const lowerCategory = category.toLowerCase();
-    return categoryMap[lowerCategory] || [category];
+    return categoryMap[lowerCategory] || [category, 'Handyman Services'];
   };
 
   // Parse URL parameters on initial load only
