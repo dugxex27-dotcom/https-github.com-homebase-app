@@ -1621,17 +1621,24 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
     },
   });
 
-  // Load completed tasks and home systems from localStorage on component mount
+  // Load completed tasks for the selected house from localStorage
   useEffect(() => {
-    const storedTasks = localStorage.getItem('maintenance-completed-tasks');
-    if (storedTasks) {
-      try {
-        setCompletedTasks(JSON.parse(storedTasks));
-      } catch {
+    if (selectedHouseId) {
+      const storedTasks = localStorage.getItem(`maintenance-completed-tasks-${selectedHouseId}`);
+      if (storedTasks) {
+        try {
+          setCompletedTasks(JSON.parse(storedTasks));
+        } catch {
+          setCompletedTasks({});
+        }
+      } else {
         setCompletedTasks({});
       }
     }
+  }, [selectedHouseId]);
 
+  // Load home systems from localStorage on component mount
+  useEffect(() => {
     const storedSystems = localStorage.getItem('home-systems');
     if (storedSystems) {
       try {
@@ -1643,9 +1650,12 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
   }, []);
 
   // Save completed tasks and home systems to localStorage whenever they change
+  // Save completed tasks to localStorage for the selected house
   useEffect(() => {
-    localStorage.setItem('maintenance-completed-tasks', JSON.stringify(completedTasks));
-  }, [completedTasks]);
+    if (selectedHouseId) {
+      localStorage.setItem(`maintenance-completed-tasks-${selectedHouseId}`, JSON.stringify(completedTasks));
+    }
+  }, [completedTasks, selectedHouseId]);
 
   useEffect(() => {
     localStorage.setItem('home-systems', JSON.stringify(homeSystems));
