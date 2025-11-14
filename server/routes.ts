@@ -1295,6 +1295,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Advanced analytics endpoint
+  app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
+    try {
+      const days = parseInt(req.query.days as string) || 30;
+      
+      const [activeUsers, referrals, contractors, revenue, churn, features] = await Promise.all([
+        storage.getActiveUsersSeries(days),
+        storage.getReferralGrowthSeries(days),
+        storage.getContractorSignupsSeries(days),
+        storage.getRevenueMetrics(days),
+        storage.getChurnMetrics(days),
+        storage.getFeatureUsageStats()
+      ]);
+      
+      res.json({
+        activeUsers,
+        referrals,
+        contractors,
+        revenue,
+        churn,
+        features
+      });
+    } catch (error) {
+      console.error("Error fetching advanced analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
   // Homeowner profile routes
   app.patch('/api/homeowner/profile', async (req: any, res) => {
     try {

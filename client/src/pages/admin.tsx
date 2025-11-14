@@ -8,10 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Users, Home, Briefcase, Plus, Ban } from "lucide-react";
+import { Users, Home, Briefcase, Plus, Ban, TrendingUp, DollarSign, UserMinus } from "lucide-react";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 
 interface AdminStats {
   totalUsers: number;
@@ -43,11 +45,33 @@ interface InviteCode {
   updatedAt: Date | null;
 }
 
+interface AnalyticsData {
+  activeUsers: Array<{ date: string; count: number }>;
+  referrals: Array<{ date: string; count: number }>;
+  contractors: Array<{ date: string; count: number }>;
+  revenue: {
+    mrr: number;
+    totalRevenue: number;
+    revenueByPlan: Array<{ plan: string; revenue: number }>;
+    revenueSeries: Array<{ date: string; amount: number }>;
+  };
+  churn: {
+    churnRate: number;
+    churnedUsers: number;
+    totalActiveUsers: number;
+    churnSeries: Array<{ date: string; rate: number }>;
+  };
+  features: Array<{ feature: string; count: number }>;
+}
+
+const CHART_COLORS = ['#9333ea', '#a855f7', '#c084fc', '#d8b4fe', '#e9d5ff', '#f3e8ff'];
+
 export default function AdminDashboard() {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newCode, setNewCode] = useState("");
   const [maxUses, setMaxUses] = useState("1");
+  const [timeRange, setTimeRange] = useState<7 | 30 | 90 | 365>(30);
 
   // Fetch admin stats
   const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
@@ -69,6 +93,18 @@ export default function AdminDashboard() {
   // Fetch invite codes
   const { data: inviteCodes, isLoading: codesLoading } = useQuery<InviteCode[]>({
     queryKey: ["/api/admin/invite-codes"],
+  });
+
+  // Fetch advanced analytics
+  const { data: analytics, isLoading: analyticsLoading } = useQuery<AnalyticsData>({
+    queryKey: ["/api/admin/analytics", timeRange],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/analytics?days=${timeRange}`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch analytics");
+      return res.json();
+    },
   });
 
   // Create invite code mutation
@@ -273,6 +309,205 @@ export default function AdminDashboard() {
                     )}
                   </TableBody>
                 </Table>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Time Range Selector */}
+        <Card className="mb-8" data-testid="card-time-range">
+          <CardHeader>
+            <CardTitle>Analytics Time Range</CardTitle>
+            <CardDescription>Select time range for analytics charts</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs value={timeRange.toString()} onValueChange={(v) => setTimeRange(parseInt(v) as 7 | 30 | 90 | 365)}>
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="7" data-testid="button-filter-7days">7 Days</TabsTrigger>
+                <TabsTrigger value="30" data-testid="button-filter-30days">30 Days</TabsTrigger>
+                <TabsTrigger value="90" data-testid="button-filter-90days">90 Days</TabsTrigger>
+                <TabsTrigger value="365" data-testid="button-filter-365days">365 Days</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        {/* Analytics Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Active Users Over Time */}
+          <Card data-testid="card-active-users-chart">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Active Users Over Time</CardTitle>
+                  <CardDescription>Daily active user signups</CardDescription>
+                </div>
+                <TrendingUp className="h-5 w-5 text-purple-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {analyticsLoading ? (
+                <Skeleton className="h-64 w-full" />
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={analytics?.activeUsers || []} data-testid="chart-active-users">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="count" stroke="#9333ea" strokeWidth={2} name="Active Users" />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Referral Growth */}
+          <Card data-testid="card-referral-growth-chart">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Referral Growth</CardTitle>
+                  <CardDescription>Cumulative referrals over time</CardDescription>
+                </div>
+                <Users className="h-5 w-5 text-purple-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {analyticsLoading ? (
+                <Skeleton className="h-64 w-full" />
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={analytics?.referrals || []} data-testid="chart-referral-growth">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="count" stroke="#a855f7" strokeWidth={2} name="Total Referrals" />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Contractor Signups */}
+          <Card data-testid="card-contractor-signups-chart">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Contractor Signups</CardTitle>
+                  <CardDescription>New contractors by day</CardDescription>
+                </div>
+                <Briefcase className="h-5 w-5 text-red-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {analyticsLoading ? (
+                <Skeleton className="h-64 w-full" />
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={analytics?.contractors || []} data-testid="chart-contractor-signups">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="count" fill="#dc2626" name="New Contractors" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Revenue Metrics */}
+          <Card data-testid="card-revenue-chart">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Subscription Revenue</CardTitle>
+                  <CardDescription>MRR: ${analytics?.revenue?.mrr?.toFixed(2) || '0.00'}</CardDescription>
+                </div>
+                <DollarSign className="h-5 w-5 text-green-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {analyticsLoading ? (
+                <Skeleton className="h-64 w-full" />
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <AreaChart data={analytics?.revenue?.revenueSeries || []} data-testid="chart-revenue">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="amount" stroke="#16a34a" fill="#22c55e" fillOpacity={0.6} name="Revenue ($)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Churn Rate */}
+          <Card data-testid="card-churn-chart">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Churn Rate</CardTitle>
+                  <CardDescription>Overall churn: {analytics?.churn?.churnRate?.toFixed(2) || '0.00'}%</CardDescription>
+                </div>
+                <UserMinus className="h-5 w-5 text-orange-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {analyticsLoading ? (
+                <Skeleton className="h-64 w-full" />
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={analytics?.churn?.churnSeries || []} data-testid="chart-churn-rate">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="rate" stroke="#ea580c" strokeWidth={2} name="Churn Rate (%)" />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Feature Usage */}
+          <Card data-testid="card-feature-usage-chart">
+            <CardHeader>
+              <CardTitle>Feature Usage</CardTitle>
+              <CardDescription>Most used features by count</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {analyticsLoading ? (
+                <Skeleton className="h-64 w-full" />
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart data-testid="chart-feature-usage">
+                    <Pie
+                      data={analytics?.features || []}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ feature, percent }: any) => `${feature}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="count"
+                    >
+                      {(analytics?.features || []).map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
               )}
             </CardContent>
           </Card>

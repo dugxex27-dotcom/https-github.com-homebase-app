@@ -418,6 +418,22 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// User activity fact table for analytics (tracks user engagement events)
+export const userActivity = pgTable("user_activity", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: text("user_id").notNull(), // links to users table
+  activityType: text("activity_type").notNull(), // "login", "search", "message", "proposal", "task_completion", "house_added", "contractor_view", "boost_purchase"
+  metadata: jsonb("metadata"), // Additional context (e.g., { searchTerm, serviceType, conversationId, taskId })
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  // Critical index for time-series queries
+  index("IDX_user_activity_created_at").on(table.createdAt),
+  // Index for user-specific queries
+  index("IDX_user_activity_user_id").on(table.userId),
+  // Composite index for user activity over time
+  index("IDX_user_activity_user_date").on(table.userId, table.createdAt),
+]);
+
 export const serviceRecords = pgTable("service_records", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   contractorId: varchar("contractor_id").notNull(), // Kept for backward compatibility
@@ -815,6 +831,11 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   createdAt: true,
 });
 
+export const insertUserActivitySchema = createInsertSchema(userActivity).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -1062,6 +1083,8 @@ export type InsertHouse = z.infer<typeof insertHouseSchema>;
 export type House = typeof houses.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
+export type InsertUserActivity = z.infer<typeof insertUserActivitySchema>;
+export type UserActivity = typeof userActivity.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;

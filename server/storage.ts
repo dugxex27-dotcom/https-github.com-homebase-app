@@ -307,6 +307,24 @@ export interface IStorage {
     signupsByZip: Array<{ zipCode: string; count: number }>;
   }>;
 
+  // Advanced admin analytics methods
+  getActiveUsersSeries(days: number): Promise<Array<{ date: string; count: number }>>;
+  getReferralGrowthSeries(days: number): Promise<Array<{ date: string; count: number }>>;
+  getContractorSignupsSeries(days: number): Promise<Array<{ date: string; count: number }>>;
+  getRevenueMetrics(days: number): Promise<{
+    mrr: number;
+    totalRevenue: number;
+    revenueByPlan: Array<{ plan: string; revenue: number }>;
+    revenueSeries: Array<{ date: string; amount: number }>;
+  }>;
+  getChurnMetrics(days: number): Promise<{
+    churnRate: number;
+    churnedUsers: number;
+    totalActiveUsers: number;
+    churnSeries: Array<{ date: string; rate: number }>;
+  }>;
+  getFeatureUsageStats(): Promise<Array<{ feature: string; count: number }>>;
+
   // Agent profile operations
   getAgentProfile(agentId: string): Promise<AgentProfile | undefined>;
   createAgentProfile(profile: InsertAgentProfile): Promise<AgentProfile>;
@@ -3357,6 +3375,197 @@ export class MemStorage implements IStorage {
     };
   }
 
+  // Advanced admin analytics methods
+  async getActiveUsersSeries(days: number): Promise<Array<{ date: string; count: number }>> {
+    const allUsers = Array.from(this.users.values());
+    const now = new Date();
+    const series: Array<{ date: string; count: number }> = [];
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const targetDate = new Date(now);
+      targetDate.setDate(now.getDate() - i);
+      targetDate.setHours(0, 0, 0, 0);
+      
+      const nextDate = new Date(targetDate);
+      nextDate.setDate(targetDate.getDate() + 1);
+      
+      // Count actual signups on this day (users created on this date)
+      const count = allUsers.filter(user => {
+        if (!user.createdAt) return false;
+        const userDate = new Date(user.createdAt);
+        return userDate >= targetDate && userDate < nextDate;
+      }).length;
+      
+      const dateStr = `${targetDate.getMonth() + 1}/${targetDate.getDate()}`;
+      series.push({ date: dateStr, count });
+    }
+    
+    return series;
+  }
+
+  async getReferralGrowthSeries(days: number): Promise<Array<{ date: string; count: number }>> {
+    const now = new Date();
+    const series: Array<{ date: string; count: number }> = [];
+    
+    const referralCreditsArray = await db.select().from(referralCredits);
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const targetDate = new Date(now);
+      targetDate.setDate(now.getDate() - i);
+      targetDate.setHours(0, 0, 0, 0);
+      
+      const nextDate = new Date(targetDate);
+      nextDate.setDate(targetDate.getDate() + 1);
+      
+      const count = referralCreditsArray.filter(credit => {
+        if (!credit.earnedAt) return false;
+        const earnedDate = new Date(credit.earnedAt);
+        return earnedDate < nextDate;
+      }).length;
+      
+      const dateStr = `${targetDate.getMonth() + 1}/${targetDate.getDate()}`;
+      series.push({ date: dateStr, count });
+    }
+    
+    return series;
+  }
+
+  async getContractorSignupsSeries(days: number): Promise<Array<{ date: string; count: number }>> {
+    const allUsers = Array.from(this.users.values());
+    const contractors = allUsers.filter(u => u.role === 'contractor');
+    const now = new Date();
+    const series: Array<{ date: string; count: number }> = [];
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const targetDate = new Date(now);
+      targetDate.setDate(now.getDate() - i);
+      targetDate.setHours(0, 0, 0, 0);
+      
+      const nextDate = new Date(targetDate);
+      nextDate.setDate(targetDate.getDate() + 1);
+      
+      const count = contractors.filter(user => {
+        if (!user.createdAt) return false;
+        const userDate = new Date(user.createdAt);
+        return userDate >= targetDate && userDate < nextDate;
+      }).length;
+      
+      const dateStr = `${targetDate.getMonth() + 1}/${targetDate.getDate()}`;
+      series.push({ date: dateStr, count });
+    }
+    
+    return series;
+  }
+
+  async getRevenueMetrics(days: number): Promise<{
+    mrr: number;
+    totalRevenue: number;
+    revenueByPlan: Array<{ plan: string; revenue: number }>;
+    revenueSeries: Array<{ date: string; amount: number }>;
+  }> {
+    const allUsers = Array.from(this.users.values());
+    const activeSubscribers = allUsers.filter(u => u.subscriptionStatus === 'active');
+    
+    const cycleEvents = await db.select().from(subscriptionCycleEvents);
+    
+    const mrr = activeSubscribers.length * 20;
+    
+    const totalRevenue = cycleEvents
+      .filter(e => e.eventType === 'payment_succeeded')
+      .reduce((sum, e) => sum + (Number(e.amountInCents || 0) / 100), 0);
+    
+    const revenueByPlan = [
+      { plan: 'Basic', revenue: activeSubscribers.filter(u => u.subscriptionTier === 'basic').length * 20 },
+      { plan: 'Super', revenue: activeSubscribers.filter(u => u.subscriptionTier === 'super').length * 35 },
+      { plan: 'Contractor', revenue: activeSubscribers.filter(u => u.role === 'contractor').length * 50 },
+    ];
+    
+    const now = new Date();
+    const revenueSeries: Array<{ date: string; amount: number }> = [];
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const targetDate = new Date(now);
+      targetDate.setDate(now.getDate() - i);
+      targetDate.setHours(0, 0, 0, 0);
+      
+      const nextDate = new Date(targetDate);
+      nextDate.setDate(targetDate.getDate() + 1);
+      
+      const dayRevenue = cycleEvents
+        .filter(e => {
+          if (!e.eventTimestamp || e.eventType !== 'payment_succeeded') return false;
+          const eventDate = new Date(e.eventTimestamp);
+          return eventDate >= targetDate && eventDate < nextDate;
+        })
+        .reduce((sum, e) => sum + (Number(e.amountInCents || 0) / 100), 0);
+      
+      const dateStr = `${targetDate.getMonth() + 1}/${targetDate.getDate()}`;
+      revenueSeries.push({ date: dateStr, amount: dayRevenue });
+    }
+    
+    return { mrr, totalRevenue, revenueByPlan, revenueSeries };
+  }
+
+  async getChurnMetrics(days: number): Promise<{
+    churnRate: number;
+    churnedUsers: number;
+    totalActiveUsers: number;
+    churnSeries: Array<{ date: string; rate: number }>;
+  }> {
+    const allUsers = Array.from(this.users.values());
+    const churnedUsers = allUsers.filter(u => u.accountCancelledAt != null).length;
+    const totalActiveUsers = allUsers.filter(u => u.subscriptionStatus === 'active').length;
+    const churnRate = totalActiveUsers > 0 ? (churnedUsers / (churnedUsers + totalActiveUsers)) * 100 : 0;
+    
+    const now = new Date();
+    const churnSeries: Array<{ date: string; rate: number }> = [];
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const targetDate = new Date(now);
+      targetDate.setDate(now.getDate() - i);
+      targetDate.setHours(0, 0, 0, 0);
+      
+      const nextDate = new Date(targetDate);
+      nextDate.setDate(targetDate.getDate() + 1);
+      
+      const dayChurned = allUsers.filter(u => {
+        if (!u.accountCancelledAt) return false;
+        const cancelDate = new Date(u.accountCancelledAt);
+        return cancelDate >= targetDate && cancelDate < nextDate;
+      }).length;
+      
+      const activeAtDate = allUsers.filter(u => {
+        if (!u.createdAt) return false;
+        const createDate = new Date(u.createdAt);
+        const isCancelled = u.accountCancelledAt && new Date(u.accountCancelledAt) <= targetDate;
+        return createDate <= targetDate && !isCancelled;
+      }).length;
+      
+      const rate = activeAtDate > 0 ? (dayChurned / activeAtDate) * 100 : 0;
+      
+      const dateStr = `${targetDate.getMonth() + 1}/${targetDate.getDate()}`;
+      churnSeries.push({ date: dateStr, rate: Math.min(rate, 5) });
+    }
+    
+    return { churnRate, churnedUsers, totalActiveUsers, churnSeries };
+  }
+
+  async getFeatureUsageStats(): Promise<Array<{ feature: string; count: number }>> {
+    const taskCompletionsArray = await db.select().from(taskCompletions);
+    const messagesArray = Array.from(this.messages.values());
+    const proposalsArray = Array.from(this.proposals.values());
+    const contractorBoostsArray = Array.from(this.contractorBoosts.values());
+    
+    return [
+      { feature: 'Task Completions', count: taskCompletionsArray.length },
+      { feature: 'Messages Sent', count: messagesArray.length },
+      { feature: 'Proposals Created', count: proposalsArray.length },
+      { feature: 'Contractor Boosts', count: contractorBoostsArray.length },
+      { feature: 'Service Records', count: this.serviceRecords.length },
+      { feature: 'Houses Tracked', count: this.houses.size },
+    ];
+  }
+
   // Agent profile operations
   async getAgentProfile(agentId: string): Promise<AgentProfile | undefined> {
     const [profile] = await db
@@ -3873,6 +4082,12 @@ class DbStorage implements IStorage {
     this.trackSearch = this.memStorage.trackSearch.bind(this.memStorage);
     this.getSearchAnalytics = this.memStorage.getSearchAnalytics.bind(this.memStorage);
     this.getAdminStats = this.memStorage.getAdminStats.bind(this.memStorage);
+    this.getActiveUsersSeries = this.memStorage.getActiveUsersSeries.bind(this.memStorage);
+    this.getReferralGrowthSeries = this.memStorage.getReferralGrowthSeries.bind(this.memStorage);
+    this.getContractorSignupsSeries = this.memStorage.getContractorSignupsSeries.bind(this.memStorage);
+    this.getRevenueMetrics = this.memStorage.getRevenueMetrics.bind(this.memStorage);
+    this.getChurnMetrics = this.memStorage.getChurnMetrics.bind(this.memStorage);
+    this.getFeatureUsageStats = this.memStorage.getFeatureUsageStats.bind(this.memStorage);
     // Agent methods
     this.getAgentProfile = this.memStorage.getAgentProfile.bind(this.memStorage);
     this.getAffiliateReferrals = this.memStorage.getAffiliateReferrals.bind(this.memStorage);
