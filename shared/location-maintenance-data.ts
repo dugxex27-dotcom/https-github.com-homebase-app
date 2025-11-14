@@ -370,7 +370,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           { title: 'Monitor heating system performance', description: 'Watch for unusual noises, odors, or cycling issues from your heating system. Replace filters monthly during winter. Ensure all rooms heat evenly. Listen for banging pipes or hissing sounds. Call HVAC technician immediately if performance declines - don\'t wait for a breakdown in winter.' },
           { title: 'Check holiday decorations safety', description: 'Inspect all light strings for frayed wires or damaged sockets before hanging. Use outdoor-rated lights outside only. Don\'t overload circuits. Keep live trees watered to prevent fire hazard. Turn off decorative lights when leaving home or sleeping. Use LED lights to reduce fire risk and energy costs.' },
           { title: 'Inspect and maintain fireplace', description: 'Check that damper opens fully and closes tightly. Remove ash buildup regularly (when cool). Keep glass doors closed when fire is burning. Use a fireplace screen with open fireplaces. Never leave fire unattended. Only burn seasoned hardwood, never treated wood or trash.' },
-          { title: 'Test carbon monoxide and smoke detectors', description: 'Press test button on all detectors monthly to verify operation. Replace batteries twice yearly (during time changes). Clean sensors with vacuum to remove dust. Replace smoke detectors older than 10 years and CO detectors older than 7 years. These devices save lives.' },
           { title: 'Monitor energy usage and efficiency', description: 'Compare current utility bills to previous winters. Unexpectedly high usage suggests air leaks, inefficient heating, or equipment problems. Use programmable thermostat to reduce heating when sleeping or away. Seal any drafts. Consider energy audit if costs seem excessive.' },
           { title: 'Check water heater pressure relief valve (carefully lift lever)', description: 'With bucket underneath, carefully lift the pressure relief valve lever slightly until water flows, then release. This tests valve function and flushes sediment. Water should stop when released. If valve leaks continuously after, it needs replacement. Do this annually for safety.' },
           { title: 'Test indoor circuit breakers (flip each one to ensure not stuck)', description: 'At your electrical panel, flip each breaker to OFF then back to ON to ensure they move freely. Stuck breakers won\'t protect circuits during overloads. Label any unlabeled breakers while testing. If breakers feel stiff or won\'t stay on, call an electrician immediately.' },
@@ -904,9 +903,29 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
         seasonal: [
           { title: 'Complete fall preparation', description: 'Finish all outdoor projects before winter. Complete exterior repairs and painting. Clean gutters after leaves fall. Store outdoor furniture and equipment. Check that heating system is serviced and ready. Stock emergency supplies. Midwest October is last chance before winter locks in.' },
           { title: 'Service heating system for winter', description: 'If not done in September, schedule furnace service immediately. Technician will inspect heat exchanger, clean burners, test safety controls, and ensure efficient operation. Cannot wait longer - Midwest heating system must be ready for months of heavy use starting soon.' },
-          { title: 'Winterize outdoor water systems', description: 'Drain irrigation systems completely - use compressed air if necessary. Drain garden hoses and store indoors. Insulate exposed pipes. Install faucet covers on outdoor spigots. Midwest freezing weather will arrive soon - protect outdoor plumbing from expensive freeze damage.' },
-          { title: 'Turn off outside water sources', description: 'Locate shut-off valves for outdoor faucets inside home (usually in basement). Turn off water supply to outdoor faucets. Open outdoor faucets to drain remaining water. Leave faucets open all winter. Prevents pipe freezing and bursting during Midwest winter.' },
-          { title: 'Shut off outside house spigots', description: 'After shutting off inside valve, open each outdoor faucet fully to drain remaining water from pipes. Disconnect and drain hoses. Install insulated faucet covers. Midwest winter freezing will burst pipes with any water left inside - drain completely.' },
+          { 
+            title: 'Winterize outdoor water systems (hoses, sprinklers, faucets)', 
+            description: 'Complete all outdoor water winterization to prevent costly freeze damage. Locate shut-off valves for outdoor faucets inside home (usually in basement). Turn off water supply to outdoor faucets and open outdoor faucets - leave them open all winter to drain completely. Disconnect and drain all garden hoses and store indoors. Drain irrigation/sprinkler systems completely using compressed air (or hire professional). Install insulated faucet covers on all outdoor spigots for added protection. Midwest winter freezing will burst pipes with any water left inside - this critical winterization prevents thousands in water damage.',
+            priority: 'high',
+            actionSummary: 'Follow these 5 essential steps to winterize your outdoor water systems and prevent burst pipes.',
+            steps: [
+              'Locate and close shut-off valves inside your home for all outdoor faucets',
+              'Open all outdoor faucets and leave them open all winter to allow drainage',
+              'Disconnect all garden hoses, drain them completely, and store indoors',
+              'Drain sprinkler/irrigation system using compressed air or hire a professional',
+              'Install insulated foam faucet covers on all outdoor spigots for extra protection'
+            ],
+            toolsAndSupplies: [
+              'Adjustable wrench (to turn shut-off valves)',
+              'Insulated faucet covers (one for each outdoor faucet)',
+              'Air compressor (for sprinkler system winterization, or hire professional)',
+              'Bucket (to catch draining water)',
+              'Towels or rags',
+              'Flashlight (for locating basement shut-off valves)'
+            ],
+            impact: 'Frozen outdoor pipes can burst, causing catastrophic water damage inside walls and flooding basements. A single burst pipe can release hundreds of gallons of water, damaging floors, walls, and belongings. Sprinkler system freeze damage often costs $500-2,000 to repair.',
+            impactCost: '$500 - $5,000 for pipe repairs and water damage; $500 - $2,000 for sprinkler system repairs'
+          },
           { title: 'Clean and maintain gutters', description: 'After leaves fall, remove all debris from gutters and downspouts. Flush thoroughly with hose. Ensure water flows freely and drains away from foundation. Make final repairs before winter. Clean gutters critical for Midwest winter snowmelt and ice dam prevention.' },
           { title: 'Check storm windows and doors', description: 'Install storm windows if you have them. Check that storm doors close tightly and latches work. Replace damaged weatherstripping. Ensure seals are tight. Storm windows significantly reduce heat loss and improve comfort during long Midwest winter.' },
           { title: 'Rake and manage fall leaves', description: 'Rake leaves regularly as they fall. Bag for disposal, compost, or mulch with mower. Don\'t leave thick leaf layers on lawn over winter - causes disease and dead spots. Midwest leaf season is brief but intense - stay ahead of accumulation.' },
@@ -947,7 +966,6 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
         seasonal: [
           { title: 'Monitor heating system performance', description: 'Check heating system daily during cold weather. Listen for unusual noises or changes in performance. Replace filters monthly. Ensure even heating throughout home. If system runs constantly or struggles to heat, call HVAC technician immediately - Midwest December cold is dangerous without reliable heat.' },
           { title: 'Check holiday decorations and lighting', description: 'Inspect outdoor decorations regularly for damage from wind or snow. Ensure electrical connections stay dry. Don\'t leave lights on when away. Keep fresh trees watered daily to prevent fire hazard. Use timers to control lighting. Check for overloaded circuits - Midwest winter holiday safety is critical.' },
-          { title: 'Test carbon monoxide and smoke detectors', description: 'Press test button on all CO and smoke detectors monthly. Replace batteries if needed. Clean dust from sensors. Ensure detectors near bedrooms and on every level. Heating season with closed house increases CO risk - working detectors save Midwest families every winter.' },
           { title: 'Maintain winter preparations', description: 'Keep emergency supplies current and accessible. Maintain snow removal equipment. Stock ice melt. Monitor weather forecasts. Keep extra food and water on hand. Have backup heating plan ready. Midwest December storms can arrive suddenly - constant preparedness is essential.' },
           { title: 'Monitor energy usage', description: 'Check heating bills weekly and compare to previous years. Unusually high bills suggest system inefficiency or air leaks. Verify thermostat set reasonably (68-70°F). Check for drafts. Monitor usage to control Midwest winter heating costs and identify problems early.' },
           { title: 'Check water heater pressure relief valve (carefully lift lever)', description: 'Carefully lift lever on pressure relief valve at top or side of water heater - should release hot water and snap back. If valve doesn\'t release water or leaks afterward, call plumber immediately. Annual testing prevents dangerous pressure buildup and ensures safety device works.' },
@@ -1614,9 +1632,29 @@ export const US_MAINTENANCE_DATA: { [key: string]: LocationMaintenanceData } = {
           { title: 'Complete fall preparation', description: 'October last chance for outdoor work at altitude. Complete all winterization tasks now. Weather in October varies from pleasant to blizzards. Work on nice days - they become rare. November freezes projects in place. October completion prevents winter regrets at altitude.' },
           { title: 'Service heating system for winter', description: 'Have professional HVAC service in October if not done - system about to work for 6-7 months straight. Technician checks burners, heat exchangers, electrical components, carbon monoxide levels. Service in October avoids November rush. Heating failure in November at altitude is emergency.' },
           { title: 'Check insulation and weatherproofing', description: 'Inspect attic insulation before winter (14-20 inches minimum at altitude). Check weatherstripping on doors and windows. Caulk gaps in exterior. Insulate pipes in unheated areas. Good insulation essential at altitude where heating season October through May. Prevention now saves money and prevents freezing disasters.' },
-          { title: 'Winterize outdoor water systems', description: 'Drain irrigation systems completely - freezing breaks pipes. Blow out sprinkler lines with compressed air or hire professional. Drain outdoor fountains and features. Store hoses. Winterization prevents costly spring repairs. At altitude, freezing is guaranteed - preparation mandatory, not optional.' },
-          { title: 'Turn off outside water sources', description: 'Shut off water to outdoor faucets from inside shut-off valves. Open outdoor faucets to drain remaining water. Leave outdoor faucets open through winter. Remove and drain hoses. At altitude, outdoor faucets freeze and burst without proper winterization - repairs expensive and water damaging.' },
-          { title: 'Shut off outside house spigots', description: 'After turning off water from inside, open each outdoor faucet to drain completely. Water remaining in pipes freezes and bursts pipes. Check basement or crawl space for moisture from leaking shut-off valves. Properly winterized outdoor faucets prevent thousands in water damage.' }
+          { 
+            title: 'Winterize outdoor water systems (hoses, sprinklers, faucets)', 
+            description: 'Complete all outdoor water winterization to prevent costly freeze damage. At altitude, freezing is guaranteed - preparation mandatory, not optional. Shut off water to outdoor faucets from inside shut-off valves. Open outdoor faucets and leave them open through winter to drain completely. Remove, drain, and store all hoses indoors. Drain irrigation systems completely - blow out sprinkler lines with compressed air or hire professional. Drain outdoor fountains and water features. Install insulated faucet covers for added protection. Water remaining in pipes freezes and bursts pipes, causing thousands in water damage.',
+            priority: 'high',
+            actionSummary: 'Follow these 5 essential steps to winterize your outdoor water systems and prevent burst pipes.',
+            steps: [
+              'Locate and close shut-off valves inside your home for all outdoor faucets',
+              'Open all outdoor faucets and leave them open all winter to allow drainage',
+              'Disconnect all garden hoses, drain them completely, and store indoors',
+              'Drain sprinkler/irrigation system using compressed air or hire a professional',
+              'Install insulated foam faucet covers on all outdoor spigots for extra protection'
+            ],
+            toolsAndSupplies: [
+              'Adjustable wrench (to turn shut-off valves)',
+              'Insulated faucet covers (one for each outdoor faucet)',
+              'Air compressor (for sprinkler system winterization, or hire professional)',
+              'Bucket (to catch draining water)',
+              'Towels or rags',
+              'Flashlight (for locating basement shut-off valves)'
+            ],
+            impact: 'At altitude, frozen outdoor pipes will burst, causing catastrophic water damage inside walls and flooding basements. A single burst pipe can release hundreds of gallons of water, damaging floors, walls, and belongings. Sprinkler system freeze damage often costs $500-2,000 to repair.',
+            impactCost: '$500 - $5,000 for pipe repairs and water damage; $500 - $2,000 for sprinkler system repairs'
+          }
         ],
         weatherSpecific: [
           { title: 'Prepare for rapid temperature drops', description: 'October at altitude brings dramatic temperature changes - 65°F one day, blizzard the next. Have winter clothes readily accessible. Keep vehicles equipped for winter. Monitor forecasts closely. Altitude weather changes in hours, not days. Rapid temperature drops stress homes and catch people unprepared.' },
