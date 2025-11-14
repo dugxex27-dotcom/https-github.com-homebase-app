@@ -201,6 +201,13 @@ export const contractors = pgTable("contractors", {
   businessLogo: text("business_logo"),
   projectPhotos: text("project_photos").array().default(sql`ARRAY[]::text[]`),
   
+  // Verification and insurance
+  isVerified: boolean("is_verified").notNull().default(false),
+  insuranceCarrier: text("insurance_carrier"),
+  insurancePolicyNumber: text("insurance_policy_number"),
+  insuranceExpiryDate: text("insurance_expiry_date"), // Date when insurance expires
+  insuranceCoverageAmount: text("insurance_coverage_amount"), // e.g., "$1M", "$2M"
+  
   // Website and social media
   website: text("website"),
   facebook: text("facebook"),

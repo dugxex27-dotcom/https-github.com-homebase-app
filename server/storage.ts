@@ -4578,6 +4578,10 @@ class DbStorage implements IStorage {
       };
       
       await db.insert(contractors).values(newContractor);
+      
+      // Update verification status after creating profile
+      await this.updateContractorVerificationStatus(contractorId);
+      
       return (await this.getContractorProfile(contractorId))!;
     } else {
       // Update existing contractor profile
@@ -4617,6 +4621,9 @@ class DbStorage implements IStorage {
           await this.updateCompany(user.companyId, companyUpdates);
         }
       }
+      
+      // Update verification status after updating profile
+      await this.updateContractorVerificationStatus(contractorId);
       
       return (await this.getContractorProfile(contractorId))!;
     }
@@ -4698,6 +4705,10 @@ class DbStorage implements IStorage {
     };
     
     await db.insert(contractorLicenses).values(newLicense);
+    
+    // Update verification status after adding license
+    await this.updateContractorVerificationStatus(license.contractorId);
+    
     return (await this.getContractorLicense(newLicense.id))!;
   }
 
@@ -4713,6 +4724,10 @@ class DbStorage implements IStorage {
     };
     
     await db.update(contractorLicenses).set(updatedData).where(eq(contractorLicenses.id, id));
+    
+    // Update verification status after updating license
+    await this.updateContractorVerificationStatus(contractorId);
+    
     return (await this.getContractorLicense(id))!;
   }
 
@@ -4726,7 +4741,51 @@ class DbStorage implements IStorage {
     await db.update(contractorLicenses)
       .set({ isActive: false, updatedAt: new Date() })
       .where(eq(contractorLicenses.id, id));
+    
+    // Update verification status after license deletion
+    await this.updateContractorVerificationStatus(contractorId);
+    
     return true;
+  }
+
+  // Calculate and update contractor verification status
+  async updateContractorVerificationStatus(contractorId: string): Promise<boolean> {
+    const contractor = await this.getContractor(contractorId);
+    if (!contractor) {
+      return false;
+    }
+
+    // Get active licenses
+    const licenses = await this.getContractorLicenses(contractorId);
+    const hasActiveLicense = licenses.length > 0;
+
+    // Check insurance validity
+    const hasValidInsurance = !!(
+      contractor.insuranceCarrier &&
+      contractor.insurancePolicyNumber &&
+      contractor.insuranceExpiryDate
+    );
+
+    // Check profile completeness
+    const hasCompleteProfile = !!(
+      contractor.name &&
+      contractor.company &&
+      contractor.bio &&
+      contractor.phone &&
+      contractor.email &&
+      contractor.services &&
+      contractor.services.length > 0
+    );
+
+    // Contractor is verified if they have all three: active license, valid insurance, and complete profile
+    const isVerified = hasActiveLicense && hasValidInsurance && hasCompleteProfile;
+
+    // Update verification status
+    await db.update(contractors)
+      .set({ isVerified })
+      .where(eq(contractors.id, contractorId));
+
+    return isVerified;
   }
 
   // Get contractor by ID - DATABASE BACKED
