@@ -4759,12 +4759,17 @@ class DbStorage implements IStorage {
     const licenses = await this.getContractorLicenses(contractorId);
     const hasActiveLicense = licenses.length > 0;
 
-    // Check insurance validity
-    const hasValidInsurance = !!(
-      contractor.insuranceCarrier &&
-      contractor.insurancePolicyNumber &&
-      contractor.insuranceExpiryDate
-    );
+    // Check insurance validity - must have all fields AND expiry date must be in the future
+    let hasValidInsurance = false;
+    if (contractor.insuranceCarrier && 
+        contractor.insurancePolicyNumber && 
+        contractor.insuranceExpiryDate) {
+      // Compare calendar dates to avoid timezone issues
+      // Format: YYYY-MM-DD
+      const expiryDateString = contractor.insuranceExpiryDate.split('T')[0]; // Handle both date-only and ISO strings
+      const todayString = new Date().toISOString().split('T')[0];
+      hasValidInsurance = expiryDateString >= todayString;
+    }
 
     // Check profile completeness
     const hasCompleteProfile = !!(

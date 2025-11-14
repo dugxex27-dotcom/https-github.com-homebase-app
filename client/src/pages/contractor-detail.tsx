@@ -134,7 +134,26 @@ export default function ContractorDetail() {
               <div className="flex-1">
                 <div className="flex justify-between items-start mb-6">
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{contractor.company}</h1>
+                    <div className="flex items-center gap-3 mb-2">
+                      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{contractor.company}</h1>
+                      {contractor.isVerified && (
+                        <div className="relative group">
+                          <Badge className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm font-semibold flex items-center gap-1" data-testid="badge-verified">
+                            <Shield className="h-4 w-4" />
+                            Verified
+                          </Badge>
+                          <div className="absolute left-0 top-full mt-2 hidden group-hover:block z-10 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg">
+                            <p className="font-semibold mb-1">Verified Contractor</p>
+                            <p>This contractor has been verified with:</p>
+                            <ul className="list-disc list-inside mt-1 space-y-1">
+                              <li>Active contractor license</li>
+                              <li>Valid insurance coverage</li>
+                              <li>Complete profile information</li>
+                            </ul>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <p className="text-xl text-gray-600 dark:text-gray-300 mb-4">Contact: {contractor.name}</p>
                     <div className="flex items-center space-x-6 mb-4">
                       <div className="flex items-center">
@@ -162,7 +181,7 @@ export default function ContractorDetail() {
                   </div>
                   <div className="flex items-center text-gray-600 dark:text-gray-300">
                     <Shield className="h-4 w-4 mr-2 text-purple-500" />
-                    <span>Licensed & Insured</span>
+                    <span>Licensed & Insured{contractor.insuranceCoverageAmount ? ` (${contractor.insuranceCoverageAmount})` : ''}</span>
                   </div>
                   <div className="flex items-center text-gray-600 dark:text-gray-300">
                     <Wrench className="h-4 w-4 mr-2 text-orange-500" />
