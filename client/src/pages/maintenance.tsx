@@ -2609,10 +2609,10 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                     </SelectTrigger>
                     <SelectContent className="max-h-[400px] w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[500px]">
                       {houses.map((house: House) => (
-                        <SelectItem key={house.id} value={house.id} className="py-4 cursor-pointer">
-                          <div className="flex flex-col w-full">
-                            <span className="font-semibold text-base break-words">{house.name}</span>
-                            <span className="text-sm text-muted-foreground mt-1 break-all whitespace-normal" title={house.address}>
+                        <SelectItem key={house.id} value={house.id} className="py-4 cursor-pointer h-auto min-h-[80px]">
+                          <div className="flex flex-col w-full gap-1">
+                            <span className="font-semibold text-base break-words leading-tight">{house.name}</span>
+                            <span className="text-sm text-muted-foreground break-all whitespace-normal leading-snug" title={house.address}>
                               {house.address}
                             </span>
                           </div>
