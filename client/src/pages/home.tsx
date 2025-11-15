@@ -529,7 +529,7 @@ export default function Home() {
                 <li><Link href="/support" className="transition-colors hover:text-purple-400">Help Center</Link></li>
                 <li><Link href="/support" className="transition-colors hover:text-purple-400">Contact Us</Link></li>
                 <li><Link href="/terms-of-service" className="transition-colors hover:text-purple-400">Terms of Service</Link></li>
-                <li><a href="https://gotohomebase.com/privacy" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-purple-400">Privacy Policy</a></li>
+                <li><Link href="/privacy-policy" className="transition-colors hover:text-purple-400">Privacy Policy</Link></li>
               </ul>
             </div>
           </div>
