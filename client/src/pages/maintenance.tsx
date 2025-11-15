@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -568,6 +568,7 @@ function TaskCard({
   };
 
   return (
+    <>
     <Card 
       className={`hover:shadow-md transition-all ${
         completed ? 'border-green-200 dark:border-green-800' : 'border-gray-300 dark:border-gray-700'
@@ -1108,6 +1109,7 @@ function TaskCard({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
 
