@@ -2607,12 +2607,12 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                     <SelectTrigger className="w-full h-14 text-lg font-medium" style={{ backgroundColor: '#ffffff', borderWidth: '2px', borderColor: '#2c0f5b' }}>
                       <SelectValue placeholder="Choose a property..." />
                     </SelectTrigger>
-                    <SelectContent className="max-h-[400px] w-full min-w-[500px]">
+                    <SelectContent className="max-h-[400px] w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[500px]">
                       {houses.map((house: House) => (
                         <SelectItem key={house.id} value={house.id} className="py-4 cursor-pointer">
-                          <div className="flex flex-col max-w-full">
-                            <span className="font-semibold text-base truncate">{house.name}</span>
-                            <span className="text-sm text-muted-foreground mt-1 truncate max-w-[450px]" title={house.address}>
+                          <div className="flex flex-col w-full">
+                            <span className="font-semibold text-base break-words">{house.name}</span>
+                            <span className="text-sm text-muted-foreground mt-1 break-all whitespace-normal" title={house.address}>
                               {house.address}
                             </span>
                           </div>
