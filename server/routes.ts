@@ -3386,7 +3386,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await db.insert(taskCompletions).values(taskCompletionData);
       
-      res.status(201).json(log);
+      // Check and award achievements after task completion
+      const newlyUnlocked = await storage.checkAndAwardAchievements(req.session.user.id);
+      
+      res.status(201).json({ 
+        ...log, 
+        newAchievements: newlyUnlocked || [] 
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid task completion data", errors: error.errors });

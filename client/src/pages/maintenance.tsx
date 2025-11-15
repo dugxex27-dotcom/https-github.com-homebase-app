@@ -1300,11 +1300,23 @@ export default function Maintenance() {
       if (!response.ok) throw new Error('Failed to complete task');
       return response.json();
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/maintenance-logs'] });
       queryClient.invalidateQueries({ queryKey: ['/api/houses'] });
       queryClient.invalidateQueries({ queryKey: ['/api/houses', variables.houseId, 'diy-savings'] });
       queryClient.invalidateQueries({ queryKey: ['/api/houses', variables.houseId, 'health-score'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/achievements/user'] });
+      
+      // Show achievement notification if any were unlocked
+      if (data.newAchievements && data.newAchievements.length > 0) {
+        const achievementNames = data.newAchievements.map((a: any) => a.achievementKey).join(', ');
+        toast({ 
+          title: "🎉 Achievement Unlocked!", 
+          description: `You've earned ${data.newAchievements.length} new achievement${data.newAchievements.length > 1 ? 's' : ''}!`,
+          duration: 5000,
+        });
+      }
+      
       toast({ title: "Success", description: "Task marked as complete!" });
     },
     onError: () => {
