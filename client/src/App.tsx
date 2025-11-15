@@ -52,6 +52,7 @@ const Support = lazy(() => import("./pages/support"));
 const SupportTicketDetail = lazy(() => import("./pages/support-ticket-detail"));
 const TermsOfService = lazy(() => import("./pages/terms-of-service"));
 const PrivacyPolicy = lazy(() => import("./pages/privacy-policy"));
+const LegalDisclaimer = lazy(() => import("./pages/legal-disclaimer"));
 
 // Lazy-loaded pages - Auth
 const Landing = lazy(() => import("./pages/landing"));
@@ -94,6 +95,7 @@ function Router() {
           <Route path="/complete-profile" component={CompleteProfile} />
           <Route path="/terms-of-service" component={TermsOfService} />
           <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/legal-disclaimer" component={LegalDisclaimer} />
           <Route path="/" component={Landing} />
           <Route component={Landing} />
         </Switch>
@@ -126,6 +128,7 @@ function Router() {
         <Route path="/support" component={Support} />
         <Route path="/terms-of-service" component={TermsOfService} />
         <Route path="/privacy-policy" component={PrivacyPolicy} />
+        <Route path="/legal-disclaimer" component={LegalDisclaimer} />
         <Route path="/signin" component={SignIn} />
         
         {/* Admin routes */}
