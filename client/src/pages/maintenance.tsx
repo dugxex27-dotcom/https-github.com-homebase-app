@@ -3351,10 +3351,10 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
             </Button>
           </div>
 
-          {/* Home Area Filter */}
-          <div className="mb-4">
+          {/* Home Area Filter and Download Options */}
+          <div className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
             <Select value={homeAreaFilter} onValueChange={setHomeAreaFilter}>
-              <SelectTrigger className="w-full md:w-64" style={{ backgroundColor: '#f2f2f2' }} data-testid="select-home-area-filter-logs">
+              <SelectTrigger className="w-full sm:w-64" style={{ backgroundColor: '#f2f2f2' }} data-testid="select-home-area-filter-logs">
                 <SelectValue placeholder="Filter by home area" />
               </SelectTrigger>
               <SelectContent>
@@ -3364,6 +3364,48 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                 ))}
               </SelectContent>
             </Select>
+            
+            {/* Download Buttons */}
+            {maintenanceLogs && maintenanceLogs.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const sortedByDate = [...maintenanceLogs].sort((a, b) => 
+                      new Date(b.serviceDate).getTime() - new Date(a.serviceDate).getTime()
+                    );
+                    const csv = generateServiceRecordsCSV(sortedByDate, 'date');
+                    downloadCSV(csv, `service-records-by-date-${new Date().toISOString().split('T')[0]}.csv`);
+                  }}
+                  className="text-xs"
+                  style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                  data-testid="button-download-by-date"
+                >
+                  <Download className="w-3 h-3 mr-1" />
+                  Download by Date
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const sortedByArea = [...maintenanceLogs].sort((a, b) => {
+                      const areaCompare = (a.homeArea || '').localeCompare(b.homeArea || '');
+                      if (areaCompare !== 0) return areaCompare;
+                      return new Date(b.serviceDate).getTime() - new Date(a.serviceDate).getTime();
+                    });
+                    const csv = generateServiceRecordsCSV(sortedByArea, 'area');
+                    downloadCSV(csv, `service-records-by-area-${new Date().toISOString().split('T')[0]}.csv`);
+                  }}
+                  className="text-xs"
+                  style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                  data-testid="button-download-by-area"
+                >
+                  <Download className="w-3 h-3 mr-1" />
+                  Download by Area
+                </Button>
+              </div>
+            )}
           </div>
 
           {maintenanceLogsLoading ? (
