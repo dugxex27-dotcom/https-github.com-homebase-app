@@ -19,7 +19,7 @@ import { insertMaintenanceLogSchema, insertCustomMaintenanceTaskSchema, insertHo
 import type { MaintenanceLog, House, CustomMaintenanceTask, HomeSystem, TaskOverride, HomeAppliance, HomeApplianceManual } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud, Monitor, Book, ExternalLink, Upload, Trophy, Mail, Handshake, Globe, TrendingDown, PiggyBank, Truck, CheckCircle2, Circle } from "lucide-react";
+import { Calendar, Clock, Wrench, DollarSign, MapPin, RotateCcw, ChevronDown, ChevronUp, Settings, Plus, Edit, Trash2, Home, FileText, Building2, User, Building, Phone, MessageSquare, AlertTriangle, Thermometer, Cloud, Monitor, Book, ExternalLink, Upload, Trophy, Mail, Handshake, Globe, TrendingDown, PiggyBank, Truck, CheckCircle2, Circle, Download } from "lucide-react";
 import { AppointmentScheduler } from "@/components/appointment-scheduler";
 import { CustomMaintenanceTasks } from "@/components/custom-maintenance-tasks";
 import { US_MAINTENANCE_DATA, getRegionFromClimateZone, getCurrentMonthTasks } from "@shared/location-maintenance-data";
@@ -1038,6 +1038,7 @@ export default function Maintenance() {
   
   // Service logs filter state
   const [homeAreaFilter, setHomeAreaFilter] = useState<string>("all");
+  const [showAllServiceRecords, setShowAllServiceRecords] = useState(false);
 
   // Use authenticated user's ID  
   const homeownerId = (user as any)?.id;
@@ -2084,6 +2085,41 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
     return HOME_AREAS.find(a => a.value === area)?.label || area;
   };
 
+  // CSV helper functions for service records download
+  const generateServiceRecordsCSV = (records: MaintenanceLog[], sortType: 'date' | 'area') => {
+    const headers = ['Service Date', 'Description', 'Area of Home', 'Contractor', 'Cost', 'Notes', 'Record Added'];
+    const rows = records.map(log => [
+      new Date(log.serviceDate).toLocaleDateString(),
+      log.serviceDescription || '',
+      log.homeArea ? getHomeAreaLabel(log.homeArea) : '',
+      log.contractorCompany || '',
+      log.cost || '',
+      log.notes || '',
+      log.createdAt ? new Date(log.createdAt).toLocaleDateString() : ''
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    return csvContent;
+  };
+
+  const downloadCSV = (csvContent: string, filename: string) => {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   // Map climate zones to regions in US_MAINTENANCE_DATA
   const getRegionFromClimateZone = (zone: string): string => {
     const mapping: { [key: string]: string } = {
@@ -2991,7 +3027,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
               <div className="mb-6">
                 <Card className="border-blue-200 dark:border-blue-800/30" style={{ backgroundColor: '#f2f2f2' }}>
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                       <div className="flex items-center gap-3">
                         <div className="p-2 rounded-lg" style={{ backgroundColor: '#2c0f5b' }}>
                           <FileText className="w-5 h-5" style={{ color: '#b6a6f4' }} />
@@ -3003,20 +3039,64 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                           </p>
                         </div>
                       </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          const serviceRecordsSection = document.getElementById('service-records');
-                          serviceRecordsSection?.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        data-testid="button-view-service-records"
-                        style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
-                      >
-                        View All Records
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            const serviceRecordsSection = document.getElementById('service-records');
+                            serviceRecordsSection?.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                          data-testid="button-view-service-records"
+                          style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                        >
+                          View All Records
+                        </Button>
+                      </div>
                     </div>
-                    {maintenanceLogs.slice(0, 2).map((log) => (
+                    
+                    {/* Download Options */}
+                    <div className="mb-3 pb-3 border-b border-gray-300">
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const sortedByDate = [...maintenanceLogs].sort((a, b) => 
+                              new Date(b.serviceDate).getTime() - new Date(a.serviceDate).getTime()
+                            );
+                            const csv = generateServiceRecordsCSV(sortedByDate, 'date');
+                            downloadCSV(csv, `service-records-by-date-${new Date().toISOString().split('T')[0]}.csv`);
+                          }}
+                          className="text-xs"
+                          data-testid="button-download-by-date"
+                        >
+                          <Download className="w-3 h-3 mr-1" />
+                          Download by Date
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const sortedByArea = [...maintenanceLogs].sort((a, b) => {
+                              const areaCompare = (a.homeArea || '').localeCompare(b.homeArea || '');
+                              if (areaCompare !== 0) return areaCompare;
+                              return new Date(b.serviceDate).getTime() - new Date(a.serviceDate).getTime();
+                            });
+                            const csv = generateServiceRecordsCSV(sortedByArea, 'area');
+                            downloadCSV(csv, `service-records-by-area-${new Date().toISOString().split('T')[0]}.csv`);
+                          }}
+                          className="text-xs"
+                          data-testid="button-download-by-area"
+                        >
+                          <Download className="w-3 h-3 mr-1" />
+                          Download by Area then Date
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Service Records List */}
+                    {(showAllServiceRecords ? [...maintenanceLogs].reverse() : [...maintenanceLogs].reverse().slice(0, 5)).map((log) => (
                       <div key={log.id} className="mt-3 p-3 rounded-lg border-gray-300 dark:border-gray-700" style={{ backgroundColor: '#f2f2f2' }}>
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
@@ -3054,6 +3134,32 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                         </div>
                       </div>
                     ))}
+                    
+                    {/* Show More/Less Toggle */}
+                    {maintenanceLogs.length > 5 && (
+                      <div className="mt-3 text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowAllServiceRecords(!showAllServiceRecords)}
+                          className="text-sm"
+                          style={{ color: '#2c0f5b' }}
+                          data-testid="button-toggle-service-records"
+                        >
+                          {showAllServiceRecords ? (
+                            <>
+                              <ChevronUp className="w-4 h-4 mr-1" />
+                              Show Less
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="w-4 h-4 mr-1" />
+                              Show All ({maintenanceLogs.length} records)
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
