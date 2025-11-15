@@ -528,7 +528,7 @@ export default function Home() {
               <ul className="space-y-3 text-gray-400">
                 <li><Link href="/support" className="transition-colors hover:text-purple-400">Help Center</Link></li>
                 <li><Link href="/support" className="transition-colors hover:text-purple-400">Contact Us</Link></li>
-                <li><a href="https://gotohomebase.com/terms" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-purple-400">Terms of Service</a></li>
+                <li><Link href="/terms-of-service" className="transition-colors hover:text-purple-400">Terms of Service</Link></li>
                 <li><a href="https://gotohomebase.com/privacy" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-purple-400">Privacy Policy</a></li>
               </ul>
             </div>
