@@ -716,9 +716,9 @@ export default function MyHome() {
                                 <Badge variant="secondary" className="ml-2">Default</Badge>
                               )}
                             </h3>
-                            <p className="text-sm flex items-center gap-1 break-words" style={{ color: '#2c0f5b' }}>
-                              <MapPin className="h-3 w-3 flex-shrink-0" />
-                              <span className="break-words">{house.address}</span>
+                            <p className="text-sm flex items-start gap-1" style={{ color: '#2c0f5b' }}>
+                              <MapPin className="h-3 w-3 flex-shrink-0 mt-0.5" />
+                              <span className="break-all overflow-wrap-anywhere">{house.address}</span>
                             </p>
                             <p className="text-sm" style={{ color: '#2c0f5b' }}>
                               Climate Zone: {house.climateZone}
