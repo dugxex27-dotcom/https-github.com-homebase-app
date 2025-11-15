@@ -792,6 +792,7 @@ export const completeTaskSchema = z.object({
     materialsLow: z.number().optional(),
     materialsHigh: z.number().optional(),
   }).optional(),
+  contractorCost: z.number().nonnegative().optional(),
 });
 
 export const insertContractorAppointmentSchema = createInsertSchema(contractorAppointments).omit({

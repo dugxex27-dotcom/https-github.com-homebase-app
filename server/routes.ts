@@ -3297,7 +3297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Validate request body with Zod schema
       const validatedData = completeTaskSchema.parse(req.body);
-      const { houseId, taskTitle, completionMethod, costEstimate } = validatedData;
+      const { houseId, taskTitle, completionMethod, costEstimate, contractorCost: providedCost } = validatedData;
       
       // Verify house belongs to user
       const house = await storage.getHouse(houseId);
@@ -3312,12 +3312,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         diySavingsAmount = savingsNumber > 0 ? savingsNumber.toString() : null;
       }
       
-      // Calculate contractor cost if applicable
-      let contractorCost: string | null = null;
-      if (completionMethod === 'contractor' && costEstimate) {
-        const { proLow, proHigh } = costEstimate;
-        if (proLow !== undefined && proHigh !== undefined) {
-          contractorCost = ((proLow + proHigh) / 2).toFixed(2);
+      // Use provided contractor cost, or calculate midpoint if not provided
+      let contractorCostStr: string | null = null;
+      if (completionMethod === 'contractor') {
+        if (providedCost !== undefined && providedCost !== null) {
+          // Use the actual cost provided by the user
+          contractorCostStr = providedCost.toFixed(2);
+        } else if (costEstimate) {
+          // Fall back to estimate midpoint if no cost provided
+          const { proLow, proHigh } = costEstimate;
+          if (proLow !== undefined && proHigh !== undefined) {
+            contractorCostStr = ((proLow + proHigh) / 2).toFixed(2);
+          }
         }
       }
       
@@ -3331,7 +3337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         serviceDescription: `Completed ${completionMethod === 'diy' ? 'DIY' : 'by contractor'}`,
         completionMethod,
         diySavingsAmount,
-        cost: contractorCost
+        cost: contractorCostStr
       };
       
       const log = await storage.createMaintenanceLog(logData);
@@ -3372,7 +3378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         year: now.getFullYear(),
         completionMethod: completionMethod === 'diy' ? 'diy' : 'professional',
         estimatedCost: estimatedCost !== null ? estimatedCost.toFixed(2) : null,
-        actualCost: contractorCost || null,
+        actualCost: contractorCostStr || null,
         costSavings: diySavingsAmount || null,
         notes: null,
         documentsUploaded: 0,
