@@ -3335,6 +3335,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const log = await storage.createMaintenanceLog(logData);
+      
+      // Also create task completion record for health score tracking
+      const now = new Date();
+      
+      // Calculate estimated cost properly - average only valid (finite) bounds
+      let estimatedCost: number | null = null;
+      if (costEstimate && (costEstimate.proLow !== undefined || costEstimate.proHigh !== undefined)) {
+        const validBounds: number[] = [];
+        
+        if (costEstimate.proLow !== undefined && costEstimate.proLow !== null) {
+          const low = Number(costEstimate.proLow);
+          if (isFinite(low) && low > 0) validBounds.push(low);
+        }
+        
+        if (costEstimate.proHigh !== undefined && costEstimate.proHigh !== null) {
+          const high = Number(costEstimate.proHigh);
+          if (isFinite(high) && high > 0) validBounds.push(high);
+        }
+        
+        if (validBounds.length > 0) {
+          const sum = validBounds.reduce((acc, val) => acc + val, 0);
+          estimatedCost = sum / validBounds.length;
+        }
+      }
+      
+      const taskCompletionData = {
+        homeownerId: req.session.user.id,
+        houseId,
+        taskId: null, // Could be populated if we track specific task IDs
+        taskType: 'maintenance' as const,
+        taskTitle,
+        taskCategory: null,
+        completedAt: now,
+        month: now.getMonth() + 1, // 1-12
+        year: now.getFullYear(),
+        completionMethod: completionMethod === 'diy' ? 'diy' : 'professional',
+        estimatedCost: estimatedCost !== null ? estimatedCost.toFixed(2) : null,
+        actualCost: contractorCost || null,
+        costSavings: diySavingsAmount || null,
+        notes: null,
+        documentsUploaded: 0,
+      };
+      
+      await db.insert(taskCompletions).values(taskCompletionData);
+      
       res.status(201).json(log);
     } catch (error) {
       if (error instanceof z.ZodError) {
