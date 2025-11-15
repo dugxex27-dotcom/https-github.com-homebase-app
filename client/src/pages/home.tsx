@@ -517,19 +517,19 @@ export default function Home() {
               <h4 className="text-lg font-semibold mb-6 text-white">For Contractors</h4>
               <ul className="space-y-3 text-gray-400">
                 <li><Link href="/contractor-signin" className="transition-colors hover:text-purple-400">Join Network</Link></li>
-                <li><a href="#" className="transition-colors hover:text-purple-400">Pricing Plans</a></li>
-                <li><a href="#" className="transition-colors hover:text-purple-400">Success Stories</a></li>
-                <li><a href="#" className="transition-colors hover:text-purple-400">Resources</a></li>
+                <li><Link href="/billing" className="transition-colors hover:text-purple-400">Pricing Plans</Link></li>
+                <li><Link href="/support" className="transition-colors hover:text-purple-400">Support Center</Link></li>
+                <li><Link href="/achievements" className="transition-colors hover:text-purple-400">Features</Link></li>
               </ul>
             </div>
 
             <div className="text-center">
               <h4 className="text-lg font-semibold mb-6 text-white">Support</h4>
               <ul className="space-y-3 text-gray-400">
-                <li><a href="#" className="transition-colors hover:text-purple-400">Help Center</a></li>
-                <li><a href="#" className="transition-colors hover:text-purple-400">Contact Us</a></li>
-                <li><a href="#" className="transition-colors hover:text-purple-400">Terms of Service</a></li>
-                <li><a href="#" className="transition-colors hover:text-purple-400">Privacy Policy</a></li>
+                <li><Link href="/support" className="transition-colors hover:text-purple-400">Help Center</Link></li>
+                <li><Link href="/support" className="transition-colors hover:text-purple-400">Contact Us</Link></li>
+                <li><a href="https://gotohomebase.com/terms" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-purple-400">Terms of Service</a></li>
+                <li><a href="https://gotohomebase.com/privacy" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-purple-400">Privacy Policy</a></li>
               </ul>
             </div>
           </div>
