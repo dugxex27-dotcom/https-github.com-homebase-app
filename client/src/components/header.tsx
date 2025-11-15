@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/logo";
 import { Notifications } from "@/components/notifications";
 import { useAuth } from "@/hooks/useAuth";
-import { Badge } from "@/components/ui/badge";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 import type { User } from "@shared/schema";
@@ -255,13 +254,6 @@ export default function Header() {
             
             {isAuthenticated && typedUser && (
               <div className="flex items-center gap-3">
-                <Badge 
-                  variant={typedUser.role === 'homeowner' ? 'default' : 'outline'} 
-                  size="default"
-                  className={typedUser.role === 'contractor' ? 'border-white bg-white text-[#1560a2]' : ''}
-                >
-                  {typedUser.role === 'homeowner' ? 'Homeowner' : typedUser.role === 'contractor' ? 'Contractor' : 'Agent'}
-                </Badge>
                 <span className={`text-sm font-medium hidden lg:inline ${typedUser.role === 'contractor' ? 'text-white' : 'text-foreground'}`}>
                   {typedUser.firstName || typedUser.email}
                 </span>
