@@ -253,22 +253,17 @@ export default function Header() {
             {isAuthenticated && (typedUser?.role === 'homeowner' || typedUser?.role === 'contractor') && <Notifications />}
             
             {isAuthenticated && typedUser && (
-              <div className="flex items-center gap-3">
-                <span className={`text-sm font-medium hidden lg:inline ${typedUser.role === 'contractor' ? 'text-white' : 'text-foreground'}`}>
-                  {typedUser.firstName || typedUser.email}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleLogout}
-                  data-testid="button-logout"
-                  aria-label="Sign out"
-                  className={typedUser.role === 'contractor' ? 'border-white bg-white text-[#1560a2] hover:bg-white/90' : ''}
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Sign Out</span>
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                data-testid="button-logout"
+                aria-label="Sign out"
+                className={typedUser.role === 'contractor' ? 'border-white bg-white text-[#1560a2] hover:bg-white/90' : ''}
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign Out</span>
+              </Button>
             )}
             
             {!isAuthenticated && (
