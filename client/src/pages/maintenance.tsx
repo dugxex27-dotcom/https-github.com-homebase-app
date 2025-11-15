@@ -463,6 +463,7 @@ interface TaskCardProps {
   onToggleComplete: () => void;
   onCustomize: () => void;
   onViewContractor: (id: string) => void;
+  onContractorComplete: (task: MaintenanceTask) => void;
   showCustomizeTask: string | null;
   getTaskOverride: (taskTitle: string, overrides: TaskOverride[] | undefined) => TaskOverride | undefined;
   isTaskEnabled: (taskTitle: string, overrides: TaskOverride[] | undefined) => boolean;
@@ -485,6 +486,7 @@ function TaskCard({
   onToggleComplete,
   onCustomize,
   onViewContractor,
+  onContractorComplete,
   showCustomizeTask,
   getTaskOverride,
   isTaskEnabled,
@@ -497,75 +499,10 @@ function TaskCard({
   selectedHouseId,
 }: TaskCardProps) {
   const [showReadDetails, setShowReadDetails] = useState(false);
-  const [showContractorCostDialog, setShowContractorCostDialog] = useState(false);
-  const [contractorCost, setContractorCost] = useState<string>('');
   
   // Calculate progress - for now use completed state as 0/1, structured for future step tracking
   const currentProgress = completed ? 1 : 0;
   const totalSteps = 1; // Future: this could come from task.steps?.length or similar
-  
-  // Calculate midpoint of cost estimate for prefill
-  const getEstimateMidpoint = () => {
-    if (!task.costEstimate?.proLow || !task.costEstimate?.proHigh) return '';
-    const midpoint = (task.costEstimate.proLow + task.costEstimate.proHigh) / 2;
-    return midpoint.toFixed(2);
-  };
-  
-  const handleContractorComplete = () => {
-    // Prefill with estimate midpoint if available
-    const midpoint = getEstimateMidpoint();
-    if (midpoint) setContractorCost(midpoint);
-    setShowContractorCostDialog(true);
-  };
-  
-  const handleSaveContractorCost = () => {
-    // Validate contractor cost format
-    if (contractorCost && !/^\d+(\.\d{1,2})?$/.test(contractorCost)) {
-      toast({
-        title: "Invalid Cost",
-        description: "Please enter a valid dollar amount (e.g., 150.00)",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    const cost = contractorCost ? parseFloat(contractorCost) : undefined;
-    if (cost !== undefined && cost < 0) {
-      toast({
-        title: "Invalid Cost",
-        description: "Cost must be a positive number",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    completeTaskMutation.mutate({
-      houseId: selectedHouseId,
-      taskTitle: task.title,
-      completionMethod: 'contractor',
-      costEstimate: task.costEstimate,
-      contractorCost: cost,
-    }, {
-      onSuccess: () => {
-        setShowContractorCostDialog(false);
-        setContractorCost('');
-      },
-    });
-  };
-  
-  const handleSkipContractorCost = () => {
-    completeTaskMutation.mutate({
-      houseId: selectedHouseId,
-      taskTitle: task.title,
-      completionMethod: 'contractor',
-      costEstimate: task.costEstimate,
-    }, {
-      onSuccess: () => {
-        setShowContractorCostDialog(false);
-        setContractorCost('');
-      },
-    });
-  };
 
   return (
     <>
@@ -759,8 +696,7 @@ function TaskCard({
               <Button
                 variant="outline"
                 className="border-2 border-purple-600 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950 font-semibold py-3 h-auto"
-                onClick={handleContractorComplete}
-                disabled={completeTaskMutation.isPending}
+                onClick={() => onContractorComplete(task)}
                 data-testid={`button-complete-contractor-${task.id}`}
               >
                 <Truck className="w-5 h-5 mr-2" />
@@ -1056,59 +992,6 @@ function TaskCard({
         </Collapsible>
       </CardContent>
     </Card>
-    
-    {/* Contractor Cost Dialog */}
-    <Dialog open={showContractorCostDialog} onOpenChange={setShowContractorCostDialog}>
-      <DialogContent className="sm:max-w-[425px]" data-testid="dialog-contractor-cost">
-        <DialogHeader>
-          <DialogTitle style={{ color: '#2c0f5b' }}>Enter Contractor Cost</DialogTitle>
-          <DialogDescription>
-            How much did the contractor charge for this work? You can skip this if you don't know yet.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <label htmlFor="contractor-cost" className="text-sm font-medium" style={{ color: '#2c0f5b' }}>
-              Cost Charged ($)
-            </label>
-            {task.costEstimate && (
-              <p className="text-xs text-gray-600">
-                Estimated: ${task.costEstimate.proLow?.toFixed(0)} - ${task.costEstimate.proHigh?.toFixed(0)}
-              </p>
-            )}
-            <input
-              id="contractor-cost"
-              type="number"
-              step="0.01"
-              min="0"
-              value={contractorCost}
-              onChange={(e) => setContractorCost(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              placeholder="Enter amount"
-              data-testid="input-contractor-cost"
-            />
-          </div>
-        </div>
-        <DialogFooter className="flex flex-row gap-2 justify-end">
-          <Button
-            variant="outline"
-            onClick={handleSkipContractorCost}
-            disabled={completeTaskMutation.isPending}
-            data-testid="button-skip-contractor-cost"
-          >
-            Skip for Now
-          </Button>
-          <Button
-            onClick={handleSaveContractorCost}
-            disabled={completeTaskMutation.isPending || (contractorCost && parseFloat(contractorCost) <= 0)}
-            style={{ backgroundColor: '#2c0f5b', color: 'white' }}
-            data-testid="button-save-contractor-cost"
-          >
-            {completeTaskMutation.isPending ? 'Saving...' : 'Save & Complete'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
     </>
   );
 }
@@ -2168,6 +2051,27 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
       notes: "",
       warrantyPeriod: "",
       nextServiceDue: "",
+    });
+    setIsMaintenanceLogDialogOpen(true);
+  };
+
+  const handleContractorCompletion = (task: MaintenanceTask) => {
+    setEditingMaintenanceLog(null);
+    maintenanceLogForm.reset({
+      homeownerId,
+      houseId: selectedHouseId,
+      serviceType: task.title,
+      serviceDate: new Date().toISOString().split('T')[0],
+      homeArea: "General Maintenance",
+      serviceDescription: "Completed by contractor",
+      cost: undefined,
+      contractorName: "",
+      contractorCompany: "",
+      contractorId: "",
+      notes: "",
+      warrantyPeriod: "",
+      nextServiceDue: "",
+      completionMethod: "contractor",
     });
     setIsMaintenanceLogDialogOpen(true);
   };
@@ -3300,6 +3204,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                     onToggleComplete={() => toggleTaskCompletion(task.id)}
                     onCustomize={() => setShowCustomizeTask(showCustomizeTask === task.id ? null : task.id)}
                     onViewContractor={(id) => window.open(`/contractor-profile/${id}`, '_blank')}
+                    onContractorComplete={handleContractorCompletion}
                     showCustomizeTask={showCustomizeTask}
                     getTaskOverride={getTaskOverride}
                     isTaskEnabled={isTaskEnabled}
