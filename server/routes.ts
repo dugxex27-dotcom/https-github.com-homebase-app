@@ -882,11 +882,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           companyRole: null
         });
 
-        // Step 2: Create the company with the user as owner
+        // Step 2: Create the company with the user as owner (if it doesn't exist)
         try {
-          const existingCompany = await storage.getCompany(companyId);
-          if (!existingCompany) {
-            await storage.createCompany({
+          let company = await storage.getCompany(companyId);
+          if (!company) {
+            company = await storage.createCompany({
             id: companyId,
             name: 'Precision HVAC & Plumbing',
             ownerId: user.id,
@@ -925,14 +925,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             rating: '4.8',
             reviewCount: 127
           });
-            
-            // Step 3: Update the user with the company reference
-            user = await storage.upsertUser({
-              ...user,
-              companyId,
-              companyRole: 'owner'
-            });
           }
+          
+          // Step 3: Update the user with the company reference (always run this)
+          user = await storage.upsertUser({
+            ...user,
+            companyId,
+            companyRole: 'owner'
+          });
         } catch (companyError) {
           console.error("Error creating demo company:", companyError);
         }
@@ -2077,6 +2077,250 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting CRM note:", error);
       res.status(500).json({ message: "Failed to delete note" });
+    }
+  });
+
+  // CRM Integration routes
+  // GET /api/crm/integrations - Get all integrations for contractor
+  app.get('/api/crm/integrations', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM integrations" });
+      }
+
+      const integrations = await storage.getCrmIntegrations(
+        req.session.user.id,
+        req.session.user.companyId
+      );
+      
+      // Don't expose sensitive tokens in response
+      const sanitized = integrations.map(i => ({
+        ...i,
+        accessToken: i.accessToken ? '***' : null,
+        refreshToken: i.refreshToken ? '***' : null,
+        apiKey: i.apiKey ? '***' : null,
+        apiSecret: i.apiSecret ? '***' : null,
+        webhookSecret: i.webhookSecret ? '***' : null,
+      }));
+      
+      res.json(sanitized);
+    } catch (error) {
+      console.error("Error fetching CRM integrations:", error);
+      res.status(500).json({ message: "Failed to fetch integrations" });
+    }
+  });
+
+  // POST /api/crm/integrations - Create new integration
+  app.post('/api/crm/integrations', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can create integrations" });
+      }
+
+      const { insertCrmIntegrationSchema } = await import("@shared/schema");
+      
+      // Generate webhook secret for webhook integrations
+      let webhookSecret = null;
+      if (req.body.platform === 'webhook' || req.body.platform === 'custom') {
+        webhookSecret = randomBytes(32).toString('hex');
+      }
+
+      const integrationData = insertCrmIntegrationSchema.parse({
+        ...req.body,
+        contractorUserId: req.session.user.id,
+        companyId: req.body.shareWithCompany ? req.session.user.companyId : null,
+        webhookSecret,
+      });
+
+      const integration = await storage.createCrmIntegration(integrationData);
+      
+      // Return sanitized response
+      res.status(201).json({
+        ...integration,
+        accessToken: integration.accessToken ? '***' : null,
+        refreshToken: integration.refreshToken ? '***' : null,
+        apiKey: integration.apiKey ? '***' : null,
+        apiSecret: integration.apiSecret ? '***' : null,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(422).json({ message: "Validation error", errors: error.errors });
+      }
+      console.error("Error creating CRM integration:", error);
+      res.status(500).json({ message: "Failed to create integration" });
+    }
+  });
+
+  // DELETE /api/crm/integrations/:id - Delete integration
+  app.delete('/api/crm/integrations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can delete integrations" });
+      }
+
+      const integration = await storage.getCrmIntegration(req.params.id);
+      
+      if (!integration) {
+        return res.status(404).json({ message: "Integration not found" });
+      }
+
+      // Check ownership
+      const userCompanyId = req.session.user.companyId;
+      const canDelete = integration.contractorUserId === req.session.user.id ||
+        (userCompanyId && integration.companyId === userCompanyId);
+      
+      if (!canDelete) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      await storage.deleteCrmIntegration(req.params.id);
+      res.json({ success: true, message: "Integration deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting CRM integration:", error);
+      res.status(500).json({ message: "Failed to delete integration" });
+    }
+  });
+
+  // POST /api/crm/webhooks/:integrationId - Webhook receiver endpoint (NOT authenticated)
+  app.post('/api/crm/webhooks/:integrationId', async (req, res) => {
+    try {
+      const integration = await storage.getCrmIntegration(req.params.integrationId);
+      
+      if (!integration || !integration.isActive) {
+        console.log(`[WEBHOOK] Integration not found or inactive: ${req.params.integrationId}`);
+        return res.status(404).json({ message: "Integration not found or inactive" });
+      }
+
+      // Validate webhook secret if provided
+      const providedSecret = req.headers['x-webhook-secret'] || req.body.secret;
+      if (integration.webhookSecret && providedSecret !== integration.webhookSecret) {
+        console.log(`[WEBHOOK] Invalid webhook secret for integration: ${req.params.integrationId}`);
+        // Log failed attempt
+        await storage.createWebhookLog({
+          integrationId: req.params.integrationId,
+          payload: req.body,
+          headers: req.headers as any,
+          ipAddress: req.ip,
+          status: 'failed',
+          errorMessage: 'Invalid webhook secret',
+          processedAt: new Date(),
+        });
+        return res.status(401).json({ message: "Invalid webhook secret" });
+      }
+
+      // Extract lead data from payload - support common CRM formats
+      let leadData: any = {};
+      
+      // Generic webhook format (custom/default)
+      if (integration.platform === 'webhook' || integration.platform === 'custom') {
+        leadData = {
+          firstName: req.body.first_name || req.body.firstName || req.body.name?.split(' ')[0] || 'Unknown',
+          lastName: req.body.last_name || req.body.lastName || req.body.name?.split(' ')[1] || '',
+          email: req.body.email,
+          phone: req.body.phone || req.body.phone_number || req.body.phoneNumber,
+          address: req.body.address || req.body.street,
+          city: req.body.city,
+          state: req.body.state || req.body.region,
+          postalCode: req.body.postal_code || req.body.postalCode || req.body.zip,
+          source: req.body.source || 'webhook',
+          status: req.body.status || 'new',
+          priority: req.body.priority || 'medium',
+          projectType: req.body.project_type || req.body.projectType || req.body.service,
+          estimatedValue: req.body.estimated_value || req.body.estimatedValue || req.body.value,
+          metadata: req.body.metadata || req.body,
+        };
+      }
+      
+      // Apply field mapping if configured
+      if (integration.fieldMapping) {
+        const mapping = integration.fieldMapping as any;
+        Object.keys(mapping).forEach(ourField => {
+          const theirField = mapping[ourField];
+          if (req.body[theirField] !== undefined) {
+            leadData[ourField] = req.body[theirField];
+          }
+        });
+      }
+
+      // Create the lead
+      const { insertCrmLeadSchema } = await import("@shared/schema");
+      const validatedData = insertCrmLeadSchema.parse({
+        ...leadData,
+        contractorUserId: integration.contractorUserId,
+        companyId: integration.companyId,
+      });
+
+      const lead = await storage.createCrmLead(validatedData);
+
+      // Log successful webhook
+      await storage.createWebhookLog({
+        integrationId: req.params.integrationId,
+        payload: req.body,
+        headers: req.headers as any,
+        ipAddress: req.ip,
+        status: 'success',
+        leadId: lead.id,
+        processedAt: new Date(),
+      });
+
+      // Update last sync time
+      await storage.updateCrmIntegration(req.params.integrationId, {
+        lastSyncAt: new Date(),
+      });
+
+      console.log(`[WEBHOOK] Successfully created lead from webhook: ${lead.id}`);
+      res.status(201).json({ success: true, leadId: lead.id });
+    } catch (error) {
+      console.error("[WEBHOOK] Error processing webhook:", error);
+      
+      // Log failed webhook
+      try {
+        await storage.createWebhookLog({
+          integrationId: req.params.integrationId,
+          payload: req.body,
+          headers: req.headers as any,
+          ipAddress: req.ip,
+          status: 'failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          processedAt: new Date(),
+        });
+      } catch (logError) {
+        console.error("[WEBHOOK] Failed to log webhook error:", logError);
+      }
+      
+      res.status(500).json({ message: "Failed to process webhook" });
+    }
+  });
+
+  // GET /api/crm/webhooks/:integrationId/logs - Get webhook logs
+  app.get('/api/crm/webhooks/:integrationId/logs', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can view webhook logs" });
+      }
+
+      const integration = await storage.getCrmIntegration(req.params.integrationId);
+      
+      if (!integration) {
+        return res.status(404).json({ message: "Integration not found" });
+      }
+
+      // Check ownership
+      const userCompanyId = req.session.user.companyId;
+      const canView = integration.contractorUserId === req.session.user.id ||
+        (userCompanyId && integration.companyId === userCompanyId);
+      
+      if (!canView) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const logs = await storage.getWebhookLogs(req.params.integrationId, limit);
+      
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching webhook logs:", error);
+      res.status(500).json({ message: "Failed to fetch webhook logs" });
     }
   });
 
