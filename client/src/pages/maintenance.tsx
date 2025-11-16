@@ -694,8 +694,7 @@ function TaskCard({
                 )}
               </Button>
               <Button
-                variant="outline"
-                className="border-2 border-purple-600 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950 font-semibold py-3 h-auto whitespace-normal text-center"
+                className="bg-purple-200 dark:bg-purple-800 text-white hover:bg-purple-300 dark:hover:bg-purple-700 font-semibold py-3 h-auto whitespace-normal text-center border-0"
                 onClick={() => onContractorComplete(task)}
                 data-testid={`button-complete-contractor-${task.id}`}
               >
