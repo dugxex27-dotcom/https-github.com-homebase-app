@@ -243,7 +243,7 @@ export default function SignInContractor() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#1560a2' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(to bottom, #e8f4f8, #f0f9fc)' }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <img 
@@ -252,15 +252,15 @@ export default function SignInContractor() {
             className="h-24 w-auto mx-auto mb-4"
             data-testid="img-logo-contractor"
           />
-          <h1 className="text-2xl font-bold mb-2 text-white">Grow Your Contracting Business</h1>
-          <p className="text-lg text-blue-100">
+          <h1 className="text-2xl font-bold mb-2" style={{ color: '#1a1a1a' }}>Grow Your Contracting Business</h1>
+          <p className="text-lg" style={{ color: '#4a4a4a' }}>
             Your trusted home services marketplace
           </p>
         </div>
 
-        <Card className="border-0 shadow-xl">
+        <Card className="border-0 shadow-xl bg-white">
           <CardHeader className="text-center pb-6">
-            <CardTitle className="text-2xl text-foreground">
+            <CardTitle className="text-2xl" style={{ color: '#1a1a1a' }}>
               Contractor Sign In
             </CardTitle>
           </CardHeader>
@@ -560,7 +560,7 @@ export default function SignInContractor() {
 
             {/* Demo Login Button */}
             <div className="pt-4 border-t">
-              <p className="text-center text-sm text-muted-foreground mb-3">
+              <p className="text-center text-sm mb-3" style={{ color: '#4a4a4a' }}>
                 Demo Login (for testing)
               </p>
               <Button
