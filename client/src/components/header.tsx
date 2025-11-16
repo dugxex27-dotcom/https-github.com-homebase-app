@@ -10,7 +10,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 import type { User, Notification } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
-import logoImage from '@assets/homebase-logo-black-text_1763321245391.png';
+import logoImage from '@assets/homebase-logo-black-text2_1763334854521.png';
 
 export default function Header() {
   const [location] = useLocation();
