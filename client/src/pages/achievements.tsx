@@ -135,92 +135,92 @@ export default function Achievements() {
   return (
     <>
       <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
           {/* Page Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2 text-white flex items-center gap-3">
-              <Trophy className="w-10 h-10 text-yellow-400" />
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-2 text-white flex items-center gap-2 sm:gap-3">
+              <Trophy className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-yellow-400" />
               Achievements
             </h1>
-            <p className="text-purple-200">
+            <p className="text-sm sm:text-base text-purple-200">
               Track your home maintenance milestones and accomplishments
             </p>
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
             <Card style={{ backgroundColor: '#f2f2f2' }}>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
                 <div className="text-center">
-                  <p className="text-3xl font-bold" style={{ color: '#6d28d9' }}>
+                  <p className="text-2xl sm:text-3xl font-bold" style={{ color: '#6d28d9' }}>
                     {unlockedCount}/{totalCount}
                   </p>
-                  <p className="text-sm" style={{ color: '#2c0f5b' }}>Total Achievements</p>
+                  <p className="text-xs sm:text-sm" style={{ color: '#2c0f5b' }}>Total Achievements</p>
                 </div>
               </CardContent>
             </Card>
             
             <Card style={{ backgroundColor: '#f2f2f2' }}>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
                 <div className="text-center">
-                  <p className="text-3xl font-bold" style={{ color: '#3b82f6' }}>
+                  <p className="text-2xl sm:text-3xl font-bold" style={{ color: '#3b82f6' }}>
                     {categoryStats.seasonal.unlocked}/{categoryStats.seasonal.total}
                   </p>
-                  <p className="text-sm" style={{ color: '#2c0f5b' }}>Seasonal Badges</p>
+                  <p className="text-xs sm:text-sm" style={{ color: '#2c0f5b' }}>Seasonal Badges</p>
                 </div>
               </CardContent>
             </Card>
             
             <Card style={{ backgroundColor: '#f2f2f2' }}>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
                 <div className="text-center">
-                  <p className="text-3xl font-bold" style={{ color: '#10b981' }}>
+                  <p className="text-2xl sm:text-3xl font-bold" style={{ color: '#10b981' }}>
                     {categoryStats.financial.unlocked}/{categoryStats.financial.total}
                   </p>
-                  <p className="text-sm" style={{ color: '#2c0f5b' }}>Financial Savvy</p>
+                  <p className="text-xs sm:text-sm" style={{ color: '#2c0f5b' }}>Financial Savvy</p>
                 </div>
               </CardContent>
             </Card>
             
             <Card style={{ backgroundColor: '#f2f2f2' }}>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
                 <div className="text-center">
-                  <p className="text-3xl font-bold" style={{ color: '#f59e0b' }}>
+                  <p className="text-2xl sm:text-3xl font-bold" style={{ color: '#f59e0b' }}>
                     {categoryStats.organization.unlocked}/{categoryStats.organization.total}
                   </p>
-                  <p className="text-sm" style={{ color: '#2c0f5b' }}>Organization</p>
+                  <p className="text-xs sm:text-sm" style={{ color: '#2c0f5b' }}>Organization</p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Category Tabs */}
-          <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
-            <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-4 mb-6" style={{ backgroundColor: '#f2f2f2' }}>
-              <TabsTrigger value="all" data-testid="tab-all" className="text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>All</TabsTrigger>
-              <TabsTrigger value="seasonal" data-testid="tab-seasonal" className="text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Seasonal</TabsTrigger>
-              <TabsTrigger value="financial savvy" data-testid="tab-financial" className="text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Financial</TabsTrigger>
-              <TabsTrigger value="organization" data-testid="tab-organization" className="text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Organization</TabsTrigger>
+          <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-6 sm:mb-8">
+            <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-4 mb-4 sm:mb-6" style={{ backgroundColor: '#f2f2f2' }}>
+              <TabsTrigger value="all" data-testid="tab-all" className="text-xs sm:text-sm text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>All</TabsTrigger>
+              <TabsTrigger value="seasonal" data-testid="tab-seasonal" className="text-xs sm:text-sm text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Seasonal</TabsTrigger>
+              <TabsTrigger value="financial savvy" data-testid="tab-financial" className="text-xs sm:text-sm text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Financial</TabsTrigger>
+              <TabsTrigger value="organization" data-testid="tab-organization" className="text-xs sm:text-sm text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Organization</TabsTrigger>
             </TabsList>
 
             <TabsContent value={selectedCategory}>
               <Card style={{ backgroundColor: '#f2f2f2' }}>
-                <CardHeader>
-                  <CardTitle style={{ color: '#2c0f5b' }}>
+                <CardHeader className="pb-4 sm:pb-6">
+                  <CardTitle className="text-base sm:text-lg lg:text-xl" style={{ color: '#2c0f5b' }}>
                     {selectedCategory === "all" ? "All Achievements" : 
                      selectedCategory === "seasonal" ? "Seasonal Badges" :
                      selectedCategory === "financial savvy" ? "Financial Savvy Achievements" :
                      "Tracking & Organization Badges"}
                   </CardTitle>
-                  <CardDescription style={{ color: '#6b7280' }}>
+                  <CardDescription className="text-xs sm:text-sm" style={{ color: '#6b7280' }}>
                     {selectedCategory === "all" ? "Complete milestones to unlock badges" :
                      selectedCategory === "seasonal" ? "Complete seasonal maintenance tasks" :
                      selectedCategory === "financial savvy" ? "Save money and track your spending" :
                      "Stay organized with records and documentation"}
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <CardContent className="px-3 sm:px-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {filteredAchievements.map((achievement) => {
                       const IconComponent = iconMap[achievement.icon] || Trophy;
                       const isUnlocked = achievement.isUnlocked;
