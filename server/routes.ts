@@ -577,24 +577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (company) {
           // If company doesn't have a referral code, generate one
           if (!company.referralCode) {
-            let newCode = generateUniqueReferralCode();
-            let attempts = 0;
-            const maxAttempts = 10;
-
-            // Ensure uniqueness by checking against existing codes
-            while (attempts < maxAttempts) {
-              const existingUser = await storage.getUserByReferralCode?.(newCode);
-              const existingCompany = await storage.getCompanyByReferralCode?.(newCode);
-              if (!existingUser && !existingCompany) {
-                break; // Code is unique
-              }
-              newCode = generateUniqueReferralCode();
-              attempts++;
-            }
-
-            if (attempts >= maxAttempts) {
-              return res.status(500).json({ message: "Failed to generate unique referral code" });
-            }
+            const newCode = await generateUniqueReferralCode(storage);
 
             // Update company with new referral code
             await storage.updateCompany(user.companyId, { referralCode: newCode });
@@ -617,24 +600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // For homeowners, use personal referral code
       if (!user.referralCode) {
-        let newCode = generateUniqueReferralCode();
-        let attempts = 0;
-        const maxAttempts = 10;
-
-        // Ensure uniqueness by checking against existing codes
-        while (attempts < maxAttempts) {
-          const existingUser = await storage.getUserByReferralCode?.(newCode);
-          const existingCompany = await storage.getCompanyByReferralCode?.(newCode);
-          if (!existingUser && !existingCompany) {
-            break; // Code is unique
-          }
-          newCode = generateUniqueReferralCode();
-          attempts++;
-        }
-
-        if (attempts >= maxAttempts) {
-          return res.status(500).json({ message: "Failed to generate unique referral code" });
-        }
+        const newCode = await generateUniqueReferralCode(storage);
 
         // Update user with new referral code
         user = await storage.upsertUser({
