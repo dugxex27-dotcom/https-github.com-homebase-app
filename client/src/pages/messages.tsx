@@ -477,33 +477,33 @@ export default function Messages() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: bgColor }}>
       {/* Hero Section */}
-      <section className="pt-12 pb-4" style={{ backgroundColor: bgColor }}>
-        <div className="container mx-auto px-6">
+      <section className="pt-8 sm:pt-12 pb-3 sm:pb-4" style={{ backgroundColor: bgColor }}>
+        <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-4xl font-bold" style={{ color: 'white' }}>Messages</h1>
-            <div className="flex items-center gap-2" data-testid="websocket-status">
+            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold" style={{ color: 'white' }}>Messages</h1>
+            <div className="flex items-center gap-1 sm:gap-2" data-testid="websocket-status">
               {wsConnected ? (
                 <>
-                  <Wifi className="h-5 w-5 text-green-400" />
-                  <span className="text-sm text-green-400">Connected</span>
+                  <Wifi className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" />
+                  <span className="text-xs sm:text-sm text-green-400">Connected</span>
                 </>
               ) : (
                 <>
-                  <WifiOff className="h-5 w-5 text-red-400" />
-                  <span className="text-sm text-red-400">Disconnected</span>
+                  <WifiOff className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" />
+                  <span className="text-xs sm:text-sm text-red-400">Disconnected</span>
                 </>
               )}
             </div>
           </div>
-          <p className="text-lg" style={{ color: 'white', opacity: 0.9 }}>
+          <p className="text-sm sm:text-base lg:text-lg" style={{ color: 'white', opacity: 0.9 }}>
             Chat in real-time with {typedUser.role === 'homeowner' ? 'contractors' : 'homeowners'}
           </p>
         </div>
       </section>
 
       {/* Main Content - Two-Panel Messenger Layout */}
-      <div className="container mx-auto px-6 pb-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[700px]">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 pb-8 sm:pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 h-[600px] sm:h-[700px]">
           
           {/* Left Panel - Conversation List */}
           <div className="lg:col-span-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
