@@ -38,7 +38,7 @@ const faqs = [
   },
   {
     question: "What are the subscription plans?",
-    answer: "We offer three homeowner plans: Base ($5/month for up to 2 homes), Premium ($20/month for 3-6 homes), and Premium Plus ($40/month for 7+ homes). Contractors pay $20/month. All plans include our referral rewards program."
+    answer: "We offer three homeowner plans: Base ($5/month for up to 2 homes), Premium ($20/month for 3-6 homes), and Premium Plus ($40/month for 7+ homes). All plans include our referral rewards program."
   },
   {
     question: "How do referral rewards work?",
