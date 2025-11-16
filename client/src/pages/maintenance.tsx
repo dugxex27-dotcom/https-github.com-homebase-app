@@ -1034,6 +1034,7 @@ export default function Maintenance() {
   
   // Service logs filter state
   const [homeAreaFilter, setHomeAreaFilter] = useState<string>("all");
+  const [isServiceRecordsExpanded, setIsServiceRecordsExpanded] = useState<boolean>(false);
 
   // Use authenticated user's ID  
   const homeownerId = (user as any)?.id;
@@ -3335,7 +3336,10 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
 
         {/* Maintenance Log Section */}
         <div id="service-records" className="mb-8" style={{ paddingTop: '30px' }}>
-          <div className="flex items-center justify-between mb-6">
+          <div 
+            className="flex items-center justify-between mb-6 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => setIsServiceRecordsExpanded(!isServiceRecordsExpanded)}
+          >
             <div className="flex items-center gap-3">
               <div className="bg-primary/10 p-2 rounded-lg">
                 <FileText className="w-6 h-6" style={{ color: '#b6a6f4' }} />
@@ -3345,14 +3349,29 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                 <p style={{ color: '#b6a6f4' }}>Complete history of maintenance and repairs performed on your home</p>
               </div>
             </div>
-            <Button onClick={handleAddNewMaintenanceLog} style={{ backgroundColor: '#b6a6f4', color: 'white' }} className="hover:opacity-90">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Service Record
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddNewMaintenanceLog();
+                }} 
+                style={{ backgroundColor: '#b6a6f4', color: 'white' }} 
+                className="hover:opacity-90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Service Record
+              </Button>
+              <ChevronDown 
+                className={`w-6 h-6 transition-transform ${isServiceRecordsExpanded ? 'rotate-180' : ''}`}
+                style={{ color: '#b6a6f4' }}
+              />
+            </div>
           </div>
 
-          {/* Home Area Filter and Download Options */}
-          <div className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          <Collapsible open={isServiceRecordsExpanded}>
+            <CollapsibleContent>
+              {/* Home Area Filter and Download Options */}
+              <div className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
             <Select value={homeAreaFilter} onValueChange={setHomeAreaFilter}>
               <SelectTrigger className="w-full sm:w-64" style={{ backgroundColor: '#f2f2f2' }} data-testid="select-home-area-filter-logs">
                 <SelectValue placeholder="Filter by home area" />
@@ -3548,6 +3567,8 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                 </Button>
               </div>
             )}
+            </CollapsibleContent>
+          </Collapsible>
         </div>
 
 
