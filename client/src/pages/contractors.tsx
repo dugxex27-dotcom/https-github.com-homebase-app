@@ -338,41 +338,41 @@ export default function Contractors() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
       {/* Hero Section */}
-      <section className="py-16" style={{ background: '#2c0f5b' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-8 sm:py-12 lg:py-16" style={{ background: '#2c0f5b' }}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
           <div className="text-center">
-            <h1 className="text-4xl lg:text-5xl font-bold mb-6" style={{ color: '#ffffff' }}>
+            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-4 sm:mb-6" style={{ color: '#ffffff' }}>
               Find Trusted Contractors
             </h1>
-            <p className="text-xl max-w-3xl mx-auto" style={{ color: '#b6a6f4' }}>
+            <p className="text-sm sm:text-base lg:text-lg max-w-3xl mx-auto" style={{ color: '#b6a6f4' }}>
               Connect with verified professionals specializing in niche home services
             </p>
           </div>
         </div>
       </section>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8">
         {/* Find Contractor Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-6" style={{ color: '#ffffff' }}>
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4 sm:mb-6" style={{ color: '#ffffff' }}>
             Find Contractor
           </h2>
           
           {/* Horizontal Filters */}
-          <div className="bg-card rounded-xl shadow-sm border p-6 mb-8">
-            <h3 className="text-lg font-semibold text-foreground mb-6">Find Your Perfect Contractor</h3>
+          <div className="bg-card rounded-xl shadow-sm border p-4 sm:p-6 mb-6 sm:mb-8">
+            <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4 sm:mb-6">Find Your Perfect Contractor</h3>
             
             {/* House Selection Banner - Only show for authenticated homeowners with houses */}
             {isAuthenticated && userRole === 'homeowner' && houses.length > 0 && selectedHouseId && (
-              <div className="col-span-full mb-4 p-4 rounded-lg" style={{ backgroundColor: '#3d1f6b', border: '2px solid #b6a6f4' }}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Home className="w-5 h-5" style={{ color: '#b6a6f4' }} />
+              <div className="col-span-full mb-4 p-3 sm:p-4 rounded-lg" style={{ backgroundColor: '#3d1f6b', border: '2px solid #b6a6f4' }}>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <Home className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: '#b6a6f4' }} />
                     <div>
-                      <p className="text-sm font-medium" style={{ color: '#b6a6f4' }}>Searching near:</p>
-                      <p className="text-lg font-bold text-white">
+                      <p className="text-xs sm:text-sm font-medium" style={{ color: '#b6a6f4' }}>Searching near:</p>
+                      <p className="text-sm sm:text-base lg:text-lg font-bold text-white">
                         {houses.find((h: House) => h.id === selectedHouseId)?.name}
                       </p>
-                      <p className="text-sm" style={{ color: '#d1c9f0' }}>
+                      <p className="text-xs sm:text-sm" style={{ color: '#d1c9f0' }}>
                         {houses.find((h: House) => h.id === selectedHouseId)?.address}
                       </p>
                     </div>
@@ -392,14 +392,14 @@ export default function Contractors() {
                     }}
                     data-testid="filter-home"
                   >
-                    <SelectTrigger className="w-64 h-auto min-h-[60px] py-3" style={{ backgroundColor: '#1e1e20', color: '#ffffff' }}>
+                    <SelectTrigger className="w-full sm:w-64 h-auto min-h-[52px] sm:min-h-[60px] py-2 sm:py-3 text-sm sm:text-base" style={{ backgroundColor: '#1e1e20', color: '#ffffff' }}>
                       <SelectValue placeholder="Change property..." />
                     </SelectTrigger>
                     <SelectContent>
                       {houses.map((house: House) => (
                         <SelectItem key={house.id} value={house.id}>
                           <div className="flex flex-col">
-                            <span className="font-medium">{house.name}</span>
+                            <span className="font-medium text-sm sm:text-base">{house.name}</span>
                             <span className="text-xs text-muted-foreground">{house.address}</span>
                           </div>
                         </SelectItem>
@@ -410,7 +410,7 @@ export default function Contractors() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 sm:gap-6">
 
               {/* Distance Filter */}
               <div className="flex flex-col h-full">

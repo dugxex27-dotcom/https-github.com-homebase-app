@@ -155,8 +155,8 @@ export default function Home() {
       
       {/* Home Health Score Section */}
       {typedUser?.role === 'homeowner' && selectedHouseId && selectedHouse && (
-        <section className="py-12" style={{ backgroundColor: '#2c0f5b' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-8 sm:py-12" style={{ backgroundColor: '#2c0f5b' }}>
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
             <div className="max-w-5xl mx-auto">
               <HomeHealthScore houseId={selectedHouseId} houseName={selectedHouse.name || 'My Home'} />
             </div>
@@ -166,30 +166,30 @@ export default function Home() {
 
       {/* Homeowner Achievements Section */}
       {typedUser?.role === 'homeowner' && achievementsData?.achievements && achievementsData.achievements.length > 0 && (
-        <section className="py-12" style={{ backgroundColor: '#2c0f5b' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-8 sm:py-12" style={{ backgroundColor: '#2c0f5b' }}>
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
             <div className="max-w-5xl mx-auto">
               <Card style={{ backgroundColor: '#f2f2f2' }}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Trophy className="w-8 h-8 text-yellow-500" />
+                <CardHeader className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500 flex-shrink-0" />
                       <div>
-                        <CardTitle style={{ color: '#2c0f5b' }}>Your Achievements</CardTitle>
-                        <p className="text-sm" style={{ color: '#6b7280' }}>
+                        <CardTitle className="text-base sm:text-lg" style={{ color: '#2c0f5b' }}>Your Achievements</CardTitle>
+                        <p className="text-xs sm:text-sm" style={{ color: '#6b7280' }}>
                           {achievementsData.achievements.length} {achievementsData.achievements.length === 1 ? 'badge' : 'badges'} unlocked
                         </p>
                       </div>
                     </div>
-                    <Link href="/achievements">
-                      <Button variant="outline" data-testid="button-view-all-achievements" style={{ color: '#6d28d9' }}>
+                    <Link href="/achievements" className="w-full sm:w-auto">
+                      <Button variant="outline" data-testid="button-view-all-achievements" style={{ color: '#6d28d9' }} className="w-full sm:w-auto text-sm">
                         View All
                       </Button>
                     </Link>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                     {achievementsData.achievements.slice(0, 3).map((achievement: any) => (
                       <div
                         key={achievement.achievementKey}
@@ -225,33 +225,33 @@ export default function Home() {
       )}
       {/* Contractor Dashboard - shown directly after hero for contractors */}
       {typedUser?.role === 'contractor' && (
-        <section className="py-16" style={{ backgroundColor: '#1560a2' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-8 sm:py-12 lg:py-16" style={{ backgroundColor: '#1560a2' }}>
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
             <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-4xl font-bold mb-4" style={{ color: 'white' }}>
+              <div className="text-center mb-8 sm:mb-12">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4" style={{ color: 'white' }}>
                   Your Business Dashboard
                 </h2>
-                <p className="text-xl max-w-2xl mx-auto" style={{ color: '#9ed0ef' }}>
+                <p className="text-sm sm:text-base max-w-2xl mx-auto" style={{ color: '#9ed0ef' }}>
                   Manage your contracting business and grow your client base
                 </p>
               </div>
 
               {/* Contractor Dashboard Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-4 items-stretch" style={{ marginBottom: '-100px' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 items-stretch" style={{ marginBottom: '-100px' }}>
                 <Link href="/contractor-profile" className="h-full">
                   <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
-                    <CardContent className="p-6 flex-1 flex flex-col">
-                      <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
-                          <Users className="h-6 w-6" style={{ color: 'white' }} />
+                    <CardContent className="p-4 sm:p-6 flex-1 flex flex-col">
+                      <div className="flex items-center mb-3 sm:mb-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors flex-shrink-0" style={{ backgroundColor: '#1560a2' }}>
+                          <Users className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: 'white' }} />
                         </div>
-                        <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>My Profile</h3>
-                          <p className="text-sm" style={{ color: '#1560a2' }}>Update info</p>
+                        <div className="ml-3 sm:ml-4">
+                          <h3 className="text-base sm:text-lg font-semibold" style={{ color: '#1560a2' }}>My Profile</h3>
+                          <p className="text-xs sm:text-sm" style={{ color: '#1560a2' }}>Update info</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: '#1560a2' }}>
+                      <p className="text-xs sm:text-sm" style={{ color: '#1560a2' }}>
                         Manage your professional profile and service offerings
                       </p>
                     </CardContent>
@@ -260,17 +260,17 @@ export default function Home() {
 
                 <Link href="/messages" className="h-full">
                   <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
-                    <CardContent className="p-6 flex-1 flex flex-col">
-                      <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
-                          <Bell className="h-6 w-6" style={{ color: 'white' }} />
+                    <CardContent className="p-4 sm:p-6 flex-1 flex flex-col">
+                      <div className="flex items-center mb-3 sm:mb-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors flex-shrink-0" style={{ backgroundColor: '#1560a2' }}>
+                          <Bell className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: 'white' }} />
                         </div>
-                        <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>Messages</h3>
-                          <p className="text-sm" style={{ color: '#1560a2' }}>Client communication</p>
+                        <div className="ml-3 sm:ml-4">
+                          <h3 className="text-base sm:text-lg font-semibold" style={{ color: '#1560a2' }}>Messages</h3>
+                          <p className="text-xs sm:text-sm" style={{ color: '#1560a2' }}>Client communication</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: '#1560a2' }}>
+                      <p className="text-xs sm:text-sm" style={{ color: '#1560a2' }}>
                         Communicate with potential and existing clients
                       </p>
                     </CardContent>
@@ -280,17 +280,17 @@ export default function Home() {
 
                 <Link href="/contractor-dashboard" className="h-full">
                   <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
-                    <CardContent className="p-6 flex-1 flex flex-col">
-                      <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
-                          <Calendar className="h-6 w-6" style={{ color: 'white' }} />
+                    <CardContent className="p-4 sm:p-6 flex-1 flex flex-col">
+                      <div className="flex items-center mb-3 sm:mb-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors flex-shrink-0" style={{ backgroundColor: '#1560a2' }}>
+                          <Calendar className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: 'white' }} />
                         </div>
-                        <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>Active Projects</h3>
-                          <p className="text-sm" style={{ color: '#1560a2' }}>Current work</p>
+                        <div className="ml-3 sm:ml-4">
+                          <h3 className="text-base sm:text-lg font-semibold" style={{ color: '#1560a2' }}>Active Projects</h3>
+                          <p className="text-xs sm:text-sm" style={{ color: '#1560a2' }}>Current work</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: '#1560a2' }}>
+                      <p className="text-xs sm:text-sm" style={{ color: '#1560a2' }}>
                         3 active projects scheduled this week
                       </p>
                     </CardContent>
@@ -299,17 +299,17 @@ export default function Home() {
 
                 <Link href="/contractor-dashboard" className="h-full">
                   <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
-                    <CardContent className="p-6 flex-1 flex flex-col">
-                      <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
-                          <Star className="h-6 w-6" style={{ color: 'white' }} />
+                    <CardContent className="p-4 sm:p-6 flex-1 flex flex-col">
+                      <div className="flex items-center mb-3 sm:mb-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors flex-shrink-0" style={{ backgroundColor: '#1560a2' }}>
+                          <Star className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: 'white' }} />
                         </div>
-                        <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>Reviews</h3>
-                          <p className="text-sm" style={{ color: '#1560a2' }}>Customer feedback</p>
+                        <div className="ml-3 sm:ml-4">
+                          <h3 className="text-base sm:text-lg font-semibold" style={{ color: '#1560a2' }}>Reviews</h3>
+                          <p className="text-xs sm:text-sm" style={{ color: '#1560a2' }}>Customer feedback</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: '#1560a2' }}>
+                      <p className="text-xs sm:text-sm" style={{ color: '#1560a2' }}>
                         4.8/5 stars from 127 recent reviews
                       </p>
                     </CardContent>
@@ -318,17 +318,17 @@ export default function Home() {
 
                 <Link href="/contractor-dashboard" className="h-full">
                   <Card className="border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full flex flex-col" style={{ background: '#f2f2f2' }}>
-                    <CardContent className="p-6 flex-1 flex flex-col">
-                      <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors" style={{ backgroundColor: '#1560a2' }}>
-                          <Search className="h-6 w-6" style={{ color: 'white' }} />
+                    <CardContent className="p-4 sm:p-6 flex-1 flex flex-col">
+                      <div className="flex items-center mb-3 sm:mb-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center group-hover:opacity-80 transition-colors flex-shrink-0" style={{ backgroundColor: '#1560a2' }}>
+                          <Search className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: 'white' }} />
                         </div>
-                        <div className="ml-4">
-                          <h3 className="text-lg font-semibold" style={{ color: '#1560a2' }}>New Leads</h3>
-                          <p className="text-sm" style={{ color: '#1560a2' }}>Opportunities</p>
+                        <div className="ml-3 sm:ml-4">
+                          <h3 className="text-base sm:text-lg font-semibold" style={{ color: '#1560a2' }}>New Leads</h3>
+                          <p className="text-xs sm:text-sm" style={{ color: '#1560a2' }}>Opportunities</p>
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: '#1560a2' }}>
+                      <p className="text-xs sm:text-sm" style={{ color: '#1560a2' }}>
                         5 new client inquiries this week
                       </p>
                     </CardContent>
@@ -341,21 +341,21 @@ export default function Home() {
       )}
       {/* AI Help Feature - Homeowners Only */}
       {typedUser?.role === 'homeowner' && (
-        <section className="bg-gradient-to-br from-purple-100 via-blue-100 to-purple-100 pt-[40px] pb-[40px] mt-[60px] mb-[10px]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="bg-gradient-to-br from-purple-100 via-blue-100 to-purple-100 py-8 sm:py-12 mt-12 sm:mt-[60px] mb-2 sm:mb-[10px]">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
             <Card className="border-2 border-purple-300 bg-gradient-to-r from-purple-50 to-blue-50 shadow-xl">
-              <CardContent className="p-8">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <CardContent className="p-4 sm:p-6 lg:p-8">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
                   <div className="flex-1 text-center md:text-left">
                     <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
-                      <Sparkles className="w-6 h-6 text-purple-600" />
-                      <h3 className="text-2xl font-bold text-purple-700">Not Sure Who to Contact?</h3>
+                      <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600 flex-shrink-0" />
+                      <h3 className="text-base sm:text-lg lg:text-xl font-bold text-purple-700">Not Sure Who to Contact?</h3>
                     </div>
-                    <p className="text-gray-700 mb-4">
+                    <p className="text-gray-700 mb-3 sm:mb-4 text-sm sm:text-base">
                       Let our AI assistant analyze your home problem and recommend the right type of contractor. 
                       Get instant, expert guidance tailored to your specific situation!
                     </p>
-                    <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+                    <div className="flex flex-wrap gap-2 text-xs sm:text-sm text-gray-600 justify-center md:justify-start">
                       <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200">
                         <CheckCircle className="w-3 h-3 mr-1" />
                         Instant Analysis
@@ -370,14 +370,14 @@ export default function Home() {
                       </Badge>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
-                    <Link href="/ai-help">
+                  <div className="flex-shrink-0 w-full md:w-auto">
+                    <Link href="/ai-help" className="w-full md:w-auto">
                       <Button 
                         size="lg" 
-                        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                        className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 sm:px-8 py-4 sm:py-6 text-sm sm:text-base lg:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                         data-testid="button-ai-help"
                       >
-                        <Sparkles className="w-5 h-5 mr-2" />
+                        <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                         Try AI Help Now
                       </Button>
                     </Link>
@@ -389,45 +389,45 @@ export default function Home() {
         </section>
       )}
       {/* Additional Features Section */}
-      <section style={{ background: typedUser?.role === 'homeowner' ? '#2c0f5b' : '#1560a2', paddingTop: '14px', paddingBottom: '30px' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4" style={{ color: '#ffffff' }}>
+      <section style={{ background: typedUser?.role === 'homeowner' ? '#2c0f5b' : '#1560a2', paddingTop: '12px', paddingBottom: '24px' }}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4" style={{ color: '#ffffff' }}>
               Why Choose Home Base?
             </h2>
             {typedUser?.role === 'homeowner' ? (
-              <p className="text-xl max-w-3xl mx-auto" style={{ color: '#b6a6f4' }}>
+              <p className="text-sm sm:text-base max-w-3xl mx-auto" style={{ color: '#b6a6f4' }}>
                 We've designed every feature to make home management simple, reliable, and efficient
               </p>
             ) : (
-              <p className="text-xl max-w-3xl mx-auto" style={{ color: '#9ed0ef' }}>
+              <p className="text-sm sm:text-base max-w-3xl mx-auto" style={{ color: '#9ed0ef' }}>
                 The platform contractors trust to grow their business and connect with quality clients
               </p>
             )}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {typedUser?.role === 'homeowner' ? (
               // Homeowner Features
               (<>
                 <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
-                  <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#2c0f5b' }}>
-                      <Shield className="h-8 w-8 text-white" />
+                  <CardContent className="p-6 sm:p-8 text-center">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6" style={{ backgroundColor: '#2c0f5b' }}>
+                      <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3" style={{ color: '#2c0f5b' }}>Verified Professionals</h3>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <h3 className="text-base sm:text-lg lg:text-xl font-bold mb-2 sm:mb-3" style={{ color: '#2c0f5b' }}>Verified Professionals</h3>
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
                       All contractors are thoroughly vetted with background checks, license verification, and customer reviews
                     </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
-                  <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#2c0f5b' }}>
-                      <Package className="h-8 w-8 text-white" />
+                  <CardContent className="p-6 sm:p-8 text-center">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6" style={{ backgroundColor: '#2c0f5b' }}>
+                      <Package className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3" style={{ color: '#2c0f5b' }}>Quality Products</h3>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <h3 className="text-base sm:text-lg lg:text-xl font-bold mb-2 sm:mb-3" style={{ color: '#2c0f5b' }}>Quality Products</h3>
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
                       Browse professional-grade tools and materials for your home improvement projects
                     </p>
                   </CardContent>
@@ -437,34 +437,34 @@ export default function Home() {
               // Contractor Features
               (<>
                 <Card className="border-gray-300 dark:border-gray-600" style={{ backgroundColor: '#f2f2f2' }}>
-                  <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#1560a2' }}>
-                      <Users className="h-8 w-8 text-white" />
+                  <CardContent className="p-6 sm:p-8 text-center">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6" style={{ backgroundColor: '#1560a2' }}>
+                      <Users className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Quality Leads</h3>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <h3 className="text-base sm:text-lg lg:text-xl font-bold mb-2 sm:mb-3" style={{ color: '#1560a2' }}>Quality Leads</h3>
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
                       Connect with motivated homeowners who value professional service and quality workmanship
                     </p>
                   </CardContent>
                 </Card>
                 <Card className="border-gray-300 dark:border-gray-600" style={{ backgroundColor: '#f2f2f2' }}>
-                  <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#1560a2' }}>
-                      <TrendingUp className="h-8 w-8 text-white" />
+                  <CardContent className="p-6 sm:p-8 text-center">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6" style={{ backgroundColor: '#1560a2' }}>
+                      <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Grow Your Business</h3>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <h3 className="text-base sm:text-lg lg:text-xl font-bold mb-2 sm:mb-3" style={{ color: '#1560a2' }}>Grow Your Business</h3>
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
                       Tools and features designed to help you manage projects, track earnings, and expand your client base
                     </p>
                   </CardContent>
                 </Card>
                 <Card className="border-gray-300 dark:border-gray-600" style={{ backgroundColor: '#f2f2f2' }}>
-                  <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#1560a2' }}>
-                      <Star className="h-8 w-8 text-white" />
+                  <CardContent className="p-6 sm:p-8 text-center">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6" style={{ backgroundColor: '#1560a2' }}>
+                      <Star className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3" style={{ color: '#1560a2' }}>Build Reputation</h3>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <h3 className="text-base sm:text-lg lg:text-xl font-bold mb-2 sm:mb-3" style={{ color: '#1560a2' }}>Build Reputation</h3>
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
                       Showcase your expertise through customer reviews and build a trusted reputation in your community
                     </p>
                   </CardContent>
@@ -476,16 +476,16 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="text-white py-16" style={{ backgroundColor: '#2c0f5b' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+      <footer className="text-white py-8 sm:py-12 lg:py-16" style={{ backgroundColor: '#2c0f5b' }}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8">
             <div className="text-center">
-              <div className="mb-6 flex justify-center">
-                <div className="w-1/4 h-auto" style={{ color: '#b6a6f4' }}>
+              <div className="mb-4 sm:mb-6 flex justify-center">
+                <div className="w-1/3 sm:w-1/4 h-auto" style={{ color: '#b6a6f4' }}>
                   <Logo className="w-full h-auto" />
                 </div>
               </div>
-              <p className="text-gray-400 mb-6 leading-relaxed">
+              <p className="text-gray-400 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
                 Your trusted partner for connecting with skilled contractors, discovering quality DIY products, and maintaining your home with confidence.
               </p>
             </div>
@@ -493,8 +493,8 @@ export default function Home() {
             {/* Only show homeowner links for homeowners */}
             {typedUser?.role === 'homeowner' && (
               <div className="text-center">
-                <h4 className="text-lg font-semibold mb-6 text-white">For Homeowners</h4>
-                <ul className="space-y-3 text-gray-400">
+                <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">For Homeowners</h4>
+                <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
                   <li><Link href="/contractors" className="hover:text-purple-400 transition-colors">Find Contractors</Link></li>
                   <li><Link href="/products" className="hover:text-purple-400 transition-colors">DIY Products</Link></li>
                   <li><Link href="/maintenance" className="hover:text-purple-400 transition-colors">Maintenance Schedule</Link></li>
@@ -504,8 +504,8 @@ export default function Home() {
             )}
 
             <div className="text-center">
-              <h4 className="text-lg font-semibold mb-6 text-white">For Contractors</h4>
-              <ul className="space-y-3 text-gray-400">
+              <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">For Contractors</h4>
+              <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
                 <li><Link href="/contractor-signin" className="transition-colors hover:text-purple-400">Join Network</Link></li>
                 <li><Link href="/billing" className="transition-colors hover:text-purple-400">Pricing Plans</Link></li>
                 <li><Link href="/support" className="transition-colors hover:text-purple-400">Support Center</Link></li>
@@ -514,16 +514,16 @@ export default function Home() {
             </div>
 
             <div className="text-center">
-              <h4 className="text-lg font-semibold mb-6 text-white">Support</h4>
-              <ul className="space-y-3 text-gray-400">
+              <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">Support</h4>
+              <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
                 <li><Link href="/support" className="transition-colors hover:text-purple-400">Help Center</Link></li>
                 <li><Link href="/support" className="transition-colors hover:text-purple-400">Contact Us</Link></li>
               </ul>
             </div>
 
             <div className="text-center">
-              <h4 className="text-lg font-semibold mb-6 text-white">Legal</h4>
-              <ul className="space-y-3 text-gray-400">
+              <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">Legal</h4>
+              <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
                 <li><Link href="/terms-of-service" className="transition-colors hover:text-purple-400">Terms of Service</Link></li>
                 <li><Link href="/privacy-policy" className="transition-colors hover:text-purple-400">Privacy Policy</Link></li>
                 <li><Link href="/legal-disclaimer" className="transition-colors hover:text-purple-400">Legal Disclaimer</Link></li>
@@ -531,7 +531,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-800 mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
             <p>&copy; 2025 Home Base. All rights reserved.</p>
           </div>
         </div>

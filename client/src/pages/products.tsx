@@ -87,32 +87,32 @@ export default function Products() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
       {/* Hero Section */}
-      <section className="py-16" style={{ backgroundColor: '#2c0f5b' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl lg:text-5xl font-bold mb-6" style={{ color: 'white' }}>
+      <section className="py-8 sm:py-12 lg:py-16" style={{ backgroundColor: '#2c0f5b' }}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-4 sm:mb-6" style={{ color: 'white' }}>
               Quality <span style={{ color: 'white' }}>DIY Products</span>
             </h1>
-            <p className="text-xl max-w-3xl mx-auto mb-8" style={{ color: '#b6a6f4' }}>
+            <p className="text-sm sm:text-base lg:text-lg max-w-3xl mx-auto mb-6 sm:mb-8" style={{ color: '#b6a6f4' }}>
               Professional-grade tools and materials for every home project
             </p>
           </div>
           
           {/* Search Section */}
           <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col md:flex-row gap-3 sm:gap-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-3 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-3 sm:top-3.5 text-gray-400 h-4 w-4" />
                 <Input
                   type="text"
                   placeholder="Search for tools, materials, supplies..."
-                  className="pl-10 h-12 text-base bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+                  className="pl-10 h-11 sm:h-12 text-sm sm:text-base bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 />
               </div>
-              <Button onClick={handleSearch} className="text-white px-8 py-3 h-12 text-base rounded-xl" style={{ backgroundColor: '#3c258e' }}>
+              <Button onClick={handleSearch} className="w-full md:w-auto text-white px-6 sm:px-8 py-3 h-11 sm:h-12 text-sm sm:text-base rounded-xl" style={{ backgroundColor: '#3c258e' }}>
                 <Search className="mr-2 h-4 w-4" />
                 Search Products
               </Button>
@@ -121,7 +121,7 @@ export default function Products() {
         </div>
       </section>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8">
         {/* Categories */}
         <div className="mb-8">
           <h3 className="text-xl font-semibold mb-6" style={{ color: '#b6a6f4' }}>Shop by Category</h3>
