@@ -4,13 +4,13 @@ import { Users, Package, User as UserIcon, LogOut, MessageCircle, Trophy, Shield
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import Logo from "@/components/logo";
 import { Notifications } from "@/components/notifications";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 import type { User, Notification } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
+import logoImage from '@assets/homebase-logo-black-text_1763321245391.png';
 
 export default function Header() {
   const [location] = useLocation();
@@ -260,7 +260,11 @@ export default function Header() {
                 `}
                 aria-label="Return to homepage"
               >
-                <Logo className={typedUser?.role === 'contractor' ? 'h-8 sm:h-10 w-auto text-white' : 'h-8 sm:h-10 w-auto text-primary'} />
+                <img 
+                  src={logoImage} 
+                  alt="Home Base" 
+                  className="h-8 sm:h-10 w-auto"
+                />
               </button>
             </Link>
           </div>
