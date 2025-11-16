@@ -249,7 +249,7 @@ export default function SignInAgent() {
   const referralCodeValue = registerForm.watch("referralCode");
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(to bottom, #f5f0ff, #faf7ff)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(to bottom, #f0f9f4, #f7fdf9)' }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <img 
@@ -258,15 +258,15 @@ export default function SignInAgent() {
             className="h-24 w-auto mx-auto mb-4"
             data-testid="img-logo-agent"
           />
-          <h1 className="text-2xl font-bold mb-2 text-primary">Earn Commissions as an Affiliate</h1>
-          <p className="text-lg text-muted-foreground">
+          <h1 className="text-2xl font-bold mb-2" style={{ color: '#1a1a1a' }}>Earn Commissions as an Affiliate</h1>
+          <p className="text-lg" style={{ color: '#4a4a4a' }}>
             Your trusted home services marketplace
           </p>
         </div>
 
-        <Card className="border-0 shadow-xl">
+        <Card className="border-0 shadow-xl bg-white">
           <CardHeader className="text-center pb-6">
-            <CardTitle className="text-2xl text-foreground">
+            <CardTitle className="text-2xl" style={{ color: '#1a1a1a' }}>
               Real Estate Agent Sign In
             </CardTitle>
           </CardHeader>
@@ -333,8 +333,9 @@ export default function SignInAgent() {
                       <button
                         type="button"
                         onClick={() => setShowForgotPassword(true)}
-                        className="text-sm text-primary hover:underline"
+                        className="text-sm hover:underline"
                         data-testid="link-forgot-password-agent"
+                        style={{ color: '#228B22' }}
                       >
                         Forgot password?
                       </button>
@@ -342,9 +343,10 @@ export default function SignInAgent() {
 
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full hover:opacity-90"
                       disabled={loginMutation.isPending}
                       data-testid="button-login-agent"
+                      style={{ backgroundColor: '#228B22', color: 'white' }}
                     >
                       {loginMutation.isPending ? 'Signing in...' : 'Sign In'}
                     </Button>
@@ -518,9 +520,10 @@ export default function SignInAgent() {
 
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full hover:opacity-90"
                       disabled={registerMutation.isPending}
                       data-testid="button-register-agent"
+                      style={{ backgroundColor: '#228B22', color: 'white' }}
                     >
                       {registerMutation.isPending ? 'Creating account...' : 'Create Account'}
                     </Button>
@@ -531,14 +534,15 @@ export default function SignInAgent() {
 
             {/* Demo Login Button */}
             <div className="pt-4 border-t">
-              <p className="text-center text-sm text-muted-foreground mb-3">
+              <p className="text-center text-sm mb-3" style={{ color: '#4a4a4a' }}>
                 Demo Login (for testing)
               </p>
               <Button
                 type="button"
-                className="w-full"
+                className="w-full hover:opacity-90"
                 onClick={handleAgentDemoLogin}
                 data-testid="button-demo-agent-signin"
+                style={{ backgroundColor: '#228B22', color: 'white' }}
               >
                 Try Agent Demo
               </Button>
