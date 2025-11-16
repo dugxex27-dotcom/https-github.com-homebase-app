@@ -236,14 +236,6 @@ export default function Header() {
                   )}
                 </Link>
                 <Link 
-                  href="/contractor-profile" 
-                  className={getNavLinkClass(location === '/contractor-profile')}
-                  aria-current={location === '/contractor-profile' ? 'page' : undefined}
-                >
-                  <UserIcon className="w-4 h-4" />
-                  Profile
-                </Link>
-                <Link 
                   href="/support" 
                   className={getNavLinkClass(location.startsWith('/support'))}
                   aria-current={location.startsWith('/support') ? 'page' : undefined}
