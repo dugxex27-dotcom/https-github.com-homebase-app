@@ -222,6 +222,31 @@ export default function SignInHomeowner() {
     resetPasswordMutation.mutate(data);
   };
 
+  const handleDemoLogin = async () => {
+    try {
+      const response = await apiRequest('/api/auth/homeowner-demo-login', 'POST', {
+        email: 'demo@homeowner.com',
+        name: 'Demo Homeowner',
+        role: 'homeowner'
+      });
+      
+      if (response.ok) {
+        await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+        toast({
+          title: "Demo login successful",
+          description: "Logged in as demo homeowner.",
+        });
+        setLocation('/');
+      }
+    } catch (error) {
+      toast({
+        title: "Demo login failed",
+        description: "Could not log in. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const referralCodeValue = registerForm.watch("referralCode");
 
   return (
@@ -502,6 +527,22 @@ export default function SignInHomeowner() {
                 </Form>
               </TabsContent>
             </Tabs>
+
+            {/* Demo Login Button */}
+            <div className="pt-4 border-t">
+              <p className="text-center text-sm text-muted-foreground mb-3">
+                Demo Login (for testing)
+              </p>
+              <Button
+                type="button"
+                className="w-full text-white"
+                onClick={handleDemoLogin}
+                data-testid="button-demo-homeowner-signin"
+                style={{ backgroundColor: '#2c0f5b' }}
+              >
+                Try Homeowner Demo
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
