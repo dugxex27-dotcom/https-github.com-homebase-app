@@ -2104,10 +2104,11 @@ export class MemStorage implements IStorage {
     const lakeHouseId = "f5c8a9d2-3e1b-4f7c-a6b3-8d9e5f2c1a4b";
     
     // 14 DIY maintenance logs spread over 6 months with total savings of $1,360
+    // Using deterministic IDs for idempotent seeding
     const diyMaintenanceLogsData = [
       // Main Residence - Month 1 (6 months ago)
       {
-        id: randomUUID(),
+        id: "maint-log-demo-001",
         homeownerId: demoHomeownerId,
         houseId: mainHouseId,
         serviceType: "Plumbing",
@@ -2124,7 +2125,7 @@ export class MemStorage implements IStorage {
         createdAt: new Date(Date.now() - 175 * 24 * 60 * 60 * 1000),
       },
       {
-        id: randomUUID(),
+        id: "maint-log-demo-002",
         homeownerId: demoHomeownerId,
         houseId: mainHouseId,
         serviceType: "HVAC",
@@ -2142,7 +2143,7 @@ export class MemStorage implements IStorage {
       },
       // Main Residence - Month 2 (5 months ago)
       {
-        id: randomUUID(),
+        id: "maint-log-demo-003",
         homeownerId: demoHomeownerId,
         houseId: mainHouseId,
         serviceType: "Electrical",
@@ -2159,7 +2160,7 @@ export class MemStorage implements IStorage {
         createdAt: new Date(Date.now() - 145 * 24 * 60 * 60 * 1000),
       },
       {
-        id: randomUUID(),
+        id: "maint-log-demo-004",
         homeownerId: demoHomeownerId,
         houseId: mainHouseId,
         serviceType: "Landscaping",
@@ -2177,7 +2178,7 @@ export class MemStorage implements IStorage {
       },
       // Lake House - Month 2
       {
-        id: randomUUID(),
+        id: "maint-log-demo-005",
         homeownerId: demoHomeownerId,
         houseId: lakeHouseId,
         serviceType: "Plumbing",
@@ -2195,7 +2196,7 @@ export class MemStorage implements IStorage {
       },
       // Main Residence - Month 3 (4 months ago)
       {
-        id: randomUUID(),
+        id: "maint-log-demo-006",
         homeownerId: demoHomeownerId,
         houseId: mainHouseId,
         serviceType: "Painting",
@@ -2212,7 +2213,7 @@ export class MemStorage implements IStorage {
         createdAt: new Date(Date.now() - 115 * 24 * 60 * 60 * 1000),
       },
       {
-        id: randomUUID(),
+        id: "maint-log-demo-007",
         homeownerId: demoHomeownerId,
         houseId: mainHouseId,
         serviceType: "General Maintenance",
@@ -2230,7 +2231,7 @@ export class MemStorage implements IStorage {
       },
       // Main Residence - Month 4 (3 months ago)
       {
-        id: randomUUID(),
+        id: "maint-log-demo-008",
         homeownerId: demoHomeownerId,
         houseId: mainHouseId,
         serviceType: "Appliance Repair",
@@ -2247,13 +2248,13 @@ export class MemStorage implements IStorage {
         createdAt: new Date(Date.now() - 85 * 24 * 60 * 60 * 1000),
       },
       {
-        id: randomUUID(),
+        id: "maint-log-demo-009",
         homeownerId: demoHomeownerId,
         houseId: mainHouseId,
         serviceType: "Flooring",
         serviceDate: new Date(Date.now() - 80 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         homeArea: "Hallway",
-        serviceDescription: "Refinished hardwood floors in hallway (DIY)",
+        serviceDescription: "Refined hardwood floors in hallway (DIY)",
         cost: "95.00",
         contractorName: null,
         contractorCompany: null,
@@ -2265,7 +2266,7 @@ export class MemStorage implements IStorage {
       },
       // Lake House - Month 4
       {
-        id: randomUUID(),
+        id: "maint-log-demo-010",
         homeownerId: demoHomeownerId,
         houseId: lakeHouseId,
         serviceType: "Deck & Patio",
@@ -2283,7 +2284,7 @@ export class MemStorage implements IStorage {
       },
       // Main Residence - Month 5 (2 months ago)
       {
-        id: randomUUID(),
+        id: "maint-log-demo-011",
         homeownerId: demoHomeownerId,
         houseId: mainHouseId,
         serviceType: "Windows & Doors",
@@ -2301,7 +2302,7 @@ export class MemStorage implements IStorage {
       },
       // Lake House - Month 5
       {
-        id: randomUUID(),
+        id: "maint-log-demo-012",
         homeownerId: demoHomeownerId,
         houseId: lakeHouseId,
         serviceType: "General Maintenance",
@@ -2319,7 +2320,7 @@ export class MemStorage implements IStorage {
       },
       // Main Residence - Month 6 (1 month ago)
       {
-        id: randomUUID(),
+        id: "maint-log-demo-013",
         homeownerId: demoHomeownerId,
         houseId: mainHouseId,
         serviceType: "Gutter Cleaning",
@@ -2336,7 +2337,7 @@ export class MemStorage implements IStorage {
         createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000),
       },
       {
-        id: randomUUID(),
+        id: "maint-log-demo-014",
         homeownerId: demoHomeownerId,
         houseId: mainHouseId,
         serviceType: "Pest Control",
@@ -2354,12 +2355,12 @@ export class MemStorage implements IStorage {
       },
     ];
 
-    // Insert DIY maintenance logs into database
+    // Insert DIY maintenance logs into database with idempotent seeding
     try {
       await Promise.all(diyMaintenanceLogsData.map(async (log) => {
         await db.insert(maintenanceLogs).values(log).onConflictDoNothing();
       }));
-      console.log('[DEMO DATA] Inserted 14 DIY maintenance logs for Sarah Anderson');
+      console.log('[DEMO DATA] Seeded 14 DIY maintenance logs for Sarah Anderson (idempotent)');
     } catch (error) {
       console.error('[DEMO DATA] Error inserting DIY maintenance logs:', error);
     }
