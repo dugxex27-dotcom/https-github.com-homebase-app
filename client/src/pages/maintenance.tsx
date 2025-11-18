@@ -953,7 +953,7 @@ export default function Maintenance() {
   
   // Service logs filter state
   const [homeAreaFilter, setHomeAreaFilter] = useState<string>("all");
-  const [isServiceRecordsExpanded, setIsServiceRecordsExpanded] = useState<boolean>(false);
+  const [isServiceRecordsExpanded, setIsServiceRecordsExpanded] = useState<boolean>(true);
   const [showAllRecords, setShowAllRecords] = useState<boolean>(false);
 
   // Use authenticated user's ID  
