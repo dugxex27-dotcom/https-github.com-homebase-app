@@ -56,6 +56,66 @@ const iconMap: Record<string, any> = {
   star: Star,
 };
 
+// Helper function to get progress label
+const getProgressLabel = (achievement: AchievementWithProgress): string => {
+  const criteria = achievement.criteria;
+  const progress = achievement.progress || 0;
+  
+  if (criteria.type === 'seasonal_tasks') {
+    const current = Math.round((progress / 100) * 5);
+    return `${current}/5 seasonal tasks`;
+  } else if (criteria.type === 'under_budget') {
+    const current = Math.round((progress / 100) * criteria.count);
+    return `${current}/${criteria.count} tasks under budget`;
+  } else if (criteria.type === 'total_savings') {
+    const current = Math.round((progress / 100) * criteria.amount);
+    return `$${current.toLocaleString()}/$${criteria.amount.toLocaleString()} saved`;
+  } else if (criteria.type === 'documents_uploaded') {
+    const current = Math.round((progress / 100) * criteria.count);
+    return `${current}/${criteria.count} documents uploaded`;
+  } else if (criteria.type === 'logs_created') {
+    const current = Math.round((progress / 100) * criteria.count);
+    return `${current}/${criteria.count} logs created`;
+  } else if (criteria.type === 'photos_uploaded') {
+    const current = Math.round((progress / 100) * criteria.count);
+    return `${current}/${criteria.count} photo pairs`;
+  }
+  return 'Progress';
+};
+
+// Helper function to get remaining text
+const getRemainingText = (achievement: AchievementWithProgress, progress: number): string => {
+  const criteria = achievement.criteria;
+  const progressPercent = progress || 0;
+  
+  if (criteria.type === 'seasonal_tasks') {
+    const current = Math.round((progressPercent / 100) * 5);
+    const remaining = 5 - current;
+    return remaining > 0 ? `${remaining} more seasonal task${remaining !== 1 ? 's' : ''} to unlock` : 'Complete!';
+  } else if (criteria.type === 'under_budget') {
+    const current = Math.round((progressPercent / 100) * criteria.count);
+    const remaining = criteria.count - current;
+    return remaining > 0 ? `${remaining} more task${remaining !== 1 ? 's' : ''} to unlock` : 'Complete!';
+  } else if (criteria.type === 'total_savings') {
+    const current = Math.round((progressPercent / 100) * criteria.amount);
+    const remaining = criteria.amount - current;
+    return remaining > 0 ? `$${remaining.toLocaleString()} more in savings to unlock` : 'Complete!';
+  } else if (criteria.type === 'documents_uploaded') {
+    const current = Math.round((progressPercent / 100) * criteria.count);
+    const remaining = criteria.count - current;
+    return remaining > 0 ? `${remaining} more document${remaining !== 1 ? 's' : ''} to unlock` : 'Complete!';
+  } else if (criteria.type === 'logs_created') {
+    const current = Math.round((progressPercent / 100) * criteria.count);
+    const remaining = criteria.count - current;
+    return remaining > 0 ? `${remaining} more log${remaining !== 1 ? 's' : ''} to unlock` : 'Complete!';
+  } else if (criteria.type === 'photos_uploaded') {
+    const current = Math.round((progressPercent / 100) * criteria.count);
+    const remaining = criteria.count - current;
+    return remaining > 0 ? `${remaining} more photo pair${remaining !== 1 ? 's' : ''} to unlock` : 'Complete!';
+  }
+  return '';
+};
+
 export default function Achievements() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementWithProgress | null>(null);
@@ -263,8 +323,8 @@ export default function Achievements() {
                               {!isUnlocked && (
                                 <div>
                                   <div className="flex justify-between items-center mb-1">
-                                    <span className="text-xs" style={{ color: '#6b7280' }}>
-                                      Progress
+                                    <span className="text-xs font-semibold" style={{ color: '#6b7280' }}>
+                                      {getProgressLabel(achievement)}
                                     </span>
                                     <span className="text-xs font-semibold" style={{ color: '#6d28d9' }}>
                                       {Math.round(progress)}%
@@ -272,9 +332,12 @@ export default function Achievements() {
                                   </div>
                                   <Progress 
                                     value={progress} 
-                                    className="h-2" 
+                                    className="h-2 mb-2" 
                                     data-testid={`progress-${achievement.key}`}
                                   />
+                                  <div className="text-xs" style={{ color: '#6b7280' }}>
+                                    {getRemainingText(achievement, progress)}
+                                  </div>
                                 </div>
                               )}
                               
@@ -374,13 +437,18 @@ export default function Achievements() {
                         </p>
                       ) : (
                         <div>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm" style={{ color: '#6b7280' }}>Progress</span>
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-sm font-semibold" style={{ color: '#6b7280' }}>
+                              {getProgressLabel(selectedAchievement)}
+                            </span>
                             <span className="text-sm font-semibold" style={{ color: '#6d28d9' }}>
                               {Math.round(selectedAchievement.progress)}%
                             </span>
                           </div>
-                          <Progress value={selectedAchievement.progress} className="h-2" />
+                          <Progress value={selectedAchievement.progress} className="h-2 mb-2" />
+                          <div className="text-sm font-medium" style={{ color: '#6d28d9' }}>
+                            {getRemainingText(selectedAchievement, selectedAchievement.progress)}
+                          </div>
                         </div>
                       )}
                     </div>
