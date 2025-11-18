@@ -35,7 +35,7 @@ Preferred communication style: Simple, everyday language.
 - **Homeowner Features**:
     - Multi-property support with climate zone detection and centralized service records.
     - **Home Health Score**: Gamified maintenance tracking, calculating a score based on completed/missed tasks.
-    - **DIY Savings Tracker**: Financial tracking of money saved from DIY tasks, including professional cost estimates and regional multipliers.
+    - **DIY Savings Tracker**: Financial tracking of money saved from DIY tasks, including professional cost estimates and regional multipliers. Displays separate cards for each house with house name labels, showing per-property savings totals, task counts, and average savings per task.
     - **Service Records Display**: Shows the 2 most recent service records by default with a collapsible dropdown to view older records. Improves page load performance and reduces visual clutter for homeowners with extensive maintenance history.
     - **AI Contractor Recommendation**: AI-powered (GPT-5 via Replit AI) recommendations for contractor types based on homeowner problems.
     - **Permanent Connection Code System**: Unique 8-character code for homeowners to share with contractors for service record access.

@@ -355,7 +355,7 @@ const HOME_SYSTEMS = {
 };
 
 // DIY Savings Tracker Component
-function DIYSavingsTracker({ houseId }: { houseId: string }) {
+function DIYSavingsTracker({ houseId, houseName }: { houseId: string; houseName: string }) {
   if (!houseId) return null;
   
   const { data, isLoading, isError } = useQuery<{ totalSavings: number; taskCount: number }>({
@@ -371,18 +371,21 @@ function DIYSavingsTracker({ houseId }: { houseId: string }) {
   }).format(data?.totalSavings || 0);
 
   return (
-    <section className="py-4 sm:py-8" style={{ backgroundColor: '#2c0f5b' }}>
-      <div className="w-full mx-auto px-2 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto">
-          <Card style={{ backgroundColor: '#f2f2f2' }} data-testid="diy-savings-tracker" className="overflow-hidden">
-            <CardHeader className="pb-3 sm:pb-6 px-3 sm:px-6">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-2 sm:p-3 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 shrink-0">
-                  <PiggyBank className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <CardTitle style={{ color: '#2c0f5b' }} className="flex-1 text-base sm:text-xl truncate">DIY Savings</CardTitle>
-              </div>
-            </CardHeader>
+    <Card style={{ backgroundColor: '#f2f2f2' }} data-testid={`diy-savings-tracker-${houseId}`} className="overflow-hidden">
+      <CardHeader className="pb-3 sm:pb-6 px-3 sm:px-6">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-2 sm:p-3 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 shrink-0">
+              <PiggyBank className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
+            </div>
+            <CardTitle style={{ color: '#2c0f5b' }} className="flex-1 text-base sm:text-xl truncate">DIY Savings</CardTitle>
+          </div>
+          <div className="flex items-center gap-2 ml-11 sm:ml-14">
+            <Home className="w-4 h-4 text-gray-600" />
+            <span className="text-sm sm:text-base font-semibold text-gray-700">{houseName}</span>
+          </div>
+        </div>
+      </CardHeader>
             <CardContent className="pt-0 px-3 sm:px-6">
               {isLoading ? (
                 <div className="flex items-center justify-center py-6 sm:py-8">
@@ -446,9 +449,6 @@ function DIYSavingsTracker({ houseId }: { houseId: string }) {
               )}
             </CardContent>
           </Card>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -2546,8 +2546,22 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
         </section>
       )}
 
-      {/* DIY Savings Tracker Section */}
-      {userRole === 'homeowner' && selectedHouseId && <DIYSavingsTracker houseId={selectedHouseId} />}
+      {/* DIY Savings Tracker Section - Show separate card for each house */}
+      {userRole === 'homeowner' && houses.length > 0 && (
+        <section className="py-4 sm:py-8" style={{ backgroundColor: '#2c0f5b' }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className={`grid gap-6 ${houses.length === 1 ? 'max-w-5xl mx-auto' : houses.length === 2 ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+              {houses.map((house: House) => (
+                <DIYSavingsTracker 
+                  key={house.id} 
+                  houseId={house.id}
+                  houseName={house.name}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <div className="container mx-auto px-4 py-4">
         <div className="mb-8">
