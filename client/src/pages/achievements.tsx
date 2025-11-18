@@ -62,8 +62,9 @@ const getProgressLabel = (achievement: AchievementWithProgress): string => {
   const progress = achievement.progress || 0;
   
   if (criteria.type === 'seasonal_tasks') {
-    const current = Math.round((progress / 100) * 5);
-    return `${current}/5 seasonal tasks`;
+    const requiredCount = criteria.seasonalTasksCount ?? criteria.count ?? 5;
+    const current = Math.round((progress / 100) * requiredCount);
+    return `${current}/${requiredCount} seasonal tasks`;
   } else if (criteria.type === 'under_budget') {
     const current = Math.round((progress / 100) * criteria.count);
     return `${current}/${criteria.count} tasks under budget`;
@@ -89,28 +90,29 @@ const getRemainingText = (achievement: AchievementWithProgress, progress: number
   const progressPercent = progress || 0;
   
   if (criteria.type === 'seasonal_tasks') {
-    const current = Math.round((progressPercent / 100) * 5);
-    const remaining = 5 - current;
+    const requiredCount = criteria.seasonalTasksCount ?? criteria.count ?? 5;
+    const current = Math.round((progressPercent / 100) * requiredCount);
+    const remaining = Math.max(0, requiredCount - current);
     return remaining > 0 ? `${remaining} more seasonal task${remaining !== 1 ? 's' : ''} to unlock` : 'Complete!';
   } else if (criteria.type === 'under_budget') {
     const current = Math.round((progressPercent / 100) * criteria.count);
-    const remaining = criteria.count - current;
+    const remaining = Math.max(0, criteria.count - current);
     return remaining > 0 ? `${remaining} more task${remaining !== 1 ? 's' : ''} to unlock` : 'Complete!';
   } else if (criteria.type === 'total_savings') {
     const current = Math.round((progressPercent / 100) * criteria.amount);
-    const remaining = criteria.amount - current;
+    const remaining = Math.max(0, criteria.amount - current);
     return remaining > 0 ? `$${remaining.toLocaleString()} more in savings to unlock` : 'Complete!';
   } else if (criteria.type === 'documents_uploaded') {
     const current = Math.round((progressPercent / 100) * criteria.count);
-    const remaining = criteria.count - current;
+    const remaining = Math.max(0, criteria.count - current);
     return remaining > 0 ? `${remaining} more document${remaining !== 1 ? 's' : ''} to unlock` : 'Complete!';
   } else if (criteria.type === 'logs_created') {
     const current = Math.round((progressPercent / 100) * criteria.count);
-    const remaining = criteria.count - current;
+    const remaining = Math.max(0, criteria.count - current);
     return remaining > 0 ? `${remaining} more log${remaining !== 1 ? 's' : ''} to unlock` : 'Complete!';
   } else if (criteria.type === 'photos_uploaded') {
     const current = Math.round((progressPercent / 100) * criteria.count);
-    const remaining = criteria.count - current;
+    const remaining = Math.max(0, criteria.count - current);
     return remaining > 0 ? `${remaining} more photo pair${remaining !== 1 ? 's' : ''} to unlock` : 'Complete!';
   }
   return '';
