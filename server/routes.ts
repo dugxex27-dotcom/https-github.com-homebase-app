@@ -1112,8 +1112,202 @@ export async function registerRoutes(app: Express): Promise<Server> {
           user = await storage.upsertUser({
             ...user,
             companyId,
-            companyRole: 'owner'
+            companyRole: 'owner',
+            canRespondToProposals: true
           });
+
+          // Step 4: Add realistic 6-month usage data for contractor demo
+          try {
+            // CRM Leads - showing active pipeline
+            const leadIds = ['demo-lead-1', 'demo-lead-2', 'demo-lead-3', 'demo-lead-4', 'demo-lead-5'];
+            
+            // Hot lead - ready to close
+            await storage.createLead({
+              id: leadIds[0],
+              companyId,
+              createdBy: demoId,
+              customerName: 'Michael Chen',
+              customerEmail: 'michael.chen@email.com',
+              customerPhone: '(206) 555-1234',
+              serviceNeeded: 'HVAC Repair',
+              address: '1523 Pine Street, Seattle, WA 98101',
+              status: 'contacted',
+              priority: 'high',
+              estimatedValue: '850.00',
+              source: 'Website',
+              notes: 'AC not cooling. Customer has 20-year-old unit. Likely needs replacement. Scheduled estimate for next week.',
+              nextFollowUp: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+            });
+
+            // Warm lead - in progress
+            await storage.createLead({
+              id: leadIds[1],
+              companyId,
+              createdBy: demoId,
+              customerName: 'Jennifer Martinez',
+              customerEmail: 'jmartinez@email.com',
+              customerPhone: '(206) 555-5678',
+              serviceNeeded: 'Water Heater Installation',
+              address: '892 Broadway Ave E, Seattle, WA 98102',
+              status: 'qualified',
+              priority: 'medium',
+              estimatedValue: '1,850.00',
+              source: 'Referral',
+              notes: 'Current water heater is leaking. Wants tankless upgrade. Sent quote yesterday. Waiting for decision.',
+              nextFollowUp: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+            });
+
+            // New lead - just came in
+            await storage.createLead({
+              id: leadIds[2],
+              companyId,
+              createdBy: demoId,
+              customerName: 'Robert Thompson',
+              customerEmail: 'rthompson@email.com',
+              customerPhone: '(206) 555-9012',
+              serviceNeeded: 'Furnace Service',
+              address: '3345 15th Ave W, Seattle, WA 98119',
+              status: 'new',
+              priority: 'medium',
+              estimatedValue: '350.00',
+              source: 'Phone',
+              notes: 'Annual maintenance needed before winter. Called this morning. Need to call back to schedule.',
+              nextFollowUp: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+            });
+
+            // Lost lead - for realistic pipeline
+            await storage.createLead({
+              id: leadIds[3],
+              companyId,
+              createdBy: demoId,
+              customerName: 'Susan Williams',
+              customerEmail: 'swilliams@email.com',
+              customerPhone: '(206) 555-3456',
+              serviceNeeded: 'AC Installation',
+              address: '7821 Greenwood Ave N, Seattle, WA 98103',
+              status: 'lost',
+              priority: 'low',
+              estimatedValue: '4,500.00',
+              source: 'Google',
+              notes: 'Got 3 quotes. Went with another company that was $500 cheaper. Price-focused customer.',
+              nextFollowUp: null
+            });
+
+            // Won lead - converted to job
+            await storage.createLead({
+              id: leadIds[4],
+              companyId,
+              createdBy: demoId,
+              customerName: 'David Park',
+              customerEmail: 'dpark@email.com',
+              customerPhone: '(206) 555-7890',
+              serviceNeeded: 'Plumbing Repair',
+              address: '2156 Queen Anne Ave N, Seattle, WA 98109',
+              status: 'won',
+              priority: 'high',
+              estimatedValue: '625.00',
+              source: 'HomeBase',
+              notes: 'Emergency leak repair. Job completed successfully last week. Customer very happy.',
+              nextFollowUp: null
+            });
+
+            // Create some sample homeowner users for realistic messages/conversations
+            const sampleHomeownerIds = ['sample-homeowner-1', 'sample-homeowner-2', 'sample-homeowner-3'];
+            
+            for (let i = 0; i < sampleHomeownerIds.length; i++) {
+              await storage.upsertUser({
+                id: sampleHomeownerIds[i],
+                email: `homeowner${i + 1}@example.com`,
+                firstName: ['Emma', 'James', 'Sophia'][i],
+                lastName: ['Wilson', 'Brown', 'Davis'][i],
+                role: 'homeowner',
+                zipCode: '98105',
+                subscriptionStatus: 'active'
+              });
+            }
+
+            // Create conversation/messages with homeowners
+            const conv1Id = 'demo-conversation-1';
+            await storage.createConversation({
+              id: conv1Id,
+              homeownerId: sampleHomeownerIds[0],
+              contractorId: demoId,
+              companyId
+            });
+
+            // Message thread 1 - Active inquiry about HVAC service
+            await storage.createMessage({
+              conversationId: conv1Id,
+              senderId: sampleHomeownerIds[0],
+              senderRole: 'homeowner',
+              recipientId: demoId,
+              recipientRole: 'contractor',
+              content: 'Hi David! My furnace is making a strange rattling noise when it starts up. It\'s about 8 years old. Could you take a look at it? I\'m located in Fremont.',
+              createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+            });
+
+            await storage.createMessage({
+              conversationId: conv1Id,
+              senderId: demoId,
+              senderRole: 'contractor',
+              recipientId: sampleHomeownerIds[0],
+              recipientRole: 'homeowner',
+              content: 'Hello Emma! I\'d be happy to help. A rattling noise often indicates a loose component or debris in the blower. I can come by this Thursday or Friday afternoon. Would either of those work for you?',
+              createdAt: new Date(Date.now() - 2.5 * 24 * 60 * 60 * 1000)
+            });
+
+            await storage.createMessage({
+              conversationId: conv1Id,
+              senderId: sampleHomeownerIds[0],
+              senderRole: 'homeowner',
+              recipientId: demoId,
+              recipientRole: 'contractor',
+              content: 'Friday at 2pm would be perfect! What\'s your service call fee?',
+              createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+            });
+
+            await storage.createMessage({
+              conversationId: conv1Id,
+              senderId: demoId,
+              senderRole: 'contractor',
+              recipientId: sampleHomeownerIds[0],
+              recipientRole: 'homeowner',
+              content: 'Great! Friday at 2pm is booked. Our diagnostic service call is $125, which includes the first hour of labor. If repairs are needed, I\'ll provide an estimate before starting any work. See you Friday!',
+              createdAt: new Date(Date.now() - 1.8 * 24 * 60 * 60 * 1000)
+            });
+
+            // Message thread 2 - Past customer follow-up
+            const conv2Id = 'demo-conversation-2';
+            await storage.createConversation({
+              id: conv2Id,
+              homeownerId: sampleHomeownerIds[1],
+              contractorId: demoId,
+              companyId
+            });
+
+            await storage.createMessage({
+              conversationId: conv2Id,
+              senderId: demoId,
+              senderRole: 'contractor',
+              recipientId: sampleHomeownerIds[1],
+              recipientRole: 'homeowner',
+              content: 'Hi James! Just following up on the water heater installation we completed last month. Is everything working well? Remember that your 1-year labor warranty covers any installation issues.',
+              createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+            });
+
+            await storage.createMessage({
+              conversationId: conv2Id,
+              senderId: sampleHomeownerIds[1],
+              senderRole: 'homeowner',
+              recipientId: demoId,
+              recipientRole: 'contractor',
+              content: 'Everything is great! The tankless system is working perfectly. We love the endless hot water. Thanks for the quality work - I\'ve already recommended you to two neighbors!',
+              createdAt: new Date(Date.now() - 4.5 * 24 * 60 * 60 * 1000)
+            });
+
+          } catch (demoDataError) {
+            console.error("Error creating demo contractor data:", demoDataError);
+          }
         } catch (companyError) {
           console.error("Error creating demo company:", companyError);
         }
