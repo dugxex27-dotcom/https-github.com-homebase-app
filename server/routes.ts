@@ -6745,7 +6745,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const AVAILABLE_SERVICES = [
     "Appliance Installation", "Appliance Repair & Maintenance", "Basement Remodeling", "Bathroom Remodeling",
-    "Cabinet Installation", "Carpet Installation", "Closet Organization", "Concrete & Masonry",
+    "Cabinet Installation", "Carpet Cleaning", "Carpet Installation", "Chimney & Fireplace Services", "Closet Organization", "Concrete & Masonry",
     "Custom Carpentry", "Custom Home Building", "Deck Construction", "Drainage Solutions",
     "Drywall & Spackling Repair", "Dumpster Rental", "Electrical Services", "Epoxy Flooring",
     "Exterior Painting", "Fence Installation", "Fire & Water Damage Restoration", "Furniture Assembly",
@@ -6753,10 +6753,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     "Handyman Services", "Hardwood Flooring", "Holiday Light Installation", "Home Inspection",
     "House Cleaning", "HVAC Services", "Interior Painting", "Irrigation Systems",
     "Junk Removal", "Kitchen Remodeling", "Laminate & Vinyl Flooring", "Landscape Design",
-    "Lawn & Landscaping", "Masonry & Paver Installation", "Mold Remediation", "Pest Control",
+    "Lawn & Landscaping", "Local Moving", "Locksmiths", "Masonry & Paver Installation", "Mold Remediation", "Pest Control",
     "Plumbing Services", "Pool Installation", "Pool Maintenance", "Pressure Washing",
     "Roofing Services", "Security System Installation", "Septic Services", "Siding Installation",
-    "Snow Removal", "Tile Installation", "Tree Service & Trimming", "Trim & Finish Carpentry",
+    "Snow Removal", "Tile Installation", "Tree Service & Trimming", "Trim & Finish Carpentry", "Window Cleaning",
     "Windows & Door Installation"
   ];
 

@@ -21,7 +21,9 @@ const AVAILABLE_SERVICES = [
   "Basement Remodeling",
   "Bathroom Remodeling",
   "Cabinet Installation",
+  "Carpet Cleaning",
   "Carpet Installation",
+  "Chimney & Fireplace Services",
   "Closet Organization",
   "Concrete & Masonry",
   "Custom Carpentry",
@@ -53,6 +55,8 @@ const AVAILABLE_SERVICES = [
   "Laminate & Vinyl Flooring",
   "Landscape Design",
   "Lawn & Landscaping",
+  "Local Moving",
+  "Locksmiths",
   "Masonry & Paver Installation",
   "Mold Remediation",
   "Pest Control",
@@ -68,6 +72,7 @@ const AVAILABLE_SERVICES = [
   "Tile Installation",
   "Tree Service & Trimming",
   "Trim & Finish Carpentry",
+  "Window Cleaning",
   "Windows & Door Installation"
 ];
 

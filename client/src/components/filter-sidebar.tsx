@@ -25,7 +25,9 @@ export default function FilterSidebar({ onFiltersChange, userCountry = 'US' }: F
     "Basement Remodeling",
     "Bathroom Remodeling",
     "Cabinet Installation",
+    "Carpet Cleaning",
     "Carpet Installation",
+    "Chimney & Fireplace Services",
     "Closet Organization",
     "Concrete & Masonry",
     "Custom Carpentry",
@@ -58,6 +60,8 @@ export default function FilterSidebar({ onFiltersChange, userCountry = 'US' }: F
     "Laminate & Vinyl Flooring",
     "Landscape Design",
     "Lawn & Landscaping",
+    "Local Moving",
+    "Locksmiths",
     "Masonry & Paver Installation",
     "Mold Remediation",
     "Pest Control",
@@ -73,6 +77,7 @@ export default function FilterSidebar({ onFiltersChange, userCountry = 'US' }: F
     "Tile Installation",
     "Tree Service & Trimming",
     "Trim & Finish Carpentry",
+    "Window Cleaning",
     "Windows & Door Installation"
   ];
 
