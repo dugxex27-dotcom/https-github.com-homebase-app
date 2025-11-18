@@ -757,8 +757,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           connectionCode: 'DEMO4567'
         });
 
-        // Create sample houses for the demo homeowner
+        // Create sample houses for the demo homeowner - showing 6 months of active usage
         try {
+          // Main Residence
           const house1 = await storage.createHouse({
             homeownerId: demoId,
             name: 'Main Residence',
@@ -786,21 +787,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
             primaryHeatingFuel: 'natural-gas'
           });
 
-          // Add some service records for realism
+          // Vacation Rental Property - second home
+          const house2 = await storage.createHouse({
+            homeownerId: demoId,
+            name: 'Lake House (Rental)',
+            address: '4521 Lakeside Drive, Bellingham, WA 98225',
+            climateZone: 'pacific-northwest',
+            homeSystems: ['central-ac', 'gas-furnace', 'gas-water-heater', 'washer-dryer'],
+            isDefault: false,
+            countryId: 'USA',
+            regionId: 'WA',
+            postalCode: '98225',
+            latitude: 48.7519,
+            longitude: -122.4787,
+            yearBuilt: 1995,
+            squareFootage: 1800,
+            bedrooms: 3,
+            bathrooms: 2,
+            stories: 1,
+            garageSpaces: 1,
+            lotSize: 0.5,
+            propertyType: 'single-family',
+            roofType: 'asphalt-shingle',
+            roofAge: 15,
+            foundationType: 'crawl-space',
+            exteriorMaterial: 'wood-siding',
+            primaryHeatingFuel: 'natural-gas'
+          });
+
+          // Service records spanning 6 months for Main Residence
+          // Month 1 (6 months ago)
           await storage.createMaintenanceLog({
             homeownerId: demoId,
             houseId: house1.id,
-            serviceDate: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            serviceType: 'repair',
-            homeArea: 'hvac',
-            serviceDescription: 'Annual HVAC maintenance and filter replacement',
-            cost: '185.00',
-            contractorName: 'Mike Johnson',
-            contractorCompany: 'Elite Heating & Cooling',
-            notes: 'System is running efficiently. Replaced air filters and cleaned coils.',
+            serviceDate: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            serviceType: 'installation',
+            homeArea: 'security',
+            serviceDescription: 'Smart doorbell and security camera installation',
+            cost: '450.00',
+            contractorName: 'Tech Solutions Pro',
+            contractorCompany: 'SecureHome Systems',
+            notes: 'Installed Ring doorbell and two outdoor cameras. Configured mobile app and tested motion detection.',
             completionMethod: 'contractor'
           });
 
+          // Month 2 (5 months ago)
+          await storage.createMaintenanceLog({
+            homeownerId: demoId,
+            houseId: house1.id,
+            serviceDate: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            serviceType: 'repair',
+            homeArea: 'plumbing',
+            serviceDescription: 'Kitchen faucet replacement',
+            cost: '0.00',
+            contractorName: 'Sarah Anderson',
+            contractorCompany: null,
+            notes: 'Replaced old leaking faucet with new Moen model. Used YouTube tutorial for installation. Turned out great!',
+            completionMethod: 'diy',
+            diySavingsAmount: '275.00'
+          });
+
+          await storage.createMaintenanceLog({
+            homeownerId: demoId,
+            houseId: house1.id,
+            serviceDate: new Date(Date.now() - 145 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            serviceType: 'maintenance',
+            homeArea: 'exterior',
+            serviceDescription: 'Pressure washing deck and siding',
+            cost: '0.00',
+            contractorName: 'Sarah Anderson',
+            contractorCompany: null,
+            notes: 'Rented pressure washer from Home Depot. Took 4 hours but saved a ton of money. Deck looks brand new!',
+            completionMethod: 'diy',
+            diySavingsAmount: '325.00'
+          });
+
+          // Month 3 (4 months ago)
           await storage.createMaintenanceLog({
             homeownerId: demoId,
             houseId: house1.id,
@@ -811,23 +873,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
             cost: '150.00',
             contractorName: 'James Wilson',
             contractorCompany: 'ProGutter Services',
-            notes: 'Cleaned all gutters and downspouts. Found and repaired small leak in north gutter.',
+            notes: 'Cleaned all gutters and downspouts. Found and repaired small leak in north gutter. Recommended annual service.',
             completionMethod: 'contractor'
           });
 
           await storage.createMaintenanceLog({
             homeownerId: demoId,
             houseId: house1.id,
-            serviceDate: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            serviceDate: new Date(Date.now() - 110 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             serviceType: 'repair',
-            homeArea: 'plumbing',
-            serviceDescription: 'Kitchen faucet replacement',
+            homeArea: 'electrical',
+            serviceDescription: 'Replaced living room light fixture',
             cost: '0.00',
             contractorName: 'Sarah Anderson',
             contractorCompany: null,
-            notes: 'Replaced old leaking faucet with new Moen model. Used YouTube tutorial for installation.',
+            notes: 'Upgraded to modern LED fixture. Turned off breaker and followed safety guidelines. Much brighter now!',
             completionMethod: 'diy',
-            diySavingsAmount: '275.00'
+            diySavingsAmount: '185.00'
+          });
+
+          // Month 4 (3 months ago)
+          await storage.createMaintenanceLog({
+            homeownerId: demoId,
+            houseId: house1.id,
+            serviceDate: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            serviceType: 'maintenance',
+            homeArea: 'landscaping',
+            serviceDescription: 'Tree trimming and yard cleanup',
+            cost: '285.00',
+            contractorName: 'Green Thumb Landscaping',
+            contractorCompany: 'Green Thumb Services',
+            notes: 'Trimmed large oak tree branches overhanging roof. Cleaned up yard debris and mulched flower beds.',
+            completionMethod: 'contractor'
+          });
+
+          // Month 5 (2 months ago)
+          await storage.createMaintenanceLog({
+            homeownerId: demoId,
+            houseId: house1.id,
+            serviceDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            serviceType: 'inspection',
+            homeArea: 'hvac',
+            serviceDescription: 'Annual HVAC maintenance and tune-up',
+            cost: '185.00',
+            contractorName: 'Mike Johnson',
+            contractorCompany: 'Elite Heating & Cooling',
+            notes: 'System is running efficiently. Replaced air filters, cleaned coils, checked refrigerant levels. No issues found.',
+            completionMethod: 'contractor'
+          });
+
+          await storage.createMaintenanceLog({
+            homeownerId: demoId,
+            houseId: house1.id,
+            serviceDate: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            serviceType: 'maintenance',
+            homeArea: 'interior',
+            serviceDescription: 'Caulked bathroom tiles and repaired grout',
+            cost: '0.00',
+            contractorName: 'Sarah Anderson',
+            contractorCompany: null,
+            notes: 'Regrouted master bathroom shower. Bought supplies at hardware store. Looks professional!',
+            completionMethod: 'diy',
+            diySavingsAmount: '225.00'
+          });
+
+          // Month 6 (1 month ago)
+          await storage.createMaintenanceLog({
+            homeownerId: demoId,
+            houseId: house1.id,
+            serviceDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            serviceType: 'repair',
+            homeArea: 'garage',
+            serviceDescription: 'Garage door spring replacement',
+            cost: '195.00',
+            contractorName: 'Quick Fix Garage Doors',
+            contractorCompany: 'Reliable Garage Services',
+            notes: 'Spring broke suddenly. Same-day service. Professional and courteous. Door works perfectly now.',
+            completionMethod: 'contractor'
+          });
+
+          // Recent maintenance
+          await storage.createMaintenanceLog({
+            homeownerId: demoId,
+            houseId: house1.id,
+            serviceDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            serviceType: 'maintenance',
+            homeArea: 'hvac',
+            serviceDescription: 'Changed air filters',
+            cost: '0.00',
+            contractorName: 'Sarah Anderson',
+            contractorCompany: null,
+            notes: 'Quarterly filter change. Bought MERV 11 filters. Quick 15-minute job.',
+            completionMethod: 'diy',
+            diySavingsAmount: '75.00'
+          });
+
+          // Lake House service records
+          await storage.createMaintenanceLog({
+            homeownerId: demoId,
+            houseId: house2.id,
+            serviceDate: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            serviceType: 'inspection',
+            homeArea: 'plumbing',
+            serviceDescription: 'Annual septic system inspection',
+            cost: '225.00',
+            contractorName: 'Northwest Septic Services',
+            contractorCompany: 'Clean Flow Septic',
+            notes: 'System in good condition. Recommended pumping in 2 years. All drains flowing properly.',
+            completionMethod: 'contractor'
+          });
+
+          await storage.createMaintenanceLog({
+            homeownerId: demoId,
+            houseId: house2.id,
+            serviceDate: new Date(Date.now() - 75 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            serviceType: 'maintenance',
+            homeArea: 'exterior',
+            serviceDescription: 'Dock repair and wood staining',
+            cost: '425.00',
+            contractorName: 'Lake Life Maintenance',
+            contractorCompany: 'Waterfront Property Services',
+            notes: 'Replaced damaged boards and restained entire dock. Looks great for summer rentals.',
+            completionMethod: 'contractor'
+          });
+
+          await storage.createMaintenanceLog({
+            homeownerId: demoId,
+            houseId: house2.id,
+            serviceDate: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            serviceType: 'maintenance',
+            homeArea: 'interior',
+            serviceDescription: 'Deep cleaning between rentals',
+            cost: '180.00',
+            contractorName: 'Crystal Clean Services',
+            contractorCompany: 'Vacation Rental Cleaning Co',
+            notes: 'Professional deep clean after summer guests. Carpets, windows, all appliances. Ready for fall bookings.',
+            completionMethod: 'contractor'
           });
 
         } catch (houseError) {
