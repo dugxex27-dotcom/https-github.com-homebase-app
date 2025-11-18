@@ -954,6 +954,7 @@ export default function Maintenance() {
   // Service logs filter state
   const [homeAreaFilter, setHomeAreaFilter] = useState<string>("all");
   const [isServiceRecordsExpanded, setIsServiceRecordsExpanded] = useState<boolean>(false);
+  const [showAllRecords, setShowAllRecords] = useState<boolean>(false);
 
   // Use authenticated user's ID  
   const homeownerId = (user as any)?.id;
@@ -3365,103 +3366,150 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                 const filteredLogs = maintenanceLogs.filter(log => homeAreaFilter === "all" || log.homeArea === homeAreaFilter);
                 return filteredLogs.length > 0 ? (
                   <div className="space-y-4">
-                    {filteredLogs.map((log) => (
-                      <Card key={log.id} className="hover:shadow-md transition-shadow" style={{ backgroundColor: '#f2f2f2' }}>
-                        <CardContent className="p-6">
-                          <div className="flex justify-between items-start mb-4">
-                            <div className="flex items-start gap-3">
-                              <div className="bg-primary/10 p-2 rounded">
-                                <Wrench className="w-5 h-5 text-primary" />
-                              </div>
-                              <div>
-                                <h4 className="font-semibold text-foreground mb-1">
-                                  {log.serviceDescription}
-                                </h4>
-                                <div className="flex items-center gap-4 text-sm" style={{ color: '#2c0f5b' }}>
-                                  <span className="flex items-center gap-1">
-                                    <Calendar className="w-4 h-4" />
-                                    {new Date(log.serviceDate).toLocaleDateString()}
-                                  </span>
-                                  {log.homeArea && (
+                    {/* Render service record card helper function */}
+                    {(() => {
+                      const renderServiceCard = (log: any) => (
+                        <Card key={log.id} className="hover:shadow-md transition-shadow" style={{ backgroundColor: '#f2f2f2' }}>
+                          <CardContent className="p-6">
+                            <div className="flex justify-between items-start mb-4">
+                              <div className="flex items-start gap-3">
+                                <div className="bg-primary/10 p-2 rounded">
+                                  <Wrench className="w-5 h-5 text-primary" />
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-foreground mb-1">
+                                    {log.serviceDescription}
+                                  </h4>
+                                  <div className="flex items-center gap-4 text-sm" style={{ color: '#2c0f5b' }}>
                                     <span className="flex items-center gap-1">
-                                      <MapPin className="w-4 h-4" />
-                                      {getHomeAreaLabel(log.homeArea)}
+                                      <Calendar className="w-4 h-4" />
+                                      {new Date(log.serviceDate).toLocaleDateString()}
                                     </span>
-                                  )}
-                                  <span className="px-2 py-1 rounded-full text-xs" style={{ backgroundColor: '#2c0f5b20', color: '#2c0f5b' }}>
-                                    {getServiceTypeLabel(log.serviceType)}
-                                  </span>
+                                    {log.homeArea && (
+                                      <span className="flex items-center gap-1">
+                                        <MapPin className="w-4 h-4" />
+                                        {getHomeAreaLabel(log.homeArea)}
+                                      </span>
+                                    )}
+                                    <span className="px-2 py-1 rounded-full text-xs" style={{ backgroundColor: '#2c0f5b20', color: '#2c0f5b' }}>
+                                      {getServiceTypeLabel(log.serviceType)}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
+                              <div className="flex gap-1">
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  onClick={() => handleEditMaintenanceLog(log)}
+                                  style={{ color: '#2c0f5b' }}
+                                  className="hover:opacity-90"
+                                  data-testid={`button-edit-record-${log.id}`}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  onClick={() => deleteMaintenanceLogMutation.mutate(log.id)}
+                                  disabled={deleteMaintenanceLogMutation.isPending}
+                                  data-testid={`button-delete-record-${log.id}`}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex gap-1">
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                onClick={() => handleEditMaintenanceLog(log)}
-                                style={{ color: '#2c0f5b' }}
-                                className="hover:opacity-90"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                onClick={() => deleteMaintenanceLogMutation.mutate(log.id)}
-                                disabled={deleteMaintenanceLogMutation.isPending}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              {log.cost && (
+                                <div className="flex items-center gap-2">
+                                  <DollarSign className="w-4 h-4 text-muted-foreground" />
+                                  <span className="font-medium">${log.cost}</span>
+                                </div>
+                              )}
+                              {log.contractorName && (
+                                <div className="flex items-center gap-2">
+                                  <User className="w-4 h-4 text-muted-foreground" />
+                                  <span>{log.contractorName}</span>
+                                </div>
+                              )}
+                              {log.contractorCompany && (
+                                <div className="flex items-center gap-2">
+                                  <Building2 className="w-4 h-4 text-muted-foreground" />
+                                  <span>{log.contractorCompany}</span>
+                                </div>
+                              )}
+                              {log.nextServiceDue && (
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-4 h-4 text-muted-foreground" />
+                                  <span>Due: {new Date(log.nextServiceDue).toLocaleDateString()}</span>
+                                </div>
+                              )}
                             </div>
+                            
+                            {log.notes && (
+                              <div className="mt-4 p-3 bg-muted rounded text-sm">
+                                <span className="text-muted-foreground">{log.notes}</span>
+                              </div>
+                            )}
+                            
+                            {log.createdAt && (
+                              <div className="mt-3 text-xs text-gray-500 border-t pt-2">
+                                Record added on {new Date(log.createdAt).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'short', 
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+
+                      // Show last 2 records by default, with dropdown for older records
+                      const recentRecords = filteredLogs.slice(0, 2);
+                      const olderRecords = filteredLogs.slice(2);
+
+                      return (
+                        <>
+                          {/* Recent Records (Last 2) - Always Visible */}
+                          <div className="space-y-4">
+                            {recentRecords.map(log => renderServiceCard(log))}
                           </div>
-                          
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                            {log.cost && (
-                              <div className="flex items-center gap-2">
-                                <DollarSign className="w-4 h-4 text-muted-foreground" />
-                                <span className="font-medium">${log.cost}</span>
-                              </div>
-                            )}
-                            {log.contractorName && (
-                              <div className="flex items-center gap-2">
-                                <User className="w-4 h-4 text-muted-foreground" />
-                                <span>{log.contractorName}</span>
-                              </div>
-                            )}
-                            {log.contractorCompany && (
-                              <div className="flex items-center gap-2">
-                                <Building2 className="w-4 h-4 text-muted-foreground" />
-                                <span>{log.contractorCompany}</span>
-                              </div>
-                            )}
-                            {log.nextServiceDue && (
-                              <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-muted-foreground" />
-                                <span>Due: {new Date(log.nextServiceDue).toLocaleDateString()}</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {log.notes && (
-                            <div className="mt-4 p-3 bg-muted rounded text-sm">
-                              <span className="text-muted-foreground">{log.notes}</span>
+
+                          {/* Older Records - Collapsible Dropdown */}
+                          {olderRecords.length > 0 && (
+                            <div className="mt-4">
+                              <Collapsible open={showAllRecords} onOpenChange={setShowAllRecords}>
+                                <CollapsibleTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    className="w-full flex items-center justify-center gap-2"
+                                    style={{ backgroundColor: '#f2f2f2', borderColor: '#2c0f5b' }}
+                                    data-testid="button-toggle-older-records"
+                                  >
+                                    <span style={{ color: '#2c0f5b' }}>
+                                      {showAllRecords ? 'Hide' : 'Show'} {olderRecords.length} Older Record{olderRecords.length !== 1 ? 's' : ''}
+                                    </span>
+                                    <ChevronDown 
+                                      className={`w-4 h-4 transition-transform ${showAllRecords ? 'rotate-180' : ''}`}
+                                      style={{ color: '#2c0f5b' }}
+                                    />
+                                  </Button>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent className="mt-4">
+                                  <div className="space-y-4">
+                                    {olderRecords.map(log => renderServiceCard(log))}
+                                  </div>
+                                </CollapsibleContent>
+                              </Collapsible>
                             </div>
                           )}
-                          
-                          {log.createdAt && (
-                            <div className="mt-3 text-xs text-gray-500 border-t pt-2">
-                              Record added on {new Date(log.createdAt).toLocaleDateString('en-US', { 
-                                year: 'numeric', 
-                                month: 'short', 
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
+                        </>
+                      );
+                    })()}
                   </div>
                 ) : (
                   <div className="text-center py-12">
