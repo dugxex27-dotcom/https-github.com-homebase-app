@@ -14,8 +14,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, apiFileUpload, queryClient } from "@/lib/queryClient";
-import { CheckCircle, Clock, XCircle, Upload, AlertCircle, FileCheck, User, Camera, Mail, Share2, Copy, Gift, DollarSign, QrCode, Download, ImageIcon } from "lucide-react";
-import { SiFacebook, SiTwitter, SiWhatsapp } from "react-icons/si";
+import { CheckCircle, Clock, XCircle, Upload, AlertCircle, FileCheck, User, Camera, Mail, Share2, Copy, Gift, DollarSign, QrCode, Download, ImageIcon, Twitter } from "lucide-react";
+import { SiFacebook, SiWhatsapp } from "react-icons/si";
 
 import instagramPostImg from '@assets/generated_images/Agent_Instagram_referral_post_867b9fb1.png';
 import instagramStoryImg from '@assets/generated_images/Agent_Instagram_story_graphic_6ea21cfb.png';
@@ -749,7 +749,7 @@ export default function AgentAccount() {
                   onClick={shareViaTwitter}
                   data-testid="button-share-twitter"
                 >
-                  <SiTwitter className="w-4 h-4 mr-2" />
+                  <Twitter className="w-4 h-4 mr-2" />
                   Twitter
                 </Button>
                 <Button
