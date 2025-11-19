@@ -213,13 +213,6 @@ export default function Home() {
                         </>
                       )}
                     </p>
-                    <div className="mt-4 text-center">
-                      <Link href="/homeowner-account">
-                        <Button variant="outline" size="sm" className="text-purple-600 border-purple-300 hover:bg-purple-50" data-testid="button-view-referral-details">
-                          View Referral Details
-                        </Button>
-                      </Link>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
