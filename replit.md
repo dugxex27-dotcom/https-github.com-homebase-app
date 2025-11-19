@@ -40,6 +40,7 @@ Preferred communication style: Simple, everyday language.
     - **AI Contractor Recommendation**: AI-powered (GPT-5 via Replit AI) recommendations for contractor types based on homeowner problems.
     - **Permanent Connection Code System**: Unique 8-character code for homeowners to share with contractors for service record access.
     - **20-Mile Contractor Filtering**: Geocoded addresses enable distance-based contractor search. Maintenance task "Find Contractor" links automatically filter contractors within 20 miles of selected house for specific service categories. Uses OpenStreetMap Nominatim for geocoding with rate limiting and caching. Gracefully handles missing location data.
+    - **House Transfer System** (Nov 2025): Comprehensive property transfer functionality allowing homeowners to transfer house ownership with all associated data to another user. Transfers include: maintenance logs, service records, home appliances, contractor appointments, custom tasks, home systems, task completions (for home health score continuity), and task overrides (custom priority settings). Secure token-based acceptance system with expiration and status tracking.
 - **Marketplace**: Listing and browsing DIY products.
 - **Maintenance Guidance**: Seasonal home maintenance schedules with location-based and individual task priorities (traffic light system).
 - **Service Categories** (Updated Nov 2025): Platform supports 76 service categories including newly added: Carpet Cleaning, Chimney & Fireplace Services, Locksmiths, Local Moving, and Window Cleaning.

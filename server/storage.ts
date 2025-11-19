@@ -199,6 +199,8 @@ export interface IStorage {
     customTasksTransferred: number;
     homeSystemsTransferred: number;
     serviceRecordsTransferred: number;
+    taskCompletionsTransferred: number;
+    taskOverridesTransferred: number;
   }>;
   getHousesCount(homeownerId: string): Promise<number>;
 
@@ -6497,6 +6499,8 @@ class DbStorage implements IStorage {
     customTasksTransferred: number;
     homeSystemsTransferred: number;
     serviceRecordsTransferred: number;
+    taskCompletionsTransferred: number;
+    taskOverridesTransferred: number;
   }> {
     // Transfer house ownership
     await db.update(houses)
@@ -6547,6 +6551,18 @@ class DbStorage implements IStorage {
       .where(and(eq(serviceRecords.houseId, houseId), eq(serviceRecords.homeownerId, fromHomeownerId)))
       .returning();
 
+    // Transfer task completions (for home health score)
+    const completionsResult = await db.update(taskCompletions)
+      .set({ homeownerId: toHomeownerId })
+      .where(and(eq(taskCompletions.houseId, houseId), eq(taskCompletions.homeownerId, fromHomeownerId)))
+      .returning();
+
+    // Transfer task overrides (custom priority settings)
+    const overridesResult = await db.update(taskOverrides)
+      .set({ homeownerId: toHomeownerId })
+      .where(and(eq(taskOverrides.houseId, houseId), eq(taskOverrides.homeownerId, fromHomeownerId)))
+      .returning();
+
     return {
       maintenanceLogsTransferred: logsResult.length,
       appliancesTransferred,
@@ -6554,6 +6570,8 @@ class DbStorage implements IStorage {
       customTasksTransferred: tasksResult.length,
       homeSystemsTransferred: systemsResult.length,
       serviceRecordsTransferred: recordsResult.length,
+      taskCompletionsTransferred: completionsResult.length,
+      taskOverridesTransferred: overridesResult.length,
     };
   }
 
