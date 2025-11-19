@@ -78,7 +78,7 @@ export default function ContractorDashboard() {
                 <Button 
                   className="h-20 flex flex-col items-center justify-center space-y-2 text-white hover:opacity-90"
                   style={{ backgroundColor: '#1560a2', border: 'none' }}
-                  onClick={() => window.location.href = "/profile"}
+                  onClick={() => window.location.href = "/contractor-profile"}
                   onMouseEnter={(e) => { e.currentTarget.style.color = '#afd6f9'; e.currentTarget.querySelectorAll('svg').forEach(svg => svg.style.color = '#afd6f9'); }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = 'white'; e.currentTarget.querySelectorAll('svg').forEach(svg => svg.style.color = 'white'); }}
                 >
