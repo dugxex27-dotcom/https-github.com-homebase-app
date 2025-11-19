@@ -61,6 +61,7 @@ const SignInHomeowner = lazy(() => import("./pages/signin-homeowner"));
 const SignInContractor = lazy(() => import("./pages/signin-contractor"));
 const SignInAgent = lazy(() => import("./pages/signin-agent"));
 const Onboarding = lazy(() => import("./pages/onboarding"));
+const Invite = lazy(() => import("./pages/invite"));
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -86,6 +87,7 @@ function Router() {
     return (
       <UnauthenticatedLayout>
         <Switch>
+          <Route path="/invite/:code" component={Invite} />
           <Route path="/onboarding" component={Onboarding} />
           <Route path="/signin/homeowner" component={SignInHomeowner} />
           <Route path="/signin/contractor" component={SignInContractor} />

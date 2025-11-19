@@ -585,7 +585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return res.json({ 
               referralCode: newCode,
               referralCount: user.referralCount || 0,
-              referralLink: `${req.protocol}://${req.get('host')}/?ref=${newCode}`
+              referralLink: `${req.protocol}://${req.get('host')}/invite/${newCode}`
             });
           }
           
@@ -593,7 +593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.json({ 
             referralCode: company.referralCode,
             referralCount: user.referralCount || 0,
-            referralLink: `${req.protocol}://${req.get('host')}/?ref=${company.referralCode}`
+            referralLink: `${req.protocol}://${req.get('host')}/invite/${company.referralCode}`
           });
         }
       }
@@ -615,11 +615,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         referralCode: user.referralCode,
         referralCount: user.referralCount || 0,
-        referralLink: `${req.protocol}://${req.get('host')}/?ref=${user.referralCode}`
+        referralLink: `${req.protocol}://${req.get('host')}/invite/${user.referralCode}`
       });
     } catch (error) {
       console.error("Error getting referral code:", error);
       res.status(500).json({ message: "Failed to get referral code" });
+    }
+  });
+
+  // Get referral information by code (for invite page)
+  app.get('/api/referrals/:code', async (req: any, res) => {
+    try {
+      const { code } = req.params;
+      
+      if (!code) {
+        return res.status(400).json({ message: "Referral code is required" });
+      }
+      
+      const user = await storage.getUserByReferralCode(code);
+      
+      if (!user) {
+        return res.status(404).json({ message: "Invalid referral code" });
+      }
+      
+      // Return only the first name and role for privacy
+      return res.json({ 
+        firstName: user.firstName || 'A friend',
+        role: user.role
+      });
+    } catch (error) {
+      console.error("Error getting referral info:", error);
+      res.status(500).json({ message: "Failed to get referral information" });
     }
   });
 
