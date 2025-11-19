@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Package, Calendar, Search, MapPin, Star, CheckCircle, TrendingUp, Shield, Home as HomeIcon, Wrench, Bell, BarChart3, X, ChevronDown, Trophy, Lock, Sparkles } from "lucide-react";
+import { Users, Package, Calendar, Search, MapPin, Star, CheckCircle, TrendingUp, Shield, Home as HomeIcon, Wrench, Bell, BarChart3, X, ChevronDown, Trophy, Lock, Sparkles, Gift } from "lucide-react";
 import HeroSection from "@/components/hero-section";
 import ProductCard from "@/components/product-card";
 import Logo from "@/components/logo";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import type { Product, User, House } from "@shared/schema";
 import { Link, useLocation } from "wouter";
@@ -151,6 +152,26 @@ export default function Home() {
     },
   });
 
+  // Referral data query for homeowners
+  const { data: referralData } = useQuery({
+    queryKey: ['/api/user/referral-code'],
+    enabled: typedUser?.role === 'homeowner',
+  });
+
+  // User data query for subscription details
+  const { data: userData } = useQuery({
+    queryKey: ['/api/user'],
+    enabled: typedUser?.role === 'homeowner',
+  });
+
+  // Calculate referral progress for homeowners
+  const referralCount = (referralData as any)?.referralCount || 0;
+  const maxHouses = (userData as any)?.maxHousesAllowed ?? 2;
+  const subscriptionCost = maxHouses >= 7 ? 40 : maxHouses >= 3 ? 20 : 5;
+  const referralsNeeded = subscriptionCost;
+  const referralsRemaining = Math.max(0, referralsNeeded - referralCount);
+  const progressPercentage = Math.min(100, (referralCount / referralsNeeded) * 100);
+
   // Find the selected house for Health Score
   const selectedHouse = userHouses.find(h => h.id === selectedHouseId);
 
@@ -158,6 +179,55 @@ export default function Home() {
     <div className="min-h-screen" style={{ background: typedUser?.role === 'homeowner' ? '#2c0f5b' : '#1560a2' }}>
       <HeroSection />
       
+      {/* Progress to Free Subscription Section */}
+      {typedUser?.role === 'homeowner' && (
+        <section className="py-8 sm:py-12" style={{ backgroundColor: '#2c0f5b' }}>
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+            <div className="max-w-5xl mx-auto">
+              <Card className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 border-purple-200 dark:border-purple-800">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-center text-foreground">
+                    <div className="flex items-center justify-center gap-2 text-[20px] sm:text-[23px] font-bold" style={{ color: '#2c0f5b' }}>
+                      <Gift className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
+                      Progress to Free Subscription
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="p-4 bg-white rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium" style={{ color: '#2c0f5b' }}>
+                        Referral Progress
+                      </span>
+                      <span className="text-sm font-bold" style={{ color: '#2c0f5b' }}>
+                        {referralCount}/{referralsNeeded}
+                      </span>
+                    </div>
+                    <Progress value={progressPercentage} className="h-3 mb-2" data-testid="progress-referral-subscription" />
+                    <p className="text-center text-[18px] sm:text-[20px]" style={{ color: referralsRemaining === 0 ? '#10b981' : '#dc2626' }}>
+                      {referralsRemaining === 0 ? (
+                        <span className="font-bold">🎉 You've earned a free subscription!</span>
+                      ) : (
+                        <>
+                          <span className="font-bold">{referralsRemaining} more referral{referralsRemaining !== 1 ? 's' : ''}</span> until your subscription is free!
+                        </>
+                      )}
+                    </p>
+                    <div className="mt-4 text-center">
+                      <Link href="/homeowner-account">
+                        <Button variant="outline" size="sm" className="text-purple-600 border-purple-300 hover:bg-purple-50" data-testid="button-view-referral-details">
+                          View Referral Details
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Home Health Score Section - All Homes */}
       {typedUser?.role === 'homeowner' && userHouses.length > 0 && (
         <section className="py-8 sm:py-12" style={{ backgroundColor: '#2c0f5b' }}>
