@@ -32,10 +32,15 @@ import {
   Send,
   Clock,
   CheckCircle,
-  Plus
+  Plus,
+  Download,
+  Image as ImageIcon
 } from "lucide-react";
 import PushNotificationManager from "@/components/push-notification-manager";
 import { HomeownerConnectionCodes } from "@/components/ConnectionCodes";
+import instagramPostImg from '@assets/generated_images/Instagram_referral_post_square_843cce29.png';
+import instagramStoryImg from '@assets/generated_images/Instagram_story_referral_vertical_fd4053fc.png';
+import facebookTwitterImg from '@assets/generated_images/Facebook_Twitter_share_image_8823d9cc.png';
 
 export default function HomeownerAccount() {
   const { user } = useAuth();
@@ -217,6 +222,61 @@ export default function HomeownerAccount() {
   const shareViaWhatsApp = () => {
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const downloadImageWithCode = async (imageUrl: string, fileName: string, codePosition: { x: number, y: number }) => {
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = imageUrl;
+      
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        throw new Error('Could not get canvas context');
+      }
+
+      // Draw the image
+      ctx.drawImage(img, 0, 0);
+
+      // Add referral code text
+      ctx.font = 'bold 48px Inter, sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.fillText(referralCode, codePosition.x, codePosition.y);
+
+      // Convert to blob and download
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          a.click();
+          URL.revokeObjectURL(url);
+          
+          toast({
+            title: "Downloaded!",
+            description: "Your personalized graphic has been downloaded",
+          });
+        }
+      }, 'image/png');
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   // House transfer queries and mutations
@@ -701,6 +761,92 @@ export default function HomeownerAccount() {
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
                     Share this link and I get $1 off when someone subscribes using my code. New users pay regular price but help me save money!
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Shareable Graphics */}
+            <Card style={{ backgroundColor: '#f2f2f2' }}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5" />
+                  Shareable Graphics
+                </CardTitle>
+                <CardDescription>
+                  Download personalized graphics with your referral code to share on social media
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-gray-600 mb-4">
+                  Click download on any graphic below to get a personalized version with your referral code <span className="font-mono font-bold" style={{ color: '#2c0f5b' }}>{referralCode}</span> already included!
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Instagram Post */}
+                  <div className="bg-white rounded-lg p-3 space-y-2">
+                    <div className="aspect-square rounded overflow-hidden border-2 border-gray-200">
+                      <img src={instagramPostImg} alt="Instagram Post Template" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-semibold text-sm" style={{ color: '#2c0f5b' }}>Instagram Post</h4>
+                      <p className="text-xs text-gray-600">Square format - 1080x1080px</p>
+                      <Button
+                        onClick={() => downloadImageWithCode(instagramPostImg, `homebase-referral-instagram-${referralCode}.png`, { x: 540, y: 950 })}
+                        size="sm"
+                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                        data-testid="button-download-instagram-post"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Instagram Story */}
+                  <div className="bg-white rounded-lg p-3 space-y-2">
+                    <div className="aspect-[9/16] rounded overflow-hidden border-2 border-gray-200 max-h-64">
+                      <img src={instagramStoryImg} alt="Instagram Story Template" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-semibold text-sm" style={{ color: '#2c0f5b' }}>Instagram Story</h4>
+                      <p className="text-xs text-gray-600">Vertical format - 1080x1920px</p>
+                      <Button
+                        onClick={() => downloadImageWithCode(instagramStoryImg, `homebase-referral-story-${referralCode}.png`, { x: 540, y: 1750 })}
+                        size="sm"
+                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                        data-testid="button-download-instagram-story"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Facebook/Twitter */}
+                  <div className="bg-white rounded-lg p-3 space-y-2">
+                    <div className="aspect-[16/9] rounded overflow-hidden border-2 border-gray-200">
+                      <img src={facebookTwitterImg} alt="Facebook/Twitter Template" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-semibold text-sm" style={{ color: '#2c0f5b' }}>Facebook/Twitter</h4>
+                      <p className="text-xs text-gray-600">Horizontal - 1200x630px</p>
+                      <Button
+                        onClick={() => downloadImageWithCode(facebookTwitterImg, `homebase-referral-facebook-${referralCode}.png`, { x: 600, y: 580 })}
+                        size="sm"
+                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                        data-testid="button-download-facebook-twitter"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>Tip:</strong> Download these graphics and share them on your social media. When friends sign up using your code, you'll earn $1 off your subscription for each referral!
                   </p>
                 </div>
               </CardContent>
