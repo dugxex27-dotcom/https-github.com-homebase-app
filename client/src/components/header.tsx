@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Users, Package, User as UserIcon, LogOut, MessageCircle, Trophy, Shield, Calendar, Crown, HelpCircle, Menu, X } from "lucide-react";
+import { Users, User as UserIcon, LogOut, MessageCircle, Trophy, Shield, Calendar, Crown, HelpCircle, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Notifications } from "@/components/notifications";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { cn } from "@/lib/utils";
 import type { User, Notification } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
 import logoImage from '@assets/homebase-logo-black-text2_1763334854521.png';
@@ -17,27 +15,6 @@ export default function Header() {
   const { user, isAuthenticated } = useAuth();
   const typedUser = user as User | undefined;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Helper function for consistent nav link styling
-  const getNavLinkClass = (isActive: boolean) => {
-    const isContractor = typedUser?.role === 'contractor';
-    
-    if (isContractor) {
-      return cn(
-        "relative inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-        isActive
-          ? "text-white bg-white/20 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-white"
-          : "text-white/80 hover:text-white hover:bg-white/10"
-      );
-    }
-    
-    return cn(
-      "relative inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-      isActive
-        ? "text-primary bg-primary/10 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary"
-        : "text-foreground/70 hover:text-primary hover:bg-primary/5"
-    );
-  };
 
   // Check if user is admin
   const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((e: string) => e.trim()).filter(Boolean);
@@ -113,14 +90,14 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
         <div className="flex justify-between items-center h-14 sm:h-16">
           <div className="flex items-center gap-2">
-            {/* Mobile Menu Button */}
+            {/* Hamburger Menu Button - Always Visible */}
             {isAuthenticated && typedUser && (
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="md:hidden p-2"
+                    className={`p-2 ${typedUser?.role === 'contractor' ? 'hover:bg-white/20 text-white' : ''}`}
                     aria-label="Open menu"
                   >
                     <Menu className="h-5 w-5" />
@@ -244,6 +221,29 @@ export default function Header() {
                         </Link>
                       </>
                     )}
+                    
+                    {/* Notifications Section - For homeowners and contractors */}
+                    {(typedUser.role === 'homeowner' || typedUser.role === 'contractor') && (
+                      <div className="px-3 py-2">
+                        <Notifications />
+                      </div>
+                    )}
+                    
+                    {/* Divider */}
+                    <div className="my-2 border-t border-border" />
+                    
+                    {/* Logout Button */}
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm hover:bg-muted text-red-600"
+                      data-testid="button-logout-menu"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
                   </nav>
                 </SheetContent>
               </Sheet>
@@ -269,193 +269,16 @@ export default function Header() {
             </Link>
           </div>
           
-          <nav className="hidden md:flex items-center gap-2" aria-label="Main navigation">
-            {isAdmin && (
-              <Link 
-                href="/admin" 
-                className={getNavLinkClass(location === '/admin')} 
-                data-testid="link-admin"
-                aria-current={location === '/admin' ? 'page' : undefined}
-              >
-                <Shield className="w-4 h-4" />
-                Admin
-              </Link>
-            )}
-            {typedUser?.role === 'homeowner' && (
-              <>
-                <Link 
-                  href="/maintenance" 
-                  className={getNavLinkClass(location === '/maintenance')}
-                  aria-current={location === '/maintenance' ? 'page' : undefined}
-                >
-                  Maintenance
-                  {hasNotificationsForTab('maintenance') && (
-                    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" aria-label="New notifications" />
-                  )}
-                </Link>
-                <Link 
-                  href="/contractors" 
-                  className={getNavLinkClass(location === '/contractors' || location === '/find-contractors')}
-                  aria-current={location === '/contractors' || location === '/find-contractors' ? 'page' : undefined}
-                >
-                  Contractors
-                </Link>
-                <Link 
-                  href="/products" 
-                  className={getNavLinkClass(location === '/products')}
-                  aria-current={location === '/products' ? 'page' : undefined}
-                >
-                  Products
-                </Link>
-                <Link 
-                  href="/messages" 
-                  className={getNavLinkClass(location === '/messages')}
-                  aria-current={location === '/messages' ? 'page' : undefined}
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Messages
-                  {hasNotificationsForTab('messages') && (
-                    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" aria-label="New notifications" />
-                  )}
-                </Link>
-                <Link 
-                  href="/achievements" 
-                  className={getNavLinkClass(location === '/achievements')} 
-                  data-testid="link-achievements"
-                  aria-current={location === '/achievements' ? 'page' : undefined}
-                >
-                  <Trophy className="w-4 h-4" />
-                  Achievements
-                </Link>
-                <Link 
-                  href="/account" 
-                  className={getNavLinkClass(location === '/account')}
-                  aria-current={location === '/account' ? 'page' : undefined}
-                >
-                  <UserIcon className="w-4 h-4" />
-                  Account
-                </Link>
-                <Link 
-                  href="/support" 
-                  className={getNavLinkClass(location.startsWith('/support'))}
-                  aria-current={location.startsWith('/support') ? 'page' : undefined}
-                  data-testid="link-support"
-                >
-                  <HelpCircle className="w-4 h-4" />
-                  Support
-                </Link>
-              </>
-            )}
-            {typedUser?.role === 'contractor' && (
-              <>
-                <Link 
-                  href="/contractor-dashboard" 
-                  className={getNavLinkClass(location === '/contractor-dashboard')}
-                  aria-current={location === '/contractor-dashboard' ? 'page' : undefined}
-                >
-                  Dashboard
-                  {hasNotificationsForTab('dashboard') && (
-                    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" aria-label="New notifications" />
-                  )}
-                </Link>
-                <Link 
-                  href="/manage-team" 
-                  className={getNavLinkClass(location === '/manage-team')} 
-                  data-testid="link-manage-team"
-                  aria-current={location === '/manage-team' ? 'page' : undefined}
-                >
-                  <Users className="w-4 h-4" />
-                  Manage Team
-                </Link>
-                <Link 
-                  href="/messages" 
-                  className={getNavLinkClass(location === '/messages')}
-                  aria-current={location === '/messages' ? 'page' : undefined}
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Messages
-                  {hasNotificationsForTab('messages') && (
-                    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" aria-label="New notifications" />
-                  )}
-                </Link>
-                <Link 
-                  href="/support" 
-                  className={getNavLinkClass(location.startsWith('/support'))}
-                  aria-current={location.startsWith('/support') ? 'page' : undefined}
-                  data-testid="link-support"
-                >
-                  <HelpCircle className="w-4 h-4" />
-                  Support
-                </Link>
-              </>
-            )}
-            {typedUser?.role === 'agent' && (
-              <>
-                <Link 
-                  href="/agent-dashboard" 
-                  className={getNavLinkClass(location === '/agent-dashboard')}
-                  aria-current={location === '/agent-dashboard' ? 'page' : undefined}
-                  data-testid="link-agent-dashboard"
-                >
-                  Dashboard
-                </Link>
-                <Link 
-                  href="/agent-account" 
-                  className={getNavLinkClass(location === '/agent-account')}
-                  aria-current={location === '/agent-account' ? 'page' : undefined}
-                  data-testid="link-agent-account"
-                >
-                  <UserIcon className="w-4 h-4" />
-                  Account
-                </Link>
-                <Link 
-                  href="/support" 
-                  className={getNavLinkClass(location.startsWith('/support'))}
-                  aria-current={location.startsWith('/support') ? 'page' : undefined}
-                  data-testid="link-support"
-                >
-                  <HelpCircle className="w-4 h-4" />
-                  Support
-                </Link>
-              </>
-            )}
-          </nav>
-
-          <div className="flex items-center gap-2">
-            {isAuthenticated && (typedUser?.role === 'homeowner' || typedUser?.role === 'contractor') && <Notifications />}
-            
-            {isAuthenticated && typedUser && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleLogout}
-                      data-testid="button-logout"
-                      aria-label="Sign out"
-                      className={`h-8 w-8 p-0 ${typedUser.role === 'contractor' ? 'border-white bg-white text-[#1560a2] hover:bg-white/90' : ''}`}
-                    >
-                      <LogOut className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Sign Out</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-            
-            {!isAuthenticated && (
-              <Button 
-                onClick={() => window.location.href = '/signin'}
-                aria-label="Sign in"
-                className="text-sm h-9 px-3 sm:px-4"
-              >
-                Sign In
-              </Button>
-            )}
-          </div>
+          {/* Sign In Button for Unauthenticated Users */}
+          {!isAuthenticated && (
+            <Button 
+              onClick={() => window.location.href = '/signin'}
+              aria-label="Sign in"
+              className="text-sm h-9 px-3 sm:px-4"
+            >
+              Sign In
+            </Button>
+          )}
         </div>
       </div>
 
