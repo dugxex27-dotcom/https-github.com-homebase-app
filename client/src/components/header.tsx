@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Users, User as UserIcon, LogOut, MessageCircle, Trophy, Shield, Calendar, Crown, HelpCircle, Menu, Wrench, Building2, Package, LayoutDashboard } from "lucide-react";
+import { Users, User as UserIcon, LogOut, MessageCircle, Trophy, Shield, Calendar, Crown, HelpCircle, Menu, Wrench, Building2, Package, LayoutDashboard, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Notifications } from "@/components/notifications";
@@ -142,6 +142,12 @@ export default function Header() {
                           <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/products' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
                             <Package className="w-4 h-4" />
                             Products
+                          </button>
+                        </Link>
+                        <Link href="/service-records" onClick={() => setMobileMenuOpen(false)}>
+                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/service-records' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                            <FileText className="w-4 h-4" />
+                            Service Records
                           </button>
                         </Link>
                         <Link href="/messages" onClick={() => setMobileMenuOpen(false)}>
