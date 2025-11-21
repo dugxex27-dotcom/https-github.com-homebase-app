@@ -211,7 +211,12 @@ export default function Achievements() {
 
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-            <Card style={{ backgroundColor: '#f2f2f2' }}>
+            <Card 
+              style={{ backgroundColor: '#f2f2f2' }}
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => setSelectedCategory('all')}
+              data-testid="card-total-achievements"
+            >
               <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
                 <div className="text-center">
                   <p className="text-2xl sm:text-3xl font-bold" style={{ color: '#6d28d9' }}>
@@ -222,7 +227,12 @@ export default function Achievements() {
               </CardContent>
             </Card>
             
-            <Card style={{ backgroundColor: '#f2f2f2' }}>
+            <Card 
+              style={{ backgroundColor: '#f2f2f2' }}
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => setSelectedCategory('seasonal')}
+              data-testid="card-seasonal"
+            >
               <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
                 <div className="text-center">
                   <p className="text-2xl sm:text-3xl font-bold" style={{ color: '#3b82f6' }}>
@@ -233,7 +243,12 @@ export default function Achievements() {
               </CardContent>
             </Card>
             
-            <Card style={{ backgroundColor: '#f2f2f2' }}>
+            <Card 
+              style={{ backgroundColor: '#f2f2f2' }}
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => setSelectedCategory('financial savvy')}
+              data-testid="card-financial"
+            >
               <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
                 <div className="text-center">
                   <p className="text-2xl sm:text-3xl font-bold" style={{ color: '#10b981' }}>
@@ -244,7 +259,12 @@ export default function Achievements() {
               </CardContent>
             </Card>
             
-            <Card style={{ backgroundColor: '#f2f2f2' }}>
+            <Card 
+              style={{ backgroundColor: '#f2f2f2' }}
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => setSelectedCategory('organization')}
+              data-testid="card-organization"
+            >
               <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
                 <div className="text-center">
                   <p className="text-2xl sm:text-3xl font-bold" style={{ color: '#f59e0b' }}>
