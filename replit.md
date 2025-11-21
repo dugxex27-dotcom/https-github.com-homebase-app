@@ -83,9 +83,14 @@ Preferred communication style: Simple, everyday language.
     - **User Status Updates**: Automatic subscription status updates based on webhook events.
     - **Payment Transparency**: Users can view complete billing history on billing page.
 - **Gamified Achievement System** (Nov 2025):
-    - **32 Total Achievements** across 8 categories with progression tracking
+    - **46 Total Achievements** across 8 categories with progression tracking (expanded from 32)
     - **Seasonal Achievements** (4): Winter Warrior, Spring Renewal, Summer Sentinel, Fall Prepper - unlock by completing 5 seasonal tasks
-    - **Financial Savvy** (5): Budget Boss ($500 saved), Savings Expert ($1,000), Frugal Master ($2,500), DIY Champion (10 under budget), Penny Pincher Pro (25 under budget)
+    - **Financial Savvy** (19 - EXPANDED!): Designed for long-term engagement (6-12+ months to complete all tiers)
+        - **Total Savings Tiers** (8): Budget Boss ($500), Savings Expert ($1K), Frugal Master ($2.5K), Savings Titan ($5K), Savings Legend ($10K), Savings Master ($25K), Savings Guru ($50K), Ultimate Saver ($100K)
+        - **Under Budget Tiers** (6): DIY Champion (10 tasks), Penny Pincher Pro (25 tasks), Budget Expert (50 tasks), Budget Legend (100 tasks), Budget Master (250 tasks), Budget Champion (500 tasks)
+        - **Savings Streaks** (3): Consistent Saver (6 consecutive months with savings), Year-Long Saver (12 months), Savings Marathon (24 months)
+        - **High ROI per Task** (3): Efficiency Expert (avg $200/task), ROI Master (avg $500/task), Value Maximizer (avg $1K/task) - requires minimum 10 tasks
+        - **Quarterly Savings Goals** (3): Quarterly Winner ($1K in a quarter), Quarterly Champion ($2.5K), Quarterly Legend ($5K)
     - **Organization** (6): Getting Started (3 records), Record Keeper (10 records), Documentation Pro (25 records), Photo Journalist (5 photo pairs), Visual Archivist (15 photo pairs), Receipt Ranger (10 documents)
     - **Referral & Community** (4): Helpful Neighbor (1 referral), Community Builder (3 referrals), Ambassador (5 referrals), Influencer (10 referrals)
     - **Milestones** (6): First Step (1 task), Getting Serious (10 tasks), Maintenance Master (25 tasks), Home Hero (50 tasks), Multi-Property Manager (2+ properties), Contractor Connection (first hire)
@@ -94,6 +99,7 @@ Preferred communication style: Simple, everyday language.
     - **Progress Tracking**: Real-time percentage progress for all achievements, automatic unlocking when criteria met
     - **Achievement Page**: Purple-themed UI with category tabs, stat cards, progress bars, unlock dates, and achievement detail modals
     - **Retroactive Checking**: POST `/api/achievements/check` endpoint processes historical data to award missed achievements
+    - **Implementation**: Three new criteria types added: `consecutive_savings_months` (streak tracking), `average_savings_per_task` (ROI tracking), `quarterly_savings` (time-boxed goals)
 - **API Endpoints**: Structured for contractors, products, houses, notifications, proposals, connection codes, search analytics, billing/subscriptions, billing history, error logging, agent/affiliate system, CRM leads, achievements, and admin functions.
 
 ## External Dependencies
