@@ -225,7 +225,7 @@ export default function Home() {
       )}
       {/* Home Health Score Section - All Homes */}
       {typedUser?.role === 'homeowner' && userHouses.length > 0 && (
-        <section className="py-8 sm:py-12" style={{ backgroundColor: '#2c0f5b' }}>
+        <section className="py-8 sm:py-12" style={{ background: 'transparent' }}>
           <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
             <div className="max-w-5xl mx-auto space-y-6">
               {userHouses.map((house) => (
@@ -241,7 +241,7 @@ export default function Home() {
       )}
       {/* Homeowner Achievements Section */}
       {typedUser?.role === 'homeowner' && achievementsData?.achievements && achievementsData.achievements.length > 0 && (
-        <section className="py-8 sm:py-12" style={{ backgroundColor: '#2c0f5b' }}>
+        <section className="py-8 sm:py-12" style={{ background: 'transparent' }}>
           <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
             <div className="max-w-5xl mx-auto">
               <Card style={{ backgroundColor: '#f2f2f2' }}>
