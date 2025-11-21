@@ -67,7 +67,7 @@ export default function Home() {
                   </div>
                 </CardTitle>
                 <p className="text-center text-gray-600 mt-2">
-                  Get {referralsNeeded} paid referrals. Unlock HomeBase for free — forever.
+                  Get {referralsNeeded} paid referrals. Free as long as they remain subscribers.
                 </p>
               </CardHeader>
               <CardContent>
