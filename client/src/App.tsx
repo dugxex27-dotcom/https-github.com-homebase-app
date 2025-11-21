@@ -43,6 +43,7 @@ const CrmLeadDetail = lazy(() => import("./pages/crm-lead-detail"));
 // Lazy-loaded pages - Agent
 const AgentDashboard = lazy(() => import("./pages/agent-dashboard"));
 const AgentAccount = lazy(() => import("./pages/agent-account"));
+const AgentReferral = lazy(() => import("./pages/agent-referral"));
 
 // Lazy-loaded pages - Admin
 const AdminDashboard = lazy(() => import("./pages/admin"));
@@ -179,6 +180,7 @@ function Router() {
           <>
             <Route path="/agent-dashboard" component={AgentDashboard} />
             <Route path="/agent-account" component={AgentAccount} />
+            <Route path="/agent-referral" component={AgentReferral} />
             <Route path="/billing" component={Billing} />
           </>
         )}

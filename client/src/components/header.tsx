@@ -239,6 +239,12 @@ export default function Header() {
                             Dashboard
                           </button>
                         </Link>
+                        <Link href="/agent-referral" onClick={() => setMobileMenuOpen(false)}>
+                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/agent-referral' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                            <Gift className="w-4 h-4" />
+                            Referral
+                          </button>
+                        </Link>
                         <Link href="/agent-account" onClick={() => setMobileMenuOpen(false)}>
                           <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/agent-account' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
                             <UserIcon className="w-4 h-4" />
