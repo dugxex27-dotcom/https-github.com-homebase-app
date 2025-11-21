@@ -317,14 +317,6 @@ export default function Billing() {
                     <Check className="h-5 w-5 text-purple-600 mt-0.5" />
                     <span>AI contractor recommendations</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-purple-600 mt-0.5" />
-                    <span><strong>Bulk management tools</strong></span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-purple-600 mt-0.5" />
-                    <span><strong>Property templates</strong></span>
-                  </li>
                 </ul>
                 {currentPlan !== 'premium' && (
                   <Button
@@ -386,18 +378,6 @@ export default function Billing() {
                   <li className="flex items-start gap-2">
                     <Check className="h-5 w-5 text-purple-600 mt-0.5" />
                     <span>AI contractor recommendations</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-purple-600 mt-0.5" />
-                    <span><strong>Bulk management tools</strong></span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-purple-600 mt-0.5" />
-                    <span><strong>Property templates</strong></span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-purple-600 mt-0.5" />
-                    <span><strong>Advanced analytics</strong></span>
                   </li>
                 </ul>
                 {currentPlan !== 'premium_plus' && (
