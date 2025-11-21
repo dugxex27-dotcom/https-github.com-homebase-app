@@ -3500,6 +3500,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all contractors previously used by homeowner (across all properties)
+  app.get("/api/contractors/previously-used", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      const userRole = req.session?.user?.role;
+      
+      if (userRole !== 'homeowner') {
+        return res.status(403).json({ message: "Only homeowners can view previously used contractors" });
+      }
+      
+      // Get unique contractor IDs from various sources across ALL houses
+      const contractorDataMap = new Map<string, { lastUsed: Date, serviceType?: string }>();
+      
+      // From maintenance logs (all houses)
+      const maintenanceLogs = await storage.getMaintenanceLogs(userId);
+      maintenanceLogs
+        .filter((log: any) => log.contractorId)
+        .forEach((log: any) => {
+          const existing = contractorDataMap.get(log.contractorId);
+          const logDate = new Date(log.serviceDate);
+          if (!existing || logDate > existing.lastUsed) {
+            contractorDataMap.set(log.contractorId, {
+              lastUsed: logDate,
+              serviceType: log.serviceType
+            });
+          }
+        });
+      
+      // From proposals (all houses)
+      const proposals = await storage.getProposals(undefined, userId);
+      proposals
+        .filter((proposal: any) => proposal.contractorId && proposal.status === 'accepted')
+        .forEach((proposal: any) => {
+          const existing = contractorDataMap.get(proposal.contractorId);
+          const proposalDate = new Date(proposal.createdAt);
+          if (!existing || proposalDate > existing.lastUsed) {
+            contractorDataMap.set(proposal.contractorId, {
+              lastUsed: proposalDate,
+              serviceType: proposal.serviceType
+            });
+          }
+        });
+      
+      // Fetch full contractor data for all unique contractor IDs
+      const contractorIds = Array.from(contractorDataMap.keys());
+      const contractors = await Promise.all(
+        contractorIds.map(async (contractorId) => {
+          const contractor = await storage.getContractor(contractorId);
+          if (!contractor) return null;
+          
+          const metadata = contractorDataMap.get(contractorId);
+          
+          // Enrich with company data
+          let enrichedContractor = { ...contractor };
+          if ((contractor as any).companyId) {
+            const company = await storage.getCompany((contractor as any).companyId);
+            if (company) {
+              enrichedContractor = {
+                ...contractor,
+                businessLogo: company.businessLogo || '',
+                projectPhotos: company.projectPhotos || []
+              };
+            }
+          }
+          
+          return {
+            ...enrichedContractor,
+            lastUsed: metadata?.lastUsed,
+            lastServiceType: metadata?.serviceType
+          };
+        })
+      );
+      
+      // Filter out nulls and sort by last used (most recent first)
+      const validContractors = contractors
+        .filter(c => c !== null)
+        .sort((a, b) => {
+          const dateA = a.lastUsed ? new Date(a.lastUsed).getTime() : 0;
+          const dateB = b.lastUsed ? new Date(b.lastUsed).getTime() : 0;
+          return dateB - dateA;
+        });
+      
+      console.log('[PREVIOUSLY USED] Found contractor IDs:', contractorIds);
+      console.log('[PREVIOUSLY USED] Returning contractors:', validContractors.length);
+      
+      res.json(validContractors);
+    } catch (error) {
+      console.error("Error fetching previously used contractors:", error);
+      res.status(500).json({ message: "Failed to fetch previously used contractors" });
+    }
+  });
+
   app.get("/api/contractors/:id", async (req, res) => {
     try {
       console.log('[DEBUG] GET /api/contractors/:id - Looking for contractor ID:', req.params.id);

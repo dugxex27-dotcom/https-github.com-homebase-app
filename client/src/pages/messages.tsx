@@ -99,9 +99,9 @@ export default function Messages() {
     enabled: !!typedUser
   });
 
-  // Fetch contractors for homeowners to compose new messages
+  // Fetch previously used contractors for homeowners to compose new messages
   const { data: contractors = [] } = useQuery<Contractor[]>({
-    queryKey: ['/api/contractors'],
+    queryKey: ['/api/contractors/previously-used'],
     enabled: !!typedUser && typedUser.role === 'homeowner'
   });
 
