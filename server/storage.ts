@@ -3630,6 +3630,73 @@ export class MemStorage implements IStorage {
     const userAchievs = await this.getUserAchievements(homeownerId);
     const unlockedKeys = new Set(userAchievs.filter(a => a.isUnlocked).map(a => a.achievementKey));
     
+    // PRE-AGGREGATE all savings data once to avoid repeated queries
+    const savingsCompletions = await db.select().from(taskCompletions)
+      .where(eq(taskCompletions.homeownerId, homeownerId))
+      .where(isNotNull(taskCompletions.costSavings));
+    
+    const tasksWithSavings = savingsCompletions.filter(c => 
+      c.costSavings && parseFloat(c.costSavings.toString()) > 0
+    );
+    
+    // Calculate aggregated savings metrics once
+    const savingsMetrics = {
+      totalSavings: tasksWithSavings.reduce((sum, c) => sum + parseFloat(c.costSavings!.toString()), 0),
+      underBudgetCount: tasksWithSavings.length,
+      avgSavingsPerTask: tasksWithSavings.length > 0 
+        ? tasksWithSavings.reduce((sum, c) => sum + parseFloat(c.costSavings!.toString()), 0) / tasksWithSavings.length 
+        : 0,
+      monthsWithSavings: new Map<string, number>(),
+      quarterSavings: new Map<string, number>(),
+      maxConsecutiveMonths: 0
+    };
+    
+    // Group by month and quarter
+    for (const completion of tasksWithSavings) {
+      if (completion.completedAt) {
+        const year = completion.completedAt.getFullYear();
+        const month = completion.completedAt.getMonth() + 1;
+        const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+        const quarter = Math.floor((month - 1) / 3) + 1;
+        const quarterKey = `${year}-Q${quarter}`;
+        
+        savingsMetrics.monthsWithSavings.set(monthKey, (savingsMetrics.monthsWithSavings.get(monthKey) || 0) + 1);
+        
+        const savings = parseFloat(completion.costSavings!.toString());
+        savingsMetrics.quarterSavings.set(quarterKey, (savingsMetrics.quarterSavings.get(quarterKey) || 0) + savings);
+      }
+    }
+    
+    // Calculate consecutive month streak using proper calendar arithmetic
+    if (savingsMetrics.monthsWithSavings.size > 0) {
+      const sortedMonths = Array.from(savingsMetrics.monthsWithSavings.keys()).sort();
+      let currentStreak = 1;
+      let maxStreak = 1;
+      
+      for (let i = 1; i < sortedMonths.length; i++) {
+        const [prevYear, prevMonth] = sortedMonths[i - 1].split('-').map(Number);
+        const [currYear, currMonth] = sortedMonths[i].split('-').map(Number);
+        
+        // Check if months are consecutive using proper calendar arithmetic
+        let isConsecutive = false;
+        if (currYear === prevYear && currMonth === prevMonth + 1) {
+          isConsecutive = true;
+        } else if (currYear === prevYear + 1 && prevMonth === 12 && currMonth === 1) {
+          // Handle year rollover
+          isConsecutive = true;
+        }
+        
+        if (isConsecutive) {
+          currentStreak++;
+          maxStreak = Math.max(maxStreak, currentStreak);
+        } else {
+          currentStreak = 1;
+        }
+      }
+      
+      savingsMetrics.maxConsecutiveMonths = maxStreak;
+    }
+    
     for (const def of definitions) {
       // Skip if already unlocked
       if (unlockedKeys.has(def.achievementKey)) continue;
@@ -3665,128 +3732,152 @@ export class MemStorage implements IStorage {
           break;
         }
         
-        case 'under_budget': {
+        case 'all_seasons': {
+          // Check if user completed tasks in all 4 seasons in current year
+          const seasonMonths: Record<string, number[]> = {
+            winter: [12, 1, 2],
+            spring: [3, 4, 5],
+            summer: [6, 7, 8],
+            fall: [9, 10, 11]
+          };
+          
+          const currentYear = new Date().getFullYear();
           const completions = await db.select().from(taskCompletions)
             .where(eq(taskCompletions.homeownerId, homeownerId))
-            .where(isNotNull(taskCompletions.costSavings));
+            .where(eq(taskCompletions.year, currentYear));
           
-          const underBudgetCount = completions.filter(c => 
-            c.costSavings && parseFloat(c.costSavings.toString()) > 0
-          ).length;
+          const seasonsCompleted = new Set<string>();
+          for (const completion of completions) {
+            for (const [season, months] of Object.entries(seasonMonths)) {
+              if (months.includes(completion.month)) {
+                seasonsCompleted.add(season);
+              }
+            }
+          }
           
-          progress = Math.min(100, (underBudgetCount / criteria.count) * 100);
-          isCompleted = underBudgetCount >= criteria.count;
+          progress = Math.min(100, (seasonsCompleted.size / 4) * 100);
+          isCompleted = seasonsCompleted.size === 4;
+          break;
+        }
+        
+        case 'seasonal_peak': {
+          // Check if user completed X+ tasks in any single season
+          const seasonMonths: Record<string, number[]> = {
+            winter: [12, 1, 2],
+            spring: [3, 4, 5],
+            summer: [6, 7, 8],
+            fall: [9, 10, 11]
+          };
+          
+          const currentYear = new Date().getFullYear();
+          const completions = await db.select().from(taskCompletions)
+            .where(eq(taskCompletions.homeownerId, homeownerId))
+            .where(eq(taskCompletions.year, currentYear));
+          
+          const seasonCounts: Record<string, number> = {
+            winter: 0,
+            spring: 0,
+            summer: 0,
+            fall: 0
+          };
+          
+          for (const completion of completions) {
+            for (const [season, months] of Object.entries(seasonMonths)) {
+              if (months.includes(completion.month)) {
+                seasonCounts[season]++;
+              }
+            }
+          }
+          
+          const maxSeasonalTasks = Math.max(...Object.values(seasonCounts));
+          progress = Math.min(100, (maxSeasonalTasks / criteria.count) * 100);
+          isCompleted = maxSeasonalTasks >= criteria.count;
+          break;
+        }
+        
+        case 'year_round':
+        case 'seasonal_consistency': {
+          // Check if user completed min tasks in each season
+          const seasonMonths: Record<string, number[]> = {
+            winter: [12, 1, 2],
+            spring: [3, 4, 5],
+            summer: [6, 7, 8],
+            fall: [9, 10, 11]
+          };
+          
+          const currentYear = new Date().getFullYear();
+          const completions = await db.select().from(taskCompletions)
+            .where(eq(taskCompletions.homeownerId, homeownerId))
+            .where(eq(taskCompletions.year, currentYear));
+          
+          const seasonCounts: Record<string, number> = {
+            winter: 0,
+            spring: 0,
+            summer: 0,
+            fall: 0
+          };
+          
+          for (const completion of completions) {
+            for (const [season, months] of Object.entries(seasonMonths)) {
+              if (months.includes(completion.month)) {
+                seasonCounts[season]++;
+              }
+            }
+          }
+          
+          const minPerSeason = criteria.min_per_season || 3;
+          const seasonsMetTarget = Object.values(seasonCounts).filter(count => count >= minPerSeason).length;
+          
+          progress = Math.min(100, (seasonsMetTarget / 4) * 100);
+          isCompleted = seasonsMetTarget === 4;
+          break;
+        }
+        
+        case 'under_budget': {
+          // Use pre-aggregated data
+          progress = Math.min(100, (savingsMetrics.underBudgetCount / criteria.count) * 100);
+          isCompleted = savingsMetrics.underBudgetCount >= criteria.count;
           break;
         }
         
         case 'total_savings': {
-          const completions = await db.select().from(taskCompletions)
-            .where(eq(taskCompletions.homeownerId, homeownerId))
-            .where(isNotNull(taskCompletions.costSavings));
-          
-          const totalSavings = completions.reduce((sum, c) => 
-            sum + (c.costSavings ? parseFloat(c.costSavings.toString()) : 0), 0
-          );
-          
-          progress = Math.min(100, (totalSavings / criteria.amount) * 100);
-          isCompleted = totalSavings >= criteria.amount;
+          // Use pre-aggregated data
+          progress = Math.min(100, (savingsMetrics.totalSavings / criteria.amount) * 100);
+          isCompleted = savingsMetrics.totalSavings >= criteria.amount;
           break;
         }
         
         case 'consecutive_savings_months': {
-          // Get all task completions with savings, ordered by completion date
-          const completions = await db.select().from(taskCompletions)
-            .where(eq(taskCompletions.homeownerId, homeownerId))
-            .where(isNotNull(taskCompletions.costSavings));
-          
-          // Group by month and check for consecutive months with savings
-          const monthsWithSavings = new Set<string>();
-          for (const completion of completions) {
-            if (completion.costSavings && parseFloat(completion.costSavings.toString()) > 0 && completion.completedAt) {
-              const monthKey = `${completion.completedAt.getFullYear()}-${String(completion.completedAt.getMonth() + 1).padStart(2, '0')}`;
-              monthsWithSavings.add(monthKey);
-            }
-          }
-          
-          // Find longest consecutive streak
-          const sortedMonths = Array.from(monthsWithSavings).sort();
-          let maxStreak = 0;
-          let currentStreak = 0;
-          
-          for (let i = 0; i < sortedMonths.length; i++) {
-            if (i === 0) {
-              currentStreak = 1;
-            } else {
-              const [prevYear, prevMonth] = sortedMonths[i - 1].split('-').map(Number);
-              const [currYear, currMonth] = sortedMonths[i].split('-').map(Number);
-              
-              const prevDate = new Date(prevYear, prevMonth - 1);
-              const currDate = new Date(currYear, currMonth - 1);
-              const monthDiff = (currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
-              
-              if (monthDiff <= 1.5) { // Allow for slight variations in month length
-                currentStreak++;
-              } else {
-                currentStreak = 1;
-              }
-            }
-            maxStreak = Math.max(maxStreak, currentStreak);
-          }
-          
-          progress = Math.min(100, (maxStreak / criteria.count) * 100);
-          isCompleted = maxStreak >= criteria.count;
+          // Use pre-calculated streak (now with proper calendar arithmetic)
+          progress = Math.min(100, (savingsMetrics.maxConsecutiveMonths / criteria.count) * 100);
+          isCompleted = savingsMetrics.maxConsecutiveMonths >= criteria.count;
           break;
         }
         
         case 'average_savings_per_task': {
-          // Calculate average savings per task
-          const completions = await db.select().from(taskCompletions)
-            .where(eq(taskCompletions.homeownerId, homeownerId))
-            .where(isNotNull(taskCompletions.costSavings));
-          
-          const tasksWithSavings = completions.filter(c => 
-            c.costSavings && parseFloat(c.costSavings.toString()) > 0
-          );
-          
-          // Need minimum number of tasks before we can calculate average
+          // Improved progress visibility
           const minTasks = criteria.min_tasks || 10;
+          
           if (tasksWithSavings.length < minTasks) {
-            progress = 0;
+            // Show progress toward reaching minimum tasks required
+            progress = (tasksWithSavings.length / minTasks) * 50; // First 50% is reaching min tasks
             isCompleted = false;
             break;
           }
           
-          const totalSavings = tasksWithSavings.reduce((sum, c) => 
-            sum + parseFloat(c.costSavings!.toString()), 0
-          );
-          const avgSavings = totalSavings / tasksWithSavings.length;
-          
-          progress = Math.min(100, (avgSavings / criteria.amount) * 100);
-          isCompleted = avgSavings >= criteria.amount;
+          // Once min tasks met, show progress based on average savings
+          const taskProgress = 50; // Already met min tasks
+          const avgProgress = Math.min(50, (savingsMetrics.avgSavingsPerTask / criteria.amount) * 50);
+          progress = taskProgress + avgProgress;
+          isCompleted = savingsMetrics.avgSavingsPerTask >= criteria.amount;
           break;
         }
         
         case 'quarterly_savings': {
-          // Check if user saved X amount in any single quarter
-          const completions = await db.select().from(taskCompletions)
-            .where(eq(taskCompletions.homeownerId, homeownerId))
-            .where(isNotNull(taskCompletions.costSavings));
-          
-          // Group savings by quarter
-          const quarterSavings = new Map<string, number>();
-          for (const completion of completions) {
-            if (completion.costSavings && completion.completedAt) {
-              const year = completion.completedAt.getFullYear();
-              const quarter = Math.floor(completion.completedAt.getMonth() / 3) + 1;
-              const quarterKey = `${year}-Q${quarter}`;
-              
-              const savings = parseFloat(completion.costSavings.toString());
-              quarterSavings.set(quarterKey, (quarterSavings.get(quarterKey) || 0) + savings);
-            }
-          }
-          
-          // Find the highest quarter
-          const maxQuarterlySavings = Math.max(0, ...Array.from(quarterSavings.values()));
+          // Use pre-aggregated quarterly data
+          const maxQuarterlySavings = savingsMetrics.quarterSavings.size > 0
+            ? Math.max(...Array.from(savingsMetrics.quarterSavings.values()))
+            : 0;
           
           progress = Math.min(100, (maxQuarterlySavings / criteria.amount) * 100);
           isCompleted = maxQuarterlySavings >= criteria.amount;

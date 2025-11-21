@@ -14,7 +14,19 @@ interface AchievementDefinition {
 }
 
 const achievements: AchievementDefinition[] = [
-  // SEASONAL MAINTENANCE ACHIEVEMENTS (4)
+  // SEASONAL MAINTENANCE ACHIEVEMENTS (20 total - expanded from 4)
+  // Winter Season (3 tiers)
+  {
+    achievementKey: "winter_starter",
+    category: "Seasonal",
+    name: "Winter Starter",
+    description: "Complete 3 winter maintenance tasks (Dec-Feb)",
+    icon: "snowflake",
+    criteria: JSON.stringify({ type: "seasonal_tasks", season: "winter", count: 3 }),
+    points: 10,
+    tier: "bronze",
+    sortOrder: 1
+  },
   {
     achievementKey: "winter_warrior",
     category: "Seasonal",
@@ -22,9 +34,33 @@ const achievements: AchievementDefinition[] = [
     description: "Complete 5 winter maintenance tasks (Dec-Feb)",
     icon: "snowflake",
     criteria: JSON.stringify({ type: "seasonal_tasks", season: "winter", count: 5 }),
-    points: 15,
+    points: 20,
+    tier: "silver",
+    sortOrder: 2
+  },
+  {
+    achievementKey: "winter_champion",
+    category: "Seasonal",
+    name: "Winter Champion",
+    description: "Complete 10 winter maintenance tasks (Dec-Feb)",
+    icon: "snowflake",
+    criteria: JSON.stringify({ type: "seasonal_tasks", season: "winter", count: 10 }),
+    points: 35,
+    tier: "gold",
+    sortOrder: 3
+  },
+  
+  // Spring Season (3 tiers)
+  {
+    achievementKey: "spring_starter",
+    category: "Seasonal",
+    name: "Spring Starter",
+    description: "Complete 3 spring maintenance tasks (Mar-May)",
+    icon: "leaf",
+    criteria: JSON.stringify({ type: "seasonal_tasks", season: "spring", count: 3 }),
+    points: 10,
     tier: "bronze",
-    sortOrder: 1
+    sortOrder: 4
   },
   {
     achievementKey: "spring_renewal",
@@ -33,9 +69,33 @@ const achievements: AchievementDefinition[] = [
     description: "Complete 5 spring maintenance tasks (Mar-May)",
     icon: "leaf",
     criteria: JSON.stringify({ type: "seasonal_tasks", season: "spring", count: 5 }),
-    points: 15,
+    points: 20,
+    tier: "silver",
+    sortOrder: 5
+  },
+  {
+    achievementKey: "spring_champion",
+    category: "Seasonal",
+    name: "Spring Champion",
+    description: "Complete 10 spring maintenance tasks (Mar-May)",
+    icon: "leaf",
+    criteria: JSON.stringify({ type: "seasonal_tasks", season: "spring", count: 10 }),
+    points: 35,
+    tier: "gold",
+    sortOrder: 6
+  },
+  
+  // Summer Season (3 tiers)
+  {
+    achievementKey: "summer_starter",
+    category: "Seasonal",
+    name: "Summer Starter",
+    description: "Complete 3 summer maintenance tasks (Jun-Aug)",
+    icon: "sun",
+    criteria: JSON.stringify({ type: "seasonal_tasks", season: "summer", count: 3 }),
+    points: 10,
     tier: "bronze",
-    sortOrder: 2
+    sortOrder: 7
   },
   {
     achievementKey: "summer_sentinel",
@@ -44,9 +104,33 @@ const achievements: AchievementDefinition[] = [
     description: "Complete 5 summer maintenance tasks (Jun-Aug)",
     icon: "sun",
     criteria: JSON.stringify({ type: "seasonal_tasks", season: "summer", count: 5 }),
-    points: 15,
+    points: 20,
+    tier: "silver",
+    sortOrder: 8
+  },
+  {
+    achievementKey: "summer_champion",
+    category: "Seasonal",
+    name: "Summer Champion",
+    description: "Complete 10 summer maintenance tasks (Jun-Aug)",
+    icon: "sun",
+    criteria: JSON.stringify({ type: "seasonal_tasks", season: "summer", count: 10 }),
+    points: 35,
+    tier: "gold",
+    sortOrder: 9
+  },
+  
+  // Fall Season (3 tiers)
+  {
+    achievementKey: "fall_starter",
+    category: "Seasonal",
+    name: "Fall Starter",
+    description: "Complete 3 fall maintenance tasks (Sep-Nov)",
+    icon: "cloud",
+    criteria: JSON.stringify({ type: "seasonal_tasks", season: "fall", count: 3 }),
+    points: 10,
     tier: "bronze",
-    sortOrder: 3
+    sortOrder: 10
   },
   {
     achievementKey: "fall_prepper",
@@ -55,9 +139,66 @@ const achievements: AchievementDefinition[] = [
     description: "Complete 5 fall maintenance tasks (Sep-Nov)",
     icon: "cloud",
     criteria: JSON.stringify({ type: "seasonal_tasks", season: "fall", count: 5 }),
-    points: 15,
-    tier: "bronze",
-    sortOrder: 4
+    points: 20,
+    tier: "silver",
+    sortOrder: 11
+  },
+  {
+    achievementKey: "fall_champion",
+    category: "Seasonal",
+    name: "Fall Champion",
+    description: "Complete 10 fall maintenance tasks (Sep-Nov)",
+    icon: "cloud",
+    criteria: JSON.stringify({ type: "seasonal_tasks", season: "fall", count: 10 }),
+    points: 35,
+    tier: "gold",
+    sortOrder: 12
+  },
+  
+  // Special Seasonal Achievements (4)
+  {
+    achievementKey: "all_seasons_master",
+    category: "Seasonal",
+    name: "All Seasons Master",
+    description: "Complete maintenance tasks in all 4 seasons in a calendar year",
+    icon: "calendar",
+    criteria: JSON.stringify({ type: "all_seasons", count: 1 }),
+    points: 50,
+    tier: "platinum",
+    sortOrder: 13
+  },
+  {
+    achievementKey: "seasonal_perfectionist",
+    category: "Seasonal",
+    name: "Seasonal Perfectionist",
+    description: "Complete 15+ tasks in any single season",
+    icon: "star",
+    criteria: JSON.stringify({ type: "seasonal_peak", count: 15 }),
+    points: 60,
+    tier: "platinum",
+    sortOrder: 14
+  },
+  {
+    achievementKey: "year_round_caretaker",
+    category: "Seasonal",
+    name: "Year-Round Caretaker",
+    description: "Maintain your home across all 4 seasons (at least 3 tasks per season)",
+    icon: "home",
+    criteria: JSON.stringify({ type: "year_round", min_per_season: 3 }),
+    points: 75,
+    tier: "diamond",
+    sortOrder: 15
+  },
+  {
+    achievementKey: "seasonal_consistency",
+    category: "Seasonal",
+    name: "Seasonal Consistency",
+    description: "Complete at least 5 tasks in each of the 4 seasons",
+    icon: "target",
+    criteria: JSON.stringify({ type: "seasonal_consistency", min_per_season: 5 }),
+    points: 100,
+    tier: "diamond",
+    sortOrder: 16
   },
 
   // FINANCIAL SAVVY ACHIEVEMENTS (5)
