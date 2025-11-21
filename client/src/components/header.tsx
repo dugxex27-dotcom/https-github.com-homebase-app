@@ -205,6 +205,12 @@ export default function Header() {
                             )}
                           </button>
                         </Link>
+                        <Link href="/contractor-profile" onClick={() => setMobileMenuOpen(false)}>
+                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/contractor-profile' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-muted'}`}>
+                            <UserIcon className="w-4 h-4" />
+                            Account
+                          </button>
+                        </Link>
                         <Link href="/support" onClick={() => setMobileMenuOpen(false)}>
                           <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location.startsWith('/support') ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-muted'}`}>
                             <HelpCircle className="w-4 h-4" />
