@@ -7265,8 +7265,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const achievementsWithProgress = definitions.map(def => {
           const userAchiev = userAchievements.find(ua => ua.achievementKey === def.achievementKey);
+          const criteria = typeof def.criteria === 'string' ? JSON.parse(def.criteria) : def.criteria;
           return {
-            ...def,
+            key: def.achievementKey,
+            category: def.category,
+            name: def.name,
+            description: def.description,
+            icon: def.icon,
+            criteria: criteria,
             progress: userAchiev ? parseFloat(userAchiev.progress?.toString() || "0") : 0,
             isUnlocked: userAchiev?.isUnlocked || false,
             unlockedAt: userAchiev?.unlockedAt || null,
@@ -7274,16 +7280,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         });
         
-        res.json(achievementsWithProgress);
+        res.json({ achievements: achievementsWithProgress });
       } else {
         // If not authenticated, just return definitions without progress
-        res.json(definitions.map(def => ({
-          ...def,
-          progress: 0,
-          isUnlocked: false,
-          unlockedAt: null,
-          metadata: null
-        })));
+        const achievementsWithoutProgress = definitions.map(def => {
+          const criteria = typeof def.criteria === 'string' ? JSON.parse(def.criteria) : def.criteria;
+          return {
+            key: def.achievementKey,
+            category: def.category,
+            name: def.name,
+            description: def.description,
+            icon: def.icon,
+            criteria: criteria,
+            progress: 0,
+            isUnlocked: false,
+            unlockedAt: null,
+            metadata: null
+          };
+        });
+        res.json({ achievements: achievementsWithoutProgress });
       }
     } catch (error) {
       console.error("Error fetching achievements:", error);
