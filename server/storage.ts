@@ -276,6 +276,7 @@ export interface IStorage {
   updateUserAchievementProgress(homeownerId: string, achievementKey: string, progress: number, metadata?: string): Promise<UserAchievement | undefined>;
   unlockUserAchievement(homeownerId: string, achievementKey: string): Promise<UserAchievement | undefined>;
   checkAndAwardAchievements(homeownerId: string): Promise<UserAchievement[]>;
+  calculateAchievementsProgress(homeownerId: string, houseId?: string): Promise<Array<{ achievementKey: string; progress: number; isUnlocked: boolean; unlockedAt?: Date; metadata?: string }>>;
   getAchievementProgress(homeownerId: string, achievementKey: string): Promise<{ progress: number; isUnlocked: boolean; criteria: any }>;
 
   // Authentication methods
@@ -4126,6 +4127,146 @@ export class MemStorage implements IStorage {
     }
     
     return newlyUnlocked;
+  }
+
+  async calculateAchievementsProgress(
+    homeownerId: string,
+    houseId?: string
+  ): Promise<Array<{ achievementKey: string; progress: number; isUnlocked: boolean; unlockedAt?: Date; metadata?: string }>> {
+    const results: Array<{ achievementKey: string; progress: number; isUnlocked: boolean; unlockedAt?: Date; metadata?: string }> = [];
+    
+    // Get all achievement definitions
+    const definitions = await this.getAllAchievementDefinitions();
+    
+    // Get user's current achievements for unlocked status
+    const userAchievs = await this.getUserAchievements(homeownerId);
+    
+    // If filtering by house, only calculate house-specific achievements
+    // Otherwise, use the full calculation from checkAndAwardAchievements
+    if (!houseId) {
+      // No house filter - return user's actual achievement progress
+      for (const def of definitions) {
+        const userAchiev = userAchievs.find(ua => ua.achievementKey === def.achievementKey);
+        results.push({
+          achievementKey: def.achievementKey,
+          progress: userAchiev ? parseFloat(userAchiev.progress?.toString() || "0") : 0,
+          isUnlocked: userAchiev?.isUnlocked || false,
+          unlockedAt: userAchiev?.unlockedAt,
+          metadata: userAchiev?.metadata
+        });
+      }
+      return results;
+    }
+    
+    // House-specific filtering - calculate progress based on house data only
+    // Get house-specific data
+    const houseTaskCompletions = await db.select().from(taskCompletions)
+      .where(eq(taskCompletions.homeownerId, homeownerId))
+      .where(eq(taskCompletions.houseId, houseId));
+    
+    const houseMaintenanceLogs = await db.select().from(maintenanceLogs)
+      .where(eq(maintenanceLogs.homeownerId, homeownerId))
+      .where(eq(maintenanceLogs.houseId, houseId));
+    
+    const houseServiceRecords = await db.select().from(serviceRecords)
+      .where(eq(serviceRecords.homeownerId, homeownerId))
+      .where(eq(serviceRecords.houseId, houseId));
+    
+    // Calculate house-specific savings metrics
+    const tasksWithSavings = houseTaskCompletions.filter(c => 
+      c.costSavings && parseFloat(c.costSavings.toString()) > 0
+    );
+    
+    const houseSavingsMetrics = {
+      totalSavings: tasksWithSavings.reduce((sum, c) => sum + parseFloat(c.costSavings!.toString()), 0),
+      underBudgetCount: tasksWithSavings.length,
+      avgSavingsPerTask: tasksWithSavings.length > 0 
+        ? tasksWithSavings.reduce((sum, c) => sum + parseFloat(c.costSavings!.toString()), 0) / tasksWithSavings.length 
+        : 0,
+    };
+    
+    // Calculate progress for each achievement based on house data
+    for (const def of definitions) {
+      const criteria = typeof def.criteria === 'string' ? JSON.parse(def.criteria) : def.criteria;
+      let progress = 0;
+      const userAchiev = userAchievs.find(ua => ua.achievementKey === def.achievementKey);
+      
+      // Calculate progress based on achievement type
+      switch (criteria.type) {
+        case 'seasonal_tasks': {
+          const seasonMap: Record<string, number> = {
+            winter: 12, spring: 3, summer: 6, fall: 9
+          };
+          const seasonMonth = seasonMap[criteria.season] || 1;
+          const tasksForSeason = houseTaskCompletions.filter(c => {
+            if (!c.completedAt) return false;
+            const month = c.completedAt.getMonth() + 1;
+            return (
+              (criteria.season === 'winter' && (month === 12 || month <= 2)) ||
+              (criteria.season === 'spring' && month >= 3 && month <= 5) ||
+              (criteria.season === 'summer' && month >= 6 && month <= 8) ||
+              (criteria.season === 'fall' && month >= 9 && month <= 11)
+            );
+          });
+          progress = Math.min(100, (tasksForSeason.length / criteria.count) * 100);
+          break;
+        }
+        
+        case 'total_savings': {
+          progress = Math.min(100, (houseSavingsMetrics.totalSavings / criteria.amount) * 100);
+          break;
+        }
+        
+        case 'under_budget': {
+          progress = Math.min(100, (houseSavingsMetrics.underBudgetCount / criteria.count) * 100);
+          break;
+        }
+        
+        case 'logs_created': {
+          progress = Math.min(100, (houseServiceRecords.length / criteria.count) * 100);
+          break;
+        }
+        
+        case 'documents_uploaded': {
+          const docsCount = houseServiceRecords.filter(sr => sr.documentUrl).length;
+          progress = Math.min(100, (docsCount / criteria.count) * 100);
+          break;
+        }
+        
+        case 'photos_uploaded': {
+          const photosCount = houseMaintenanceLogs.reduce((sum, log) => 
+            sum + (log.beforePhotoUrls?.length || 0) + (log.afterPhotoUrls?.length || 0), 0
+          );
+          const pairsCount = Math.floor(photosCount / 2);
+          progress = Math.min(100, (pairsCount / criteria.count) * 100);
+          break;
+        }
+        
+        case 'detailed_logs': {
+          const detailedLogs = houseMaintenanceLogs.filter(log => 
+            log.description && log.description.length >= 50
+          );
+          progress = Math.min(100, (detailedLogs.length / criteria.count) * 100);
+          break;
+        }
+        
+        // For non-house-specific achievements (referrals, subscriptions, etc.), return 0 or use user's actual progress
+        default: {
+          progress = userAchiev ? parseFloat(userAchiev.progress?.toString() || "0") : 0;
+          break;
+        }
+      }
+      
+      results.push({
+        achievementKey: def.achievementKey,
+        progress,
+        isUnlocked: userAchiev?.isUnlocked || false,
+        unlockedAt: userAchiev?.unlockedAt,
+        metadata: userAchiev?.metadata
+      });
+    }
+    
+    return results;
   }
 
   async getAchievementProgress(homeownerId: string, achievementKey: string): Promise<{ progress: number; isUnlocked: boolean; criteria: any }> {

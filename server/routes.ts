@@ -7249,7 +7249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/achievements', async (req: any, res) => {
     try {
       const homeownerId = req.session?.user?.id;
-      const { category } = req.query;
+      const { category, houseId } = req.query;
       
       // Get all definitions (or filtered by category)
       let definitions;
@@ -7259,13 +7259,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         definitions = await storage.getAllAchievementDefinitions();
       }
       
-      // If user is authenticated, merge with their progress
+      // If user is authenticated, calculate progress based on house filter
       if (homeownerId) {
-        const userAchievements = await storage.getUserAchievements(homeownerId);
+        // Calculate achievements with house filtering
+        const achievementsWithProgress = await storage.calculateAchievementsProgress(
+          homeownerId,
+          houseId as string | undefined
+        );
         
-        const achievementsWithProgress = definitions.map(def => {
-          const userAchiev = userAchievements.find(ua => ua.achievementKey === def.achievementKey);
+        // Merge with definitions
+        const result = definitions.map(def => {
+          const calculated = achievementsWithProgress.find(a => a.achievementKey === def.achievementKey);
           const criteria = typeof def.criteria === 'string' ? JSON.parse(def.criteria) : def.criteria;
+          
           return {
             key: def.achievementKey,
             category: def.category,
@@ -7273,14 +7279,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             description: def.description,
             icon: def.icon,
             criteria: criteria,
-            progress: userAchiev ? parseFloat(userAchiev.progress?.toString() || "0") : 0,
-            isUnlocked: userAchiev?.isUnlocked || false,
-            unlockedAt: userAchiev?.unlockedAt || null,
-            metadata: userAchiev?.metadata || null
+            progress: calculated?.progress || 0,
+            isUnlocked: calculated?.isUnlocked || false,
+            unlockedAt: calculated?.unlockedAt || null,
+            metadata: calculated?.metadata || null
           };
         });
         
-        res.json({ achievements: achievementsWithProgress });
+        res.json({ achievements: result });
       } else {
         // If not authenticated, just return definitions without progress
         const achievementsWithoutProgress = definitions.map(def => {

@@ -15,13 +15,15 @@ import {
   Clock,
   Camera,
   CheckCircle,
-  Target
+  Target,
+  Home
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Backend achievement definition with user progress
 interface AchievementWithProgress {
@@ -38,6 +40,16 @@ interface AchievementWithProgress {
 
 interface AchievementsResponse {
   achievements: AchievementWithProgress[];
+}
+
+interface House {
+  id: string;
+  name: string;
+  address: string;
+  homeownerId: string;
+  climateZone: string;
+  homeSystems: string[];
+  isDefault: boolean;
 }
 
 // Icon mapping for achievements
@@ -123,11 +135,25 @@ export default function Achievements() {
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementWithProgress | null>(null);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [modalCategory, setModalCategory] = useState<string | null>(null);
+  const [selectedHouseId, setSelectedHouseId] = useState<string>("all");
   const queryClient = useQueryClient();
   const hasCheckedAchievements = useRef(false);
 
+  // Fetch user's houses
+  const { data: houses = [], isLoading: housesLoading } = useQuery<House[]>({
+    queryKey: ['/api/houses'],
+  });
+
   const { data, isLoading } = useQuery<AchievementsResponse>({
-    queryKey: ['/api/achievements'],
+    queryKey: ['/api/achievements', selectedHouseId],
+    queryFn: async () => {
+      const url = selectedHouseId === "all" 
+        ? '/api/achievements'
+        : `/api/achievements?houseId=${selectedHouseId}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch achievements');
+      return response.json();
+    },
   });
 
   // Mutation to retroactively check all past tasks for achievements
@@ -226,6 +252,52 @@ export default function Achievements() {
               Track your home maintenance milestones and accomplishments
             </p>
           </div>
+
+          {/* House Selector */}
+          {!housesLoading && houses.length > 1 && (
+            <div className="mb-6 sm:mb-8">
+              <Card style={{ backgroundColor: '#f2f2f2' }}>
+                <CardContent className="pt-4 pb-4 sm:pt-6 sm:pb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <Home className="w-5 h-5" style={{ color: '#2c0f5b' }} />
+                      <label className="text-sm font-semibold" style={{ color: '#2c0f5b' }}>
+                        Filter by Property:
+                      </label>
+                    </div>
+                    <Select value={selectedHouseId} onValueChange={setSelectedHouseId}>
+                      <SelectTrigger 
+                        className="w-full sm:w-64" 
+                        style={{ borderColor: '#2c0f5b' }}
+                        data-testid="house-selector"
+                      >
+                        <SelectValue placeholder="Select property" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all" data-testid="house-option-all">
+                          All Properties
+                        </SelectItem>
+                        {houses.map((house) => (
+                          <SelectItem 
+                            key={house.id} 
+                            value={house.id}
+                            data-testid={`house-option-${house.id}`}
+                          >
+                            {house.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {selectedHouseId !== "all" && (
+                      <p className="text-xs sm:text-sm text-purple-200">
+                        Showing achievements for {houses.find(h => h.id === selectedHouseId)?.name}
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -384,11 +456,15 @@ export default function Achievements() {
 
           {/* Category Tabs */}
           <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-6 sm:mb-8">
-            <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-4 mb-4 sm:mb-6" style={{ backgroundColor: '#f2f2f2' }}>
+            <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-4 md:grid-cols-8 mb-4 sm:mb-6" style={{ backgroundColor: '#f2f2f2' }}>
               <TabsTrigger value="all" data-testid="tab-all" className="text-xs sm:text-sm text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>All</TabsTrigger>
               <TabsTrigger value="seasonal" data-testid="tab-seasonal" className="text-xs sm:text-sm text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Seasonal</TabsTrigger>
               <TabsTrigger value="financial savvy" data-testid="tab-financial" className="text-xs sm:text-sm text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Financial</TabsTrigger>
               <TabsTrigger value="organization" data-testid="tab-organization" className="text-xs sm:text-sm text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Organization</TabsTrigger>
+              <TabsTrigger value="referral & community" data-testid="tab-referral" className="text-xs sm:text-sm text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Referrals</TabsTrigger>
+              <TabsTrigger value="milestones" data-testid="tab-milestones" className="text-xs sm:text-sm text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Milestones</TabsTrigger>
+              <TabsTrigger value="streaks" data-testid="tab-streaks" className="text-xs sm:text-sm text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Streaks</TabsTrigger>
+              <TabsTrigger value="special" data-testid="tab-special" className="text-xs sm:text-sm text-[#4b435c]" style={{ backgroundColor: '#e9d5ff' }}>Special</TabsTrigger>
             </TabsList>
 
             <TabsContent value={selectedCategory}>
@@ -398,13 +474,23 @@ export default function Achievements() {
                     {selectedCategory === "all" ? "All Achievements" : 
                      selectedCategory === "seasonal" ? "Seasonal Badges" :
                      selectedCategory === "financial savvy" ? "Financial Savvy Achievements" :
-                     "Tracking & Organization Badges"}
+                     selectedCategory === "organization" ? "Organization Badges" :
+                     selectedCategory === "referral & community" ? "Referral & Community Badges" :
+                     selectedCategory === "milestones" ? "Milestone Achievements" :
+                     selectedCategory === "streaks" ? "Streak Achievements" :
+                     selectedCategory === "special" ? "Special Achievements" :
+                     "All Achievements"}
                   </CardTitle>
                   <CardDescription className="text-xs sm:text-sm" style={{ color: '#6b7280' }}>
                     {selectedCategory === "all" ? "Complete milestones to unlock badges" :
                      selectedCategory === "seasonal" ? "Complete seasonal maintenance tasks" :
                      selectedCategory === "financial savvy" ? "Save money and track your spending" :
-                     "Stay organized with records and documentation"}
+                     selectedCategory === "organization" ? "Stay organized with records and documentation" :
+                     selectedCategory === "referral & community" ? "Invite friends and grow the community" :
+                     selectedCategory === "milestones" ? "Reach important maintenance milestones" :
+                     selectedCategory === "streaks" ? "Build consistent maintenance habits" :
+                     selectedCategory === "special" ? "Unlock exclusive special achievements" :
+                     "Complete milestones to unlock badges"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="px-3 sm:px-6">
