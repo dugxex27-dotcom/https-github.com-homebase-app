@@ -2411,6 +2411,24 @@ export class MemStorage implements IStorage {
         notes: "Quick and efficient installation",
         createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
       },
+      // Lake House - Contractor Roofing (1 month ago)
+      {
+        id: "maint-log-contractor-004",
+        homeownerId: demoHomeownerId,
+        houseId: lakeHouseId,
+        serviceType: "Roofing Services",
+        serviceDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        homeArea: "Exterior",
+        serviceDescription: "Roof inspection and minor repairs",
+        cost: "425.00",
+        contractorName: "Tom Chen",
+        contractorCompany: "Elite Roofing Solutions",
+        contractorId: "contractor-demo-003",
+        completionMethod: "contractor",
+        diySavingsAmount: null,
+        notes: "Found and fixed several loose shingles",
+        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      },
     ];
 
     // Insert DIY maintenance logs into database with idempotent seeding
@@ -2418,7 +2436,7 @@ export class MemStorage implements IStorage {
       await Promise.all(diyMaintenanceLogsData.map(async (log) => {
         await db.insert(maintenanceLogs).values(log).onConflictDoNothing();
       }));
-      console.log('[DEMO DATA] Seeded 17 maintenance logs for Sarah Anderson (14 DIY + 3 contractor) (idempotent)');
+      console.log('[DEMO DATA] Seeded 18 maintenance logs for Sarah Anderson (14 DIY + 4 contractor) (idempotent)');
     } catch (error) {
       console.error('[DEMO DATA] Error inserting DIY maintenance logs:', error);
     }
