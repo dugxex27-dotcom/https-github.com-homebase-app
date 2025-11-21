@@ -609,7 +609,7 @@ export default function Contractors() {
               <h2 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: '#ffffff' }}>
                 Your Contractors at {houses.find(h => h.id === selectedHouseId)?.name}
               </h2>
-              <p className="text-sm sm:text-base lg:text-lg" style={{ color: '#b6a6f4' }}>
+              <p className="text-sm sm:text-base lg:text-lg" style={{ color: '#2c0f5b' }}>
                 {contractorsUsedAtHouse.length} {contractorsUsedAtHouse.length === 1 ? 'contractor' : 'contractors'} you've worked with at this property
               </p>
             </div>
