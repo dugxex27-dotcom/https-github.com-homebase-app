@@ -740,9 +740,11 @@ async function seedAchievements() {
       console.log(`✓ Seeded: ${achievement.name}`);
     }
     
-    console.log("\n✅ Successfully seeded all 46 achievements!");
+    console.log("\n✅ Successfully seeded all 62 achievements!");
     console.log("\nAchievements by category:");
-    console.log("- Seasonal: 4");
+    console.log("- Seasonal: 16 (EXPANDED!)");
+    console.log("  → Tiered Seasonal: 12 (Bronze/Silver/Gold for Winter, Spring, Summer, Fall)");
+    console.log("  → Special Seasonal: 4 (All Seasons Master, Perfectionist, Year-Round, Consistency)");
     console.log("- Financial Savvy: 19 (EXPANDED!)");
     console.log("  → Total Savings Tiers: 8 ($500 to $100K)");
     console.log("  → Under Budget Tiers: 6 (10 to 500 tasks)");
@@ -754,7 +756,7 @@ async function seedAchievements() {
     console.log("- Milestones: 6");
     console.log("- Streaks: 3");
     console.log("- Special: 4");
-    console.log("\nTotal: 46 achievements (14 new financial achievements added!)");
+    console.log("\nTotal: 62 achievements (30 new: 16 seasonal + 14 financial!)");
     
   } catch (error) {
     console.error("Error seeding achievements:", error);
