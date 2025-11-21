@@ -542,7 +542,7 @@ export default function MyHome() {
           <h1 className="text-4xl font-bold text-white mb-4" data-testid="text-page-title">
             My Home
           </h1>
-          <p className="text-xl" style={{ color: '#b6a6f4' }}>
+          <p className="text-xl" style={{ color: '#2c0f5b' }}>
             Manage your personal property and track maintenance tasks
           </p>
         </div>

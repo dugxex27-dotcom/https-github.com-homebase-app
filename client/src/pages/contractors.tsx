@@ -636,7 +636,7 @@ export default function Contractors() {
               <h2 className="text-3xl font-bold mb-2" style={{ color: '#ffffff' }}>
                 Available Contractors
               </h2>
-              <p className="text-lg" style={{ color: '#b6a6f4' }}>
+              <p className="text-lg" style={{ color: '#2c0f5b' }}>
                 {isLoading ? 'Loading...' : `${sortedContractors.length} verified contractors specializing in niche services`}
               </p>
             </div>

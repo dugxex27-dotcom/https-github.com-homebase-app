@@ -2796,7 +2796,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                   </div>
                   
                   {selectedHouseId && houses.length > 0 && (
-                    <div className="text-base mt-2" style={{ color: '#b6a6f4' }}>
+                    <div className="text-base mt-2" style={{ color: '#2c0f5b' }}>
                       <div className="flex items-center gap-2">
                         <MapPin className="w-5 h-5" style={{ color: '#2c0f5b' }} />
                         <span className="font-medium" style={{ color: '#2c0f5b' }}>
@@ -3126,7 +3126,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                   <h3 className="text-lg font-medium mb-2" style={{ color: '#ffffff' }}>
                     No tasks for this month and location
                   </h3>
-                  <p style={{ color: '#b6a6f4' }}>
+                  <p style={{ color: '#2c0f5b' }}>
                     Try selecting a different month or climate zone to see recommended maintenance tasks.
                   </p>
                 </div>
