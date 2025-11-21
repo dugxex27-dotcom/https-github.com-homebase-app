@@ -2552,7 +2552,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
             <h1 className="text-4xl lg:text-5xl font-bold mb-6" style={{ color: '#ffffff' }}>
               Smart Maintenance Schedule
             </h1>
-            <p className="text-xl max-w-3xl mx-auto mb-8" style={{ color: '#b6a6f4' }}>
+            <p className="text-xl max-w-3xl mx-auto mb-8" style={{ color: '#2c0f5b' }}>
               Keep your home in perfect condition with personalized maintenance schedules based on your location and home systems
             </p>
           </div>
