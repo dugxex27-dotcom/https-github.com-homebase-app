@@ -239,7 +239,7 @@ export function CustomMaintenanceTasks({ homeownerId, houseId }: CustomMaintenan
             <Button onClick={() => {
               setEditingTask(null);
               form.reset();
-            }} className="text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: '#b6a6f4' }} data-testid="button-add-custom-task">
+            }} className="text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: '#2c0f5b' }} data-testid="button-add-custom-task">
               <Plus className="h-4 w-4 mr-2" />
               Add Custom Task
             </Button>
@@ -491,7 +491,7 @@ export function CustomMaintenanceTasks({ homeownerId, houseId }: CustomMaintenan
                     type="submit" 
                     disabled={createTaskMutation.isPending || updateTaskMutation.isPending}
                     className="text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:opacity-90"
-                    style={{ backgroundColor: '#b6a6f4' }}
+                    style={{ backgroundColor: '#2c0f5b' }}
                     data-testid="button-create-custom-task"
                   >
                     {editingTask ? 'Update Task' : 'Create Task'}
