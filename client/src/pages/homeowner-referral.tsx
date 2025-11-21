@@ -8,9 +8,9 @@ import { useAuth } from "@/hooks/useAuth";
 import type { User as UserType } from "@shared/schema";
 import { Gift, Copy, Share2, MessageSquare, Download, ImageIcon } from "lucide-react";
 
-import instagramPostImg from '@assets/generated_images/Homeowner_Instagram_referral_post_0cc2a9e7.png';
-import instagramStoryImg from '@assets/generated_images/Homeowner_Instagram_story_graphic_35fe7fd0.png';
-import facebookTwitterImg from '@assets/generated_images/Homeowner_Facebook_Twitter_share_ea16b9aa.png';
+import instagramPostImg from '@assets/generated_images/Instagram_referral_post_square_843cce29.png';
+import instagramStoryImg from '@assets/generated_images/Instagram_story_referral_vertical_fd4053fc.png';
+import facebookTwitterImg from '@assets/generated_images/Facebook_Twitter_share_image_8823d9cc.png';
 
 export default function HomeownerReferral() {
   const { toast } = useToast();
