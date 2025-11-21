@@ -2,7 +2,9 @@
 
 ## Overview
 
-Home Base is a full-stack web application designed to connect homeowners with contractors, facilitate a DIY product marketplace, and offer seasonal home maintenance guidance. It aims to streamline property management for homeowners and enhance operational efficiency for contractors, featuring an Anthropologie-inspired aesthetic and robust tools like multi-property management, detailed proposal handling, and a gamified home health score. The project seeks to create a comprehensive ecosystem for home maintenance and improvement.
+Home Base is a full-stack web application designed to connect homeowners with contractors, facilitate a DIY product marketplace, and offer seasonal home maintenance guidance. It aims to streamline property management for homeowners and enhance operational efficiency for contractors, featuring a modern purple gradient aesthetic and robust tools like multi-property management, detailed proposal handling, and a gamified home health score. The project seeks to create a comprehensive ecosystem for home maintenance and improvement.
+
+**Landing Page**: Simplified homeowner home page (November 2025) with focused messaging on "Carfax-style home history" value proposition, featuring hero section with CTA button and referral rewards card. Home Health Score and Achievements accessible through maintenance and achievements pages respectively.
 
 ## User Preferences
 
