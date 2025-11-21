@@ -5532,6 +5532,7 @@ class DbStorage implements IStorage {
     this.updateUserAchievementProgress = this.memStorage.updateUserAchievementProgress.bind(this.memStorage);
     this.unlockUserAchievement = this.memStorage.unlockUserAchievement.bind(this.memStorage);
     this.checkAndAwardAchievements = this.memStorage.checkAndAwardAchievements.bind(this.memStorage);
+    this.calculateAchievementsProgress = this.memStorage.calculateAchievementsProgress.bind(this.memStorage);
     this.getAchievementProgress = this.memStorage.getAchievementProgress.bind(this.memStorage);
     this.validateAndUseInviteCode = this.memStorage.validateAndUseInviteCode.bind(this.memStorage);
     this.getInviteCodes = this.memStorage.getInviteCodes.bind(this.memStorage);
