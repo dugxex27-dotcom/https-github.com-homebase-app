@@ -3742,12 +3742,12 @@ export class MemStorage implements IStorage {
         
         case 'contractor_hired': {
           // Count unique contractor hires
-          const proposals = await db.select().from(proposals)
+          const acceptedProposals = await db.select().from(proposals)
             .where(eq(proposals.homeownerId, homeownerId))
             .where(eq(proposals.status, 'accepted'));
           
-          progress = Math.min(100, (proposals.length / criteria.count) * 100);
-          isCompleted = proposals.length >= criteria.count;
+          progress = Math.min(100, (acceptedProposals.length / criteria.count) * 100);
+          isCompleted = acceptedProposals.length >= criteria.count;
           break;
         }
         
