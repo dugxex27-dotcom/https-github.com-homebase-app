@@ -2815,26 +2815,6 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                 )}
                 
                 <div className="flex gap-2 ml-auto">
-                  {/* Find Contractors Button */}
-                  {selectedHouseId && houses.length > 0 && (
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
-                        if (selectedHouse) {
-                          // Navigate to contractors page with house address as location
-                          const encodedAddress = encodeURIComponent(selectedHouse.address);
-                          window.location.href = `/contractors?location=${encodedAddress}`;
-                        }
-                      }}
-                      className="whitespace-nowrap px-8 py-3 text-lg font-semibold" 
-                      style={{ backgroundColor: '#1560a2', color: 'white' }}
-                      data-testid="button-find-contractors"
-                    >
-                      <MapPin className="w-4 h-4 mr-1" />
-                      Find Contractors
-                    </Button>
-                  )}
                   <AppointmentScheduler 
                     triggerButtonText="Schedule Visit" 
                     triggerButtonVariant="outline"
