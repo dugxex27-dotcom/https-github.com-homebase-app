@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Plus, Phone, MessageCircle, Calendar, Search, Filter, Plug, Copy, Check, Trash2, ExternalLink } from "lucide-react";
@@ -127,6 +128,8 @@ export default function ContractorCRMPage() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [isAddIntegrationOpen, setIsAddIntegrationOpen] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [deleteIntegrationConfirmOpen, setDeleteIntegrationConfirmOpen] = useState(false);
+  const [integrationToDelete, setIntegrationToDelete] = useState<CrmIntegration | null>(null);
 
   // Fetch leads
   const { data: leads, isLoading } = useQuery<CrmLead[]>({
@@ -226,6 +229,14 @@ export default function ContractorCRMPage() {
       });
     },
   });
+
+  const confirmDeleteIntegration = () => {
+    if (integrationToDelete) {
+      deleteIntegrationMutation.mutate(integrationToDelete.id);
+      setDeleteIntegrationConfirmOpen(false);
+      setIntegrationToDelete(null);
+    }
+  };
 
   const handleQuickAction = (action: string, lead: CrmLead) => {
     if (action === 'call' && lead.phone) {
@@ -817,9 +828,8 @@ export default function ContractorCRMPage() {
                         variant="destructive"
                         size="sm"
                         onClick={() => {
-                          if (confirm(`Delete ${integration.platformName} integration?`)) {
-                            deleteIntegrationMutation.mutate(integration.id);
-                          }
+                          setIntegrationToDelete(integration);
+                          setDeleteIntegrationConfirmOpen(true);
                         }}
                         disabled={deleteIntegrationMutation.isPending}
                         data-testid={`button-delete-integration-${integration.id}`}
@@ -835,6 +845,18 @@ export default function ContractorCRMPage() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Delete Integration Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteIntegrationConfirmOpen}
+        onOpenChange={setDeleteIntegrationConfirmOpen}
+        title="Delete Integration?"
+        description={`Are you sure you want to delete the ${integrationToDelete?.platformName} integration? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteIntegration}
+        variant="destructive"
+      />
     </div>
   );
 }
