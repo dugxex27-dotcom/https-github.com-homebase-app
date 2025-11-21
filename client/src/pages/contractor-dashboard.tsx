@@ -1,15 +1,31 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Proposals } from "@/components/proposals";
 import { ContractorCodeEntry } from "@/components/ConnectionCodes";
 
 import { useAuth } from "@/hooks/useAuth";
-import { FileText, User, Star, Briefcase } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { FileText, User, Star, Briefcase, Gift } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 
 export default function ContractorDashboard() {
   const { user } = useAuth();
   const typedUser = user as UserType | undefined;
+  
+  // Referral data query
+  const { data: referralData, isLoading: isLoadingReferral } = useQuery({
+    queryKey: ['/api/user/referral-code'],
+    enabled: !!typedUser,
+  });
+  
+  const referralCount = (referralData as any)?.referralCount || 0;
+  
+  // Contractors have a $20/month subscription
+  const subscriptionCost = 20;
+  const referralsNeeded = subscriptionCost;
+  const referralsRemaining = Math.max(0, referralsNeeded - referralCount);
+  const progressPercentage = Math.min(100, (referralCount / referralsNeeded) * 100);
   
   if (!typedUser) {
     return (
@@ -29,6 +45,40 @@ export default function ContractorDashboard() {
           <p className="text-lg" style={{ color: '#000000' }}>Manage your contracting business and grow your client base</p>
         </div>
 
+        {/* Referral Progress Card */}
+        <Card className="mb-8" style={{ backgroundColor: '#f2f2f2' }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2" style={{ color: '#1560a2' }}>
+              <Gift className="w-5 h-5" style={{ color: '#1560a2' }} />
+              Progress to Free Subscription
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="p-4 bg-white rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium" style={{ color: '#1560a2' }}>
+                  Referral Progress
+                </span>
+                <span className="text-sm font-bold" style={{ color: '#1560a2' }}>
+                  {isLoadingReferral ? '...' : `${referralCount}/${referralsNeeded}`}
+                </span>
+              </div>
+              <Progress value={progressPercentage} className="h-3 mb-2" />
+              <p className="text-center text-[32px]" style={{ color: referralsRemaining === 0 ? '#10b981' : '#dc2626' }}>
+                {referralsRemaining === 0 ? (
+                  <span className="font-bold">🎉 You've earned a free subscription!</span>
+                ) : (
+                  <>
+                    <span className="font-bold">{referralsRemaining} more referral{referralsRemaining !== 1 ? 's' : ''}</span> until your subscription is free!
+                  </>
+                )}
+              </p>
+              <p className="text-center text-sm text-gray-600 mt-3">
+                Share your referral code from the Account page to earn $1 off per signup!
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Proposals Section */}
         <div className="mb-8">

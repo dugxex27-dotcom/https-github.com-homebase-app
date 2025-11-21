@@ -1890,44 +1890,6 @@ export default function ContractorProfile() {
               Share Home Base with other contractors and homeowners. I earn $1 off my subscription for each signup!
             </div>
             
-            {/* Referral Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-3 bg-white rounded-lg">
-                <div className="text-2xl font-bold" style={{ color: '#1560a2' }}>
-                  {isLoadingReferral ? '...' : referralCount}
-                </div>
-                <div className="text-sm text-gray-600">People Referred</div>
-              </div>
-              <div className="text-center p-3 bg-white rounded-lg">
-                <div className="text-2xl font-bold text-green-600">
-                  ${isLoadingReferral ? '...' : (referralCount * 1).toFixed(2)}
-                </div>
-                <div className="text-sm text-gray-600">Total Earned</div>
-              </div>
-            </div>
-
-            {/* Progress to Free Subscription */}
-            <div className="p-4 bg-white rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium" style={{ color: '#1560a2' }}>
-                  Progress to Free Subscription
-                </span>
-                <span className="text-sm font-bold" style={{ color: '#1560a2' }}>
-                  {referralCount}/{referralsNeeded}
-                </span>
-              </div>
-              <Progress value={progressPercentage} className="h-3 mb-2" />
-              <p className="text-center text-[20px]" style={{ color: referralsRemaining === 0 ? '#10b981' : '#dc2626' }}>
-                {referralsRemaining === 0 ? (
-                  <span className="font-bold">🎉 You've earned a free subscription!</span>
-                ) : (
-                  <>
-                    <span className="font-bold">{referralsRemaining} more referral{referralsRemaining !== 1 ? 's' : ''}</span> until your subscription is free!
-                  </>
-                )}
-              </p>
-            </div>
-
             {/* Referral Code */}
             <div>
               <Label style={{ color: '#1560a2' }}>Your Referral Code</Label>
