@@ -356,17 +356,17 @@ export default function HomeownerServiceRecords() {
   const filteredLogs = maintenanceLogs?.filter(log => homeAreaFilter === "all" || log.homeArea === homeAreaFilter) || [];
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #2c0f5b 0%, #1a0936 100%)' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-primary/10 p-2 rounded-lg">
-              <FileText className="w-8 h-8" style={{ color: '#b6a6f4' }} />
+              <FileText className="w-8 h-8" style={{ color: '#ffffff' }} />
             </div>
             <div>
               <h1 className="text-3xl font-bold" style={{ color: '#ffffff' }}>Service Records</h1>
-              <p style={{ color: '#b6a6f4' }}>Complete history of maintenance and repairs performed on your home</p>
+              <p style={{ color: '#ffffff' }}>Complete history of maintenance and repairs performed on your home</p>
             </div>
           </div>
         </div>
@@ -375,8 +375,7 @@ export default function HomeownerServiceRecords() {
         <div className="mb-6">
           <Button 
             onClick={handleAddNewMaintenanceLog} 
-            style={{ backgroundColor: '#b6a6f4', color: 'white' }} 
-            className="hover:opacity-90"
+            className="bg-white text-purple-900 hover:bg-gray-100"
             data-testid="button-add-service-record"
           >
             <Plus className="w-4 h-4 mr-2" />

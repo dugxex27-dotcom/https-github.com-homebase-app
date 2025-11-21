@@ -472,12 +472,12 @@ export default function Messages() {
     );
   }
 
-  const bgColor = typedUser.role === 'contractor' ? '#1560a2' : '#2c0f5b';
+  const bgColor = typedUser.role === 'contractor' ? '#1560a2' : 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)';
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: bgColor }}>
+    <div className="min-h-screen" style={{ background: bgColor }}>
       {/* Hero Section */}
-      <section className="pt-8 sm:pt-12 pb-3 sm:pb-4" style={{ backgroundColor: bgColor }}>
+      <section className="pt-8 sm:pt-12 pb-3 sm:pb-4" style={{ background: 'transparent' }}>
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold" style={{ color: 'white' }}>Messages</h1>
