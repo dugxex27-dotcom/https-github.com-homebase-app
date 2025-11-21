@@ -94,7 +94,7 @@ export default function Home() {
                     data-testid="progress-referral-subscription" 
                   />
                   
-                  <p className="text-center text-xl sm:text-2xl font-semibold" style={{ color: referralsRemaining === 0 ? '#10b981' : '#dc2626' }}>
+                  <p className="text-center text-lg sm:text-xl font-medium" style={{ color: referralsRemaining === 0 ? '#10b981' : '#6b46c1' }}>
                     {referralsRemaining === 0 ? (
                       "🎉 You've earned a free subscription!"
                     ) : (
