@@ -103,7 +103,7 @@ export default function Home() {
                   </p>
                   
                   <div className="text-center mt-6">
-                    <Link href="/homeowner-account">
+                    <Link href="/homeowner-referral">
                       <Button 
                         size="lg"
                         className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
