@@ -40,10 +40,10 @@ export default function Contractors() {
     enabled: isAuthenticated && !!homeownerId && userRole === 'homeowner'
   });
 
-  // Fetch contractor stats for homeowners
-  const { data: contractorStats } = useQuery<{ contractorsUsed: number }>({
-    queryKey: ['/api/homeowner/contractors-stats'],
-    enabled: isAuthenticated && !!homeownerId && userRole === 'homeowner'
+  // Fetch contractors used at the selected house
+  const { data: contractorsUsedAtHouse = [], isLoading: contractorsUsedLoading } = useQuery<Contractor[]>({
+    queryKey: ['/api/houses', selectedHouseId, 'contractors-used'],
+    enabled: isAuthenticated && !!homeownerId && userRole === 'homeowner' && !!selectedHouseId
   });
 
   // Auto-select first house when houses are loaded
@@ -358,15 +358,6 @@ export default function Contractors() {
             <p className="text-sm sm:text-base lg:text-lg max-w-3xl mx-auto" style={{ color: '#b6a6f4' }}>
               Connect with verified professionals specializing in niche home services
             </p>
-            {isAuthenticated && userRole === 'homeowner' && contractorStats && contractorStats.contractorsUsed > 0 && (
-              <div className="mt-4 sm:mt-6">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full" style={{ backgroundColor: '#3d1f6b', border: '2px solid #b6a6f4' }}>
-                  <span className="text-sm sm:text-base font-medium text-white">
-                    You've worked with {contractorStats.contractorsUsed} {contractorStats.contractorsUsed === 1 ? 'contractor' : 'contractors'}
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </section>
@@ -607,6 +598,33 @@ export default function Contractors() {
             </div>
           </div>
         </div>
+
+        {/* Your Contractors at This House Section */}
+        {isAuthenticated && userRole === 'homeowner' && selectedHouseId && contractorsUsedAtHouse.length > 0 && (
+          <div className="mb-8">
+            <div className="mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: '#ffffff' }}>
+                Your Contractors at {houses.find(h => h.id === selectedHouseId)?.name}
+              </h2>
+              <p className="text-sm sm:text-base lg:text-lg" style={{ color: '#b6a6f4' }}>
+                {contractorsUsedAtHouse.length} {contractorsUsedAtHouse.length === 1 ? 'contractor' : 'contractors'} you've worked with at this property
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {contractorsUsedAtHouse.map((contractor) => (
+                <div key={contractor.id} className="relative">
+                  <div className="absolute -top-2 -right-2 z-10">
+                    <div className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                      Previously Used
+                    </div>
+                  </div>
+                  <ContractorCard contractor={contractor} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Available Contractors Section */}
         <div className="mb-8">

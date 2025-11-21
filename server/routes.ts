@@ -3399,57 +3399,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get homeowner's contractor usage stats
-  app.get("/api/homeowner/contractors-stats", isAuthenticated, async (req: any, res) => {
+  // Get contractors used at a specific house
+  app.get("/api/houses/:houseId/contractors-used", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.user?.id;
       const userRole = req.session?.user?.role;
+      const houseId = req.params.houseId;
       
       if (userRole !== 'homeowner') {
-        return res.status(403).json({ message: "Only homeowners can view contractor stats" });
+        return res.status(403).json({ message: "Only homeowners can view contractors used" });
       }
       
-      // Get unique contractor IDs from various sources
-      const uniqueContractorIds = new Set<string>();
+      // Verify house belongs to user
+      const house = await storage.getHouse(houseId);
+      if (!house || house.homeownerId !== userId) {
+        return res.status(403).json({ message: "House not found or unauthorized" });
+      }
       
-      // From maintenance logs
+      // Get unique contractor IDs from various sources for this specific house
+      const contractorDataMap = new Map<string, { lastUsed: Date, serviceType?: string }>();
+      
+      // From maintenance logs for this house
       const maintenanceLogs = await storage.getMaintenanceLogs(userId);
-      maintenanceLogs.forEach((log: any) => {
-        if (log.contractorId) {
-          uniqueContractorIds.add(log.contractorId);
-        }
-      });
+      maintenanceLogs
+        .filter((log: any) => log.houseId === houseId && log.contractorId)
+        .forEach((log: any) => {
+          const existing = contractorDataMap.get(log.contractorId);
+          const logDate = new Date(log.serviceDate);
+          if (!existing || logDate > existing.lastUsed) {
+            contractorDataMap.set(log.contractorId, {
+              lastUsed: logDate,
+              serviceType: log.serviceType
+            });
+          }
+        });
       
-      // From proposals (received and accepted)
+      // From proposals for this house
       const proposals = await storage.getHomeownerProposals(userId);
-      proposals.forEach((proposal: any) => {
-        if (proposal.contractorId) {
-          uniqueContractorIds.add(proposal.contractorId);
-        }
-      });
+      proposals
+        .filter((proposal: any) => proposal.houseId === houseId && proposal.contractorId && proposal.status === 'accepted')
+        .forEach((proposal: any) => {
+          const existing = contractorDataMap.get(proposal.contractorId);
+          const proposalDate = new Date(proposal.createdAt);
+          if (!existing || proposalDate > existing.lastUsed) {
+            contractorDataMap.set(proposal.contractorId, {
+              lastUsed: proposalDate,
+              serviceType: proposal.serviceType
+            });
+          }
+        });
       
-      // From conversations
-      const conversations = await storage.getConversationsForUser(userId, 'homeowner');
-      conversations.forEach((conversation: any) => {
-        if (conversation.contractorId) {
-          uniqueContractorIds.add(conversation.contractorId);
-        }
-      });
+      // Fetch full contractor data for all unique contractor IDs
+      const contractorIds = Array.from(contractorDataMap.keys());
+      const contractors = await Promise.all(
+        contractorIds.map(async (contractorId) => {
+          const contractor = await storage.getContractor(contractorId);
+          if (!contractor) return null;
+          
+          const metadata = contractorDataMap.get(contractorId);
+          
+          // Enrich with company data
+          let enrichedContractor = { ...contractor };
+          if ((contractor as any).companyId) {
+            const company = await storage.getCompany((contractor as any).companyId);
+            if (company) {
+              enrichedContractor = {
+                ...contractor,
+                businessLogo: company.businessLogo || '',
+                projectPhotos: company.projectPhotos || []
+              };
+            }
+          }
+          
+          return {
+            ...enrichedContractor,
+            lastUsed: metadata?.lastUsed,
+            lastServiceType: metadata?.serviceType
+          };
+        })
+      );
       
-      // From reviews
-      const reviews = await storage.getHomeownerReviews(userId);
-      reviews.forEach((review: any) => {
-        if (review.contractorId) {
-          uniqueContractorIds.add(review.contractorId);
-        }
-      });
+      // Filter out nulls and sort by last used (most recent first)
+      const validContractors = contractors
+        .filter(c => c !== null)
+        .sort((a, b) => {
+          const dateA = a.lastUsed ? new Date(a.lastUsed).getTime() : 0;
+          const dateB = b.lastUsed ? new Date(b.lastUsed).getTime() : 0;
+          return dateB - dateA;
+        });
       
-      res.json({
-        contractorsUsed: uniqueContractorIds.size
-      });
+      res.json(validContractors);
     } catch (error) {
-      console.error("Error fetching contractor stats:", error);
-      res.status(500).json({ message: "Failed to fetch contractor stats" });
+      console.error("Error fetching contractors used at house:", error);
+      res.status(500).json({ message: "Failed to fetch contractors used" });
     }
   });
 
