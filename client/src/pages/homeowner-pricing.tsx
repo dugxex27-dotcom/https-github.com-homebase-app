@@ -178,19 +178,7 @@ export default function HomeownerPricing() {
                 </li>
                 <li className="flex items-start gap-3">
                   <Check className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Priority email support</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Check className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
                   <span className="text-sm">Bulk maintenance scheduling</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Check className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Property comparison tools</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Check className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Phone support during business hours</span>
                 </li>
               </ul>
               {maxHouses >= 3 && maxHouses <= 6 ? (
