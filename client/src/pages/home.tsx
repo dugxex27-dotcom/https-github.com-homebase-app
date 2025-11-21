@@ -67,7 +67,7 @@ export default function Home() {
                   </div>
                 </CardTitle>
                 <p className="text-center text-gray-600 mt-2">
-                  Invite {referralsNeeded} friends. Unlock HomeBase for free — forever.
+                  Get {referralsNeeded} paid referrals. Unlock HomeBase for free — forever.
                 </p>
               </CardHeader>
               <CardContent>
@@ -77,7 +77,7 @@ export default function Home() {
                       <div className="text-3xl font-bold" style={{ color: '#2c0f5b' }}>
                         {referralCount}
                       </div>
-                      <div className="text-sm text-gray-600">Invites</div>
+                      <div className="text-sm text-gray-600">Paid Referrals</div>
                     </div>
                     <div className="text-2xl text-gray-400">/</div>
                     <div className="text-center">
@@ -98,7 +98,7 @@ export default function Home() {
                     {referralsRemaining === 0 ? (
                       "🎉 You've earned a free subscription!"
                     ) : (
-                      `You're ${referralsRemaining} referral${referralsRemaining !== 1 ? 's' : ''} away from a free subscription.`
+                      `You're ${referralsRemaining} paid referral${referralsRemaining !== 1 ? 's' : ''} away from a free subscription.`
                     )}
                   </p>
                   
