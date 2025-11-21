@@ -2480,7 +2480,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
   // Authentication guards
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#2c0f5b' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto mb-4"></div>
           <p className="text-white text-lg">Loading...</p>
@@ -2491,10 +2491,10 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#2c0f5b' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">Authentication Required</h1>
-          <p className="text-gray-300 mb-6">Please sign in to access maintenance features.</p>
+          <p className="text-white mb-6">Please sign in to access maintenance features.</p>
           <Button onClick={() => window.location.href = '/signin'} className="bg-white text-purple-900 hover:bg-gray-100">
             Sign In
           </Button>
@@ -2505,10 +2505,10 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
 
   if (!userRole || (userRole !== 'homeowner' && userRole !== 'contractor')) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#2c0f5b' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">Access Denied</h1>
-          <p className="text-gray-300 mb-6">This feature is only available to homeowners and contractors.</p>
+          <p className="text-white mb-6">This feature is only available to homeowners and contractors.</p>
           <Button onClick={() => window.location.href = '/'} className="bg-white text-purple-900 hover:bg-gray-100">
             Go Home
           </Button>
@@ -2518,9 +2518,9 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#2c0f5b' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
       {/* Hero Section */}
-      <section className="py-6" style={{ background: '#2c0f5b' }}>
+      <section className="py-6" style={{ background: 'transparent' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-6">
             <h1 className="text-4xl lg:text-5xl font-bold mb-6" style={{ color: '#ffffff' }}>
@@ -2535,7 +2535,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
 
       {/* Home Health Score Section */}
       {userRole === 'homeowner' && houses.length > 0 && (
-        <section className="py-8" style={{ backgroundColor: '#2c0f5b' }}>
+        <section className="py-8" style={{ background: 'transparent' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className={`grid gap-6 ${houses.length === 1 ? 'max-w-5xl mx-auto' : houses.length === 2 ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
               {houses.map((house: House) => (
@@ -2552,7 +2552,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
 
       {/* DIY Savings Tracker Section - Show separate card for each house */}
       {userRole === 'homeowner' && houses.length > 0 && (
-        <section className="py-4 sm:py-8" style={{ backgroundColor: '#2c0f5b' }}>
+        <section className="py-4 sm:py-8" style={{ background: 'transparent' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className={`grid gap-6 ${houses.length === 1 ? 'max-w-5xl mx-auto' : houses.length === 2 ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
               {houses.map((house: House) => (

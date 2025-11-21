@@ -104,13 +104,13 @@ export default function AIContractorHelp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
       <div className="container mx-auto py-8 px-4 max-w-4xl">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2" style={{ color: '#ffffff' }}>
             Who Should I Contact?
           </h1>
-          <p className="text-gray-600">
+          <p style={{ color: '#ffffff' }}>
             Not sure which contractor you need? Describe your problem and get AI-powered recommendations.
           </p>
         </div>

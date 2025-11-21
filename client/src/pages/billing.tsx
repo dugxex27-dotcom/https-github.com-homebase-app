@@ -72,13 +72,13 @@ export default function Billing() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #f8f4fc, #faf9fb)' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
         {/* Back button */}
         <Button
           variant="ghost"
           onClick={() => setLocation('/my-home')}
-          className="mb-4 sm:mb-6"
+          className="mb-4 sm:mb-6 text-white hover:text-white hover:bg-white/10"
           data-testid="button-back"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -87,10 +87,10 @@ export default function Billing() {
 
         {/* Page Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-2" style={{ color: isContractor ? '#b91c1c' : '#2c0f5b' }}>
+          <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-2" style={{ color: '#ffffff' }}>
             Subscription & Billing
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-sm sm:text-base" style={{ color: '#ffffff' }}>
             {isContractor 
               ? 'Manage your contractor subscription'
               : 'Choose the plan that fits your property management needs'
