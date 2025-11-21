@@ -575,7 +575,7 @@ export default function Messages() {
                                     data-testid={`checkbox-contractor-${contractor.id}`}
                                   />
                                   <label htmlFor={`contractor-${contractor.id}`} className="text-sm font-medium leading-none">
-                                    {contractor.companyName || contractor.businessName}
+                                    {contractor.company} - {contractor.name}
                                   </label>
                                 </div>
                               ))}
