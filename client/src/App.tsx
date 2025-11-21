@@ -26,6 +26,7 @@ const Products = lazy(() => import("./pages/products"));
 const ContractorDetail = lazy(() => import("./pages/contractor-detail"));
 const HomeownerServiceRecords = lazy(() => import("./pages/homeowner-service-records"));
 const HomeownerAccount = lazy(() => import("./pages/homeowner-account"));
+const HomeownerReferral = lazy(() => import("./pages/homeowner-referral"));
 const Achievements = lazy(() => import("./pages/achievements"));
 const AIContractorHelp = lazy(() => import("./pages/ai-contractor-help"));
 const Billing = lazy(() => import("./pages/billing"));
@@ -153,6 +154,7 @@ function Router() {
             <Route path="/contractor/:id" component={ContractorDetail} />
             <Route path="/service-records" component={HomeownerServiceRecords} />
             <Route path="/account" component={HomeownerAccount} />
+            <Route path="/homeowner-referral" component={HomeownerReferral} />
             <Route path="/achievements" component={Achievements} />
             <Route path="/ai-help" component={AIContractorHelp} />
             <Route path="/billing" component={Billing} />
