@@ -1878,7 +1878,7 @@ export default function ContractorProfile() {
         </Card>
 
         {/* Referral Sharing */}
-        <Card style={{ backgroundColor: '#f2f2f2' }}>
+        <Card id="referral" style={{ backgroundColor: '#f2f2f2' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2" style={{ color: '#1560a2' }}>
               <Gift className="w-5 h-5" style={{ color: '#1560a2' }} />

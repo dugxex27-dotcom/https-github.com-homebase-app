@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Users, User as UserIcon, LogOut, MessageCircle, Trophy, Shield, Calendar, Crown, HelpCircle, Menu, Wrench, Building2, Package, LayoutDashboard, FileText } from "lucide-react";
+import { Users, User as UserIcon, LogOut, MessageCircle, Trophy, Shield, Calendar, Crown, HelpCircle, Menu, Wrench, Building2, Package, LayoutDashboard, FileText, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Notifications } from "@/components/notifications";
@@ -203,6 +203,12 @@ export default function Header() {
                             {hasNotificationsForTab('messages') && (
                               <span className="ml-auto h-2 w-2 rounded-full bg-red-500" />
                             )}
+                          </button>
+                        </Link>
+                        <Link href="/contractor-profile#referral" onClick={() => setMobileMenuOpen(false)}>
+                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/contractor-profile' && window.location.hash === '#referral' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-muted'}`}>
+                            <Gift className="w-4 h-4" />
+                            Referral
                           </button>
                         </Link>
                         <Link href="/contractor-profile" onClick={() => setMobileMenuOpen(false)}>
