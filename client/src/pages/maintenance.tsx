@@ -2922,7 +2922,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                                   <label
                                     htmlFor={system.value}
                                     className="text-sm cursor-pointer"
-                                    style={{ color: '#b6a6f4' }}
+                                    style={{ color: '#ffffff' }}
                                   >
                                     {system.label}
                                   </label>
