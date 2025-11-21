@@ -7143,9 +7143,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
+      // Ensure month and year are set from completedAt
+      const completedAt = req.body.completedAt ? new Date(req.body.completedAt) : new Date();
+      
       const completionData = insertTaskCompletionSchema.parse({
         ...req.body,
         homeownerId,
+        completedAt,
+        month: completedAt.getMonth() + 1, // 1-12
+        year: completedAt.getFullYear(),
       });
 
       const completion = await storage.createTaskCompletion(completionData);
