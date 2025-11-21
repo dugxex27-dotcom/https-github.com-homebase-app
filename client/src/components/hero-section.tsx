@@ -24,7 +24,7 @@ export default function HeroSection() {
           
           <p className="text-xl mb-8 max-w-3xl mx-auto leading-relaxed" style={{ color: typedUser?.role === 'homeowner' ? '#b6a6f4' : '#9ed0ef' }}>
             {typedUser?.role === 'homeowner' ? (
-              'Connect with skilled local contractors for all your home improvement and maintenance projects. Find trusted professionals in your area ready to help.'
+              'The Carfax-style home history your house has always needed'
             ) : (
               'Grow your contracting business by connecting with quality clients, showcasing your expertise, and managing your professional reputation in one powerful platform.'
             )}
