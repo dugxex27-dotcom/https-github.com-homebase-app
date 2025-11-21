@@ -165,12 +165,6 @@ export default function Header() {
                             Achievements
                           </button>
                         </Link>
-                        <Link href="/homeowner-pricing" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/homeowner-pricing' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`} data-testid="nav-pricing">
-                            <CreditCard className="w-4 h-4" />
-                            Pricing
-                          </button>
-                        </Link>
                         <Link href="/homeowner-referral" onClick={() => setMobileMenuOpen(false)}>
                           <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/homeowner-referral' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
                             <Gift className="w-4 h-4" />

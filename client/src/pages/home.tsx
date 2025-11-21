@@ -483,6 +483,7 @@ export default function Home() {
                   <li><Link href="/products" className="hover:text-purple-400 transition-colors">DIY Products</Link></li>
                   <li><Link href="/maintenance" className="hover:text-purple-400 transition-colors">Maintenance Schedule</Link></li>
                   <li><Link href="/maintenance#service-records" className="hover:text-purple-400 transition-colors">Service History</Link></li>
+                  <li><Link href="/homeowner-pricing" className="hover:text-purple-400 transition-colors" data-testid="link-pricing-footer">Pricing Plans</Link></li>
                 </ul>
               </div>
             )}
