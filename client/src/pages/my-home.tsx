@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -115,6 +116,8 @@ export default function MyHome() {
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [houseToDelete, setHouseToDelete] = useState<House | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -508,8 +511,15 @@ export default function MyHome() {
   };
 
   const handleDelete = (house: House) => {
-    if (confirm(`Are you sure you want to delete ${house.name}?`)) {
-      deleteHouseMutation.mutate(house.id);
+    setHouseToDelete(house);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (houseToDelete) {
+      deleteHouseMutation.mutate(houseToDelete.id);
+      setDeleteConfirmOpen(false);
+      setHouseToDelete(null);
     }
   };
 
@@ -1153,6 +1163,18 @@ export default function MyHome() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDialog
+          open={deleteConfirmOpen}
+          onOpenChange={setDeleteConfirmOpen}
+          title="Delete House?"
+          description={`Are you sure you want to delete ${houseToDelete?.name}? This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={confirmDelete}
+          variant="destructive"
+        />
       </div>
     </div>
   );
