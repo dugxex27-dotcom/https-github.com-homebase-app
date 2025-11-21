@@ -4161,16 +4161,16 @@ export class MemStorage implements IStorage {
     // House-specific filtering - calculate progress based on house data only
     // Get house-specific data
     const houseTaskCompletions = await db.select().from(taskCompletions)
-      .where(eq(taskCompletions.homeownerId, homeownerId))
-      .where(eq(taskCompletions.houseId, houseId));
+      .where(and(
+        eq(taskCompletions.homeownerId, homeownerId),
+        eq(taskCompletions.houseId, houseId)
+      ));
     
     const houseMaintenanceLogs = await db.select().from(maintenanceLogs)
-      .where(eq(maintenanceLogs.homeownerId, homeownerId))
-      .where(eq(maintenanceLogs.houseId, houseId));
-    
-    const houseServiceRecords = await db.select().from(serviceRecords)
-      .where(eq(serviceRecords.homeownerId, homeownerId))
-      .where(eq(serviceRecords.houseId, houseId));
+      .where(and(
+        eq(maintenanceLogs.homeownerId, homeownerId),
+        eq(maintenanceLogs.houseId, houseId)
+      ));
     
     // Calculate house-specific savings metrics
     const tasksWithSavings = houseTaskCompletions.filter(c => 
@@ -4223,12 +4223,12 @@ export class MemStorage implements IStorage {
         }
         
         case 'logs_created': {
-          progress = Math.min(100, (houseServiceRecords.length / criteria.count) * 100);
+          progress = Math.min(100, (houseMaintenanceLogs.length / criteria.count) * 100);
           break;
         }
         
         case 'documents_uploaded': {
-          const docsCount = houseServiceRecords.filter(sr => sr.documentUrl).length;
+          const docsCount = houseMaintenanceLogs.filter(log => log.receiptUrls && log.receiptUrls.length > 0).length;
           progress = Math.min(100, (docsCount / criteria.count) * 100);
           break;
         }
