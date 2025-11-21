@@ -448,7 +448,7 @@ export default function Billing() {
                     <div className="text-right">
                       <p className="font-semibold text-lg">${parseFloat(event.amount).toFixed(2)}</p>
                       <p className="text-sm text-gray-500">
-                        {format(new Date(event.createdAt), 'MMM d, h:mm a')}
+                        {event.createdAt && format(new Date(event.createdAt), 'MMM d, h:mm a')}
                       </p>
                     </div>
                   </div>
