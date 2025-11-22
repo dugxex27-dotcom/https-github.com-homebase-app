@@ -63,6 +63,7 @@ const AVAILABLE_SERVICES = [
   "Handyman Services",
   "Hardwood Flooring",
   "Holiday Light Installation",
+  "Home Automation & Tech Services",
   "Home Inspection",
   "House Cleaning",
   "HVAC Services",

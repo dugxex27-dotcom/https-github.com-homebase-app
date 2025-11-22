@@ -7595,7 +7595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     "Drywall & Spackling Repair", "Dumpster Rental", "Electrical Services", "Epoxy Flooring",
     "Exterior Painting", "Fence Installation", "Fire & Water Damage Restoration", "Furniture Assembly",
     "Garage Door Services", "General Contracting", "Gutter Cleaning and Repair", "Gutter Installation",
-    "Handyman Services", "Hardwood Flooring", "Holiday Light Installation", "Home Inspection",
+    "Handyman Services", "Hardwood Flooring", "Holiday Light Installation", "Home Automation & Tech Services", "Home Inspection",
     "House Cleaning", "HVAC Services", "Interior Painting", "Irrigation Systems",
     "Junk Removal", "Kitchen Remodeling", "Laminate & Vinyl Flooring", "Landscape Design",
     "Lawn & Landscaping", "Local Moving", "Locksmiths", "Masonry & Paver Installation", "Mold Remediation", "Pest Control",
@@ -7621,6 +7621,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'flooring', 'carpet', 'tile', 'wood', 'cabinet', 'counter', 'sink', 'toilet', 'shower',
       'furnace', 'boiler', 'ac', 'thermostat', 'duct', 'vent', 'pipe', 'wiring', 'outlet',
       'smart home', 'security system', 'camera', 'alarm', 'detector', 'smoke', 'carbon monoxide',
+      'automation', 'automated', 'automate', 'smart device', 'iot', 'wifi', 'network', 'router',
+      'home theater', 'audio', 'video', 'speaker', 'tv mount', 'voice control', 'alexa', 'google home',
+      'smart light', 'smart thermostat', 'smart lock', 'doorbell camera', 'nest', 'ring', 'ecobee',
       'mold', 'moisture', 'humidity', 'ventilation', 'energy', 'efficiency', 'solar'
     ];
     
@@ -7757,7 +7760,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 - Appliance installation and repair
 - Plumbing, electrical, HVAC, roofing issues
 - Landscaping, lawn care, outdoor structures
-- Smart home devices related to home infrastructure
+- Smart home devices, automation, and tech integration
+- Home automation systems (lighting, thermostats, voice control)
+- Home theater and audio/video installation
+- Network setup, WiFi, and smart home hubs
 - Home safety and security systems
 - Energy efficiency and home improvements
 
