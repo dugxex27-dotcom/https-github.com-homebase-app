@@ -55,6 +55,15 @@ Preferred communication style: Simple, everyday language.
 - **Error Tracking and Monitoring**: Features a React ErrorBoundary, client-side error logger, and a database schema for tracking errors, accessible via an admin-only developer console.
 - **Stripe Billing Reconciliation**: Processes Stripe webhook events for subscription management, tracks subscription cycles, and provides users with a complete billing history UI.
 - **Gamified Achievement System**: Features 66 achievements across 8 categories (Seasonal, Financial Savvy, Organization, Referral & Community, Milestones, Streaks, Special), with real-time progress tracking, house-based filtering (achievements show as unlocked only if the selected house meets the criteria independently), and retroactive checking. Performance optimized with pre-aggregated savings metrics.
+- **Review Fraud Prevention System**: Comprehensive anti-fraud measures for contractor reviews including:
+    - **Email Verification**: Required for all review submissions with 6-digit token verification system (24-hour expiry)
+    - **Account Age Requirement**: Minimum 7-day account age before users can leave reviews
+    - **One Review Per Customer-Contractor**: Database-level unique constraint prevents multiple reviews for same contractor
+    - **90-Day Service Window**: Reviews must be based on service records within past 90 days (verified service badge)
+    - **Device Fingerprinting**: Captures browser fingerprint to detect duplicate/fake reviews
+    - **IP Address Tracking**: Logs IP addresses with automatic fraud alerts when >3 reviews from same IP/device
+    - **Review Flagging System**: Users can report suspicious reviews; admins investigate via dedicated dashboard
+    - **Admin Investigation Tools**: Flag management interface with status tracking (pending/investigating/resolved_valid/resolved_invalid)
 - **API Endpoints**: Comprehensive set of APIs for managing all core functionalities.
 
 ## External Dependencies
