@@ -3367,7 +3367,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                                   <Button 
                                     variant="ghost" 
                                     size="sm" 
-                                    className="h-6 w-6 p-0 text-xs text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                                    className="h-6 w-6 p-0 text-xs text-white dark:text-white hover:bg-purple-50 dark:hover:bg-purple-900/20"
                                     onClick={() => systemData ? handleEditHomeSystem(systemData) : handleAddHomeSystem(system.label)}
                                     data-testid={`button-add-date-${system.value}`}
                                   >

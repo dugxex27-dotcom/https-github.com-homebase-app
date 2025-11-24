@@ -743,6 +743,67 @@ export class MemStorage implements IStorage {
     sarahHouses.forEach(house => {
       this.houses.set(house.id, house);
     });
+
+    // Add demo home systems with installation years for Sarah's Main Residence
+    const mainResidenceId = "8d44c1d0-af55-4f1c-bada-b70e54c823bc";
+    const demoHomeSystems = [
+      {
+        id: randomUUID(),
+        homeownerId: demoHomeownerId,
+        houseId: mainResidenceId,
+        systemType: "gas-furnace",
+        brand: "Carrier",
+        model: "59TN6",
+        installationYear: 2007, // 17 years old - should trigger important/critical recommendation
+        lastServiceYear: 2023,
+        notes: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        homeownerId: demoHomeownerId,
+        houseId: mainResidenceId,
+        systemType: "central-ac",
+        brand: "Trane",
+        model: "XR13",
+        installationYear: 2010, // 14 years old - should trigger critical recommendation
+        lastServiceYear: 2024,
+        notes: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        homeownerId: demoHomeownerId,
+        houseId: mainResidenceId,
+        systemType: "gas-water-heater",
+        brand: "Rheem",
+        model: "Performance Plus",
+        installationYear: 2015, // 9 years old - approaching replacement
+        lastServiceYear: 2024,
+        notes: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        homeownerId: demoHomeownerId,
+        houseId: mainResidenceId,
+        systemType: "sump-pump",
+        brand: "Wayne",
+        model: "CDU980E",
+        installationYear: 2018, // 6 years old
+        lastServiceYear: null,
+        notes: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    demoHomeSystems.forEach(system => {
+      this.homeSystems.set(system.id, system);
+    });
   }
 
   async getContractors(filters?: {
