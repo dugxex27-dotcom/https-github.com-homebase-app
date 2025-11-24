@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Users, User as UserIcon, LogOut, MessageCircle, Trophy, Shield, Calendar, Crown, HelpCircle, Menu, Wrench, Building2, Package, LayoutDashboard, FileText, Gift, CreditCard } from "lucide-react";
+import { Users, User as UserIcon, LogOut, MessageCircle, Trophy, Shield, Calendar, Crown, HelpCircle, Menu, Wrench, Building2, Package, LayoutDashboard, FileText, Gift, CreditCard, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Notifications } from "@/components/notifications";
@@ -10,11 +10,18 @@ import type { User, Notification } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
 import logoImage from '@assets/homebase-logo-black-text2_1763334854521.png';
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 export default function Header() {
   const [location] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const typedUser = user as User | undefined;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
 
   // Check if user is admin
   const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((e: string) => e.trim()).filter(Boolean);
@@ -59,6 +66,94 @@ export default function Header() {
   const now = new Date();
   const isTrialActive = trialEndsAt && trialEndsAt > now && userData?.subscriptionStatus === 'trialing';
   const daysRemaining = trialEndsAt ? Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+
+  // PWA Install handling
+  useEffect(() => {
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstallable(false);
+      return;
+    }
+
+    // Function to check dismissal status
+    const checkDismissal = () => {
+      const dismissed = localStorage.getItem('pwa-install-dismissed');
+      const dismissedTime = dismissed ? parseInt(dismissed) : 0;
+      const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+      
+      if (dismissed && Date.now() - dismissedTime < sevenDaysInMs) {
+        setIsInstallable(false);
+        setDeferredPrompt(null);
+        return true; // Is dismissed
+      }
+      return false; // Not dismissed
+    };
+
+    // Initial check
+    if (checkDismissal()) {
+      return;
+    }
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      const promptEvent = e as BeforeInstallPromptEvent;
+      setDeferredPrompt(promptEvent);
+      
+      // Double-check dismissal before making installable
+      if (!checkDismissal()) {
+        setIsInstallable(true);
+      }
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+      setIsInstallable(false);
+      localStorage.removeItem('pwa-install-dismissed');
+    };
+
+    // Listen for storage changes (when banner dismisses)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'pwa-install-dismissed') {
+        checkDismissal();
+      }
+    };
+
+    // Listen for custom event when banner dismisses (for same-tab updates)
+    const handleDismissEvent = () => {
+      checkDismissal();
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('pwa-dismissed', handleDismissEvent);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('pwa-dismissed', handleDismissEvent);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+
+    // Show the native install prompt
+    deferredPrompt.prompt();
+
+    // Wait for the user's response
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+      console.log('PWA installed from menu');
+    }
+
+    // Hide the install option
+    setDeferredPrompt(null);
+    setIsInstallable(false);
+    setMobileMenuOpen(false);
+  };
 
   const handleLogout = async () => {
     try {
@@ -183,6 +278,18 @@ export default function Header() {
                             Support
                           </button>
                         </Link>
+                        
+                        {/* PWA Install option for homeowners */}
+                        {isInstallable && (
+                          <button
+                            onClick={handleInstallClick}
+                            className="w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm hover:bg-muted text-purple-600 font-medium"
+                            data-testid="button-install-app-menu"
+                          >
+                            <Download className="w-4 h-4" />
+                            Install App
+                          </button>
+                        )}
                       </>
                     )}
                     {typedUser.role === 'contractor' && (
@@ -229,6 +336,18 @@ export default function Header() {
                             Support
                           </button>
                         </Link>
+                        
+                        {/* PWA Install option for contractors */}
+                        {isInstallable && (
+                          <button
+                            onClick={handleInstallClick}
+                            className="w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm hover:bg-muted text-blue-600 font-medium"
+                            data-testid="button-install-app-menu"
+                          >
+                            <Download className="w-4 h-4" />
+                            Install App
+                          </button>
+                        )}
                       </>
                     )}
                     {typedUser.role === 'agent' && (
@@ -257,6 +376,18 @@ export default function Header() {
                             Support
                           </button>
                         </Link>
+                        
+                        {/* PWA Install option for agents */}
+                        {isInstallable && (
+                          <button
+                            onClick={handleInstallClick}
+                            className="w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm hover:bg-muted text-purple-600 font-medium"
+                            data-testid="button-install-app-menu"
+                          >
+                            <Download className="w-4 h-4" />
+                            Install App
+                          </button>
+                        )}
                       </>
                     )}
                     

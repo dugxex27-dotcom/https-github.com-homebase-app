@@ -84,6 +84,10 @@ export function PWAInstallPrompt() {
   const handleDismiss = () => {
     // Remember that user dismissed it
     localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+    
+    // Dispatch custom event to notify Header component
+    window.dispatchEvent(new Event('pwa-dismissed'));
+    
     setShowPrompt(false);
   };
 
