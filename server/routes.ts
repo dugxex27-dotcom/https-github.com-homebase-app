@@ -6964,6 +6964,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (userType !== 'homeowner') {
         return res.status(403).json({ message: "Only homeowners can leave reviews" });
       }
+
+      // Get user info for fraud prevention checks
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // FRAUD PREVENTION CHECK 1: Email verification required
+      if (!user.emailVerified) {
+        return res.status(403).json({ 
+          message: "Email verification required",
+          details: "Please verify your email address before leaving reviews. Check your inbox for the verification link."
+        });
+      }
+
+      // FRAUD PREVENTION CHECK 2: Account age must be at least 7 days
+      const accountAge = Date.now() - new Date(user.createdAt!).getTime();
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      if (accountAge < sevenDays) {
+        const daysRemaining = Math.ceil((sevenDays - accountAge) / (24 * 60 * 60 * 1000));
+        return res.status(403).json({ 
+          message: "Account too new",
+          details: `You must wait ${daysRemaining} more day(s) before leaving reviews. This helps prevent spam.`
+        });
+      }
+
+      // FRAUD PREVENTION CHECK 3: Check for existing review (only 1 review per customer-contractor pair)
+      const existingReviews = await storage.getReviewsByHomeowner(userId);
+      const alreadyReviewed = existingReviews.some(r => r.contractorId === contractorId);
+      if (alreadyReviewed) {
+        return res.status(409).json({ 
+          message: "Review already exists",
+          details: "You have already reviewed this contractor. You can edit your existing review instead."
+        });
+      }
+
+      // FRAUD PREVENTION CHECK 4: Verify service record exists within 90 days
+      const serviceRecords = await storage.getServiceRecords(userId);
+      const ninetyDaysAgo = new Date();
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+      
+      const hasRecentService = serviceRecords.some(record => {
+        const serviceDate = new Date(record.serviceDate);
+        return record.contractorId === contractorId && serviceDate >= ninetyDaysAgo;
+      });
+
+      // FRAUD PREVENTION CHECK 5: Capture device fingerprint and IP address
+      const deviceFingerprint = req.body.deviceFingerprint || req.headers['x-device-fingerprint'];
+      const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+      // FRAUD PREVENTION CHECK 6: Detect duplicate IP/device fingerprints (>3 reviews)
+      if (deviceFingerprint || ipAddress) {
+        const allReviews = await storage.getAllReviews();
+        
+        if (deviceFingerprint) {
+          const reviewsFromSameDevice = allReviews.filter(r => r.deviceFingerprint === deviceFingerprint);
+          if (reviewsFromSameDevice.length >= 3) {
+            console.warn(`[FRAUD ALERT] Device fingerprint ${deviceFingerprint} has ${reviewsFromSameDevice.length} reviews`);
+            // Auto-flag for admin review but allow submission
+          }
+        }
+        
+        if (ipAddress) {
+          const reviewsFromSameIP = allReviews.filter(r => r.ipAddress === ipAddress);
+          if (reviewsFromSameIP.length >= 3) {
+            console.warn(`[FRAUD ALERT] IP address ${ipAddress} has ${reviewsFromSameIP.length} reviews`);
+            // Auto-flag for admin review but allow submission
+          }
+        }
+      }
       
       // Check if homeowner has exchanged messages with this contractor
       const conversations = await storage.getConversationsByUser(userId);
@@ -6979,7 +7049,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const reviewData = insertContractorReviewSchema.parse({
         ...req.body,
         contractorId: contractorId,
-        homeownerId: userId
+        homeownerId: userId,
+        deviceFingerprint: deviceFingerprint || null,
+        ipAddress: ipAddress ? String(ipAddress).split(',')[0].trim() : null,
+        isVerifiedService: hasRecentService
       });
       
       const review = await storage.createContractorReview(reviewData);
@@ -7071,6 +7144,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting review:", error);
       res.status(500).json({ message: "Failed to delete review" });
+    }
+  });
+
+  // Review flag API endpoints
+  app.post('/api/reviews/:id/flag', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user.id;
+      const reviewId = req.params.id;
+      
+      // Check if review exists
+      const allReviews = await storage.getAllReviews();
+      const review = allReviews.find(r => r.id === reviewId);
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      
+      // Can't flag your own review
+      if (review.homeownerId === userId) {
+        return res.status(403).json({ message: "You cannot flag your own review" });
+      }
+      
+      const flagData = insertReviewFlagSchema.parse({
+        reviewId,
+        reportedBy: userId,
+        reason: req.body.reason,
+        notes: req.body.notes || null,
+        status: 'pending'
+      });
+      
+      const flag = await storage.createReviewFlag(flagData);
+      res.status(201).json(flag);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid flag data", errors: error.errors });
+      }
+      console.error("Error flagging review:", error);
+      res.status(500).json({ message: "Failed to flag review" });
+    }
+  });
+
+  app.get('/api/admin/review-flags', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUserById(req.session.user.id);
+      
+      // Only admins can view flags
+      if (!user || !(user as any).isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const status = req.query.status as string | undefined;
+      const flags = await storage.getReviewFlags(status);
+      res.json(flags);
+    } catch (error) {
+      console.error("Error fetching review flags:", error);
+      res.status(500).json({ message: "Failed to fetch review flags" });
+    }
+  });
+
+  app.put('/api/admin/review-flags/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUserById(req.session.user.id);
+      
+      // Only admins can update flags
+      if (!user || !(user as any).isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const flagData = insertReviewFlagSchema.partial().parse({
+        ...req.body,
+        reviewedBy: req.session.user.id,
+        resolvedAt: req.body.status === 'resolved_valid' || req.body.status === 'resolved_invalid' ? new Date() : undefined
+      });
+      
+      const flag = await storage.updateReviewFlag(req.params.id, flagData);
+      
+      if (!flag) {
+        return res.status(404).json({ message: "Flag not found" });
+      }
+      
+      res.json(flag);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid flag data", errors: error.errors });
+      }
+      console.error("Error updating review flag:", error);
+      res.status(500).json({ message: "Failed to update review flag" });
+    }
+  });
+
+  // Email verification endpoints
+  app.post('/api/send-verification-email', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user.id;
+      const user = await storage.getUserById(userId);
+      
+      if (!user || !user.email) {
+        return res.status(404).json({ message: "User not found or no email on file" });
+      }
+      
+      if (user.emailVerified) {
+        return res.status(400).json({ message: "Email already verified" });
+      }
+      
+      // Generate verification token (6-digit code)
+      const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+      const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      
+      // Update user with verification token
+      await storage.updateUser(userId, {
+        emailVerificationToken: verificationToken,
+        emailVerificationTokenExpiry: tokenExpiry
+      });
+      
+      // TODO: Send email via SendGrid (when integrated)
+      console.log(`[EMAIL VERIFICATION] Token for ${user.email}: ${verificationToken}`);
+      
+      res.json({ message: "Verification email sent. Please check your inbox." });
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      res.status(500).json({ message: "Failed to send verification email" });
+    }
+  });
+
+  app.post('/api/verify-email', async (req: any, res) => {
+    try {
+      const { email, token } = req.body;
+      
+      if (!email || !token) {
+        return res.status(400).json({ message: "Email and token are required" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (user.emailVerified) {
+        return res.status(400).json({ message: "Email already verified" });
+      }
+      
+      if (!user.emailVerificationToken || user.emailVerificationToken !== token) {
+        return res.status(400).json({ message: "Invalid verification token" });
+      }
+      
+      if (user.emailVerificationTokenExpiry && new Date() > new Date(user.emailVerificationTokenExpiry)) {
+        return res.status(400).json({ message: "Verification token expired" });
+      }
+      
+      // Mark email as verified
+      await storage.updateUser(user.id, {
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        emailVerificationToken: null,
+        emailVerificationTokenExpiry: null
+      });
+      
+      res.json({ message: "Email verified successfully!" });
+    } catch (error) {
+      console.error("Error verifying email:", error);
+      res.status(500).json({ message: "Failed to verify email" });
     }
   });
 

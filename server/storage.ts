@@ -146,8 +146,15 @@ export interface IStorage {
   // Review operations
   getContractorReviews(contractorId: string): Promise<ContractorReview[]>;
   getReviewsByHomeowner(homeownerId: string): Promise<ContractorReview[]>;
+  getAllReviews(): Promise<ContractorReview[]>;
   createContractorReview(review: InsertContractorReview): Promise<ContractorReview>;
   updateContractorReview(id: string, review: Partial<InsertContractorReview>): Promise<ContractorReview | undefined>;
+  
+  // Review flag operations
+  createReviewFlag(flag: InsertReviewFlag): Promise<ReviewFlag>;
+  getReviewFlags(status?: string): Promise<ReviewFlag[]>;
+  getReviewFlag(id: string): Promise<ReviewFlag | undefined>;
+  updateReviewFlag(id: string, flag: Partial<InsertReviewFlag>): Promise<ReviewFlag | undefined>;
   deleteContractorReview(id: string): Promise<boolean>;
   getContractorAverageRating(contractorId: string): Promise<{ averageRating: number; totalReviews: number }>;
 
@@ -489,6 +496,7 @@ export class MemStorage implements IStorage {
   private conversations: Map<string, Conversation>;
   private messages: Map<string, Message>;
   private contractorReviews: Map<string, ContractorReview>;
+  private reviewFlags: Map<string, ReviewFlag>;
   private proposals: Map<string, Proposal>;
   private homeSystems: Map<string, HomeSystem>;
   private pushSubscriptions: Map<string, PushSubscription>;
@@ -533,6 +541,7 @@ export class MemStorage implements IStorage {
     this.conversations = new Map();
     this.messages = new Map();
     this.contractorReviews = new Map();
+    this.reviewFlags = new Map();
     this.proposals = new Map();
     this.homeSystems = new Map();
     this.pushSubscriptions = new Map();
@@ -2004,6 +2013,10 @@ export class MemStorage implements IStorage {
       .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
   }
 
+  async getAllReviews(): Promise<ContractorReview[]> {
+    return Array.from(this.contractorReviews.values());
+  }
+
   async createContractorReview(reviewData: InsertContractorReview): Promise<ContractorReview> {
     const id = randomUUID();
     const review: ContractorReview = {
@@ -2056,6 +2069,51 @@ export class MemStorage implements IStorage {
     }
     
     return deleted;
+  }
+
+  // Review flag operations
+  async createReviewFlag(flagData: InsertReviewFlag): Promise<ReviewFlag> {
+    const id = randomUUID();
+    const flag: ReviewFlag = {
+      ...flagData,
+      id,
+      status: flagData.status || 'pending',
+      reviewedBy: flagData.reviewedBy || null,
+      resolution: flagData.resolution || null,
+      notes: flagData.notes || null,
+      createdAt: new Date(),
+      resolvedAt: flagData.resolvedAt || null,
+    };
+    
+    this.reviewFlags.set(id, flag);
+    return flag;
+  }
+
+  async getReviewFlags(status?: string): Promise<ReviewFlag[]> {
+    const flags = Array.from(this.reviewFlags.values());
+    if (status) {
+      return flags.filter(f => f.status === status);
+    }
+    return flags;
+  }
+
+  async getReviewFlag(id: string): Promise<ReviewFlag | undefined> {
+    return this.reviewFlags.get(id);
+  }
+
+  async updateReviewFlag(id: string, flagData: Partial<InsertReviewFlag>): Promise<ReviewFlag | undefined> {
+    const flag = this.reviewFlags.get(id);
+    if (!flag) {
+      return undefined;
+    }
+    
+    const updatedFlag: ReviewFlag = {
+      ...flag,
+      ...flagData,
+    };
+    
+    this.reviewFlags.set(id, updatedFlag);
+    return updatedFlag;
   }
 
   async getContractorAverageRating(contractorId: string): Promise<{ averageRating: number; totalReviews: number }> {
