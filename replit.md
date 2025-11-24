@@ -40,6 +40,7 @@ Preferred communication style: Simple, everyday language.
     - **20-Mile Contractor Filtering**: Geocoded addresses enable distance-based contractor search for specific service categories.
     - **House Transfer System**: Comprehensive property ownership transfer with all associated data, secured by a token-based system.
     - **Previously Used Contractors**: When a house is selected, displays a dedicated "Your Contractors at [House Name]" section showing contractors previously used at that property, sorted by most recent work, making it easy to find and re-hire trusted contractors.
+    - **Age-Based System Maintenance Recommendations**: Intelligent maintenance guidance based on installation year for all 24 home system types (heating, cooling, water, and special features). Provides age-appropriate recommendations with three urgency levels (critical/important/routine), cost estimates, and actionable maintenance tasks. Color-coded cards display system age, replacement timelines, and professional service schedules tailored to each system's typical lifespan.
 - **Marketplace**: Functionality for listing and browsing DIY products.
 - **Maintenance Guidance**: Seasonal home maintenance schedules with location-based and prioritized tasks.
 - **Service Categories**: Supports 76 distinct service categories.
