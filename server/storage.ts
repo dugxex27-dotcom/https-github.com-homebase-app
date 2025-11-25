@@ -658,7 +658,80 @@ export class MemStorage implements IStorage {
     };
     this.users.set(demoHomeownerId, demoHomeowner);
 
-    // No seed contractors - contractors will register through the app
+    // Create Elite Roofing Solutions demo contractor
+    const eliteRoofingUserId = "bellevue-roofer-001";
+    const eliteRoofingCompanyId = "elite-roofing-company-001";
+    
+    // Set creation date to 2023 to show tenure
+    const year2023 = new Date('2023-01-15T00:00:00Z');
+    
+    const eliteRoofingUser: User = {
+      id: eliteRoofingUserId,
+      email: "tom.chen@eliteroofing.com",
+      firstName: "Tom",
+      lastName: "Chen",
+      role: "contractor",
+      passwordHash: "$2a$10$7xmrE7Mz3zU4QgP5v4VyK.7TYgZ5RQb8BzqW6rH9nP5Q4vK7Y8b9K", // "demo123"
+      referralCode: null,
+      referredBy: null,
+      referralCount: 0,
+      subscriptionStatus: "active",
+      subscriptionPlanId: "plan_contractor_base",
+      maxHousesAllowed: 0,
+      isPremium: true,
+      zipCode: "98004",
+      profileImageUrl: null,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      companyId: eliteRoofingCompanyId,
+      companyRole: "owner",
+      canRespondToProposals: true,
+      createdAt: year2023,
+      updatedAt: new Date(),
+      isAdmin: false,
+      inviteCode: null,
+      trialEndDate: null,
+    };
+    this.users.set(eliteRoofingUserId, eliteRoofingUser);
+    
+    // Create Elite Roofing Solutions company
+    const eliteRoofingCompany: Company = {
+      id: eliteRoofingCompanyId,
+      name: "Elite Roofing Solutions",
+      ownerId: eliteRoofingUserId,
+      location: "Bellevue, WA",
+      address: "890 Commercial Blvd, Bellevue, WA 98004",
+      countryId: "USA",
+      regionId: "WA",
+      postalCode: "98004",
+      latitude: 47.6101,
+      longitude: -122.2015,
+      website: "https://eliteroofing.example.com",
+      phone: "(425) 555-0199",
+      email: "tom.chen@eliteroofing.com",
+      bio: "Professional roofing contractor serving the greater Seattle area since 2023. Specializing in residential roof inspections, repairs, and replacements. Licensed and insured.",
+      services: ["Roofing Services", "Roof Inspection", "Roof Repair", "Roof Replacement", "Emergency Services"],
+      serviceRadius: 30,
+      hasEmergencyServices: true,
+      isLicensed: true,
+      licenseNumber: "WA-ROOF-54321",
+      licenseState: "WA",
+      licenseExpiration: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      isInsured: true,
+      insuranceProvider: "Travelers Insurance",
+      insuranceExpiration: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      insuranceCoverageAmount: "$1,000,000",
+      businessHours: "Mon-Sat: 8am-5pm, Sun: Closed",
+      rating: "4.8",
+      referralCode: "ELITE2023",
+      businessLogo: null,
+      projectPhotos: [],
+      createdAt: year2023,
+      updatedAt: new Date()
+    };
+    this.companies.set(eliteRoofingCompanyId, eliteRoofingCompany);
+
+    // No other seed contractors - contractors will register through the app
     const contractorData: InsertContractor[] = [];
 
     // Seed products
