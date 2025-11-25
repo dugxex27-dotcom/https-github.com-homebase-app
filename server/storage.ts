@@ -6766,8 +6766,17 @@ class DbStorage implements IStorage {
       return existingCompany;
     }
 
+    // Filter out null/undefined values to prevent NOT NULL constraint violations
+    // This ensures we only update fields that actually have values
+    const filteredData: Record<string, any> = {};
+    for (const [key, value] of Object.entries(companyData)) {
+      if (value !== null && value !== undefined) {
+        filteredData[key] = value;
+      }
+    }
+
     const updatedData = {
-      ...companyData,
+      ...filteredData,
       updatedAt: new Date()
     };
     
