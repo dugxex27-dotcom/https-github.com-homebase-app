@@ -590,14 +590,28 @@ export default function ContractorProfile() {
         refetchUser();
       }
       
-      // Save licenses - first get existing licenses to determine creates vs updates
+      // Save licenses - first get existing licenses to determine creates vs updates vs deletes
       const existingResponse = await fetch('/api/contractor/licenses', {
         credentials: 'include',
       });
       const existingLicenses = existingResponse.ok ? await existingResponse.json() : [];
       const existingLicenseIds = new Set(existingLicenses.map((l: any) => l.id));
       
-      // Save each license
+      // Track which license IDs are in the current form state
+      const currentLicenseIds = new Set(licenses.filter(l => l.id).map(l => l.id));
+      
+      // Delete licenses that exist in DB but are no longer in the form
+      for (const existingLicense of existingLicenses) {
+        if (!currentLicenseIds.has(existingLicense.id)) {
+          console.log('[DEBUG] Deleting removed license:', existingLicense.id);
+          await fetch(`/api/contractor/licenses/${existingLicense.id}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          });
+        }
+      }
+      
+      // Save each license (create or update)
       for (const license of licenses) {
         if (license.licenseNumber && license.municipality && license.state) { // Only save complete licenses
           if (license.id && existingLicenseIds.has(license.id)) {
