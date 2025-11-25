@@ -4678,7 +4678,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                     type="button" 
                     variant="outline" 
                     onClick={() => setIsApplianceDialogOpen(false)}
-                    style={{ color: 'white', borderColor: 'white' }}
+                    style={{ color: '#2c0f5b', borderColor: 'white', backgroundColor: 'white' }}
                   >
                     Cancel
                   </Button>
