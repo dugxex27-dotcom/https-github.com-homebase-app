@@ -620,7 +620,7 @@ export default function ContractorProfile() {
         }
       }
       
-      return profileResponse.json();
+      return profileResult;
     },
     onSuccess: () => {
       toast({
