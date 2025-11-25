@@ -50,6 +50,7 @@ const AgentReferral = lazy(() => import("./pages/agent-referral"));
 // Lazy-loaded pages - Admin
 const AdminDashboard = lazy(() => import("./pages/admin"));
 const AdminSupport = lazy(() => import("./pages/admin-support"));
+const AdminFlaggedReviews = lazy(() => import("./pages/admin-flagged-reviews"));
 const DeveloperConsole = lazy(() => import("./pages/developer-console"));
 
 // Lazy-loaded pages - Support
@@ -142,6 +143,7 @@ function Router() {
         {isAdmin && (
           <>
             <Route path="/admin/developer-console" component={DeveloperConsole} />
+            <Route path="/admin/flagged-reviews" component={AdminFlaggedReviews} />
             <Route path="/admin/support/:id" component={AdminSupport} />
             <Route path="/admin/support" component={AdminSupport} />
             <Route path="/admin" component={AdminDashboard} />

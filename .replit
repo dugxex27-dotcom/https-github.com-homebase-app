@@ -95,3 +95,8 @@ integrations = ["javascript_object_storage:1.0.0", "javascript_log_in_with_repli
 
 [objectStorage]
 defaultBucketID = "replit-objstore-6b6c0a35-de9a-48e9-9110-28f95a385aae"
+
+[userenv]
+
+[userenv.shared]
+ADMIN_EMAILS = "admin@gotohomebase.com"

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Users, Home, Briefcase, Plus, Ban, TrendingUp, DollarSign, UserMinus, MessageSquare, ArrowRight } from "lucide-react";
+import { Users, Home, Briefcase, Plus, Ban, TrendingUp, DollarSign, UserMinus, MessageSquare, ArrowRight, Flag } from "lucide-react";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -255,6 +255,35 @@ export default function AdminDashboard() {
           <CardContent>
             <p className="text-sm text-muted-foreground">
               Access the full support ticket dashboard to filter, assign, and respond to user inquiries across all categories and priorities.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Flagged Reviews Management */}
+        <Card className="mb-8" data-testid="card-flagged-reviews">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Flag className="h-5 w-5 text-orange-600" />
+                  Flagged Reviews Management
+                </CardTitle>
+                <CardDescription className="mt-2">
+                  Investigate and manage reported reviews for fraud prevention
+                </CardDescription>
+              </div>
+              <Button
+                onClick={() => navigate('/admin/flagged-reviews')}
+                data-testid="button-manage-flagged-reviews"
+              >
+                Manage Flagged Reviews
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Review reported suspicious reviews, investigate IP/device duplicates, and take action on fraudulent content.
             </p>
           </CardContent>
         </Card>

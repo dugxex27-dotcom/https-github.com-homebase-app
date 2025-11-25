@@ -7196,16 +7196,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/review-flags', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserById(req.session.user.id);
-      
-      // Only admins can view flags
-      if (!user || !(user as any).isAdmin) {
+      // Check admin access via email
+      const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
+      if (!req.session.user.email || !adminEmails.includes(req.session.user.email)) {
         return res.status(403).json({ message: "Admin access required" });
       }
       
       const status = req.query.status as string | undefined;
       const flags = await storage.getReviewFlags(status);
-      res.json(flags);
+      
+      // Enhance flags with review and reporter data
+      const enhancedFlags = await Promise.all(flags.map(async (flag) => {
+        // Get the review directly from storage
+        const allReviews = await storage.getAllReviews();
+        const review = allReviews.find(r => r.id === flag.reviewId);
+        
+        const reporter = await storage.getUserById(flag.reportedBy);
+        
+        // Get contractor and homeowner names
+        let contractorName = 'Unknown Contractor';
+        let reviewerName = 'Unknown Reviewer';
+        let reviewData = undefined;
+        
+        if (review) {
+          const contractor = await storage.getContractorById(review.contractorId);
+          contractorName = contractor?.companyName || 'Unknown Contractor';
+          
+          const homeowner = await storage.getUserById(review.homeownerId);
+          reviewerName = homeowner ? `${homeowner.firstName} ${homeowner.lastName}` : 'Unknown Reviewer';
+          
+          reviewData = {
+            id: review.id,
+            contractorId: review.contractorId,
+            homeownerId: review.homeownerId,
+            rating: review.rating,
+            comment: review.comment,
+            wouldRecommend: review.wouldRecommend,
+            contractorName,
+            reviewerName,
+            deviceFingerprint: review.deviceFingerprint,
+            ipAddress: review.ipAddress
+          };
+        }
+        
+        return {
+          ...flag,
+          review: reviewData,
+          reporter: reporter ? {
+            name: `${reporter.firstName} ${reporter.lastName}`,
+            email: reporter.email
+          } : undefined
+        };
+      }));
+      
+      res.json(enhancedFlags);
     } catch (error) {
       console.error("Error fetching review flags:", error);
       res.status(500).json({ message: "Failed to fetch review flags" });
@@ -7214,10 +7258,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/admin/review-flags/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserById(req.session.user.id);
-      
-      // Only admins can update flags
-      if (!user || !(user as any).isAdmin) {
+      // Check admin access via email
+      const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
+      if (!req.session.user.email || !adminEmails.includes(req.session.user.email)) {
         return res.status(403).json({ message: "Admin access required" });
       }
       
