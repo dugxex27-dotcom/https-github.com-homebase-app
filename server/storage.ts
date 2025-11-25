@@ -731,6 +731,32 @@ export class MemStorage implements IStorage {
     };
     this.companies.set(eliteRoofingCompanyId, eliteRoofingCompany);
 
+    // Create contractor profile for Elite Roofing Solutions
+    const eliteRoofingContractor: Contractor = {
+      id: eliteRoofingUserId,
+      name: "Tom Chen",
+      company: "Elite Roofing Solutions",
+      companyId: eliteRoofingCompanyId,
+      location: "Bellevue, WA",
+      distance: "0",
+      rating: "4.8",
+      reviewCount: 12,
+      services: ["Roofing Services", "Roof Inspection", "Roof Repair", "Roof Replacement", "Emergency Services"],
+      bio: "Professional roofing contractor serving the greater Seattle area since 2023. Specializing in residential roof inspections, repairs, and replacements. Licensed and insured.",
+      experience: "2",
+      availability: "Available this week",
+      profileImage: null,
+      businessLogo: null,
+      projectPhotos: [],
+      hasEmergencyServices: true,
+      phoneNumber: "(425) 555-0199",
+      email: "tom.chen@eliteroofing.com",
+      licenseNumber: "WA-ROOF-54321",
+      zipCode: "98004",
+      createdAt: year2023,
+    };
+    this.contractors.set(eliteRoofingUserId, eliteRoofingContractor);
+
     // No other seed contractors - contractors will register through the app
     const contractorData: InsertContractor[] = [];
 
