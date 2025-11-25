@@ -1366,7 +1366,7 @@ export default function ContractorProfile() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="insuranceCarrier">Insurance Carrier *</Label>
+                <Label htmlFor="insuranceCarrier">Insurance Carrier</Label>
                 <Input
                   id="insuranceCarrier"
                   data-testid="input-insurance-carrier"
@@ -1377,7 +1377,7 @@ export default function ContractorProfile() {
                 />
               </div>
               <div>
-                <Label htmlFor="insurancePolicyNumber">Policy Number *</Label>
+                <Label htmlFor="insurancePolicyNumber">Policy Number</Label>
                 <Input
                   id="insurancePolicyNumber"
                   data-testid="input-insurance-policy-number"
@@ -1388,7 +1388,7 @@ export default function ContractorProfile() {
                 />
               </div>
               <div>
-                <Label htmlFor="insuranceExpiryDate">Expiry Date *</Label>
+                <Label htmlFor="insuranceExpiryDate">Expiry Date</Label>
                 <Input
                   id="insuranceExpiryDate"
                   data-testid="input-insurance-expiry-date"
@@ -1400,7 +1400,7 @@ export default function ContractorProfile() {
                 />
               </div>
               <div>
-                <Label htmlFor="insuranceCoverageAmount">Coverage Amount *</Label>
+                <Label htmlFor="insuranceCoverageAmount">Coverage Amount</Label>
                 <Select 
                   value={formData.insuranceCoverageAmount}
                   onValueChange={(value) => setFormData({ ...formData, insuranceCoverageAmount: value })}
