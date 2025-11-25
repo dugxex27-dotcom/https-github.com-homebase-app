@@ -6907,7 +6907,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/contractors/:id/reviews', async (req, res) => {
     try {
       const reviews = await storage.getContractorReviews(req.params.id);
-      res.json(reviews);
+      
+      // Enhance reviews with reviewer email verification status
+      const enhancedReviews = await Promise.all(reviews.map(async (review) => {
+        const reviewer = await storage.getUserById(review.homeownerId);
+        return {
+          ...review,
+          reviewerEmailVerified: reviewer?.emailVerified || false
+        };
+      }));
+      
+      res.json(enhancedReviews);
     } catch (error) {
       console.error("Error fetching contractor reviews:", error);
       res.status(500).json({ message: "Failed to fetch reviews" });

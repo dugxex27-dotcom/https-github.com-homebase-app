@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertContractorReviewSchema, type ContractorReview } from "@shared/schema";
 import { z } from "zod";
-import { Star, Calendar, Package, Edit, Trash2 } from "lucide-react";
+import { Star, Calendar, Package, Edit, Trash2, Flag, CheckCircle2, Mail } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -60,38 +60,77 @@ function StarRating({ rating, onRatingChange, readonly = false }: { rating: numb
   );
 }
 
-function ReviewCard({ review, isOwner, onEdit, onDelete }: { review: ContractorReview; isOwner: boolean; onEdit: (review: ContractorReview) => void; onDelete: (review: ContractorReview) => void }) {
+function ReviewCard({ review, isOwner, onEdit, onDelete, onFlag }: { 
+  review: ContractorReview; 
+  isOwner: boolean; 
+  onEdit: (review: ContractorReview) => void; 
+  onDelete: (review: ContractorReview) => void;
+  onFlag?: (review: ContractorReview) => void;
+}) {
   return (
     <Card className="mb-4">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-2">
-            <StarRating rating={review.rating} readonly />
-            <span className="text-sm text-muted-foreground">
-              {review.createdAt ? format(new Date(review.createdAt), 'MMM dd, yyyy') : 'No date'}
-            </span>
-          </div>
-          {isOwner && (
-            <div className="flex space-x-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onEdit(review)}
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onDelete(review)}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+          <div className="flex-1">
+            <div className="flex items-center space-x-2 mb-2">
+              <StarRating rating={review.rating} readonly />
+              <span className="text-sm text-muted-foreground">
+                {review.createdAt ? format(new Date(review.createdAt), 'MMM dd, yyyy') : 'No date'}
+              </span>
             </div>
-          )}
+            
+            {/* Verification Badges */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {review.isVerifiedService && (
+                <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300">
+                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                  Verified Service
+                </Badge>
+              )}
+              {(review as any).reviewerEmailVerified && (
+                <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300">
+                  <Mail className="w-3 h-3 mr-1" />
+                  Email Verified
+                </Badge>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex space-x-2">
+            {isOwner ? (
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onEdit(review)}
+                  data-testid={`button-edit-review-${review.id}`}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onDelete(review)}
+                  data-testid={`button-delete-review-${review.id}`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </>
+            ) : onFlag && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onFlag(review)}
+                className="text-muted-foreground hover:text-red-600"
+                data-testid={`button-flag-review-${review.id}`}
+              >
+                <Flag className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
         {review.serviceType && (
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-2">
             <Package className="w-4 h-4" />
             <span>{review.serviceType}</span>
             {review.serviceDate && (
@@ -166,9 +205,14 @@ function ReviewForm({
       onSuccess();
     },
     onError: (error: any) => {
+      // Show detailed error message from backend (fraud prevention)
+      const errorMessage = error.details || error.message || "Failed to submit review";
       toast({ 
-        title: "Error", 
-        description: error.message || "Failed to submit review",
+        title: error.message === "Email verification required" ? "Email Verification Required" :
+               error.message === "Account too new" ? "Account Age Requirement" :
+               error.message === "Review already exists" ? "Duplicate Review" :
+               "Error", 
+        description: errorMessage,
         variant: "destructive" 
       });
     }
@@ -320,6 +364,10 @@ export function ContractorReviews({ contractorId, contractorName }: ContractorRe
   const [editingReview, setEditingReview] = useState<ContractorReview | null>(null);
   const [deleteReviewConfirmOpen, setDeleteReviewConfirmOpen] = useState(false);
   const [reviewToDelete, setReviewToDelete] = useState<ContractorReview | null>(null);
+  const [flagDialogOpen, setFlagDialogOpen] = useState(false);
+  const [reviewToFlag, setReviewToFlag] = useState<ContractorReview | null>(null);
+  const [flagReason, setFlagReason] = useState<string>("fake");
+  const [flagNotes, setFlagNotes] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -360,6 +408,28 @@ export function ContractorReviews({ contractorId, contractorName }: ContractorRe
     }
   });
 
+  const flagMutation = useMutation({
+    mutationFn: ({ reviewId, reason, notes }: { reviewId: string; reason: string; notes?: string }) =>
+      apiRequest(`/api/reviews/${reviewId}/flag`, "POST", { reason, notes }),
+    onSuccess: () => {
+      toast({ 
+        title: "Review flagged", 
+        description: "Thank you for reporting. Our team will investigate this review." 
+      });
+      setFlagDialogOpen(false);
+      setReviewToFlag(null);
+      setFlagReason("fake");
+      setFlagNotes("");
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to flag review",
+        variant: "destructive" 
+      });
+    }
+  });
+
   const handleEdit = (review: ContractorReview) => {
     setEditingReview(review);
     setIsDialogOpen(true);
@@ -370,11 +440,26 @@ export function ContractorReviews({ contractorId, contractorName }: ContractorRe
     setDeleteReviewConfirmOpen(true);
   };
 
+  const handleFlag = (review: ContractorReview) => {
+    setReviewToFlag(review);
+    setFlagDialogOpen(true);
+  };
+
   const confirmDeleteReview = () => {
     if (reviewToDelete) {
       deleteMutation.mutate(reviewToDelete.id);
       setDeleteReviewConfirmOpen(false);
       setReviewToDelete(null);
+    }
+  };
+
+  const confirmFlagReview = () => {
+    if (reviewToFlag) {
+      flagMutation.mutate({ 
+        reviewId: reviewToFlag.id, 
+        reason: flagReason,
+        notes: flagNotes 
+      });
     }
   };
 
@@ -460,6 +545,7 @@ export function ContractorReviews({ contractorId, contractorName }: ContractorRe
                 isOwner={!!isOwner}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onFlag={user && !isOwner ? handleFlag : undefined}
               />
             );
           })
@@ -477,6 +563,60 @@ export function ContractorReviews({ contractorId, contractorName }: ContractorRe
         onConfirm={confirmDeleteReview}
         variant="destructive"
       />
+
+      {/* Flag Review Dialog */}
+      <Dialog open={flagDialogOpen} onOpenChange={setFlagDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Report Review</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="flag-reason">Reason for reporting</Label>
+              <Select value={flagReason} onValueChange={setFlagReason}>
+                <SelectTrigger id="flag-reason">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fake">Fake or fraudulent review</SelectItem>
+                  <SelectItem value="inappropriate">Inappropriate content</SelectItem>
+                  <SelectItem value="spam">Spam</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="flag-notes">Additional details (optional)</Label>
+              <Textarea
+                id="flag-notes"
+                value={flagNotes}
+                onChange={(e) => setFlagNotes(e.target.value)}
+                placeholder="Provide any additional information about why you're reporting this review..."
+                rows={4}
+              />
+            </div>
+            <div className="flex space-x-2 justify-end">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setFlagDialogOpen(false);
+                  setReviewToFlag(null);
+                  setFlagReason("fake");
+                  setFlagNotes("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={confirmFlagReview}
+                disabled={flagMutation.isPending}
+              >
+                {flagMutation.isPending ? "Submitting..." : "Submit Report"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
