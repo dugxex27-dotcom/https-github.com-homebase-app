@@ -3,6 +3,62 @@ import { randomUUID, randomBytes } from "crypto";
 import { db } from "./db";
 import { eq, ne, isNotNull, and, or, isNull, not, desc } from "drizzle-orm";
 
+// DEMO DATA PROTECTION SYSTEM
+// Helper functions to identify demo accounts and prevent overwrites of real user data
+
+// List of known demo account ID prefixes - these are the ONLY IDs that should be used for demo data
+const DEMO_ID_PREFIXES = [
+  'demo-',
+  'bellevue-roofer-',
+  'seattle-plumber-',
+  'elite-roofing-company-',
+  'quality-home-services-',
+  'maint-log-demo-',
+  'maint-log-contractor-',
+  'task-comp-demo-',
+  'demo-lead-',
+];
+
+// Demo email domains - emails from these domains are considered demo accounts
+const DEMO_EMAIL_DOMAINS = [
+  '@homebase.com',
+  '@eliteroofing.com',
+  '@qualityhome.com',
+  '@precisionhvac.com',
+];
+
+// Check if an ID belongs to a demo account
+export function isDemoId(id: string | null | undefined): boolean {
+  if (!id) return false;
+  return DEMO_ID_PREFIXES.some(prefix => id.startsWith(prefix));
+}
+
+// Check if an email belongs to a demo account
+export function isDemoEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  return DEMO_EMAIL_DOMAINS.some(domain => email.endsWith(domain));
+}
+
+// Check if a user is a demo account
+export function isDemoUser(user: { id: string; email?: string | null }): boolean {
+  return isDemoId(user.id) || isDemoEmail(user.email);
+}
+
+// Check if we're in production environment (demo seeding should be disabled)
+export function isProductionEnvironment(): boolean {
+  return process.env.NODE_ENV === 'production' || process.env.REPLIT_DEPLOYMENT === '1';
+}
+
+// Check if demo data operations are explicitly enabled (for testing in development)
+export function isDemoDataEnabled(): boolean {
+  // In production, demo data is ALWAYS disabled unless explicitly enabled
+  if (isProductionEnvironment()) {
+    return process.env.ENABLE_DEMO_DATA === 'true';
+  }
+  // In development, demo data is enabled by default
+  return process.env.DISABLE_DEMO_DATA !== 'true';
+}
+
 export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
@@ -565,12 +621,19 @@ export class MemStorage implements IStorage {
     this.crmNotes = new Map();
     this.crmIntegrations = new Map();
     this.webhookLogs = new Map();
-    this.seedData();
-    // Seed demo homeowner data asynchronously
-    this.seedHomeownerDemoData().catch(error => {
-      console.error('[DEMO DATA] Failed to seed homeowner demo data:', error);
-    });
-    this.seedReviews();
+    
+    // DEMO DATA PROTECTION: Only seed demo data if explicitly enabled
+    if (isDemoDataEnabled()) {
+      console.log('[DEMO DATA] Demo data seeding is ENABLED');
+      this.seedData();
+      // Seed demo homeowner data asynchronously
+      this.seedHomeownerDemoData().catch(error => {
+        console.error('[DEMO DATA] Failed to seed homeowner demo data:', error);
+      });
+      this.seedReviews();
+    } else {
+      console.log('[DEMO DATA] Demo data seeding is DISABLED (production environment or DISABLE_DEMO_DATA=true)');
+    }
     
     // Add sample maintenance logs with contractor information after other data is seeded
     this.initializeMaintenanceLogsData();
