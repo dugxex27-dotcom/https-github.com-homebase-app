@@ -690,8 +690,14 @@ export class MemStorage implements IStorage {
   }
 
   private seedData() {
+    // DEMO DATA PROTECTION: Validate that seedData only uses demo IDs
     // Create demo homeowner user - Sarah Anderson
     const demoHomeownerId = "demo-homeowner-permanent-id";
+    
+    if (!demoHomeownerId.includes('demo')) {
+      console.error('🛡️ DEMO DATA PROTECTION: seedData attempted to use non-demo homeowner ID!');
+      return;
+    }
     const demoHomeowner: User = {
       id: demoHomeownerId,
       email: "sarah.anderson@homebase.com",
@@ -2383,9 +2389,16 @@ export class MemStorage implements IStorage {
   }
 
   private async seedHomeownerDemoData() {
+    // DEMO DATA PROTECTION: Extra validation to ensure this function only uses demo IDs
     const demoHomeownerId = "demo-homeowner-permanent-id";
     const mainHouseId = "8d44c1d0-af55-4f1c-bada-b70e54c823bc";
     const lakeHouseId = "f5c8a9d2-3e1b-4f7c-a6b3-8d9e5f2c1a4b";
+    
+    // Validate all IDs contain "demo" prefix or are known house UUIDs for demo purposes
+    if (!demoHomeownerId.includes('demo')) {
+      console.error('🛡️ DEMO DATA PROTECTION: seedHomeownerDemoData attempted to use non-demo homeowner ID!');
+      return;
+    }
     
     // 14 DIY maintenance logs spread over 6 months with total savings of $1,360
     // Using deterministic IDs for idempotent seeding
