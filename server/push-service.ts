@@ -25,7 +25,6 @@ try {
     vapidKeys = generateVapidKeys();
     console.log('Generated VAPID Keys for development:');
     console.log('Public Key:', vapidKeys.publicKey);
-    console.log('Private Key:', vapidKeys.privateKey);
     console.log('\nTo use these keys in production, set the following environment variables:');
     console.log('VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY');
   }
