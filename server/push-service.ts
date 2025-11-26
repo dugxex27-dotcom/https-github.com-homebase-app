@@ -26,14 +26,16 @@ try {
     vapidKeys = generateVapidKeys();
     console.log('Generated VAPID Keys for development:');
     console.log('Public Key:', vapidKeys.publicKey);
+    console.log('Private Key:', vapidKeys.privateKey);
+    console.log('\nTo use these keys in production, set the following environment variables:');
+    console.log('VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY');
   }
 } catch (error) {
-  // Fallback to manual generation if web-push generation fails
-  const publicKey = 'BMqSvZTb2VQFrTiWYKvzPHZjVODkehTyYCEYhG3MYqFDRqW8aHzrg3X5q8k2rN4J1cZ9G8rYl4mR6Q5kGT8nV1E';
-  const privateKey = 'aQv8RTkN4Y3qYON5rYb4oZ8aY7mXqK1jnR5vT9kGqZs';
-  
-  vapidKeys = { publicKey, privateKey };
-  console.warn('Using fallback VAPID keys for development');
+  console.error('Failed to initialize VAPID keys:', error);
+  throw new Error(
+    'VAPID keys must be configured. Set VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY environment variables. ' +
+    'Generate keys using: npx web-push generate-vapid-keys'
+  );
 }
 
 webpush.setVapidDetails(
