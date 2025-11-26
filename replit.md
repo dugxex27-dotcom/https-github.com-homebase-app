@@ -89,3 +89,46 @@ Preferred communication style: Simple, everyday language.
 - **Geocoding**: OpenStreetMap Nominatim
 - **Address Autocomplete**: Google Places API, OpenStreetMap
 - **AI**: Replit AI Integrations (for GPT-5)
+
+## Database Protection & Migrations
+
+### Safe Schema Changes (Migrations)
+The project uses Drizzle ORM with a migration system to protect user data during schema updates:
+
+1. **Generate migrations** (after changing `shared/schema.ts`):
+   ```bash
+   npx drizzle-kit generate
+   ```
+   This creates incremental SQL files in `./migrations/` without touching the database.
+
+2. **Apply migrations** (production-safe):
+   ```bash
+   npx tsx server/migrate.ts
+   ```
+   This applies pending migrations incrementally, preserving all existing data.
+
+3. **Development sync** (use with caution):
+   ```bash
+   npm run db:push
+   ```
+   This is faster but less safe - only use in development when you're sure no data will be lost.
+
+### Database Backups
+The backup utility exports all important tables to JSON files:
+
+1. **Create a backup**:
+   ```bash
+   npx tsx server/backup.ts
+   ```
+   Creates `backups/backup-{timestamp}.json` with all user data.
+
+2. **List available backups**:
+   ```bash
+   npx tsx server/backup.ts list
+   ```
+
+### Best Practices
+- **Always generate migrations** before making schema changes in production
+- **Create backups** before major updates or schema changes
+- **Never change ID column types** (serial ↔ varchar) as this breaks existing data
+- **Test migrations** in development before applying to production
