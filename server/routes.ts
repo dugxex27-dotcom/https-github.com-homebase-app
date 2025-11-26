@@ -3017,7 +3017,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Apply field mapping if configured
       if (integration.fieldMapping) {
         const mapping = integration.fieldMapping as any;
+        const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
         Object.keys(mapping).forEach(ourField => {
+          // Prevent prototype pollution
+          if (dangerousKeys.includes(ourField)) {
+            console.warn(`[WEBHOOK] Blocked dangerous property name in field mapping: ${ourField}`);
+            return;
+          }
           const theirField = mapping[ourField];
           if (req.body[theirField] !== undefined) {
             leadData[ourField] = req.body[theirField];
