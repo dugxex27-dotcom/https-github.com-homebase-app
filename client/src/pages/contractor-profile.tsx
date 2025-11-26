@@ -31,8 +31,12 @@ import {
   Save,
   Plus,
   X,
-  Eye
+  Eye,
+  Star,
+  Medal,
+  MessageSquare
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 
 const AVAILABLE_SERVICES = [
@@ -1844,17 +1848,120 @@ export default function ContractorProfile() {
             See how homeowners will view your contractor profile when browsing for services.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Link href={`/contractor/${typedUser?.id}`}>
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              data-testid="button-preview-profile"
-            >
-              <Eye className="w-4 h-4" />
-              Preview as Homeowner
-            </Button>
-          </Link>
+        <CardContent className="space-y-6">
+          {/* Card Preview - How it appears in search results */}
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground mb-3">How you appear in search results:</h4>
+            <div className="bg-card border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/20">
+              <div className="flex items-start space-x-4">
+                <div className="relative">
+                  {formData.businessLogo ? (
+                    <img
+                      src={formData.businessLogo}
+                      alt={`${formData.company} logo`}
+                      className="w-20 h-20 rounded-lg object-contain border-2 border-primary/10 bg-white p-2"
+                      data-testid="preview-contractor-logo"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                      <span className="text-lg font-bold text-primary">
+                        {formData.company.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || 'CO'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h3 className="font-semibold text-foreground text-lg truncate">{formData.company || 'Your Business Name'}</h3>
+                        {typedUser?.createdAt && (() => {
+                          const years = Math.floor((Date.now() - new Date(typedUser.createdAt).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+                          return years > 0 ? (
+                            <Badge 
+                              className="text-xs px-2 py-1 text-white font-medium flex items-center gap-1"
+                              style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}
+                            >
+                              <Medal className="w-3 h-3" />
+                              <span>{years} {years === 1 ? 'Year' : 'Years'}</span>
+                            </Badge>
+                          ) : null;
+                        })()}
+                      </div>
+                      <p className="text-muted-foreground text-sm mb-2">{formData.name || 'Owner Name'}</p>
+                    </div>
+                    <div className="flex items-center ml-4 flex-shrink-0">
+                      <div className="flex text-yellow-400 text-sm">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-current" />
+                        ))}
+                      </div>
+                      <span className="ml-2 text-sm font-medium text-foreground">5.0</span>
+                      <span className="ml-1 text-xs text-muted-foreground">(New)</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mb-3">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <MapPin className="w-4 h-4 mr-2 text-primary/60" />
+                      <span>Your area • {formData.city || 'City'}, {formData.state || 'State'}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Shield className="w-4 h-4 mr-2 text-primary/60" />
+                      <span>Licensed & Insured • {formData.yearsExperience || 0} years experience</span>
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                      {formData.bio || 'Your business description will appear here...'}
+                    </p>
+                  </div>
+
+                  <div className="mb-4">
+                    <div className="flex flex-wrap gap-1">
+                      {(formData.services.length > 0 ? formData.services.slice(0, 3) : ['Service 1', 'Service 2']).map((service, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs bg-primary/10 text-primary hover:bg-primary/20">
+                          {service}
+                        </Badge>
+                      ))}
+                      {formData.services.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{formData.services.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button size="sm" className="flex-1" disabled>
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Contact
+                    </Button>
+                    <Button variant="outline" size="sm" className="px-3 whitespace-nowrap" style={{ backgroundColor: '#2c0f5b', color: '#ffffff', borderColor: '#2c0f5b' }} disabled>
+                      View Profile
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Link to full profile page */}
+          <div className="border-t pt-4">
+            <h4 className="text-sm font-medium text-muted-foreground mb-3">View your complete profile page:</h4>
+            <Link href={`/contractor/${typedUser?.id}`}>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                data-testid="button-preview-profile"
+              >
+                <Eye className="w-4 h-4" />
+                Open Full Profile Page
+              </Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
 
