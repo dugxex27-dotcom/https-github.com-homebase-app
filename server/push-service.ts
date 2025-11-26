@@ -8,7 +8,6 @@ import crypto from 'crypto';
 // Helper to generate VAPID keys if not provided in environment
 const generateVapidKeys = () => {
   // Use web-push to generate keys if needed
-  const webpush = require('web-push');
   return webpush.generateVAPIDKeys();
 };
 

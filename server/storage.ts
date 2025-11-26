@@ -1,5 +1,6 @@
 import { type Contractor, type InsertContractor, type Company, type InsertCompany, type CompanyInviteCode, type InsertCompanyInviteCode, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type HomeownerConnectionCode, type InsertHomeownerConnectionCode, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, type TaskCompletion, type InsertTaskCompletion, type Achievement, type InsertAchievement, type AchievementDefinition, type InsertAchievementDefinition, type UserAchievement, type InsertUserAchievement, type SearchAnalytics, type InsertSearchAnalytics, type InviteCode, type InsertInviteCode, type AgentProfile, type InsertAgentProfile, type AffiliateReferral, type InsertAffiliateReferral, type SubscriptionCycleEvent, type InsertSubscriptionCycleEvent, type AffiliatePayout, type InsertAffiliatePayout, type AgentVerificationAudit, type InsertAgentVerificationAudit, type SupportTicket, type InsertSupportTicket, type TicketReply, type InsertTicketReply, users, contractors, companies, contractorLicenses, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks, taskCompletions, achievements, achievementDefinitions, userAchievements, maintenanceLogs, searchAnalytics, inviteCodes, agentProfiles, affiliateReferrals, subscriptionCycleEvents, affiliatePayouts, agentVerificationAudits, supportTickets, ticketReplies, houses, homeSystems, customMaintenanceTasks, taskOverrides, serviceRecords, homeownerConnectionCodes, conversations, messages, proposals, houseTransfers , type CrmLead, type InsertCrmLead, type CrmNote, type InsertCrmNote, type ErrorLog, type InsertErrorLog, type ErrorBreadcrumb, type InsertErrorBreadcrumb, type CrmIntegration, type InsertCrmIntegration, type WebhookLog, type InsertWebhookLog, crmLeads, crmNotes, errorLogs, errorBreadcrumbs, crmIntegrations, webhookLogs } from "@shared/schema";
 import { randomUUID, randomBytes } from "crypto";
+import bcrypt from "bcryptjs";
 import { db } from "./db";
 import { eq, ne, isNotNull, and, or, isNull, not, desc } from "drizzle-orm";
 
@@ -704,7 +705,7 @@ export class MemStorage implements IStorage {
       firstName: "Sarah",
       lastName: "Anderson",
       role: "homeowner",
-      passwordHash: "$2a$10$7xmrE7Mz3zU4QgP5v4VyK.7TYgZ5RQb8BzqW6rH9nP5Q4vK7Y8b9K", // "demo123"
+      passwordHash: bcrypt.hashSync("demo123", 10),
       referralCode: "DEMO4567",
       referredBy: null,
       referralCount: 2,
@@ -740,7 +741,7 @@ export class MemStorage implements IStorage {
       firstName: "Tom",
       lastName: "Chen",
       role: "contractor",
-      passwordHash: "$2a$10$7xmrE7Mz3zU4QgP5v4VyK.7TYgZ5RQb8BzqW6rH9nP5Q4vK7Y8b9K", // "demo123"
+      passwordHash: bcrypt.hashSync("demo123", 10),
       referralCode: null,
       referredBy: null,
       referralCount: 0,
