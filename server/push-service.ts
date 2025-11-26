@@ -26,7 +26,6 @@ try {
     vapidKeys = generateVapidKeys();
     console.log('Generated VAPID Keys for development:');
     console.log('Public Key:', vapidKeys.publicKey);
-    console.log('Private Key:', vapidKeys.privateKey);
   }
 } catch (error) {
   // Fallback to manual generation if web-push generation fails
