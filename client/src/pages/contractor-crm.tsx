@@ -1168,6 +1168,126 @@ export default function ContractorCRMPage() {
               ))}
             </div>
           )}
+
+          {/* Import Data Section */}
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ExternalLink className="h-5 w-5" />
+                Import Data from Another CRM
+              </CardTitle>
+              <CardDescription>
+                Migrate your existing clients, jobs, quotes, and invoices from another CRM system using a JSON file
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg">
+                  <h4 className="font-semibold mb-2">Step 1: Download Template</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Get a sample JSON template showing the expected format for your data
+                  </p>
+                  <Button variant="outline" onClick={async () => {
+                    try {
+                      const response = await fetch('/api/crm/import/template', { credentials: 'include' });
+                      const template = await response.json();
+                      const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = 'crm-import-template.json';
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      toast({ title: "Template downloaded", description: "Check your downloads folder" });
+                    } catch (error) {
+                      toast({ title: "Error", description: "Failed to download template", variant: "destructive" });
+                    }
+                  }} data-testid="button-download-template">
+                    <ExternalLink className="h-4 w-4 mr-2" />Download Template
+                  </Button>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <h4 className="font-semibold mb-2">Step 2: Upload Your Data</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Format your data according to the template and upload the JSON file
+                  </p>
+                  <input
+                    type="file"
+                    accept=".json"
+                    id="crm-import-file"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      
+                      try {
+                        const text = await file.text();
+                        const data = JSON.parse(text);
+                        
+                        const response = await fetch('/api/crm/import', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          credentials: 'include',
+                          body: JSON.stringify(data),
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (response.ok) {
+                          toast({ 
+                            title: "Import Complete", 
+                            description: result.message,
+                          });
+                          queryClient.invalidateQueries({ queryKey: ['/api/crm/clients'] });
+                          queryClient.invalidateQueries({ queryKey: ['/api/crm/jobs'] });
+                          queryClient.invalidateQueries({ queryKey: ['/api/crm/quotes'] });
+                          queryClient.invalidateQueries({ queryKey: ['/api/crm/invoices'] });
+                        } else {
+                          toast({ 
+                            title: "Import Failed", 
+                            description: result.message || "Please check your file format",
+                            variant: "destructive"
+                          });
+                        }
+                      } catch (error) {
+                        toast({ 
+                          title: "Error", 
+                          description: "Invalid JSON file. Please check the format.",
+                          variant: "destructive"
+                        });
+                      }
+                      
+                      e.target.value = '';
+                    }}
+                  />
+                  <Button onClick={() => document.getElementById('crm-import-file')?.click()} data-testid="button-upload-import">
+                    <Plus className="h-4 w-4 mr-2" />Upload JSON File
+                  </Button>
+                </div>
+              </div>
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Supported Data Types</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    <span>Clients</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4 text-primary" />
+                    <span>Jobs</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" />
+                    <span>Quotes</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Receipt className="h-4 w-4 text-primary" />
+                    <span>Invoices</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Clients Tab (Pro) */}

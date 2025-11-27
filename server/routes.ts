@@ -4160,6 +4160,308 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // -------------------- CRM Import Route --------------------
+
+  // POST /api/crm/import - Import data from another CRM (JSON format)
+  app.post('/api/crm/import', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const { clients = [], jobs = [], quotes = [], invoices = [] } = req.body;
+      const userId = req.session.user.id;
+      const companyId = req.session.user.companyId || null;
+      
+      const results = {
+        clients: { imported: 0, failed: 0, errors: [] as string[] },
+        jobs: { imported: 0, failed: 0, errors: [] as string[] },
+        quotes: { imported: 0, failed: 0, errors: [] as string[] },
+        invoices: { imported: 0, failed: 0, errors: [] as string[] },
+      };
+
+      // Map to track imported client names to IDs for linking jobs/quotes/invoices
+      const clientNameToId: Map<string, string> = new Map();
+
+      // Step 1: Import clients first (they're referenced by jobs, quotes, invoices)
+      for (const clientData of clients) {
+        try {
+          const validationResult = insertCrmClientSchema.safeParse({
+            ...clientData,
+            contractorUserId: userId,
+            companyId,
+            isActive: clientData.isActive ?? true,
+            totalJobsCompleted: clientData.totalJobsCompleted ?? 0,
+            totalRevenue: clientData.totalRevenue ?? "0.00",
+          });
+
+          if (!validationResult.success) {
+            results.clients.failed++;
+            results.clients.errors.push(`Client "${clientData.firstName} ${clientData.lastName}": ${validationResult.error.errors[0]?.message}`);
+            continue;
+          }
+
+          const client = await storage.createCrmClient(validationResult.data);
+          results.clients.imported++;
+          
+          // Store mapping for later use
+          const fullName = `${clientData.firstName} ${clientData.lastName}`.toLowerCase().trim();
+          clientNameToId.set(fullName, client.id);
+          
+          // Also store by email if provided
+          if (clientData.email) {
+            clientNameToId.set(clientData.email.toLowerCase().trim(), client.id);
+          }
+        } catch (error: any) {
+          results.clients.failed++;
+          results.clients.errors.push(`Client "${clientData.firstName} ${clientData.lastName}": ${error.message}`);
+        }
+      }
+
+      // Helper function to resolve client ID from name or email
+      const resolveClientId = (job: any): string | null => {
+        if (job.clientId && clientNameToId.has(job.clientId)) {
+          return clientNameToId.get(job.clientId)!;
+        }
+        if (job.clientName) {
+          const name = job.clientName.toLowerCase().trim();
+          if (clientNameToId.has(name)) return clientNameToId.get(name)!;
+        }
+        if (job.clientEmail) {
+          const email = job.clientEmail.toLowerCase().trim();
+          if (clientNameToId.has(email)) return clientNameToId.get(email)!;
+        }
+        return null;
+      };
+
+      // Step 2: Import jobs
+      for (const jobData of jobs) {
+        try {
+          const clientId = resolveClientId(jobData);
+          if (!clientId) {
+            results.jobs.failed++;
+            results.jobs.errors.push(`Job "${jobData.title}": Client not found. Provide clientName or clientEmail that matches an imported client.`);
+            continue;
+          }
+
+          const validationResult = insertCrmJobSchema.safeParse({
+            ...jobData,
+            contractorUserId: userId,
+            companyId,
+            clientId,
+            scheduledDate: jobData.scheduledDate ? new Date(jobData.scheduledDate) : new Date(),
+            scheduledEndDate: jobData.scheduledEndDate ? new Date(jobData.scheduledEndDate) : null,
+            status: jobData.status || 'scheduled',
+            priority: jobData.priority || 'normal',
+          });
+
+          if (!validationResult.success) {
+            results.jobs.failed++;
+            results.jobs.errors.push(`Job "${jobData.title}": ${validationResult.error.errors[0]?.message}`);
+            continue;
+          }
+
+          await storage.createCrmJob(validationResult.data);
+          results.jobs.imported++;
+        } catch (error: any) {
+          results.jobs.failed++;
+          results.jobs.errors.push(`Job "${jobData.title}": ${error.message}`);
+        }
+      }
+
+      // Step 3: Import quotes
+      for (const quoteData of quotes) {
+        try {
+          const clientId = resolveClientId(quoteData);
+          if (!clientId) {
+            results.quotes.failed++;
+            results.quotes.errors.push(`Quote "${quoteData.title}": Client not found. Provide clientName or clientEmail that matches an imported client.`);
+            continue;
+          }
+
+          // Generate quote number if not provided
+          const quoteNumber = quoteData.quoteNumber || `Q-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+          const validationResult = insertCrmQuoteSchema.safeParse({
+            ...quoteData,
+            contractorUserId: userId,
+            companyId,
+            clientId,
+            quoteNumber,
+            lineItems: quoteData.lineItems || [],
+            subtotal: quoteData.subtotal || quoteData.total || "0.00",
+            total: quoteData.total || quoteData.subtotal || "0.00",
+            status: quoteData.status || 'draft',
+            validUntil: quoteData.validUntil ? new Date(quoteData.validUntil) : null,
+          });
+
+          if (!validationResult.success) {
+            results.quotes.failed++;
+            results.quotes.errors.push(`Quote "${quoteData.title}": ${validationResult.error.errors[0]?.message}`);
+            continue;
+          }
+
+          await storage.createCrmQuote(validationResult.data);
+          results.quotes.imported++;
+        } catch (error: any) {
+          results.quotes.failed++;
+          results.quotes.errors.push(`Quote "${quoteData.title}": ${error.message}`);
+        }
+      }
+
+      // Step 4: Import invoices
+      for (const invoiceData of invoices) {
+        try {
+          const clientId = resolveClientId(invoiceData);
+          if (!clientId) {
+            results.invoices.failed++;
+            results.invoices.errors.push(`Invoice "${invoiceData.title}": Client not found. Provide clientName or clientEmail that matches an imported client.`);
+            continue;
+          }
+
+          // Generate invoice number if not provided
+          const invoiceNumber = invoiceData.invoiceNumber || `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+          const validationResult = insertCrmInvoiceSchema.safeParse({
+            ...invoiceData,
+            contractorUserId: userId,
+            companyId,
+            clientId,
+            invoiceNumber,
+            lineItems: invoiceData.lineItems || [],
+            subtotal: invoiceData.subtotal || invoiceData.total || "0.00",
+            total: invoiceData.total || invoiceData.subtotal || "0.00",
+            amountDue: invoiceData.amountDue || invoiceData.total || "0.00",
+            amountPaid: invoiceData.amountPaid || "0.00",
+            status: invoiceData.status || 'draft',
+            dueDate: invoiceData.dueDate ? new Date(invoiceData.dueDate) : null,
+          });
+
+          if (!validationResult.success) {
+            results.invoices.failed++;
+            results.invoices.errors.push(`Invoice "${invoiceData.title}": ${validationResult.error.errors[0]?.message}`);
+            continue;
+          }
+
+          await storage.createCrmInvoice(validationResult.data);
+          results.invoices.imported++;
+        } catch (error: any) {
+          results.invoices.failed++;
+          results.invoices.errors.push(`Invoice "${invoiceData.title}": ${error.message}`);
+        }
+      }
+
+      const totalImported = results.clients.imported + results.jobs.imported + results.quotes.imported + results.invoices.imported;
+      const totalFailed = results.clients.failed + results.jobs.failed + results.quotes.failed + results.invoices.failed;
+
+      res.json({
+        success: true,
+        message: `Import completed: ${totalImported} records imported, ${totalFailed} failed`,
+        results,
+      });
+    } catch (error) {
+      console.error("Error importing CRM data:", error);
+      res.status(500).json({ message: "Failed to import CRM data" });
+    }
+  });
+
+  // GET /api/crm/import/template - Get JSON template for import
+  app.get('/api/crm/import/template', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const template = {
+        clients: [
+          {
+            firstName: "John",
+            lastName: "Smith",
+            email: "john.smith@example.com",
+            phone: "(555) 123-4567",
+            address: "123 Main St",
+            city: "Springfield",
+            state: "IL",
+            postalCode: "62701",
+            notes: "Loyal customer since 2020",
+            preferredContactMethod: "phone"
+          }
+        ],
+        jobs: [
+          {
+            clientName: "John Smith",
+            clientEmail: "john.smith@example.com",
+            title: "Kitchen Remodel",
+            description: "Complete kitchen renovation",
+            serviceType: "Remodeling",
+            scheduledDate: "2024-03-15T09:00:00Z",
+            status: "scheduled",
+            priority: "high",
+            address: "123 Main St",
+            city: "Springfield",
+            state: "IL",
+            postalCode: "62701",
+            laborCost: "2500.00",
+            materialsCost: "3500.00",
+            totalCost: "6000.00",
+            notes: "Customer prefers morning appointments"
+          }
+        ],
+        quotes: [
+          {
+            clientName: "John Smith",
+            title: "Bathroom Renovation Quote",
+            description: "Master bathroom complete renovation",
+            serviceType: "Remodeling",
+            lineItems: [
+              { description: "Demolition", quantity: 1, unitPrice: 500, total: 500 },
+              { description: "Plumbing", quantity: 1, unitPrice: 1500, total: 1500 },
+              { description: "Tile Installation", quantity: 1, unitPrice: 2000, total: 2000 }
+            ],
+            subtotal: "4000.00",
+            taxRate: "8.00",
+            taxAmount: "320.00",
+            total: "4320.00",
+            validUntil: "2024-04-15T00:00:00Z",
+            status: "sent"
+          }
+        ],
+        invoices: [
+          {
+            clientName: "John Smith",
+            title: "Kitchen Remodel - Final Invoice",
+            description: "Final payment for kitchen remodel project",
+            lineItems: [
+              { description: "Labor", quantity: 40, unitPrice: 62.50, total: 2500 },
+              { description: "Materials", quantity: 1, unitPrice: 3500, total: 3500 }
+            ],
+            subtotal: "6000.00",
+            taxRate: "8.00",
+            taxAmount: "480.00",
+            total: "6480.00",
+            amountPaid: "3240.00",
+            amountDue: "3240.00",
+            dueDate: "2024-04-01T00:00:00Z",
+            status: "partial"
+          }
+        ]
+      };
+
+      res.json(template);
+    } catch (error) {
+      console.error("Error generating import template:", error);
+      res.status(500).json({ message: "Failed to generate import template" });
+    }
+  });
+
   // Error Tracking routes - For logging and monitoring errors
   app.post('/api/errors', async (req: any, res) => {
     try {
