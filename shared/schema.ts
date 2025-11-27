@@ -17,8 +17,8 @@ export const sessions = pgTable(
 // Subscription plans table
 export const subscriptionPlans = pgTable("subscription_plans", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  tierName: text("tier_name").notNull().unique(), // "basic", "super", "contractor"
-  displayName: text("display_name").notNull(), // "Basic Homeowner", "Super Homeowner", "Contractor"
+  tierName: text("tier_name").notNull().unique(), // "basic", "super", "contractor", "contractor_pro"
+  displayName: text("display_name").notNull(), // "Basic Homeowner", "Super Homeowner", "Contractor", "Contractor Pro"
   description: text("description").notNull(),
   monthlyPrice: decimal("monthly_price", { precision: 10, scale: 2 }).notNull(),
   minHouses: integer("min_houses").notNull().default(0), // Minimum houses required for this tier
@@ -27,6 +27,8 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   stripeProductId: varchar("stripe_product_id").unique(),
   stripePriceId: varchar("stripe_price_id").unique(),
   features: text("features").array().notNull(), // Array of feature descriptions
+  referralCreditCap: decimal("referral_credit_cap", { precision: 10, scale: 2 }), // Max referral credits per month (null = use default)
+  hasCrmAccess: boolean("has_crm_access").notNull().default(false), // Whether tier includes CRM features
   isActive: boolean("is_active").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0), // For display ordering
   createdAt: timestamp("created_at").defaultNow(),
@@ -1606,3 +1608,161 @@ export const webhookLogs = pgTable("webhook_logs", {
 export const insertWebhookLogSchema = createInsertSchema(webhookLogs).omit({ id: true, createdAt: true });
 export type InsertWebhookLog = z.infer<typeof insertWebhookLogSchema>;
 export type WebhookLog = typeof webhookLogs.$inferSelect;
+
+// CRM Clients table - customer contacts for contractors (Pro tier feature)
+export const crmClients = pgTable("crm_clients", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractorUserId: varchar("contractor_user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: 'cascade' }),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  secondaryPhone: text("secondary_phone"),
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  postalCode: text("postal_code"),
+  notes: text("notes"),
+  tags: text("tags").array().default(sql`ARRAY[]::text[]`),
+  preferredContactMethod: text("preferred_contact_method").default("phone"), // 'phone', 'email', 'text'
+  isActive: boolean("is_active").notNull().default(true),
+  totalJobsCompleted: integer("total_jobs_completed").notNull().default(0),
+  totalRevenue: decimal("total_revenue", { precision: 12, scale: 2 }).default("0.00"),
+  lastServiceDate: timestamp("last_service_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_crm_clients_contractor").on(table.contractorUserId),
+  index("IDX_crm_clients_company").on(table.companyId),
+  index("IDX_crm_clients_email").on(table.email),
+  index("IDX_crm_clients_is_active").on(table.isActive),
+]);
+
+export const insertCrmClientSchema = createInsertSchema(crmClients).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertCrmClient = z.infer<typeof insertCrmClientSchema>;
+export type CrmClient = typeof crmClients.$inferSelect;
+
+// CRM Jobs table - job scheduling and tracking (Pro tier feature)
+export const crmJobs = pgTable("crm_jobs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractorUserId: varchar("contractor_user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: 'cascade' }),
+  clientId: varchar("client_id").notNull().references(() => crmClients.id, { onDelete: 'cascade' }),
+  quoteId: varchar("quote_id"), // References crmQuotes.id - no FK to avoid circular dependency
+  title: text("title").notNull(),
+  description: text("description"),
+  serviceType: text("service_type").notNull(),
+  status: text("status").notNull().default("scheduled"), // 'scheduled', 'in_progress', 'completed', 'cancelled', 'on_hold'
+  priority: text("priority").notNull().default("normal"), // 'low', 'normal', 'high', 'urgent'
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  scheduledEndDate: timestamp("scheduled_end_date"),
+  actualStartTime: timestamp("actual_start_time"),
+  actualEndTime: timestamp("actual_end_time"),
+  estimatedDuration: integer("estimated_duration"), // in minutes
+  actualDuration: integer("actual_duration"), // in minutes
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  postalCode: text("postal_code"),
+  laborCost: decimal("labor_cost", { precision: 10, scale: 2 }),
+  materialsCost: decimal("materials_cost", { precision: 10, scale: 2 }),
+  totalCost: decimal("total_cost", { precision: 10, scale: 2 }),
+  notes: text("notes"),
+  internalNotes: text("internal_notes"),
+  completionNotes: text("completion_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_crm_jobs_contractor").on(table.contractorUserId),
+  index("IDX_crm_jobs_company").on(table.companyId),
+  index("IDX_crm_jobs_client").on(table.clientId),
+  index("IDX_crm_jobs_status").on(table.status),
+  index("IDX_crm_jobs_scheduled_date").on(table.scheduledDate),
+]);
+
+export const insertCrmJobSchema = createInsertSchema(crmJobs).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertCrmJob = z.infer<typeof insertCrmJobSchema>;
+export type CrmJob = typeof crmJobs.$inferSelect;
+
+// CRM Quotes table - estimates for customers (Pro tier feature)
+export const crmQuotes = pgTable("crm_quotes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractorUserId: varchar("contractor_user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: 'cascade' }),
+  clientId: varchar("client_id").notNull().references(() => crmClients.id, { onDelete: 'cascade' }),
+  quoteNumber: varchar("quote_number").notNull(), // e.g., "Q-2024-0001"
+  title: text("title").notNull(),
+  description: text("description"),
+  serviceType: text("service_type").notNull(),
+  status: text("status").notNull().default("draft"), // 'draft', 'sent', 'viewed', 'accepted', 'declined', 'expired'
+  lineItems: jsonb("line_items").notNull().default(sql`'[]'::jsonb`), // Array of {description, quantity, unitPrice, total}
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  taxRate: decimal("tax_rate", { precision: 5, scale: 2 }).default("0.00"),
+  taxAmount: decimal("tax_amount", { precision: 10, scale: 2 }).default("0.00"),
+  discount: decimal("discount", { precision: 10, scale: 2 }).default("0.00"),
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  validUntil: timestamp("valid_until"),
+  sentAt: timestamp("sent_at"),
+  viewedAt: timestamp("viewed_at"),
+  acceptedAt: timestamp("accepted_at"),
+  declinedAt: timestamp("declined_at"),
+  notes: text("notes"),
+  termsAndConditions: text("terms_and_conditions"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_crm_quotes_contractor").on(table.contractorUserId),
+  index("IDX_crm_quotes_company").on(table.companyId),
+  index("IDX_crm_quotes_client").on(table.clientId),
+  index("IDX_crm_quotes_status").on(table.status),
+  uniqueIndex("UX_crm_quotes_number").on(table.contractorUserId, table.quoteNumber),
+]);
+
+export const insertCrmQuoteSchema = createInsertSchema(crmQuotes).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertCrmQuote = z.infer<typeof insertCrmQuoteSchema>;
+export type CrmQuote = typeof crmQuotes.$inferSelect;
+
+// CRM Invoices table - billing customers (Pro tier feature)
+export const crmInvoices = pgTable("crm_invoices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractorUserId: varchar("contractor_user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: 'cascade' }),
+  clientId: varchar("client_id").notNull().references(() => crmClients.id, { onDelete: 'cascade' }),
+  jobId: varchar("job_id").references(() => crmJobs.id, { onDelete: 'set null' }),
+  quoteId: varchar("quote_id").references(() => crmQuotes.id, { onDelete: 'set null' }),
+  invoiceNumber: varchar("invoice_number").notNull(), // e.g., "INV-2024-0001"
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status").notNull().default("draft"), // 'draft', 'sent', 'viewed', 'paid', 'partial', 'overdue', 'cancelled'
+  lineItems: jsonb("line_items").notNull().default(sql`'[]'::jsonb`), // Array of {description, quantity, unitPrice, total}
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  taxRate: decimal("tax_rate", { precision: 5, scale: 2 }).default("0.00"),
+  taxAmount: decimal("tax_amount", { precision: 10, scale: 2 }).default("0.00"),
+  discount: decimal("discount", { precision: 10, scale: 2 }).default("0.00"),
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  amountPaid: decimal("amount_paid", { precision: 10, scale: 2 }).default("0.00"),
+  amountDue: decimal("amount_due", { precision: 10, scale: 2 }).notNull(),
+  dueDate: timestamp("due_date"),
+  sentAt: timestamp("sent_at"),
+  viewedAt: timestamp("viewed_at"),
+  paidAt: timestamp("paid_at"),
+  paymentMethod: text("payment_method"), // 'cash', 'check', 'credit_card', 'bank_transfer', 'other'
+  paymentNotes: text("payment_notes"),
+  notes: text("notes"),
+  termsAndConditions: text("terms_and_conditions"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_crm_invoices_contractor").on(table.contractorUserId),
+  index("IDX_crm_invoices_company").on(table.companyId),
+  index("IDX_crm_invoices_client").on(table.clientId),
+  index("IDX_crm_invoices_job").on(table.jobId),
+  index("IDX_crm_invoices_status").on(table.status),
+  index("IDX_crm_invoices_due_date").on(table.dueDate),
+  uniqueIndex("UX_crm_invoices_number").on(table.contractorUserId, table.invoiceNumber),
+]);
+
+export const insertCrmInvoiceSchema = createInsertSchema(crmInvoices).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertCrmInvoice = z.infer<typeof insertCrmInvoiceSchema>;
+export type CrmInvoice = typeof crmInvoices.$inferSelect;
