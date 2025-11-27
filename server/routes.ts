@@ -571,6 +571,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
+      // Get referral cap based on subscription tier
+      let referralCreditCap = 20; // Default cap for contractors
+      let tierName = 'contractor';
+      
+      if (user.subscriptionPlanId) {
+        const plans = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, user.subscriptionPlanId)).limit(1);
+        if (plans.length > 0 && plans[0].referralCreditCap) {
+          referralCreditCap = parseFloat(plans[0].referralCreditCap);
+          tierName = plans[0].tierName;
+        }
+      } else if ((user as any).subscriptionTierName === 'contractor_pro') {
+        referralCreditCap = 40;
+        tierName = 'contractor_pro';
+      }
+      
+      // For homeowners, cap is their subscription price
+      if (user.role === 'homeowner') {
+        if (user.subscriptionPlanId) {
+          const plans = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, user.subscriptionPlanId)).limit(1);
+          if (plans.length > 0 && plans[0].referralCreditCap) {
+            referralCreditCap = parseFloat(plans[0].referralCreditCap);
+          } else if (plans.length > 0 && plans[0].monthlyPrice) {
+            referralCreditCap = parseFloat(plans[0].monthlyPrice);
+          }
+        } else {
+          referralCreditCap = 5; // Default for basic homeowner
+        }
+      }
+
+      // Calculate current monthly credits: each referral = $1, capped by tier
+      const rawReferralCount = user.referralCount || 0;
+      const earnedCredits = rawReferralCount * 1; // $1 per active referral
+      const currentCredits = Math.min(earnedCredits, referralCreditCap);
+      
       // For contractors, use the company's referral code instead of personal code
       if (user.role === 'contractor' && user.companyId) {
         const company = await storage.getCompany(user.companyId);
@@ -584,7 +618,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             return res.json({ 
               referralCode: newCode,
-              referralCount: user.referralCount || 0,
+              referralCount: rawReferralCount,
+              earnedCredits,
+              referralCreditCap,
+              currentCredits,
+              tierName,
               referralLink: `${req.protocol}://${req.get('host')}/invite/${newCode}`
             });
           }
@@ -592,7 +630,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Return company's existing referral code
           return res.json({ 
             referralCode: company.referralCode,
-            referralCount: user.referralCount || 0,
+            referralCount: rawReferralCount,
+            earnedCredits,
+            referralCreditCap,
+            currentCredits,
+            tierName,
             referralLink: `${req.protocol}://${req.get('host')}/invite/${company.referralCode}`
           });
         }
@@ -614,7 +656,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         referralCode: user.referralCode,
-        referralCount: user.referralCount || 0,
+        referralCount: rawReferralCount,
+        earnedCredits,
+        referralCreditCap,
+        currentCredits,
+        tierName,
         referralLink: `${req.protocol}://${req.get('host')}/invite/${user.referralCode}`
       });
     } catch (error) {

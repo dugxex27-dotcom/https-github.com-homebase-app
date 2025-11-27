@@ -2,11 +2,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import type { User as UserType } from "@shared/schema";
-import { Gift, Copy, Share2, MessageSquare, Download, ImageIcon } from "lucide-react";
+import { Gift, Copy, Share2, MessageSquare, Download, ImageIcon, Crown, TrendingUp } from "lucide-react";
 
 import instagramPostImg from '@assets/generated_images/Contractor_Instagram_referral_post_7b9f6d5d.png';
 import instagramStoryImg from '@assets/generated_images/Contractor_Instagram_story_graphic_4d65a731.png';
@@ -25,6 +27,13 @@ export default function ContractorReferral() {
 
   const referralCode = (referralData as any)?.referralCode || '';
   const referralLink = (referralData as any)?.referralLink || '';
+  const referralCount = (referralData as any)?.referralCount || 0;
+  const earnedCredits = (referralData as any)?.earnedCredits || 0;
+  const referralCreditCap = (referralData as any)?.referralCreditCap || 20;
+  const currentCredits = (referralData as any)?.currentCredits || 0;
+  const tierName = (referralData as any)?.tierName || 'contractor';
+  const isPro = tierName === 'contractor_pro';
+  const creditProgress = (earnedCredits / referralCreditCap) * 100;
   
   const shareMessage = `Join me on Home Base! Use my referral code ${referralCode} and I get $1 off when you subscribe. You'll get the full Home Base experience at regular price while helping me save money! Perfect for contractors! Sign up here: ${referralLink}`;
 
@@ -117,6 +126,76 @@ export default function ContractorReferral() {
         </div>
 
         <div className="space-y-8">
+          {/* Referral Stats Card */}
+          <Card style={{ backgroundColor: '#f2f2f2' }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2" style={{ color: '#1560a2' }}>
+                <TrendingUp className="w-5 h-5" style={{ color: '#1560a2' }} />
+                Your Referral Stats
+                {isPro && (
+                  <Badge className="ml-2 bg-red-600 text-white">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Pro
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-white rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold" style={{ color: '#1560a2' }}>{referralCount}</div>
+                  <div className="text-sm text-gray-600">Active Referrals</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold" style={{ color: '#1560a2' }}>${earnedCredits}</div>
+                  <div className="text-sm text-gray-600">Credits Earned</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold text-green-600">${currentCredits}</div>
+                  <div className="text-sm text-gray-600">Applied Savings</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold" style={{ color: '#1560a2' }}>${referralCreditCap}</div>
+                  <div className="text-sm text-gray-600">Monthly Cap</div>
+                </div>
+              </div>
+              
+              {/* Progress to Cap */}
+              <div className="bg-white rounded-lg p-4">
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium" style={{ color: '#1560a2' }}>Progress to Cap</span>
+                  <span className="text-sm text-gray-600">${earnedCredits} earned / ${referralCreditCap} cap</span>
+                </div>
+                <Progress value={Math.min(creditProgress, 100)} className="h-3" />
+                {earnedCredits >= referralCreditCap && (
+                  <p className="text-sm text-green-600 mt-2">
+                    You've reached your monthly referral cap! You're saving ${currentCredits}/month.
+                    {earnedCredits > referralCreditCap && ` (${earnedCredits - referralCreditCap} credits above cap)`}
+                  </p>
+                )}
+                {!isPro && (
+                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Crown className="w-4 h-4 text-red-600" />
+                      <span className="text-sm font-medium text-red-900">Upgrade to Pro for a $40/month cap</span>
+                    </div>
+                    <p className="text-xs text-red-700 mt-1">Pro subscribers can save up to $40/month with referrals instead of $20.</p>
+                    <Button
+                      onClick={() => window.location.href = '/billing'}
+                      size="sm"
+                      className="mt-2"
+                      style={{ backgroundColor: '#b91c1c', color: 'white' }}
+                      data-testid="button-upgrade-pro-referral"
+                    >
+                      <Crown className="w-3 h-3 mr-2" />
+                      Upgrade to Pro
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Referral Rewards Card */}
           <Card style={{ backgroundColor: '#f2f2f2' }}>
             <CardHeader>
@@ -127,7 +206,7 @@ export default function ContractorReferral() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-sm text-gray-600">
-                Share Home Base with other contractors and homeowners. Earn $1 off your subscription for each paid subscriber!
+                Share Home Base with other contractors and homeowners. Earn $1 off your subscription for each paid subscriber (up to ${referralCreditCap}/month)!
               </div>
               
               {/* Referral Code */}
