@@ -22,6 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { Link } from "wouter";
+import { ProFeatureGate, ProUpgradeBanner, ProBenefitsDialog } from "@/components/pro-feature-gate";
 
 // Types
 interface CrmLead {
@@ -341,27 +342,6 @@ type CreateJobForm = z.infer<typeof createJobSchema>;
 type CreateQuoteForm = z.infer<typeof createQuoteSchema>;
 type CreateInvoiceForm = z.infer<typeof createInvoiceSchema>;
 
-// Upgrade Prompt Component
-function UpgradePrompt() {
-  return (
-    <Card className="border-2 border-dashed border-primary/50">
-      <CardContent className="py-12 text-center">
-        <Crown className="h-16 w-16 mx-auto mb-4 text-primary" />
-        <h3 className="text-2xl font-bold mb-2">Upgrade to Pro</h3>
-        <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-          Unlock powerful CRM features including client management, job scheduling, 
-          quotes, invoices, and business analytics with Contractor Pro.
-        </p>
-        <Button asChild size="lg" data-testid="button-upgrade-to-pro">
-          <Link href="/billing">
-            <Crown className="h-4 w-4 mr-2" />
-            Upgrade Now
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
 
 export default function ContractorCRMPage() {
   const { toast } = useToast();
@@ -402,6 +382,9 @@ export default function ContractorCRMPage() {
   const [paymentInvoice, setPaymentInvoice] = useState<CrmInvoice | null>(null);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
+  
+  // Pro benefits dialog state
+  const [showProBenefitsDialog, setShowProBenefitsDialog] = useState(false);
 
   // Check Pro tier access
   const { data: proAccessData, error: proAccessError, isLoading: isCheckingProAccess } = useQuery<CrmClient[]>({
@@ -816,6 +799,14 @@ export default function ContractorCRMPage() {
         <p className="text-muted-foreground mt-1">Manage your leads, clients, jobs, quotes, and invoices</p>
       </div>
 
+      {/* Pro Upgrade Banner for non-Pro users */}
+      {needsUpgrade && (
+        <ProUpgradeBanner onShowBenefits={() => setShowProBenefitsDialog(true)} />
+      )}
+
+      {/* Pro Benefits Dialog */}
+      <ProBenefitsDialog open={showProBenefitsDialog} onOpenChange={setShowProBenefitsDialog} />
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-6 flex-wrap h-auto gap-1">
           <TabsTrigger value="leads" data-testid="tab-leads">Leads</TabsTrigger>
@@ -1181,200 +1172,251 @@ export default function ContractorCRMPage() {
 
         {/* Clients Tab (Pro) */}
         <TabsContent value="clients">
-          {!hasProAccess ? (
-            <UpgradePrompt />
-          ) : (
-            <>
-              <div className="flex justify-between items-center mb-6">
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search clients..." value={clientSearch} onChange={(e) => setClientSearch(e.target.value)} className="pl-9" data-testid="input-search-clients" />
-                </div>
-                <Dialog open={isAddClientOpen || !!editingClient} onOpenChange={(open) => { if (!open) { setIsAddClientOpen(false); setEditingClient(null); clientForm.reset(); } else { setIsAddClientOpen(true); } }}>
-                  <DialogTrigger asChild>
-                    <Button data-testid="button-add-client"><Plus className="h-4 w-4 mr-2" />Add Client</Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>{editingClient ? "Edit Client" : "Add New Client"}</DialogTitle>
-                      <DialogDescription>{editingClient ? "Update client information" : "Enter the client information below"}</DialogDescription>
-                    </DialogHeader>
-                    <Form {...clientForm}>
-                      <form onSubmit={clientForm.handleSubmit(handleSubmitClient)} className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField control={clientForm.control} name="firstName" render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>First Name *</FormLabel>
-                              <FormControl><Input {...field} data-testid="input-client-first-name" /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )} />
-                          <FormField control={clientForm.control} name="lastName" render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Last Name *</FormLabel>
-                              <FormControl><Input {...field} data-testid="input-client-last-name" /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )} />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField control={clientForm.control} name="email" render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email</FormLabel>
-                              <FormControl><Input {...field} type="email" data-testid="input-client-email" /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )} />
-                          <FormField control={clientForm.control} name="phone" render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Phone</FormLabel>
-                              <FormControl><Input {...field} data-testid="input-client-phone" /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )} />
-                        </div>
-                        <FormField control={clientForm.control} name="address" render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Address</FormLabel>
-                            <FormControl><Input {...field} data-testid="input-client-address" /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
-                        <div className="grid grid-cols-3 gap-4">
-                          <FormField control={clientForm.control} name="city" render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>City</FormLabel>
-                              <FormControl><Input {...field} data-testid="input-client-city" /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )} />
-                          <FormField control={clientForm.control} name="state" render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>State</FormLabel>
-                              <FormControl><Input {...field} data-testid="input-client-state" /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )} />
-                          <FormField control={clientForm.control} name="postalCode" render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Postal Code</FormLabel>
-                              <FormControl><Input {...field} data-testid="input-client-postal-code" /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )} />
-                        </div>
-                        <FormField control={clientForm.control} name="notes" render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Notes</FormLabel>
-                            <FormControl><Textarea {...field} data-testid="input-client-notes" /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
-                        <FormField control={clientForm.control} name="preferredContactMethod" render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Preferred Contact Method</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger data-testid="select-client-contact-method"><SelectValue /></SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="phone">Phone</SelectItem>
-                                <SelectItem value="email">Email</SelectItem>
-                                <SelectItem value="text">Text</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
-                        <DialogFooter>
-                          <Button type="button" variant="outline" onClick={() => { setIsAddClientOpen(false); setEditingClient(null); clientForm.reset(); }} data-testid="button-cancel-client">Cancel</Button>
-                          <Button type="submit" disabled={createClientMutation.isPending || updateClientMutation.isPending} data-testid="button-submit-client">
-                            {(createClientMutation.isPending || updateClientMutation.isPending) ? "Saving..." : editingClient ? "Update Client" : "Create Client"}
-                          </Button>
-                        </DialogFooter>
-                      </form>
-                    </Form>
-                  </DialogContent>
-                </Dialog>
+          <ProFeatureGate featureName="Client Management" featureIcon={Users} needsUpgrade={needsUpgrade}>
+            <div className="flex justify-between items-center mb-6">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search clients..." value={clientSearch} onChange={(e) => setClientSearch(e.target.value)} className="pl-9" data-testid="input-search-clients" />
               </div>
+              <Dialog open={isAddClientOpen || !!editingClient} onOpenChange={(open) => { if (!open) { setIsAddClientOpen(false); setEditingClient(null); clientForm.reset(); } else { setIsAddClientOpen(true); } }}>
+                <DialogTrigger asChild>
+                  <Button data-testid="button-add-client"><Plus className="h-4 w-4 mr-2" />Add Client</Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>{editingClient ? "Edit Client" : "Add New Client"}</DialogTitle>
+                    <DialogDescription>{editingClient ? "Update client information" : "Enter the client information below"}</DialogDescription>
+                  </DialogHeader>
+                  <Form {...clientForm}>
+                    <form onSubmit={clientForm.handleSubmit(handleSubmitClient)} className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField control={clientForm.control} name="firstName" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>First Name *</FormLabel>
+                            <FormControl><Input {...field} data-testid="input-client-first-name" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={clientForm.control} name="lastName" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name *</FormLabel>
+                            <FormControl><Input {...field} data-testid="input-client-last-name" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField control={clientForm.control} name="email" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl><Input {...field} type="email" data-testid="input-client-email" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={clientForm.control} name="phone" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone</FormLabel>
+                            <FormControl><Input {...field} data-testid="input-client-phone" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
+                      <FormField control={clientForm.control} name="address" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Address</FormLabel>
+                          <FormControl><Input {...field} data-testid="input-client-address" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <div className="grid grid-cols-3 gap-4">
+                        <FormField control={clientForm.control} name="city" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>City</FormLabel>
+                            <FormControl><Input {...field} data-testid="input-client-city" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={clientForm.control} name="state" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>State</FormLabel>
+                            <FormControl><Input {...field} data-testid="input-client-state" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={clientForm.control} name="postalCode" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Postal Code</FormLabel>
+                            <FormControl><Input {...field} data-testid="input-client-postal-code" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
+                      <FormField control={clientForm.control} name="notes" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Notes</FormLabel>
+                          <FormControl><Textarea {...field} data-testid="input-client-notes" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={clientForm.control} name="preferredContactMethod" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Preferred Contact Method</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger data-testid="select-client-contact-method"><SelectValue /></SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="phone">Phone</SelectItem>
+                              <SelectItem value="email">Email</SelectItem>
+                              <SelectItem value="text">Text</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => { setIsAddClientOpen(false); setEditingClient(null); clientForm.reset(); }} data-testid="button-cancel-client">Cancel</Button>
+                        <Button type="submit" disabled={createClientMutation.isPending || updateClientMutation.isPending} data-testid="button-submit-client">
+                          {(createClientMutation.isPending || updateClientMutation.isPending) ? "Saving..." : editingClient ? "Update Client" : "Create Client"}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </div>
 
-              <div className="space-y-4">
-                {isLoadingClients ? (
-                  <Card><CardContent className="py-8 text-center text-muted-foreground">Loading clients...</CardContent></Card>
-                ) : clients && clients.length === 0 ? (
-                  <Card>
-                    <CardContent className="py-12 text-center">
-                      <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground mb-4">No clients found</p>
-                      <Button onClick={() => setIsAddClientOpen(true)} data-testid="button-add-first-client">
-                        <Plus className="h-4 w-4 mr-2" />Add Your First Client
-                      </Button>
+            <div className="space-y-4">
+              {needsUpgrade ? (
+                <>
+                  {/* Demo preview content for non-Pro users */}
+                  <Card className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-xl">John Smith</CardTitle>
+                          <CardDescription className="mt-1">
+                            <span className="mr-3">(555) 123-4567</span>
+                            <span>john.smith@email.com</span>
+                          </CardDescription>
+                        </div>
+                        <Badge>Active</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div className="flex gap-4 text-sm text-muted-foreground">
+                          <span>Jobs: 12</span>
+                          <span>Revenue: $8,450.00</span>
+                          <span>Last service: Nov 15, 2025</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm"><Edit className="h-4 w-4 mr-2" />Edit</Button>
+                          <Button variant="outline" size="sm"><Trash2 className="h-4 w-4 mr-2" />Delete</Button>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
-                ) : (
-                  clients?.map((client) => (
-                    <Card key={client.id} className="hover:shadow-lg transition-shadow" data-testid={`client-card-${client.id}`}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-xl" data-testid={`client-name-${client.id}`}>{client.firstName} {client.lastName}</CardTitle>
-                            <CardDescription className="mt-1">
-                              {client.phone && <span className="mr-3">{client.phone}</span>}
-                              {client.email && <span>{client.email}</span>}
-                            </CardDescription>
-                          </div>
-                          <div className="flex gap-2">
-                            <Badge variant={client.isActive ? "default" : "secondary"}>{client.isActive ? "Active" : "Inactive"}</Badge>
-                          </div>
+                  <Card className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-xl">Sarah Johnson</CardTitle>
+                          <CardDescription className="mt-1">
+                            <span className="mr-3">(555) 987-6543</span>
+                            <span>sarah.j@email.com</span>
+                          </CardDescription>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between">
-                          <div className="flex gap-4 text-sm text-muted-foreground">
-                            <span>Jobs: {client.totalJobsCompleted}</span>
-                            <span>Revenue: ${parseFloat(client.totalRevenue || "0").toFixed(2)}</span>
-                            {client.lastServiceDate && <span>Last service: {format(new Date(client.lastServiceDate), 'MMM d, yyyy')}</span>}
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setEditingClient(client)} data-testid={`button-edit-client-${client.id}`}>
-                              <Edit className="h-4 w-4 mr-2" />Edit
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => { setClientToDelete(client); setDeleteClientConfirmOpen(true); }} data-testid={`button-delete-client-${client.id}`}>
-                              <Trash2 className="h-4 w-4 mr-2" />Delete
-                            </Button>
-                          </div>
+                        <Badge>Active</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div className="flex gap-4 text-sm text-muted-foreground">
+                          <span>Jobs: 8</span>
+                          <span>Revenue: $5,200.00</span>
+                          <span>Last service: Nov 10, 2025</span>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
-            </>
-          )}
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm"><Edit className="h-4 w-4 mr-2" />Edit</Button>
+                          <Button variant="outline" size="sm"><Trash2 className="h-4 w-4 mr-2" />Delete</Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : isLoadingClients ? (
+                <Card><CardContent className="py-8 text-center text-muted-foreground">Loading clients...</CardContent></Card>
+              ) : clients && clients.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground mb-4">No clients found</p>
+                    <Button onClick={() => setIsAddClientOpen(true)} data-testid="button-add-first-client">
+                      <Plus className="h-4 w-4 mr-2" />Add Your First Client
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                clients?.map((client) => (
+                  <Card key={client.id} className="hover:shadow-lg transition-shadow" data-testid={`client-card-${client.id}`}>
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-xl" data-testid={`client-name-${client.id}`}>{client.firstName} {client.lastName}</CardTitle>
+                          <CardDescription className="mt-1">
+                            {client.phone && <span className="mr-3">{client.phone}</span>}
+                            {client.email && <span>{client.email}</span>}
+                          </CardDescription>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant={client.isActive ? "default" : "secondary"}>{client.isActive ? "Active" : "Inactive"}</Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div className="flex gap-4 text-sm text-muted-foreground">
+                          <span>Jobs: {client.totalJobsCompleted}</span>
+                          <span>Revenue: ${parseFloat(client.totalRevenue || "0").toFixed(2)}</span>
+                          {client.lastServiceDate && <span>Last service: {format(new Date(client.lastServiceDate), 'MMM d, yyyy')}</span>}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => setEditingClient(client)} data-testid={`button-edit-client-${client.id}`}>
+                            <Edit className="h-4 w-4 mr-2" />Edit
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => { setClientToDelete(client); setDeleteClientConfirmOpen(true); }} data-testid={`button-delete-client-${client.id}`}>
+                            <Trash2 className="h-4 w-4 mr-2" />Delete
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </ProFeatureGate>
         </TabsContent>
 
         {/* Jobs Tab (Pro) */}
         <TabsContent value="jobs">
-          {!hasProAccess ? (
-            <UpgradePrompt />
-          ) : (
-            <>
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <Select value={jobStatusFilter} onValueChange={setJobStatusFilter}>
-                    <SelectTrigger className="w-48" data-testid="select-filter-job-status"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      {Object.entries(jobStatusLabels).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>{label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Dialog open={isAddJobOpen} onOpenChange={setIsAddJobOpen}>
-                  <DialogTrigger asChild>
-                    <Button data-testid="button-add-job"><Plus className="h-4 w-4 mr-2" />Add Job</Button>
-                  </DialogTrigger>
+          <ProFeatureGate featureName="Job Scheduling" featureIcon={Briefcase} needsUpgrade={needsUpgrade}>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <Select value={jobStatusFilter} onValueChange={setJobStatusFilter}>
+                  <SelectTrigger className="w-48" data-testid="select-filter-job-status"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    {Object.entries(jobStatusLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Dialog open={isAddJobOpen} onOpenChange={setIsAddJobOpen}>
+                <DialogTrigger asChild>
+                  <Button data-testid="button-add-job"><Plus className="h-4 w-4 mr-2" />Add Job</Button>
+                </DialogTrigger>
                   <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Schedule New Job</DialogTitle>
@@ -1529,20 +1571,16 @@ export default function ContractorCRMPage() {
                   ))
                 )}
               </div>
-            </>
-          )}
+          </ProFeatureGate>
         </TabsContent>
 
         {/* Quotes Tab (Pro) */}
         <TabsContent value="quotes">
-          {!hasProAccess ? (
-            <UpgradePrompt />
-          ) : (
-            <>
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <Select value={quoteStatusFilter} onValueChange={setQuoteStatusFilter}>
-                    <SelectTrigger className="w-48" data-testid="select-filter-quote-status"><SelectValue /></SelectTrigger>
+          <ProFeatureGate featureName="Professional Quotes" featureIcon={FileText} needsUpgrade={needsUpgrade}>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <Select value={quoteStatusFilter} onValueChange={setQuoteStatusFilter}>
+                  <SelectTrigger className="w-48" data-testid="select-filter-quote-status"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Statuses</SelectItem>
                       {Object.entries(quoteStatusLabels).map(([value, label]) => (
@@ -1718,20 +1756,16 @@ export default function ContractorCRMPage() {
                   ))
                 )}
               </div>
-            </>
-          )}
+          </ProFeatureGate>
         </TabsContent>
 
         {/* Invoices Tab (Pro) */}
         <TabsContent value="invoices">
-          {!hasProAccess ? (
-            <UpgradePrompt />
-          ) : (
-            <>
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <Select value={invoiceStatusFilter} onValueChange={setInvoiceStatusFilter}>
-                    <SelectTrigger className="w-48" data-testid="select-filter-invoice-status"><SelectValue /></SelectTrigger>
+          <ProFeatureGate featureName="Invoice Management" featureIcon={Receipt} needsUpgrade={needsUpgrade}>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <Select value={invoiceStatusFilter} onValueChange={setInvoiceStatusFilter}>
+                  <SelectTrigger className="w-48" data-testid="select-filter-invoice-status"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Statuses</SelectItem>
                       {Object.entries(invoiceStatusLabels).map(([value, label]) => (
@@ -1958,15 +1992,12 @@ export default function ContractorCRMPage() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-            </>
-          )}
+          </ProFeatureGate>
         </TabsContent>
 
         {/* Dashboard Tab (Pro) */}
         <TabsContent value="dashboard">
-          {!hasProAccess ? (
-            <UpgradePrompt />
-          ) : (
+          <ProFeatureGate featureName="Business Dashboard" featureIcon={LayoutDashboard} needsUpgrade={needsUpgrade}>
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card data-testid="dashboard-card-clients">
@@ -1976,7 +2007,7 @@ export default function ContractorCRMPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold" data-testid="stat-total-clients">
-                      {isLoadingDashboard ? "..." : dashboardStats?.totalClients || 0}
+                      {needsUpgrade ? "24" : isLoadingDashboard ? "..." : dashboardStats?.totalClients || 0}
                     </div>
                   </CardContent>
                 </Card>
@@ -1987,7 +2018,7 @@ export default function ContractorCRMPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold" data-testid="stat-active-jobs">
-                      {isLoadingDashboard ? "..." : dashboardStats?.activeJobs || 0}
+                      {needsUpgrade ? "8" : isLoadingDashboard ? "..." : dashboardStats?.activeJobs || 0}
                     </div>
                   </CardContent>
                 </Card>
@@ -1998,7 +2029,7 @@ export default function ContractorCRMPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold" data-testid="stat-pending-quotes">
-                      {isLoadingDashboard ? "..." : dashboardStats?.pendingQuotes || 0}
+                      {needsUpgrade ? "5" : isLoadingDashboard ? "..." : dashboardStats?.pendingQuotes || 0}
                     </div>
                   </CardContent>
                 </Card>
@@ -2009,7 +2040,7 @@ export default function ContractorCRMPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold" data-testid="stat-outstanding-invoices">
-                      {isLoadingDashboard ? "..." : dashboardStats?.outstandingInvoices || 0}
+                      {needsUpgrade ? "3" : isLoadingDashboard ? "..." : dashboardStats?.outstandingInvoices || 0}
                     </div>
                   </CardContent>
                 </Card>
@@ -2028,13 +2059,13 @@ export default function ContractorCRMPage() {
                       <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Total Revenue</span>
                         <span className="text-2xl font-bold" data-testid="stat-total-revenue">
-                          ${isLoadingDashboard ? "..." : parseFloat(dashboardStats?.totalRevenue || "0").toFixed(2)}
+                          ${needsUpgrade ? "87,450.00" : isLoadingDashboard ? "..." : parseFloat(dashboardStats?.totalRevenue || "0").toFixed(2)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Monthly Revenue</span>
                         <span className="text-xl font-semibold" data-testid="stat-monthly-revenue">
-                          ${isLoadingDashboard ? "..." : parseFloat(dashboardStats?.monthlyRevenue || "0").toFixed(2)}
+                          ${needsUpgrade ? "12,350.00" : isLoadingDashboard ? "..." : parseFloat(dashboardStats?.monthlyRevenue || "0").toFixed(2)}
                         </span>
                       </div>
                     </div>
@@ -2055,7 +2086,7 @@ export default function ContractorCRMPage() {
                           Paid Invoices
                         </span>
                         <span className="font-semibold" data-testid="stat-paid-invoices">
-                          {isLoadingDashboard ? "..." : dashboardStats?.paidInvoices || 0}
+                          {needsUpgrade ? "42" : isLoadingDashboard ? "..." : dashboardStats?.paidInvoices || 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
@@ -2064,7 +2095,7 @@ export default function ContractorCRMPage() {
                           Overdue Invoices
                         </span>
                         <span className="font-semibold" data-testid="stat-overdue-invoices">
-                          {isLoadingDashboard ? "..." : dashboardStats?.overdueInvoices || 0}
+                          {needsUpgrade ? "2" : isLoadingDashboard ? "..." : dashboardStats?.overdueInvoices || 0}
                         </span>
                       </div>
                     </div>
@@ -2072,7 +2103,7 @@ export default function ContractorCRMPage() {
                 </Card>
               </div>
             </div>
-          )}
+          </ProFeatureGate>
         </TabsContent>
       </Tabs>
 
