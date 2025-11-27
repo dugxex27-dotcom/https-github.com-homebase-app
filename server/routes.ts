@@ -9,7 +9,7 @@ import { z } from "zod";
 import { randomUUID } from "crypto";
 import rateLimit from "express-rate-limit";
 import { eq, and, or, lte, isNull } from "drizzle-orm";
-import { insertHomeApplianceSchema, insertHomeApplianceManualSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema, insertHouseTransferSchema, insertContractorAnalyticsSchema, insertTaskOverrideSchema, insertCountrySchema, insertRegionSchema, insertClimateZoneSchema, insertRegulatoryBodySchema, insertRegionalMaintenanceTaskSchema, insertTaskCompletionSchema, insertAchievementSchema, insertCompanySchema, insertCompanyInviteCodeSchema, updateHouseholdProfileSchema, passwordResetTokens, taskCompletions, maintenanceTasks, customMaintenanceTasks, insertSupportTicketSchema, insertSubscriptionCycleEventSchema, completeTaskSchema } from "@shared/schema";
+import { insertHomeApplianceSchema, insertHomeApplianceManualSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema, insertHouseTransferSchema, insertContractorAnalyticsSchema, insertTaskOverrideSchema, insertCountrySchema, insertRegionSchema, insertClimateZoneSchema, insertRegulatoryBodySchema, insertRegionalMaintenanceTaskSchema, insertTaskCompletionSchema, insertAchievementSchema, insertCompanySchema, insertCompanyInviteCodeSchema, updateHouseholdProfileSchema, passwordResetTokens, taskCompletions, maintenanceTasks, customMaintenanceTasks, insertSupportTicketSchema, insertSubscriptionCycleEventSchema, completeTaskSchema, insertCrmClientSchema, insertCrmJobSchema, insertCrmQuoteSchema, insertCrmInvoiceSchema, subscriptionPlans, crmClients, crmJobs, crmQuotes, crmInvoices } from "@shared/schema";
 import { calculateDIYSavingsAmount } from "@shared/cost-helpers";
 import pushRoutes from "./push-routes";
 import { pushService } from "./push-service";
@@ -3110,6 +3110,1007 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching webhook logs:", error);
       res.status(500).json({ message: "Failed to fetch webhook logs" });
+    }
+  });
+
+  // ============================================
+  // CRM Pro Tier Routes - Client Management, Jobs, Quotes, Invoices
+  // ============================================
+
+  // Helper function to check Pro tier access
+  async function hasCrmProAccess(user: any): Promise<boolean> {
+    if (!user || user.role !== 'contractor') return false;
+    
+    // Check if user's subscription plan has CRM access
+    if (user.subscriptionPlanId) {
+      const plan = await db.select().from(subscriptionPlans)
+        .where(eq(subscriptionPlans.id, user.subscriptionPlanId))
+        .limit(1);
+      return plan[0]?.hasCrmAccess === true;
+    }
+    
+    // Check by tier name (for demo purposes or fallback)
+    const tierName = user.subscriptionTierName;
+    return tierName === 'contractor_pro';
+  }
+
+  // Helper function to check ownership of CRM resources
+  function canAccessCrmResource(user: any, resource: { contractorUserId: string; companyId?: string | null }): boolean {
+    if (resource.contractorUserId === user.id) return true;
+    if (user.companyId && resource.companyId === user.companyId) return true;
+    return false;
+  }
+
+  // -------------------- CRM Clients Routes --------------------
+
+  // GET /api/crm/clients - List all clients
+  app.get('/api/crm/clients', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const filters: any = {};
+      if (req.query.search) {
+        filters.search = req.query.search as string;
+      }
+      if (req.query.isActive !== undefined) {
+        filters.isActive = req.query.isActive === 'true';
+      }
+
+      const clients = await storage.getCrmClients(req.session.user.id, filters);
+      res.json(clients);
+    } catch (error) {
+      console.error("Error fetching CRM clients:", error);
+      res.status(500).json({ message: "Failed to fetch clients" });
+    }
+  });
+
+  // POST /api/crm/clients - Create new client
+  app.post('/api/crm/clients', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const validationResult = insertCrmClientSchema.safeParse({
+        ...req.body,
+        contractorUserId: req.session.user.id,
+        companyId: req.session.user.companyId || null,
+      });
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid client data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const client = await storage.createCrmClient(validationResult.data);
+      res.status(201).json(client);
+    } catch (error) {
+      console.error("Error creating CRM client:", error);
+      res.status(500).json({ message: "Failed to create client" });
+    }
+  });
+
+  // GET /api/crm/clients/:id - Get single client
+  app.get('/api/crm/clients/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const client = await storage.getCrmClient(req.params.id);
+      
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, client)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      res.json(client);
+    } catch (error) {
+      console.error("Error fetching CRM client:", error);
+      res.status(500).json({ message: "Failed to fetch client" });
+    }
+  });
+
+  // PATCH /api/crm/clients/:id - Update client
+  app.patch('/api/crm/clients/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const existingClient = await storage.getCrmClient(req.params.id);
+      
+      if (!existingClient) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, existingClient)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const updateSchema = insertCrmClientSchema.partial();
+      const validationResult = updateSchema.safeParse(req.body);
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid client data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const updatedClient = await storage.updateCrmClient(req.params.id, validationResult.data);
+      res.json(updatedClient);
+    } catch (error) {
+      console.error("Error updating CRM client:", error);
+      res.status(500).json({ message: "Failed to update client" });
+    }
+  });
+
+  // DELETE /api/crm/clients/:id - Soft delete client (set isActive = false)
+  app.delete('/api/crm/clients/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const existingClient = await storage.getCrmClient(req.params.id);
+      
+      if (!existingClient) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, existingClient)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Soft delete - set isActive to false
+      await storage.updateCrmClient(req.params.id, { isActive: false });
+      res.json({ message: "Client deactivated successfully" });
+    } catch (error) {
+      console.error("Error deleting CRM client:", error);
+      res.status(500).json({ message: "Failed to delete client" });
+    }
+  });
+
+  // -------------------- CRM Jobs Routes --------------------
+
+  // GET /api/crm/jobs - List all jobs
+  app.get('/api/crm/jobs', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const filters: any = {};
+      if (req.query.clientId) {
+        filters.clientId = req.query.clientId as string;
+      }
+      if (req.query.status) {
+        filters.status = req.query.status as string;
+      }
+      if (req.query.startDate) {
+        filters.startDate = new Date(req.query.startDate as string);
+      }
+      if (req.query.endDate) {
+        filters.endDate = new Date(req.query.endDate as string);
+      }
+
+      const jobs = await storage.getCrmJobs(req.session.user.id, filters);
+      res.json(jobs);
+    } catch (error) {
+      console.error("Error fetching CRM jobs:", error);
+      res.status(500).json({ message: "Failed to fetch jobs" });
+    }
+  });
+
+  // POST /api/crm/jobs - Create new job
+  app.post('/api/crm/jobs', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const validationResult = insertCrmJobSchema.safeParse({
+        ...req.body,
+        contractorUserId: req.session.user.id,
+        companyId: req.session.user.companyId || null,
+      });
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid job data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const job = await storage.createCrmJob(validationResult.data);
+      res.status(201).json(job);
+    } catch (error) {
+      console.error("Error creating CRM job:", error);
+      res.status(500).json({ message: "Failed to create job" });
+    }
+  });
+
+  // GET /api/crm/jobs/:id - Get single job
+  app.get('/api/crm/jobs/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const job = await storage.getCrmJob(req.params.id);
+      
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, job)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      res.json(job);
+    } catch (error) {
+      console.error("Error fetching CRM job:", error);
+      res.status(500).json({ message: "Failed to fetch job" });
+    }
+  });
+
+  // PATCH /api/crm/jobs/:id - Update job
+  app.patch('/api/crm/jobs/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const existingJob = await storage.getCrmJob(req.params.id);
+      
+      if (!existingJob) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, existingJob)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const updateSchema = insertCrmJobSchema.partial();
+      const validationResult = updateSchema.safeParse(req.body);
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid job data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const updatedJob = await storage.updateCrmJob(req.params.id, validationResult.data);
+      res.json(updatedJob);
+    } catch (error) {
+      console.error("Error updating CRM job:", error);
+      res.status(500).json({ message: "Failed to update job" });
+    }
+  });
+
+  // DELETE /api/crm/jobs/:id - Delete job
+  app.delete('/api/crm/jobs/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const existingJob = await storage.getCrmJob(req.params.id);
+      
+      if (!existingJob) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, existingJob)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      await storage.deleteCrmJob(req.params.id);
+      res.json({ message: "Job deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting CRM job:", error);
+      res.status(500).json({ message: "Failed to delete job" });
+    }
+  });
+
+  // -------------------- CRM Quotes Routes --------------------
+
+  // GET /api/crm/quotes - List all quotes
+  app.get('/api/crm/quotes', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const filters: any = {};
+      if (req.query.clientId) {
+        filters.clientId = req.query.clientId as string;
+      }
+      if (req.query.status) {
+        filters.status = req.query.status as string;
+      }
+
+      const quotes = await storage.getCrmQuotes(req.session.user.id, filters);
+      res.json(quotes);
+    } catch (error) {
+      console.error("Error fetching CRM quotes:", error);
+      res.status(500).json({ message: "Failed to fetch quotes" });
+    }
+  });
+
+  // POST /api/crm/quotes - Create new quote
+  app.post('/api/crm/quotes', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      // Auto-generate quote number
+      const year = new Date().getFullYear();
+      const existingQuotes = await storage.getCrmQuotes(req.session.user.id, {});
+      const quoteCount = existingQuotes.length + 1;
+      const quoteNumber = `Q-${year}-${quoteCount.toString().padStart(4, '0')}`;
+
+      const validationResult = insertCrmQuoteSchema.safeParse({
+        ...req.body,
+        contractorUserId: req.session.user.id,
+        companyId: req.session.user.companyId || null,
+        quoteNumber,
+      });
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid quote data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const quote = await storage.createCrmQuote(validationResult.data);
+      res.status(201).json(quote);
+    } catch (error) {
+      console.error("Error creating CRM quote:", error);
+      res.status(500).json({ message: "Failed to create quote" });
+    }
+  });
+
+  // GET /api/crm/quotes/:id - Get single quote
+  app.get('/api/crm/quotes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const quote = await storage.getCrmQuote(req.params.id);
+      
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, quote)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      res.json(quote);
+    } catch (error) {
+      console.error("Error fetching CRM quote:", error);
+      res.status(500).json({ message: "Failed to fetch quote" });
+    }
+  });
+
+  // PATCH /api/crm/quotes/:id - Update quote
+  app.patch('/api/crm/quotes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const existingQuote = await storage.getCrmQuote(req.params.id);
+      
+      if (!existingQuote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, existingQuote)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const updateSchema = insertCrmQuoteSchema.partial();
+      const validationResult = updateSchema.safeParse(req.body);
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid quote data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const updatedQuote = await storage.updateCrmQuote(req.params.id, validationResult.data);
+      res.json(updatedQuote);
+    } catch (error) {
+      console.error("Error updating CRM quote:", error);
+      res.status(500).json({ message: "Failed to update quote" });
+    }
+  });
+
+  // POST /api/crm/quotes/:id/send - Mark quote as sent
+  app.post('/api/crm/quotes/:id/send', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const existingQuote = await storage.getCrmQuote(req.params.id);
+      
+      if (!existingQuote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, existingQuote)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const updatedQuote = await storage.updateCrmQuote(req.params.id, {
+        status: 'sent',
+        sentAt: new Date(),
+      });
+      res.json(updatedQuote);
+    } catch (error) {
+      console.error("Error sending CRM quote:", error);
+      res.status(500).json({ message: "Failed to send quote" });
+    }
+  });
+
+  // DELETE /api/crm/quotes/:id - Delete quote
+  app.delete('/api/crm/quotes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const existingQuote = await storage.getCrmQuote(req.params.id);
+      
+      if (!existingQuote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, existingQuote)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      await storage.deleteCrmQuote(req.params.id);
+      res.json({ message: "Quote deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting CRM quote:", error);
+      res.status(500).json({ message: "Failed to delete quote" });
+    }
+  });
+
+  // -------------------- CRM Invoices Routes --------------------
+
+  // GET /api/crm/invoices - List all invoices
+  app.get('/api/crm/invoices', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const filters: any = {};
+      if (req.query.clientId) {
+        filters.clientId = req.query.clientId as string;
+      }
+      if (req.query.status) {
+        filters.status = req.query.status as string;
+      }
+      if (req.query.jobId) {
+        filters.jobId = req.query.jobId as string;
+      }
+
+      const invoices = await storage.getCrmInvoices(req.session.user.id, filters);
+      res.json(invoices);
+    } catch (error) {
+      console.error("Error fetching CRM invoices:", error);
+      res.status(500).json({ message: "Failed to fetch invoices" });
+    }
+  });
+
+  // POST /api/crm/invoices - Create new invoice
+  app.post('/api/crm/invoices', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      // Auto-generate invoice number
+      const year = new Date().getFullYear();
+      const existingInvoices = await storage.getCrmInvoices(req.session.user.id, {});
+      const invoiceCount = existingInvoices.length + 1;
+      const invoiceNumber = `INV-${year}-${invoiceCount.toString().padStart(4, '0')}`;
+
+      const validationResult = insertCrmInvoiceSchema.safeParse({
+        ...req.body,
+        contractorUserId: req.session.user.id,
+        companyId: req.session.user.companyId || null,
+        invoiceNumber,
+      });
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid invoice data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const invoice = await storage.createCrmInvoice(validationResult.data);
+      res.status(201).json(invoice);
+    } catch (error) {
+      console.error("Error creating CRM invoice:", error);
+      res.status(500).json({ message: "Failed to create invoice" });
+    }
+  });
+
+  // GET /api/crm/invoices/:id - Get single invoice
+  app.get('/api/crm/invoices/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const invoice = await storage.getCrmInvoice(req.params.id);
+      
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, invoice)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      res.json(invoice);
+    } catch (error) {
+      console.error("Error fetching CRM invoice:", error);
+      res.status(500).json({ message: "Failed to fetch invoice" });
+    }
+  });
+
+  // PATCH /api/crm/invoices/:id - Update invoice
+  app.patch('/api/crm/invoices/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const existingInvoice = await storage.getCrmInvoice(req.params.id);
+      
+      if (!existingInvoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, existingInvoice)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const updateSchema = insertCrmInvoiceSchema.partial();
+      const validationResult = updateSchema.safeParse(req.body);
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid invoice data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const updatedInvoice = await storage.updateCrmInvoice(req.params.id, validationResult.data);
+      res.json(updatedInvoice);
+    } catch (error) {
+      console.error("Error updating CRM invoice:", error);
+      res.status(500).json({ message: "Failed to update invoice" });
+    }
+  });
+
+  // POST /api/crm/invoices/:id/send - Mark invoice as sent
+  app.post('/api/crm/invoices/:id/send', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const existingInvoice = await storage.getCrmInvoice(req.params.id);
+      
+      if (!existingInvoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, existingInvoice)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const updatedInvoice = await storage.updateCrmInvoice(req.params.id, {
+        status: 'sent',
+        sentAt: new Date(),
+      });
+      res.json(updatedInvoice);
+    } catch (error) {
+      console.error("Error sending CRM invoice:", error);
+      res.status(500).json({ message: "Failed to send invoice" });
+    }
+  });
+
+  // POST /api/crm/invoices/:id/payment - Record payment
+  app.post('/api/crm/invoices/:id/payment', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const existingInvoice = await storage.getCrmInvoice(req.params.id);
+      
+      if (!existingInvoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, existingInvoice)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const paymentSchema = z.object({
+        amount: z.string().or(z.number()).transform(val => String(val)),
+        paymentMethod: z.string().optional(),
+        paymentNotes: z.string().optional(),
+      });
+
+      const validationResult = paymentSchema.safeParse(req.body);
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid payment data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const paymentAmount = parseFloat(validationResult.data.amount);
+      const currentAmountPaid = parseFloat(existingInvoice.amountPaid || '0');
+      const newAmountPaid = currentAmountPaid + paymentAmount;
+      const totalAmount = parseFloat(existingInvoice.total);
+      const newAmountDue = totalAmount - newAmountPaid;
+
+      let newStatus = existingInvoice.status;
+      if (newAmountDue <= 0) {
+        newStatus = 'paid';
+      } else if (newAmountPaid > 0) {
+        newStatus = 'partial';
+      }
+
+      const updatedInvoice = await storage.updateCrmInvoice(req.params.id, {
+        amountPaid: newAmountPaid.toFixed(2),
+        amountDue: Math.max(0, newAmountDue).toFixed(2),
+        status: newStatus,
+        paidAt: newStatus === 'paid' ? new Date() : existingInvoice.paidAt,
+        paymentMethod: validationResult.data.paymentMethod || existingInvoice.paymentMethod,
+        paymentNotes: validationResult.data.paymentNotes || existingInvoice.paymentNotes,
+      });
+      res.json(updatedInvoice);
+    } catch (error) {
+      console.error("Error recording payment:", error);
+      res.status(500).json({ message: "Failed to record payment" });
+    }
+  });
+
+  // DELETE /api/crm/invoices/:id - Delete invoice
+  app.delete('/api/crm/invoices/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const existingInvoice = await storage.getCrmInvoice(req.params.id);
+      
+      if (!existingInvoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      if (!canAccessCrmResource(req.session.user, existingInvoice)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      await storage.deleteCrmInvoice(req.params.id);
+      res.json({ message: "Invoice deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting CRM invoice:", error);
+      res.status(500).json({ message: "Failed to delete invoice" });
+    }
+  });
+
+  // -------------------- CRM Dashboard Route --------------------
+
+  // GET /api/crm/dashboard - Get dashboard stats
+  app.get('/api/crm/dashboard', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.session.user.role !== 'contractor') {
+        return res.status(403).json({ message: "Only contractors can access CRM features" });
+      }
+
+      const hasAccess = await hasCrmProAccess(req.session.user);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM features require Contractor Pro subscription",
+          upgradeRequired: true 
+        });
+      }
+
+      const userId = req.session.user.id;
+
+      // Fetch all data for dashboard
+      const [clients, jobs, quotes, invoices] = await Promise.all([
+        storage.getCrmClients(userId, { isActive: true }),
+        storage.getCrmJobs(userId, {}),
+        storage.getCrmQuotes(userId, {}),
+        storage.getCrmInvoices(userId, {}),
+      ]);
+
+      // Calculate stats
+      const now = new Date();
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+      // Jobs stats
+      const scheduledJobs = jobs.filter(j => j.status === 'scheduled').length;
+      const inProgressJobs = jobs.filter(j => j.status === 'in_progress').length;
+      const completedJobs = jobs.filter(j => j.status === 'completed').length;
+      const completedThisMonth = jobs.filter(j => 
+        j.status === 'completed' && 
+        j.updatedAt && new Date(j.updatedAt) >= thisMonth
+      ).length;
+
+      // Quotes stats
+      const pendingQuotes = quotes.filter(q => q.status === 'sent' || q.status === 'draft').length;
+      const acceptedQuotes = quotes.filter(q => q.status === 'accepted').length;
+      const totalQuoteValue = quotes.reduce((sum, q) => sum + parseFloat(q.total), 0);
+
+      // Invoice stats
+      const unpaidInvoices = invoices.filter(i => 
+        i.status !== 'paid' && i.status !== 'cancelled'
+      );
+      const overdueInvoices = unpaidInvoices.filter(i => 
+        i.dueDate && new Date(i.dueDate) < now
+      );
+      const totalOutstanding = unpaidInvoices.reduce((sum, i) => 
+        sum + parseFloat(i.amountDue), 0
+      );
+      const totalPaidThisMonth = invoices
+        .filter(i => i.paidAt && new Date(i.paidAt) >= thisMonth)
+        .reduce((sum, i) => sum + parseFloat(i.amountPaid || '0'), 0);
+
+      // Revenue calculation
+      const totalRevenue = invoices
+        .filter(i => i.status === 'paid')
+        .reduce((sum, i) => sum + parseFloat(i.total), 0);
+
+      res.json({
+        clients: {
+          total: clients.length,
+          active: clients.filter(c => c.isActive).length,
+        },
+        jobs: {
+          scheduled: scheduledJobs,
+          inProgress: inProgressJobs,
+          completed: completedJobs,
+          completedThisMonth,
+          total: jobs.length,
+        },
+        quotes: {
+          pending: pendingQuotes,
+          accepted: acceptedQuotes,
+          totalValue: totalQuoteValue.toFixed(2),
+          total: quotes.length,
+        },
+        invoices: {
+          unpaid: unpaidInvoices.length,
+          overdue: overdueInvoices.length,
+          totalOutstanding: totalOutstanding.toFixed(2),
+          paidThisMonth: totalPaidThisMonth.toFixed(2),
+          total: invoices.length,
+        },
+        revenue: {
+          total: totalRevenue.toFixed(2),
+          thisMonth: totalPaidThisMonth.toFixed(2),
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching CRM dashboard:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard stats" });
     }
   });
 

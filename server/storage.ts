@@ -1,4 +1,4 @@
-import { type Contractor, type InsertContractor, type Company, type InsertCompany, type CompanyInviteCode, type InsertCompanyInviteCode, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type HomeownerConnectionCode, type InsertHomeownerConnectionCode, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, type TaskCompletion, type InsertTaskCompletion, type Achievement, type InsertAchievement, type AchievementDefinition, type InsertAchievementDefinition, type UserAchievement, type InsertUserAchievement, type SearchAnalytics, type InsertSearchAnalytics, type InviteCode, type InsertInviteCode, type AgentProfile, type InsertAgentProfile, type AffiliateReferral, type InsertAffiliateReferral, type SubscriptionCycleEvent, type InsertSubscriptionCycleEvent, type AffiliatePayout, type InsertAffiliatePayout, type AgentVerificationAudit, type InsertAgentVerificationAudit, type SupportTicket, type InsertSupportTicket, type TicketReply, type InsertTicketReply, users, contractors, companies, contractorLicenses, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks, taskCompletions, achievements, achievementDefinitions, userAchievements, maintenanceLogs, searchAnalytics, inviteCodes, agentProfiles, affiliateReferrals, subscriptionCycleEvents, affiliatePayouts, agentVerificationAudits, supportTickets, ticketReplies, houses, homeSystems, customMaintenanceTasks, taskOverrides, serviceRecords, homeownerConnectionCodes, conversations, messages, proposals, houseTransfers , type CrmLead, type InsertCrmLead, type CrmNote, type InsertCrmNote, type ErrorLog, type InsertErrorLog, type ErrorBreadcrumb, type InsertErrorBreadcrumb, type CrmIntegration, type InsertCrmIntegration, type WebhookLog, type InsertWebhookLog, crmLeads, crmNotes, errorLogs, errorBreadcrumbs, crmIntegrations, webhookLogs } from "@shared/schema";
+import { type Contractor, type InsertContractor, type Company, type InsertCompany, type CompanyInviteCode, type InsertCompanyInviteCode, type ContractorLicense, type InsertContractorLicense, type Product, type InsertProduct, type HomeAppliance, type InsertHomeAppliance, type HomeApplianceManual, type InsertHomeApplianceManual, type MaintenanceLog, type InsertMaintenanceLog, type ContractorAppointment, type InsertContractorAppointment, type House, type InsertHouse, type Notification, type InsertNotification, type User, type UpsertUser, type ServiceRecord, type InsertServiceRecord, type HomeownerConnectionCode, type InsertHomeownerConnectionCode, type Conversation, type InsertConversation, type Message, type InsertMessage, type ContractorReview, type InsertContractorReview, type CustomMaintenanceTask, type InsertCustomMaintenanceTask, type Proposal, type InsertProposal, type HomeSystem, type InsertHomeSystem, type PushSubscription, type InsertPushSubscription, type ContractorBoost, type InsertContractorBoost, type HouseTransfer, type InsertHouseTransfer, type ContractorAnalytics, type InsertContractorAnalytics, type TaskOverride, type InsertTaskOverride, type Country, type InsertCountry, type Region, type InsertRegion, type ClimateZone, type InsertClimateZone, type RegulatoryBody, type InsertRegulatoryBody, type RegionalMaintenanceTask, type InsertRegionalMaintenanceTask, type TaskCompletion, type InsertTaskCompletion, type Achievement, type InsertAchievement, type AchievementDefinition, type InsertAchievementDefinition, type UserAchievement, type InsertUserAchievement, type SearchAnalytics, type InsertSearchAnalytics, type InviteCode, type InsertInviteCode, type AgentProfile, type InsertAgentProfile, type AffiliateReferral, type InsertAffiliateReferral, type SubscriptionCycleEvent, type InsertSubscriptionCycleEvent, type AffiliatePayout, type InsertAffiliatePayout, type AgentVerificationAudit, type InsertAgentVerificationAudit, type SupportTicket, type InsertSupportTicket, type TicketReply, type InsertTicketReply, users, contractors, companies, contractorLicenses, countries, regions, climateZones, regulatoryBodies, regionalMaintenanceTasks, taskCompletions, achievements, achievementDefinitions, userAchievements, maintenanceLogs, searchAnalytics, inviteCodes, agentProfiles, affiliateReferrals, subscriptionCycleEvents, affiliatePayouts, agentVerificationAudits, supportTickets, ticketReplies, houses, homeSystems, customMaintenanceTasks, taskOverrides, serviceRecords, homeownerConnectionCodes, conversations, messages, proposals, houseTransfers , type CrmLead, type InsertCrmLead, type CrmNote, type InsertCrmNote, type ErrorLog, type InsertErrorLog, type ErrorBreadcrumb, type InsertErrorBreadcrumb, type CrmIntegration, type InsertCrmIntegration, type WebhookLog, type InsertWebhookLog, crmLeads, crmNotes, errorLogs, errorBreadcrumbs, crmIntegrations, webhookLogs, type CrmClient, type InsertCrmClient, type CrmJob, type InsertCrmJob, type CrmQuote, type InsertCrmQuote, type CrmInvoice, type InsertCrmInvoice, crmClients, crmJobs, crmQuotes, crmInvoices } from "@shared/schema";
 import { randomUUID, randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { db } from "./db";
@@ -510,6 +510,64 @@ export interface IStorage {
     notes: CrmNote[];
   } | undefined>;
   
+  // CRM Client operations (Pro tier feature)
+  getCrmClients(contractorUserId: string, filters?: {
+    status?: string;
+    searchQuery?: string;
+  }): Promise<CrmClient[]>;
+  getCrmClient(id: string): Promise<CrmClient | undefined>;
+  createCrmClient(client: InsertCrmClient): Promise<CrmClient>;
+  updateCrmClient(id: string, client: Partial<InsertCrmClient>): Promise<CrmClient | undefined>;
+  deleteCrmClient(id: string): Promise<boolean>;
+  
+  // CRM Job operations (Pro tier feature)
+  getCrmJobs(contractorUserId: string, filters?: {
+    status?: string;
+    clientId?: string;
+    priority?: string;
+    searchQuery?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<CrmJob[]>;
+  getCrmJob(id: string): Promise<CrmJob | undefined>;
+  createCrmJob(job: InsertCrmJob): Promise<CrmJob>;
+  updateCrmJob(id: string, job: Partial<InsertCrmJob>): Promise<CrmJob | undefined>;
+  deleteCrmJob(id: string): Promise<boolean>;
+  
+  // CRM Quote operations (Pro tier feature)
+  getCrmQuotes(contractorUserId: string, filters?: {
+    status?: string;
+    clientId?: string;
+    searchQuery?: string;
+  }): Promise<CrmQuote[]>;
+  getCrmQuote(id: string): Promise<CrmQuote | undefined>;
+  createCrmQuote(quote: InsertCrmQuote): Promise<CrmQuote>;
+  updateCrmQuote(id: string, quote: Partial<InsertCrmQuote>): Promise<CrmQuote | undefined>;
+  deleteCrmQuote(id: string): Promise<boolean>;
+  
+  // CRM Invoice operations (Pro tier feature)
+  getCrmInvoices(contractorUserId: string, filters?: {
+    status?: string;
+    clientId?: string;
+    searchQuery?: string;
+  }): Promise<CrmInvoice[]>;
+  getCrmInvoice(id: string): Promise<CrmInvoice | undefined>;
+  createCrmInvoice(invoice: InsertCrmInvoice): Promise<CrmInvoice>;
+  updateCrmInvoice(id: string, invoice: Partial<InsertCrmInvoice>): Promise<CrmInvoice | undefined>;
+  deleteCrmInvoice(id: string): Promise<boolean>;
+  
+  // CRM Dashboard Stats (Pro tier feature)
+  getCrmDashboardStats(contractorUserId: string): Promise<{
+    totalClients: number;
+    activeJobs: number;
+    pendingQuotes: number;
+    outstandingInvoices: number;
+    totalRevenue: string;
+    revenueThisMonth: string;
+    jobsThisMonth: number;
+    conversionRate: number;
+  }>;
+  
   // Error Tracking operations
   getErrorLogs(filters?: {
     errorType?: string;
@@ -577,6 +635,11 @@ export class MemStorage implements IStorage {
   private crmNotes: Map<string, CrmNote>;
   private crmIntegrations: Map<string, CrmIntegration>;
   private webhookLogs: Map<string, WebhookLog>;
+  // CRM Pro tier Maps
+  private crmClientsMap: Map<string, CrmClient>;
+  private crmJobsMap: Map<string, CrmJob>;
+  private crmQuotesMap: Map<string, CrmQuote>;
+  private crmInvoicesMap: Map<string, CrmInvoice>;
 
   constructor() {
     this.users = new Map();
@@ -622,6 +685,11 @@ export class MemStorage implements IStorage {
     this.crmNotes = new Map();
     this.crmIntegrations = new Map();
     this.webhookLogs = new Map();
+    // Initialize CRM Pro tier Maps
+    this.crmClientsMap = new Map();
+    this.crmJobsMap = new Map();
+    this.crmQuotesMap = new Map();
+    this.crmInvoicesMap = new Map();
     
     // DEMO DATA PROTECTION: Only seed demo data if explicitly enabled
     if (isDemoDataEnabled()) {
@@ -5768,6 +5836,381 @@ export class MemStorage implements IStorage {
     this.webhookLogs.set(id, newLog);
     return newLog;
   }
+
+  // CRM Client operations (Pro tier feature)
+  async getCrmClients(contractorUserId: string, filters?: {
+    status?: string;
+    searchQuery?: string;
+  }): Promise<CrmClient[]> {
+    const user = await this.getUser(contractorUserId);
+    const companyId = user?.companyId;
+
+    let clients = Array.from(this.crmClientsMap.values())
+      .filter(c => 
+        c.contractorUserId === contractorUserId || 
+        (companyId && c.companyId === companyId)
+      );
+
+    if (filters?.status && filters.status !== 'all') {
+      const isActive = filters.status === 'active';
+      clients = clients.filter(c => c.isActive === isActive);
+    }
+    if (filters?.searchQuery) {
+      const query = filters.searchQuery.toLowerCase();
+      clients = clients.filter(c => {
+        const firstName = c.firstName?.toLowerCase() || '';
+        const lastName = c.lastName?.toLowerCase() || '';
+        const email = c.email?.toLowerCase() || '';
+        const phone = c.phone?.toLowerCase() || '';
+        const tags = c.tags?.map(t => t.toLowerCase()).join(' ') || '';
+        
+        return firstName.includes(query) ||
+          lastName.includes(query) ||
+          email.includes(query) ||
+          phone.includes(query) ||
+          tags.includes(query);
+      });
+    }
+
+    clients.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    return clients;
+  }
+
+  async getCrmClient(id: string): Promise<CrmClient | undefined> {
+    return this.crmClientsMap.get(id);
+  }
+
+  async createCrmClient(client: InsertCrmClient): Promise<CrmClient> {
+    const id = crypto.randomUUID();
+    const now = new Date();
+    const newClient: CrmClient = {
+      id,
+      ...client,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.crmClientsMap.set(id, newClient);
+    return newClient;
+  }
+
+  async updateCrmClient(id: string, client: Partial<InsertCrmClient>): Promise<CrmClient | undefined> {
+    const existing = this.crmClientsMap.get(id);
+    if (!existing) return undefined;
+
+    const updated: CrmClient = {
+      ...existing,
+      ...client,
+      updatedAt: new Date(),
+    };
+    this.crmClientsMap.set(id, updated);
+    return updated;
+  }
+
+  async deleteCrmClient(id: string): Promise<boolean> {
+    return this.crmClientsMap.delete(id);
+  }
+
+  // CRM Job operations (Pro tier feature)
+  async getCrmJobs(contractorUserId: string, filters?: {
+    status?: string;
+    clientId?: string;
+    priority?: string;
+    searchQuery?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<CrmJob[]> {
+    const user = await this.getUser(contractorUserId);
+    const companyId = user?.companyId;
+
+    let jobs = Array.from(this.crmJobsMap.values())
+      .filter(j => 
+        j.contractorUserId === contractorUserId || 
+        (companyId && j.companyId === companyId)
+      );
+
+    if (filters?.status && filters.status !== 'all') {
+      jobs = jobs.filter(j => j.status === filters.status);
+    }
+    if (filters?.clientId) {
+      jobs = jobs.filter(j => j.clientId === filters.clientId);
+    }
+    if (filters?.priority && filters.priority !== 'all') {
+      jobs = jobs.filter(j => j.priority === filters.priority);
+    }
+    if (filters?.startDate) {
+      jobs = jobs.filter(j => j.scheduledDate && new Date(j.scheduledDate) >= filters.startDate!);
+    }
+    if (filters?.endDate) {
+      jobs = jobs.filter(j => j.scheduledDate && new Date(j.scheduledDate) <= filters.endDate!);
+    }
+    if (filters?.searchQuery) {
+      const query = filters.searchQuery.toLowerCase();
+      jobs = jobs.filter(j => {
+        const title = j.title?.toLowerCase() || '';
+        const description = j.description?.toLowerCase() || '';
+        const serviceType = j.serviceType?.toLowerCase() || '';
+        const address = j.address?.toLowerCase() || '';
+        
+        return title.includes(query) ||
+          description.includes(query) ||
+          serviceType.includes(query) ||
+          address.includes(query);
+      });
+    }
+
+    jobs.sort((a, b) => {
+      const dateA = a.scheduledDate ? new Date(a.scheduledDate).getTime() : 0;
+      const dateB = b.scheduledDate ? new Date(b.scheduledDate).getTime() : 0;
+      return dateA - dateB;
+    });
+    return jobs;
+  }
+
+  async getCrmJob(id: string): Promise<CrmJob | undefined> {
+    return this.crmJobsMap.get(id);
+  }
+
+  async createCrmJob(job: InsertCrmJob): Promise<CrmJob> {
+    const id = crypto.randomUUID();
+    const now = new Date();
+    const newJob: CrmJob = {
+      id,
+      ...job,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.crmJobsMap.set(id, newJob);
+    return newJob;
+  }
+
+  async updateCrmJob(id: string, job: Partial<InsertCrmJob>): Promise<CrmJob | undefined> {
+    const existing = this.crmJobsMap.get(id);
+    if (!existing) return undefined;
+
+    const updated: CrmJob = {
+      ...existing,
+      ...job,
+      updatedAt: new Date(),
+      actualStartTime: job.status === 'in_progress' && !existing.actualStartTime ? new Date() : existing.actualStartTime,
+      actualEndTime: job.status === 'completed' && !existing.actualEndTime ? new Date() : existing.actualEndTime,
+    };
+    this.crmJobsMap.set(id, updated);
+    return updated;
+  }
+
+  async deleteCrmJob(id: string): Promise<boolean> {
+    return this.crmJobsMap.delete(id);
+  }
+
+  // CRM Quote operations (Pro tier feature)
+  async getCrmQuotes(contractorUserId: string, filters?: {
+    status?: string;
+    clientId?: string;
+    searchQuery?: string;
+  }): Promise<CrmQuote[]> {
+    const user = await this.getUser(contractorUserId);
+    const companyId = user?.companyId;
+
+    let quotes = Array.from(this.crmQuotesMap.values())
+      .filter(q => 
+        q.contractorUserId === contractorUserId || 
+        (companyId && q.companyId === companyId)
+      );
+
+    if (filters?.status && filters.status !== 'all') {
+      quotes = quotes.filter(q => q.status === filters.status);
+    }
+    if (filters?.clientId) {
+      quotes = quotes.filter(q => q.clientId === filters.clientId);
+    }
+    if (filters?.searchQuery) {
+      const query = filters.searchQuery.toLowerCase();
+      quotes = quotes.filter(q => {
+        const title = q.title?.toLowerCase() || '';
+        const description = q.description?.toLowerCase() || '';
+        const quoteNumber = q.quoteNumber?.toLowerCase() || '';
+        const serviceType = q.serviceType?.toLowerCase() || '';
+        
+        return title.includes(query) ||
+          description.includes(query) ||
+          quoteNumber.includes(query) ||
+          serviceType.includes(query);
+      });
+    }
+
+    quotes.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    return quotes;
+  }
+
+  async getCrmQuote(id: string): Promise<CrmQuote | undefined> {
+    return this.crmQuotesMap.get(id);
+  }
+
+  async createCrmQuote(quote: InsertCrmQuote): Promise<CrmQuote> {
+    const id = crypto.randomUUID();
+    const now = new Date();
+    const newQuote: CrmQuote = {
+      id,
+      ...quote,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.crmQuotesMap.set(id, newQuote);
+    return newQuote;
+  }
+
+  async updateCrmQuote(id: string, quote: Partial<InsertCrmQuote>): Promise<CrmQuote | undefined> {
+    const existing = this.crmQuotesMap.get(id);
+    if (!existing) return undefined;
+
+    const updated: CrmQuote = {
+      ...existing,
+      ...quote,
+      updatedAt: new Date(),
+      sentAt: quote.status === 'sent' && !existing.sentAt ? new Date() : existing.sentAt,
+      viewedAt: quote.status === 'viewed' && !existing.viewedAt ? new Date() : existing.viewedAt,
+      acceptedAt: quote.status === 'accepted' && !existing.acceptedAt ? new Date() : existing.acceptedAt,
+      declinedAt: quote.status === 'declined' && !existing.declinedAt ? new Date() : existing.declinedAt,
+    };
+    this.crmQuotesMap.set(id, updated);
+    return updated;
+  }
+
+  async deleteCrmQuote(id: string): Promise<boolean> {
+    return this.crmQuotesMap.delete(id);
+  }
+
+  // CRM Invoice operations (Pro tier feature)
+  async getCrmInvoices(contractorUserId: string, filters?: {
+    status?: string;
+    clientId?: string;
+    searchQuery?: string;
+  }): Promise<CrmInvoice[]> {
+    const user = await this.getUser(contractorUserId);
+    const companyId = user?.companyId;
+
+    let invoices = Array.from(this.crmInvoicesMap.values())
+      .filter(i => 
+        i.contractorUserId === contractorUserId || 
+        (companyId && i.companyId === companyId)
+      );
+
+    if (filters?.status && filters.status !== 'all') {
+      invoices = invoices.filter(i => i.status === filters.status);
+    }
+    if (filters?.clientId) {
+      invoices = invoices.filter(i => i.clientId === filters.clientId);
+    }
+    if (filters?.searchQuery) {
+      const query = filters.searchQuery.toLowerCase();
+      invoices = invoices.filter(i => {
+        const title = i.title?.toLowerCase() || '';
+        const description = i.description?.toLowerCase() || '';
+        const invoiceNumber = i.invoiceNumber?.toLowerCase() || '';
+        
+        return title.includes(query) ||
+          description.includes(query) ||
+          invoiceNumber.includes(query);
+      });
+    }
+
+    invoices.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    return invoices;
+  }
+
+  async getCrmInvoice(id: string): Promise<CrmInvoice | undefined> {
+    return this.crmInvoicesMap.get(id);
+  }
+
+  async createCrmInvoice(invoice: InsertCrmInvoice): Promise<CrmInvoice> {
+    const id = crypto.randomUUID();
+    const now = new Date();
+    const newInvoice: CrmInvoice = {
+      id,
+      ...invoice,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.crmInvoicesMap.set(id, newInvoice);
+    return newInvoice;
+  }
+
+  async updateCrmInvoice(id: string, invoice: Partial<InsertCrmInvoice>): Promise<CrmInvoice | undefined> {
+    const existing = this.crmInvoicesMap.get(id);
+    if (!existing) return undefined;
+
+    const updated: CrmInvoice = {
+      ...existing,
+      ...invoice,
+      updatedAt: new Date(),
+      sentAt: invoice.status === 'sent' && !existing.sentAt ? new Date() : existing.sentAt,
+      viewedAt: invoice.status === 'viewed' && !existing.viewedAt ? new Date() : existing.viewedAt,
+      paidAt: invoice.status === 'paid' && !existing.paidAt ? new Date() : existing.paidAt,
+    };
+    this.crmInvoicesMap.set(id, updated);
+    return updated;
+  }
+
+  async deleteCrmInvoice(id: string): Promise<boolean> {
+    return this.crmInvoicesMap.delete(id);
+  }
+
+  // CRM Dashboard Stats (Pro tier feature)
+  async getCrmDashboardStats(contractorUserId: string): Promise<{
+    totalClients: number;
+    activeJobs: number;
+    pendingQuotes: number;
+    outstandingInvoices: number;
+    totalRevenue: string;
+    revenueThisMonth: string;
+    jobsThisMonth: number;
+    conversionRate: number;
+  }> {
+    const user = await this.getUser(contractorUserId);
+    const companyId = user?.companyId;
+
+    const clients = Array.from(this.crmClientsMap.values())
+      .filter(c => c.contractorUserId === contractorUserId || (companyId && c.companyId === companyId));
+    
+    const jobs = Array.from(this.crmJobsMap.values())
+      .filter(j => j.contractorUserId === contractorUserId || (companyId && j.companyId === companyId));
+    
+    const quotes = Array.from(this.crmQuotesMap.values())
+      .filter(q => q.contractorUserId === contractorUserId || (companyId && q.companyId === companyId));
+    
+    const invoices = Array.from(this.crmInvoicesMap.values())
+      .filter(i => i.contractorUserId === contractorUserId || (companyId && i.companyId === companyId));
+
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const activeJobs = jobs.filter(j => j.status === 'scheduled' || j.status === 'in_progress').length;
+    const pendingQuotes = quotes.filter(q => q.status === 'draft' || q.status === 'sent').length;
+    const outstandingInvoices = invoices.filter(i => i.status !== 'paid' && i.status !== 'cancelled').length;
+
+    const paidInvoices = invoices.filter(i => i.status === 'paid');
+    const totalRevenue = paidInvoices.reduce((sum, i) => sum + parseFloat(i.amountPaid || '0'), 0);
+
+    const paidThisMonth = paidInvoices.filter(i => i.paidAt && new Date(i.paidAt) >= startOfMonth);
+    const revenueThisMonth = paidThisMonth.reduce((sum, i) => sum + parseFloat(i.amountPaid || '0'), 0);
+
+    const jobsThisMonth = jobs.filter(j => j.createdAt && new Date(j.createdAt) >= startOfMonth).length;
+
+    const acceptedQuotes = quotes.filter(q => q.status === 'accepted').length;
+    const sentQuotes = quotes.filter(q => q.status !== 'draft').length;
+    const conversionRate = sentQuotes > 0 ? Math.round((acceptedQuotes / sentQuotes) * 100) : 0;
+
+    return {
+      totalClients: clients.length,
+      activeJobs,
+      pendingQuotes,
+      outstandingInvoices,
+      totalRevenue: totalRevenue.toFixed(2),
+      revenueThisMonth: revenueThisMonth.toFixed(2),
+      jobsThisMonth,
+      conversionRate,
+    };
+  }
 }
 
 // Database-backed storage for users (OAuth persistence)
@@ -5951,6 +6394,28 @@ class DbStorage implements IStorage {
     this.updateCrmNote = this.memStorage.updateCrmNote.bind(this.memStorage);
     this.deleteCrmNote = this.memStorage.deleteCrmNote.bind(this.memStorage);
     this.getCrmLeadWithNotes = this.memStorage.getCrmLeadWithNotes.bind(this.memStorage);
+    // CRM Pro tier methods
+    this.getCrmClients = this.memStorage.getCrmClients.bind(this.memStorage);
+    this.getCrmClient = this.memStorage.getCrmClient.bind(this.memStorage);
+    this.createCrmClient = this.memStorage.createCrmClient.bind(this.memStorage);
+    this.updateCrmClient = this.memStorage.updateCrmClient.bind(this.memStorage);
+    this.deleteCrmClient = this.memStorage.deleteCrmClient.bind(this.memStorage);
+    this.getCrmJobs = this.memStorage.getCrmJobs.bind(this.memStorage);
+    this.getCrmJob = this.memStorage.getCrmJob.bind(this.memStorage);
+    this.createCrmJob = this.memStorage.createCrmJob.bind(this.memStorage);
+    this.updateCrmJob = this.memStorage.updateCrmJob.bind(this.memStorage);
+    this.deleteCrmJob = this.memStorage.deleteCrmJob.bind(this.memStorage);
+    this.getCrmQuotes = this.memStorage.getCrmQuotes.bind(this.memStorage);
+    this.getCrmQuote = this.memStorage.getCrmQuote.bind(this.memStorage);
+    this.createCrmQuote = this.memStorage.createCrmQuote.bind(this.memStorage);
+    this.updateCrmQuote = this.memStorage.updateCrmQuote.bind(this.memStorage);
+    this.deleteCrmQuote = this.memStorage.deleteCrmQuote.bind(this.memStorage);
+    this.getCrmInvoices = this.memStorage.getCrmInvoices.bind(this.memStorage);
+    this.getCrmInvoice = this.memStorage.getCrmInvoice.bind(this.memStorage);
+    this.createCrmInvoice = this.memStorage.createCrmInvoice.bind(this.memStorage);
+    this.updateCrmInvoice = this.memStorage.updateCrmInvoice.bind(this.memStorage);
+    this.deleteCrmInvoice = this.memStorage.deleteCrmInvoice.bind(this.memStorage);
+    this.getCrmDashboardStats = this.memStorage.getCrmDashboardStats.bind(this.memStorage);
   }
 
   // User operations - DATABASE BACKED for persistence
