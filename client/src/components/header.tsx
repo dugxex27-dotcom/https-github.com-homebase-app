@@ -318,6 +318,12 @@ export default function Header() {
                             )}
                           </button>
                         </Link>
+                        <Link href="/crm" onClick={() => setMobileMenuOpen(false)}>
+                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/crm' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-muted'}`}>
+                            <Wrench className="w-4 h-4" />
+                            CRM
+                          </button>
+                        </Link>
                         <Link href="/contractor-referral" onClick={() => setMobileMenuOpen(false)}>
                           <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/contractor-referral' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-muted'}`}>
                             <Gift className="w-4 h-4" />
