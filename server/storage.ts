@@ -2476,6 +2476,108 @@ export class MemStorage implements IStorage {
       console.error('🛡️ DEMO DATA PROTECTION: seedHomeownerDemoData attempted to use non-demo homeowner ID!');
       return;
     }
+
+    // Seed demo houses first (Main Residence and Lake House)
+    const demoHousesData = [
+      {
+        id: mainHouseId,
+        homeownerId: demoHomeownerId,
+        name: "Main Residence",
+        address: "2847 Maple Drive, Seattle, WA 98112",
+        climateZone: "Pacific Northwest",
+        homeSystems: ["Central Air", "Gas Furnace", "Gas Water Heater", "Dishwasher", "Garbage Disposal", "Refrigerator"],
+        isDefault: true,
+        latitude: "47.6281",
+        longitude: "-122.3121",
+        createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000),
+      },
+      {
+        id: lakeHouseId,
+        homeownerId: demoHomeownerId,
+        name: "Lake House",
+        address: "1523 Lakefront Road, Bellevue, WA 98004",
+        climateZone: "Pacific Northwest",
+        homeSystems: ["Heat Pump", "Electric Water Heater", "Fireplace", "Well Water System"],
+        isDefault: false,
+        latitude: "47.6101",
+        longitude: "-122.2015",
+        createdAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000),
+      }
+    ];
+
+    try {
+      await Promise.all(demoHousesData.map(async (house) => {
+        await db.insert(houses).values(house).onConflictDoNothing();
+      }));
+      console.log('[DEMO DATA] Seeded 2 houses for demo homeowner (Main Residence + Lake House)');
+    } catch (error) {
+      console.error('[DEMO DATA] Error inserting demo houses:', error);
+    }
+
+    // Seed demo home systems for Main Residence
+    const demoHomeSystemsData = [
+      {
+        id: "demo-system-furnace-001",
+        homeownerId: demoHomeownerId,
+        houseId: mainHouseId,
+        systemType: "gas-furnace",
+        brand: "Carrier",
+        model: "59TN6",
+        installationYear: 2007,
+        lastServiceYear: 2023,
+        notes: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: "demo-system-ac-001",
+        homeownerId: demoHomeownerId,
+        houseId: mainHouseId,
+        systemType: "central-ac",
+        brand: "Trane",
+        model: "XR13",
+        installationYear: 2010,
+        lastServiceYear: 2024,
+        notes: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: "demo-system-water-heater-001",
+        homeownerId: demoHomeownerId,
+        houseId: mainHouseId,
+        systemType: "gas-water-heater",
+        brand: "Rheem",
+        model: "Performance Plus",
+        installationYear: 2015,
+        lastServiceYear: 2024,
+        notes: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: "demo-system-sump-pump-001",
+        homeownerId: demoHomeownerId,
+        houseId: mainHouseId,
+        systemType: "sump-pump",
+        brand: "Wayne",
+        model: "CDU980E",
+        installationYear: 2018,
+        lastServiceYear: null,
+        notes: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    try {
+      await Promise.all(demoHomeSystemsData.map(async (system) => {
+        await db.insert(homeSystems).values(system).onConflictDoNothing();
+      }));
+      console.log('[DEMO DATA] Seeded 4 home systems for demo homeowner Main Residence');
+    } catch (error) {
+      console.error('[DEMO DATA] Error inserting demo home systems:', error);
+    }
     
     // 14 DIY maintenance logs spread over 6 months with total savings of $1,360
     // Using deterministic IDs for idempotent seeding
