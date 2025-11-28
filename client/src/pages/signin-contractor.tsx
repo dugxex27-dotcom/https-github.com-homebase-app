@@ -219,24 +219,38 @@ export default function SignInContractor() {
 
   const handleContractorDemoLogin = async () => {
     try {
+      console.log('[Demo Login] Starting contractor demo login...');
+      
+      // Clear any existing session first
+      try {
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        queryClient.clear();
+      } catch (e) {
+        // Ignore logout errors - user might not be logged in
+      }
+      
       const response = await apiRequest('/api/auth/contractor-demo-login', 'POST', {
         email: 'demo@contractor.com',
         name: 'Demo Contractor',
         role: 'contractor'
       });
       
+      console.log('[Demo Login] Response received:', response.ok, response.status);
+      
       if (response.ok) {
-        await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+        console.log('[Demo Login] Success! Redirecting...');
         toast({
           title: "Demo login successful",
           description: "Logged in as demo contractor.",
         });
-        setLocation('/contractor-dashboard');
+        // Use window.location for a full page refresh to ensure session is picked up
+        window.location.href = '/contractor-dashboard';
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('[Demo Login] Error:', error?.message || error);
       toast({
         title: "Demo login failed",
-        description: "Could not log in. Please try again.",
+        description: error?.message || "Could not log in. Please try again.",
         variant: "destructive",
       });
     }
