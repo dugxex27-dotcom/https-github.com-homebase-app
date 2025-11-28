@@ -108,3 +108,4 @@ defaultBucketID = "replit-objstore-6b6c0a35-de9a-48e9-9110-28f95a385aae"
 
 [userenv.shared]
 ADMIN_EMAILS = "admin@gotohomebase.com"
+ENABLE_DEMO_DATA = "true"
