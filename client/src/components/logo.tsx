@@ -1,11 +1,22 @@
+import { Link } from 'wouter';
 import logoIcon from '@assets/homebase-app-logo_1764513182226.png';
 
-export default function Logo({ className = "h-[28px] sm:h-[32px] w-auto" }: { className?: string }) {
-  return (
+export default function Logo({ className = "h-[28px] sm:h-[32px] w-auto", clickable = true }: { className?: string; clickable?: boolean }) {
+  const image = (
     <img 
       src={logoIcon} 
       alt="HomeBase" 
       className={`${className} object-contain`}
     />
   );
+
+  if (clickable) {
+    return (
+      <Link href="/" className="inline-block cursor-pointer" data-testid="logo-home-link">
+        {image}
+      </Link>
+    );
+  }
+
+  return image;
 }
