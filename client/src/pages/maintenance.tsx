@@ -3348,7 +3348,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4 border rounded-lg bg-muted/50">
                     {Object.entries(HOME_SYSTEMS).map(([category, systems]) => (
                       <div key={category}>
-                        <h4 className="font-medium text-sm mb-3 capitalize" style={{ color: '#ffffff' }}>
+                        <h4 className="font-medium text-sm mb-3 capitalize" style={{ color: '#2c0f5b' }}>
                           {category === 'features' ? 'Special Features' : `${category} System`}
                         </h4>
                         <div className="space-y-2">
@@ -3365,21 +3365,22 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                                   <label
                                     htmlFor={system.value}
                                     className="text-sm cursor-pointer"
-                                    style={{ color: '#ffffff' }}
+                                    style={{ color: '#2c0f5b' }}
                                   >
                                     {system.label}
                                   </label>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   {systemData && (
-                                    <span className="text-xs bg-muted/50 px-2 py-1 rounded" style={{ color: 'white' }}>
+                                    <span className="text-xs bg-muted/50 px-2 py-1 rounded" style={{ color: '#2c0f5b' }}>
                                       {systemData.installationYear || 'Unknown'}
                                     </span>
                                   )}
                                   <Button 
                                     variant="ghost" 
                                     size="sm" 
-                                    className="h-6 w-6 p-0 text-xs text-white dark:text-white hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                                    className="h-6 w-6 p-0 text-xs hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                                    style={{ color: '#2c0f5b' }}
                                     onClick={() => systemData ? handleEditHomeSystem(systemData) : handleAddHomeSystem(system.label)}
                                     data-testid={`button-add-date-${system.value}`}
                                   >
