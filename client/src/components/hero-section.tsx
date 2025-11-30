@@ -13,7 +13,7 @@ export default function HeroSection() {
       background: typedUser?.role === 'homeowner' 
         ? '#eeedf9' 
         : '#1560a2', 
-      paddingTop: '20px', 
+      paddingTop: '40px', 
       paddingBottom: '40px' 
     }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
