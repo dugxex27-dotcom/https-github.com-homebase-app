@@ -296,7 +296,7 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8">
             <div className="text-left md:col-span-2">
               <div className="mb-4 sm:mb-6">
-                <div className="w-full sm:w-3/4 h-auto">
+                <div className="w-1/2 sm:w-1/3 h-auto">
                   <Logo className="w-full h-auto" />
                 </div>
               </div>
