@@ -16,9 +16,7 @@ export default function Landing() {
           <h1 className="text-5xl font-bold mb-4" style={{ color: '#2c0f5b' }}>
             Welcome to HOMEBASE
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Your comprehensive home maintenance platform connecting homeowners with trusted contractors
-          </p>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">Your home’s entire story — documented, organized, and supported by trusted pros for every next step.</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
