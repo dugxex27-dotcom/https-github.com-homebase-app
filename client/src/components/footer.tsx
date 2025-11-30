@@ -11,9 +11,9 @@ export default function Footer() {
     <footer className="text-white py-8 sm:py-12 lg:py-16" style={{ backgroundColor: '#2c0f5b' }}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8">
-          <div className="text-left md:col-span-2">
+          <div className="text-center sm:text-left md:col-span-2">
             <div className="mb-4 sm:mb-6">
-              <div className="w-1/2 sm:w-1/3 h-auto">
+              <div className="w-1/2 sm:w-1/3 h-auto mx-auto sm:mx-0">
                 <Link href="/" data-testid="footer-logo-home-link">
                   <img 
                     src={whiteLogoIcon} 
@@ -29,7 +29,7 @@ export default function Footer() {
           </div>
 
           {typedUser?.role === 'homeowner' && (
-            <div className="text-left">
+            <div className="text-center sm:text-left">
               <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">For Homeowners</h4>
               <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
                 <li><Link href="/contractors" className="hover:text-purple-400 transition-colors">Find Contractors</Link></li>
@@ -41,7 +41,7 @@ export default function Footer() {
             </div>
           )}
 
-          <div className="text-left">
+          <div className="text-center sm:text-left">
             <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">Support</h4>
             <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
               <li><Link href="/support" className="transition-colors hover:text-purple-400">Help Center</Link></li>
@@ -49,7 +49,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className="text-left">
+          <div className="text-center sm:text-left">
             <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">Legal</h4>
             <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
               <li><Link href="/terms-of-service" className="transition-colors hover:text-purple-400">Terms of Service</Link></li>
