@@ -294,8 +294,8 @@ export default function Home() {
       <footer className="text-white py-8 sm:py-12 lg:py-16" style={{ backgroundColor: '#2c0f5b' }}>
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8">
-            <div className="text-center">
-              <div className="mb-4 sm:mb-6 flex justify-center">
+            <div className="text-left">
+              <div className="mb-4 sm:mb-6">
                 <div className="w-full sm:w-3/4 h-auto">
                   <Logo className="w-full h-auto" />
                 </div>
@@ -307,7 +307,7 @@ export default function Home() {
 
             {/* Only show homeowner links for homeowners */}
             {typedUser?.role === 'homeowner' && (
-              <div className="text-center">
+              <div className="text-left">
                 <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">For Homeowners</h4>
                 <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
                   <li><Link href="/contractors" className="hover:text-purple-400 transition-colors">Find Contractors</Link></li>
@@ -319,7 +319,7 @@ export default function Home() {
               </div>
             )}
 
-            <div className="text-center">
+            <div className="text-left">
               <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">Support</h4>
               <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
                 <li><Link href="/support" className="transition-colors hover:text-purple-400">Help Center</Link></li>
@@ -327,7 +327,7 @@ export default function Home() {
               </ul>
             </div>
 
-            <div className="text-center">
+            <div className="text-left">
               <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">Legal</h4>
               <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
                 <li><Link href="/terms-of-service" className="transition-colors hover:text-purple-400">Terms of Service</Link></li>
