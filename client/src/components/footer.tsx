@@ -60,7 +60,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
-          <p>&copy; 2025 Home Base. All rights reserved.</p>
+          <p>© 2025 HomeBase. All rights reserved.</p>
         </div>
       </div>
     </footer>
