@@ -14,7 +14,7 @@ export default function Landing() {
         <div className="text-center mb-12">
           <Logo className="h-16 w-auto mx-auto mb-6" style={{ color: '#2c0f5b' }} />
           <h1 className="text-5xl font-bold mb-4" style={{ color: '#2c0f5b' }}>
-            Welcome to Home Base
+            Welcome to HOMEBASE
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Your comprehensive home maintenance platform connecting homeowners with trusted contractors
