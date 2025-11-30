@@ -125,7 +125,7 @@ export default function Home() {
       
       {/* AI Help Feature - Homeowners Only */}
       {typedUser?.role === 'homeowner' && (
-        <section className="py-8 sm:py-12" style={{ background: 'transparent' }}>
+        <section className="py-8 sm:py-12" style={{ backgroundColor: '#6351a5' }}>
           <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
             <Card className="border-2 border-purple-300 bg-white shadow-xl">
               <CardContent className="p-4 sm:p-6 lg:p-8">
