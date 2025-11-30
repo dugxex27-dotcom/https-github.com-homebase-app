@@ -6393,7 +6393,7 @@ class DbStorage implements IStorage {
     this.updatePushSubscription = this.memStorage.updatePushSubscription.bind(this.memStorage);
     this.deletePushSubscription = this.memStorage.deletePushSubscription.bind(this.memStorage);
     this.deletePushSubscriptionByEndpoint = this.memStorage.deletePushSubscriptionByEndpoint.bind(this.memStorage);
-    this.getHousesByHomeowner = this.memStorage.getHousesByHomeowner.bind(this.memStorage);
+    // getHousesByHomeowner now database-backed - implemented below (delegates to getHouses)
     this.getHomeSystemsByHomeowner = this.memStorage.getHomeSystemsByHomeowner.bind(this.memStorage);
     this.getMaintenanceLogsByHomeowner = this.memStorage.getMaintenanceLogsByHomeowner.bind(this.memStorage);
     this.getActiveBoosts = this.memStorage.getActiveBoosts.bind(this.memStorage);
@@ -7541,6 +7541,11 @@ class DbStorage implements IStorage {
   async deleteHouse(id: string): Promise<boolean> {
     const result = await db.delete(houses).where(eq(houses.id, id));
     return true;
+  }
+
+  // Get houses by homeowner - DATABASE BACKED (delegates to getHouses)
+  async getHousesByHomeowner(homeownerId: string): Promise<House[]> {
+    return await this.getHouses(homeownerId);
   }
 
   // Home Systems operations - DATABASE BACKED for persistence
