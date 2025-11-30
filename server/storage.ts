@@ -964,7 +964,7 @@ export class MemStorage implements IStorage {
         id: "8d44c1d0-af55-4f1c-bada-b70e54c823bc",
         homeownerId: demoHomeownerId,
         name: "Main Residence",
-        address: "2847 Maple Drive, Seattle, WA 98112",
+        address: "2847 Maple Drive, Seattle, WA 98101",
         climateZone: "Pacific Northwest",
         homeSystems: ["Central Air", "Gas Furnace", "Gas Water Heater", "Dishwasher", "Garbage Disposal", "Refrigerator"],
         isDefault: true,
