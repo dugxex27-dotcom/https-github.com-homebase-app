@@ -105,7 +105,7 @@ export default function Landing() {
                   I'm a Real Estate Agent
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  Earn commissions by referring homeowners and contractors to Home Base
+                  Earn commissions by referring homeowners and contractors to HomeBase
                 </p>
                 <ul className="space-y-2 mb-6 text-sm text-gray-700">
                   <li>✓ Earn referral bonuses</li>

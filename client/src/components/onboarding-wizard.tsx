@@ -265,7 +265,7 @@ export function OnboardingWizard({ onComplete, isLoading, initialData }: Onboard
           {currentStep === 1 && (
             <form onSubmit={step1Form.handleSubmit(handleStep1Submit)} className="space-y-6">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-foreground mb-2">Welcome to Home Base!</h2>
+                <h2 className="text-2xl font-bold text-foreground mb-2">Welcome to HomeBase!</h2>
                 <p className="text-muted-foreground">Let's get to know you</p>
               </div>
 

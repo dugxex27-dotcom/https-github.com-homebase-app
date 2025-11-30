@@ -189,7 +189,7 @@ export default function HomeownerAccount() {
   const referralsRemaining = Math.max(0, referralsNeeded - referralCount);
   const progressPercentage = Math.min(100, (referralCount / referralsNeeded) * 100);
   
-  const shareMessage = `Join me on Home Base! Use my referral code ${referralCode} and I get $1 off when you subscribe. You'll get the full Home Base experience at regular price while helping me save money! Sign up here: ${referralLink}`;
+  const shareMessage = `Join me on HomeBase! Use my referral code ${referralCode} and I get $1 off when you subscribe. You'll get the full HomeBase experience at regular price while helping me save money! Sign up here: ${referralLink}`;
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -648,7 +648,7 @@ export default function HomeownerAccount() {
                   Referral Rewards
                 </CardTitle>
                 <CardDescription>
-                  Share Home Base with friends and I get $1 off my subscription for each signup
+                  Share HomeBase with friends and I get $1 off my subscription for each signup
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -1125,7 +1125,7 @@ export default function HomeownerAccount() {
               <CardHeader>
                 <CardTitle className="text-red-600">Cancel Account</CardTitle>
                 <CardDescription>
-                  Permanently cancel your Home Base account. This action cannot be undone.
+                  Permanently cancel your HomeBase account. This action cannot be undone.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1139,7 +1139,7 @@ export default function HomeownerAccount() {
                     <DialogHeader>
                       <DialogTitle>Are you absolutely sure?</DialogTitle>
                       <DialogDescription>
-                        This will permanently cancel your Home Base account. Your subscription will be cancelled and you will lose access to:
+                        This will permanently cancel your HomeBase account. Your subscription will be cancelled and you will lose access to:
                         <ul className="list-disc list-inside mt-2 space-y-1">
                           <li>All your properties and maintenance schedules</li>
                           <li>Service records and contractor conversations</li>

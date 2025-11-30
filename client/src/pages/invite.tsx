@@ -37,8 +37,8 @@ export default function Invite() {
   const firstName = referralInfo?.firstName || 'A friend';
   const hostUrl = window.location.origin;
   const shareUrl = `${hostUrl}/invite/${referralCode}`;
-  const shareTitle = `${firstName} invited you to Home Base!`;
-  const shareDescription = "Join Home Base to manage your home maintenance, connect with contractors, and save money on DIY projects. Get a 14-day free trial!";
+  const shareTitle = `${firstName} invited you to HomeBase!`;
+  const shareDescription = "Join HomeBase to manage your home maintenance, connect with contractors, and save money on DIY projects. Get a 14-day free trial!";
 
   if (isLoading) {
     return (
@@ -69,7 +69,7 @@ export default function Invite() {
   return (
     <>
       <Helmet>
-        <title>{shareTitle} | Home Base</title>
+        <title>{shareTitle} | HomeBase</title>
         <meta name="description" content={shareDescription} />
         
         {/* Open Graph / Facebook */}
@@ -93,7 +93,7 @@ export default function Invite() {
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="text-white text-2xl font-bold flex items-center gap-2">
               <HomeIcon className="w-8 h-8" />
-              Home Base
+              HomeBase
             </div>
             <Link href="/signin">
               <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20" data-testid="button-signin">
@@ -218,7 +218,7 @@ export default function Invite() {
                 Ready to Get Started?
               </h2>
               <p className="text-gray-600 mb-6">
-                Join Home Base today and get 14 days free. No credit card required.
+                Join HomeBase today and get 14 days free. No credit card required.
               </p>
               <Link href={`/signup?ref=${referralCode}`}>
                 <Button 
@@ -236,7 +236,7 @@ export default function Invite() {
         {/* Footer */}
         <footer className="py-8 px-4 border-t border-white/20">
           <div className="max-w-4xl mx-auto text-center text-white/80 text-sm">
-            <p>&copy; 2025 Home Base. All rights reserved.</p>
+            <p>&copy; 2025 HomeBase. All rights reserved.</p>
           </div>
         </footer>
       </div>

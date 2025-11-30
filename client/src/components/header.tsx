@@ -430,7 +430,7 @@ export default function Header() {
               >
                 <img 
                   src={logoImage} 
-                  alt="Home Base" 
+                  alt="HomeBase" 
                   className="h-8 sm:h-10 w-auto"
                 />
               </button>

@@ -30,7 +30,7 @@ export default function AgentReferral() {
   // Calculate potential earnings: $15 per referral after 4 months
   const estimatedEarnings = referralCount * 15;
   
-  const shareMessage = `Join me on Home Base! Use my referral code ${referralCode} when you sign up. As a real estate agent, I earn commissions when my clients subscribe. Sign up here: ${referralLink}`;
+  const shareMessage = `Join me on HomeBase! Use my referral code ${referralCode} when you sign up. As a real estate agent, I earn commissions when my clients subscribe. Sign up here: ${referralLink}`;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -117,7 +117,7 @@ export default function AgentReferral() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 bg-white rounded-lg shadow-lg p-6">
           <h1 className="text-3xl font-bold mb-2 text-green-600">Referral Program</h1>
-          <p className="text-lg text-gray-700">Share Home Base and earn commissions</p>
+          <p className="text-lg text-gray-700">Share HomeBase and earn commissions</p>
         </div>
 
         <div className="space-y-8">
@@ -130,7 +130,7 @@ export default function AgentReferral() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="text-sm text-gray-600">Share Home Base with your clients and earn $15 commission per referral after 4 months of active subscription</div>
+              <div className="text-sm text-gray-600">Share HomeBase with your clients and earn $15 commission per referral after 4 months of active subscription</div>
               
               {/* Referral Stats */}
               <div className="grid grid-cols-2 gap-4">
@@ -251,7 +251,7 @@ export default function AgentReferral() {
                   </Button>
                 </div>
                 <p className="text-sm text-gray-600 mt-1">
-                  Share with your clients. They get the full Home Base experience while you earn commissions!
+                  Share with your clients. They get the full HomeBase experience while you earn commissions!
                 </p>
               </div>
 

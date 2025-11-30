@@ -1,6 +1,6 @@
 {
-  "name": "Home Base - Home Maintenance Manager",
-  "short_name": "Home Base",
+  "name": "HomeBase - Home Maintenance Manager",
+  "short_name": "HomeBase",
   "description": "The Carfax-style home history your house has always needed. Manage properties, connect with contractors, and track all your home maintenance in one place.",
   "start_url": "/",
   "display": "standalone",

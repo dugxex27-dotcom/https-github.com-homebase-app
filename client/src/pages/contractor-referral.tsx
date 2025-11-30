@@ -35,7 +35,7 @@ export default function ContractorReferral() {
   const isPro = tierName === 'contractor_pro';
   const creditProgress = (earnedCredits / referralCreditCap) * 100;
   
-  const shareMessage = `Join me on Home Base! Use my referral code ${referralCode} and I get $1 off when you subscribe. You'll get the full Home Base experience at regular price while helping me save money! Perfect for contractors! Sign up here: ${referralLink}`;
+  const shareMessage = `Join me on HomeBase! Use my referral code ${referralCode} and I get $1 off when you subscribe. You'll get the full HomeBase experience at regular price while helping me save money! Perfect for contractors! Sign up here: ${referralLink}`;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -122,7 +122,7 @@ export default function ContractorReferral() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 p-6 rounded-lg" style={{ background: '#f2f2f2' }}>
           <h1 className="text-3xl font-bold mb-2" style={{ color: '#1560a2' }}>Referral Program</h1>
-          <p className="text-lg" style={{ color: '#000000' }}>Share Home Base and earn rewards</p>
+          <p className="text-lg" style={{ color: '#000000' }}>Share HomeBase and earn rewards</p>
         </div>
 
         <div className="space-y-8">
@@ -206,7 +206,7 @@ export default function ContractorReferral() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-sm text-gray-600">
-                Share Home Base with other contractors and homeowners. Earn $1 off your subscription for each paid subscriber (up to ${referralCreditCap}/month)!
+                Share HomeBase with other contractors and homeowners. Earn $1 off your subscription for each paid subscriber (up to ${referralCreditCap}/month)!
               </div>
               
               {/* Referral Code */}
@@ -313,7 +313,7 @@ export default function ContractorReferral() {
                   </Button>
                 </div>
                 <p className="text-sm text-gray-600 mt-1">
-                  Share with fellow contractors and potential clients. They get the full Home Base experience while helping you save $1!
+                  Share with fellow contractors and potential clients. They get the full HomeBase experience while helping you save $1!
                 </p>
               </div>
             </CardContent>
