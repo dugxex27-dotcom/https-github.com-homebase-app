@@ -24,7 +24,7 @@ export default function Landing() {
             onClick={() => handleRoleSelection('homeowner')}
             data-testid="card-role-homeowner"
           >
-            <CardContent className="p-8 text-left flex flex-col flex-grow">
+            <CardContent className="p-8 text-center sm:text-left flex flex-col flex-grow">
               <div className="flex-grow">
                 <div className="mb-6 flex justify-center sm:justify-start">
                   <div className="p-4 rounded-full bg-purple-100 inline-flex">
@@ -58,7 +58,7 @@ export default function Landing() {
             onClick={() => handleRoleSelection('contractor')}
             data-testid="card-role-contractor"
           >
-            <CardContent className="p-8 text-left flex flex-col flex-grow">
+            <CardContent className="p-8 text-center sm:text-left flex flex-col flex-grow">
               <div className="flex-grow">
                 <div className="mb-6 flex justify-center sm:justify-start">
                   <div className="p-4 rounded-full bg-blue-100 inline-flex">
@@ -94,7 +94,7 @@ export default function Landing() {
             onClick={() => handleRoleSelection('agent')}
             data-testid="card-role-agent"
           >
-            <CardContent className="p-8 text-left flex flex-col flex-grow">
+            <CardContent className="p-8 text-center sm:text-left flex flex-col flex-grow">
               <div className="flex-grow">
                 <div className="mb-6 flex justify-center sm:justify-start">
                   <div className="p-4 rounded-full bg-emerald-100 inline-flex">
