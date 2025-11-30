@@ -24,7 +24,10 @@ export default function HeroSection() {
           
           <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight" style={{ color: typedUser?.role === 'homeowner' ? '#2c0f5b' : 'white' }}>
             {typedUser?.role === 'homeowner' ? (
-              <>Welcome to Your Home's<br />Smart Management Hub</>
+              <>
+                <span className="hidden md:inline">Welcome to Your Home's<br />Smart Management Hub</span>
+                <span className="md:hidden">Welcome to Your Home's Smart<br />Management Hub</span>
+              </>
             ) : (
               <>Your Business{" "}
               <span style={{ color: 'white' }}>Growth Platform</span></>
