@@ -2,6 +2,7 @@ import { ReactNode, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'wouter';
 import Header from '@/components/header';
+import Footer from '@/components/footer';
 import LoadingFallback from '@/components/loading-fallback';
 import ErrorBoundary from '@/components/error-boundary';
 
@@ -13,7 +14,7 @@ export default function AuthenticatedLayout({ children }: AuthenticatedLayoutPro
   const [location] = useLocation();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
       <AnimatePresence mode="wait">
         <motion.main
@@ -22,6 +23,7 @@ export default function AuthenticatedLayout({ children }: AuthenticatedLayoutPro
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2, ease: 'easeInOut' }}
+          className="flex-1"
         >
           <ErrorBoundary>
             <Suspense fallback={<LoadingFallback variant="inline" />}>
@@ -30,6 +32,7 @@ export default function AuthenticatedLayout({ children }: AuthenticatedLayoutPro
           </ErrorBoundary>
         </motion.main>
       </AnimatePresence>
+      <Footer />
     </div>
   );
 }

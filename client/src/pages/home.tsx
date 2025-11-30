@@ -2,8 +2,6 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Users, Package, Calendar, Search, MapPin, Star, CheckCircle, TrendingUp, Shield, Home as HomeIcon, Wrench, Bell, BarChart3, Gift, Sparkles } from "lucide-react";
 import HeroSection from "@/components/hero-section";
-import Logo from "@/components/logo";
-import whiteLogoIcon from '@assets/homebase-app-logo-white_1764516680500.png';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -290,65 +288,6 @@ export default function Home() {
           </div>
         </section>
       )}
-      
-      {/* Footer */}
-      <footer className="text-white py-8 sm:py-12 lg:py-16" style={{ backgroundColor: '#2c0f5b' }}>
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8">
-            <div className="text-left md:col-span-2">
-              <div className="mb-4 sm:mb-6">
-                <div className="w-1/2 sm:w-1/3 h-auto">
-                  <Link href="/" data-testid="footer-logo-home-link">
-                    <img 
-                      src={whiteLogoIcon} 
-                      alt="HomeBase" 
-                      className="w-full h-auto object-contain cursor-pointer"
-                    />
-                  </Link>
-                </div>
-              </div>
-              <p className="text-gray-400 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
-                Your trusted partner for connecting with skilled contractors, discovering quality DIY products, and maintaining your home with confidence.
-              </p>
-            </div>
-
-            {/* Only show homeowner links for homeowners */}
-            {typedUser?.role === 'homeowner' && (
-              <div className="text-left">
-                <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">For Homeowners</h4>
-                <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
-                  <li><Link href="/contractors" className="hover:text-purple-400 transition-colors">Find Contractors</Link></li>
-                  <li><Link href="/products" className="hover:text-purple-400 transition-colors">DIY Products</Link></li>
-                  <li><Link href="/maintenance" className="hover:text-purple-400 transition-colors">Maintenance Schedule</Link></li>
-                  <li><Link href="/maintenance#service-records" className="hover:text-purple-400 transition-colors">Service History</Link></li>
-                  <li><Link href="/homeowner-pricing" className="hover:text-purple-400 transition-colors" data-testid="link-pricing-footer">Pricing Plans</Link></li>
-                </ul>
-              </div>
-            )}
-
-            <div className="text-left">
-              <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">Support</h4>
-              <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
-                <li><Link href="/support" className="transition-colors hover:text-purple-400">Help Center</Link></li>
-                <li><Link href="/support" className="transition-colors hover:text-purple-400">Contact Us</Link></li>
-              </ul>
-            </div>
-
-            <div className="text-left">
-              <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">Legal</h4>
-              <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
-                <li><Link href="/terms-of-service" className="transition-colors hover:text-purple-400">Terms of Service</Link></li>
-                <li><Link href="/privacy-policy" className="transition-colors hover:text-purple-400">Privacy Policy</Link></li>
-                <li><Link href="/legal-disclaimer" className="transition-colors hover:text-purple-400">Legal Disclaimer</Link></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
-            <p>&copy; 2025 Home Base. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

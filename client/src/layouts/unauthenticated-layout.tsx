@@ -1,6 +1,7 @@
 import { ReactNode, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'wouter';
+import Footer from '@/components/footer';
 import LoadingFallback from '@/components/loading-fallback';
 import ErrorBoundary from '@/components/error-boundary';
 
@@ -19,13 +20,16 @@ export default function UnauthenticatedLayout({ children }: UnauthenticatedLayou
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.15, ease: 'easeInOut' }}
-        className="min-h-screen"
+        className="min-h-screen flex flex-col"
       >
         <ErrorBoundary>
           <Suspense fallback={<LoadingFallback variant="full" />}>
-            {children}
+            <div className="flex-1">
+              {children}
+            </div>
           </Suspense>
         </ErrorBoundary>
+        <Footer />
       </motion.div>
     </AnimatePresence>
   );
