@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Users, Package, Calendar, Search, MapPin, Star, CheckCircle, TrendingUp, Shield, Home as HomeIcon, Wrench, Bell, BarChart3, Gift, Sparkles } from "lucide-react";
 import HeroSection from "@/components/hero-section";
 import Logo from "@/components/logo";
+import whiteLogoIcon from '@assets/homebase-app-logo-white_1764516680500.png';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -297,7 +298,13 @@ export default function Home() {
             <div className="text-left md:col-span-2">
               <div className="mb-4 sm:mb-6">
                 <div className="w-1/2 sm:w-1/3 h-auto">
-                  <Logo className="w-full h-auto" />
+                  <Link href="/" data-testid="footer-logo-home-link">
+                    <img 
+                      src={whiteLogoIcon} 
+                      alt="HomeBase" 
+                      className="w-full h-auto object-contain cursor-pointer"
+                    />
+                  </Link>
                 </div>
               </div>
               <p className="text-gray-400 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
