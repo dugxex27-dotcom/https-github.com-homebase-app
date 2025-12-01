@@ -6874,6 +6874,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Always use authenticated user's ID, ignore query params
       const homeownerId = req.session.user.id;
       const houses = await storage.getHouses(homeownerId);
+      console.log("[DEBUG /api/houses] Returning", houses.length, "houses for", homeownerId);
+      houses.forEach((h: any, i: number) => console.log(`  [${i}] ${h.name} - ${h.address} (id: ${h.id})`));
       res.json(houses);
     } catch (error) {
       console.error("[ERROR] Failed to fetch houses:", error);
