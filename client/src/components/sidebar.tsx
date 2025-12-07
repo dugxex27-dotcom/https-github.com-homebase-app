@@ -157,7 +157,7 @@ export default function Sidebar() {
 
   return (
     <aside className="hidden md:flex md:flex-col w-64 bg-white border-r border-gray-200 fixed left-0 top-14 sm:top-16 bottom-0 z-40 overflow-y-auto shadow-sm">
-      <nav className="flex-1 p-4 space-y-1" aria-label="Main navigation">
+      <nav className="flex-1 p-4 space-y-1 pl-[8px] pr-[8px] pt-[16px] pb-[16px] text-center" aria-label="Main navigation">
         {isAdmin && (
           <Link href="/admin">
             <button className={navItemClass('/admin')} data-testid="nav-admin">
@@ -344,7 +344,6 @@ export default function Sidebar() {
           </>
         )}
       </nav>
-      
       <div className="p-3 border-t border-gray-100">
         <button
           onClick={handleLogout}
