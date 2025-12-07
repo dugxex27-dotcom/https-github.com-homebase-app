@@ -356,17 +356,17 @@ export default function HomeownerServiceRecords() {
   const filteredLogs = maintenanceLogs?.filter(log => homeAreaFilter === "all" || log.homeArea === homeAreaFilter) || [];
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-primary/10 p-2 rounded-lg">
-              <FileText className="w-8 h-8" style={{ color: '#ffffff' }} />
+              <FileText className="w-8 h-8 text-gray-900" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold" style={{ color: '#ffffff' }}>Service Records</h1>
-              <p style={{ color: '#ffffff' }}>Complete history of maintenance and repairs performed on your home</p>
+              <h1 className="text-3xl font-bold text-gray-900">Service Records</h1>
+              <p className="text-gray-600">Complete history of maintenance and repairs performed on your home</p>
             </div>
           </div>
         </div>

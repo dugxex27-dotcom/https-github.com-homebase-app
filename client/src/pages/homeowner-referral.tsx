@@ -103,20 +103,20 @@ export default function HomeownerReferral() {
 
   if (!typedUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
         <div className="text-center">
-          <div className="text-2xl font-bold text-white mb-2">Loading...</div>
+          <div className="text-2xl font-bold text-gray-900 mb-2">Loading...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 bg-white rounded-lg shadow-lg p-6">
-          <h1 className="text-3xl font-bold mb-2 text-purple-600">Referral Program</h1>
-          <p className="text-lg text-gray-700">Share HomeBase and earn rewards</p>
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Referral Program</h1>
+          <p className="text-gray-600">Share HomeBase and earn rewards</p>
         </div>
 
         <PaidSubscriberGate featureName="Referral Rewards">

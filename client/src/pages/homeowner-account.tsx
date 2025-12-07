@@ -381,12 +381,12 @@ export default function HomeownerAccount() {
   });
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" style={{ color: 'white' }}>Account Settings</h1>
-          <p style={{ color: '#ffffff' }}>Manage your profile information and preferences</p>
+          <h1 className="text-3xl font-bold mb-2 text-gray-900">Account Settings</h1>
+          <p className="text-gray-600">Manage your profile information and preferences</p>
         </div>
 
         <div className="space-y-6 max-w-4xl mx-auto">

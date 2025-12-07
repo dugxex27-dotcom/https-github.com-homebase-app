@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ===================================
-   HOMEBASE DESIGN TOKENS
+   HOMEBASE DESIGN TOKENS - ENVOLVE DESIGN
    =================================== */
 
 :root {
@@ -44,40 +44,46 @@
   --text-3xl: 1.875rem;     /* 30px */
   --text-4xl: 2.25rem;      /* 36px */
   --text-5xl: 2.5rem;       /* 40px */
-  --text-6xl: 3rem;         /* 48px - changed from 3.75rem */
+  --text-6xl: 3rem;         /* 48px */
+  
+  /* Sidebar Width */
+  --sidebar-width: 220px;
 }
 
-/* Homeowner Theme (Purple) - Default */
+/* Homeowner Theme (Purple) - Default - Envolve Design */
 :root, [data-role="homeowner"] {
-  /* Brand Colors */
-  --brand-primary: hsl(260, 65%, 55%);
-  --brand-primary-dark: hsl(260, 80%, 30%);
-  --brand-primary-light: hsl(260, 50%, 70%);
+  /* Brand Colors - Envolve Design System */
+  --brand-primary: hsl(270, 70%, 45%);
+  --brand-primary-dark: hsl(270, 80%, 20%);
+  --brand-primary-light: hsl(270, 50%, 65%);
+  
+  /* Page Background - Light Gray */
+  --page-background: hsl(0, 0%, 96%);
   
   /* Semantic Colors */
   --background: hsl(0, 0%, 100%);
-  --foreground: hsl(260, 20%, 20%);
-  --muted: hsl(250, 12%, 96%);
-  --muted-foreground: hsl(260, 10%, 45%);
+  --foreground: hsl(270, 30%, 15%);
+  --muted: hsl(0, 0%, 96%);
+  --muted-foreground: hsl(270, 10%, 45%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(260, 20%, 20%);
+  --popover-foreground: hsl(270, 30%, 15%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(260, 20%, 20%);
-  --border: hsl(250, 10%, 88%);
-  --input: hsl(250, 10%, 88%);
+  --card-foreground: hsl(270, 30%, 15%);
+  --border: hsl(0, 0%, 88%);
+  --input: hsl(0, 0%, 88%);
   
-  /* Action Colors */
-  --primary: hsl(260, 65%, 55%);
-  --primary-hover: hsl(260, 70%, 48%);
-  --primary-active: hsl(260, 75%, 42%);
+  /* Action Colors - Purple Primary */
+  --primary: hsl(270, 70%, 45%);
+  --primary-hover: hsl(270, 75%, 38%);
+  --primary-active: hsl(270, 80%, 32%);
   --primary-foreground: hsl(0, 0%, 100%);
   
-  --secondary: hsl(250, 20%, 96%);
-  --secondary-hover: hsl(250, 20%, 92%);
-  --secondary-foreground: hsl(260, 20%, 20%);
+  --secondary: hsl(0, 0%, 96%);
+  --secondary-hover: hsl(0, 0%, 92%);
+  --secondary-foreground: hsl(270, 30%, 15%);
   
-  --accent: hsl(245, 25%, 92%);
-  --accent-foreground: hsl(260, 20%, 20%);
+  --accent: hsl(270, 20%, 95%);
+  --accent-foreground: hsl(270, 30%, 15%);
   
   /* Status Colors */
   --destructive: hsl(0, 65%, 51%);
@@ -87,69 +93,91 @@
   --success: hsl(142, 71%, 45%);
   --success-foreground: hsl(0, 0%, 100%);
   
-  --warning: hsl(38, 92%, 50%);
-  --warning-foreground: hsl(0, 0%, 100%);
+  --warning: hsl(45, 93%, 47%);
+  --warning-foreground: hsl(0, 0%, 15%);
   
   --info: hsl(199, 89%, 48%);
   --info-foreground: hsl(0, 0%, 100%);
   
-  --neutral: hsl(250, 10%, 75%);
+  --neutral: hsl(0, 0%, 75%);
+  
+  /* Priority Badge Colors */
+  --priority-high: hsl(14, 100%, 50%);
+  --priority-medium: hsl(45, 93%, 47%);
+  --priority-low: hsl(142, 71%, 45%);
   
   /* Focus & Ring */
-  --ring: hsl(260, 65%, 55%);
+  --ring: hsl(270, 70%, 45%);
   --ring-offset: hsl(0, 0%, 100%);
   
   /* Chart Colors */
-  --chart-1: hsl(260, 65%, 55%);
+  --chart-1: hsl(270, 70%, 45%);
   --chart-2: hsl(199, 89%, 48%);
   --chart-3: hsl(142, 71%, 45%);
-  --chart-4: hsl(38, 92%, 50%);
+  --chart-4: hsl(45, 93%, 47%);
   --chart-5: hsl(0, 65%, 51%);
+  
+  /* Footer */
+  --footer-bg: hsl(270, 80%, 12%);
+  
+  /* Sidebar */
+  --sidebar-bg: hsl(0, 0%, 100%);
+  --sidebar-border: hsl(0, 0%, 90%);
+  --sidebar-active: hsl(270, 70%, 45%);
+  --sidebar-active-bg: hsl(270, 60%, 95%);
 }
 
-/* Contractor Theme (Blue/Red) */
+/* Contractor Theme (Blue) */
 [data-role="contractor"] {
   /* Brand Colors */
-  --brand-primary: hsl(4, 90%, 58%);
-  --brand-primary-dark: hsl(4, 85%, 48%);
-  --brand-primary-light: hsl(4, 90%, 70%);
+  --brand-primary: hsl(210, 70%, 45%);
+  --brand-primary-dark: hsl(210, 80%, 35%);
+  --brand-primary-light: hsl(210, 60%, 60%);
   
   /* Action Colors */
-  --primary: hsl(4, 90%, 58%);
-  --primary-hover: hsl(4, 90%, 52%);
-  --primary-active: hsl(4, 90%, 46%);
+  --primary: hsl(210, 70%, 45%);
+  --primary-hover: hsl(210, 75%, 38%);
+  --primary-active: hsl(210, 80%, 32%);
   --primary-foreground: hsl(0, 0%, 100%);
   
   /* Focus & Ring */
-  --ring: hsl(4, 90%, 58%);
+  --ring: hsl(210, 70%, 45%);
   
   /* Chart Colors */
-  --chart-1: hsl(4, 90%, 58%);
+  --chart-1: hsl(210, 70%, 45%);
   --chart-2: hsl(199, 89%, 48%);
   --chart-3: hsl(142, 71%, 45%);
-  --chart-4: hsl(38, 92%, 50%);
-  --chart-5: hsl(260, 65%, 55%);
+  --chart-4: hsl(45, 93%, 47%);
+  --chart-5: hsl(270, 70%, 45%);
+  
+  /* Sidebar */
+  --sidebar-active: hsl(210, 70%, 45%);
+  --sidebar-active-bg: hsl(210, 60%, 95%);
 }
 
 /* Dark Mode */
 .dark {
-  --background: hsl(260, 25%, 8%);
-  --foreground: hsl(250, 25%, 92%);
-  --muted: hsl(260, 15%, 15%);
-  --muted-foreground: hsl(250, 15%, 65%);
-  --popover: hsl(260, 20%, 12%);
-  --popover-foreground: hsl(250, 25%, 92%);
-  --card: hsl(260, 18%, 12%);
-  --card-foreground: hsl(250, 25%, 92%);
-  --border: hsl(260, 12%, 24%);
-  --input: hsl(260, 12%, 20%);
-  --secondary: hsl(260, 15%, 18%);
-  --secondary-hover: hsl(260, 15%, 22%);
-  --secondary-foreground: hsl(250, 25%, 92%);
-  --accent: hsl(260, 15%, 18%);
-  --accent-foreground: hsl(250, 25%, 92%);
-  --neutral: hsl(260, 20%, 25%);
-  --ring-offset: hsl(260, 25%, 8%);
+  --page-background: hsl(270, 25%, 6%);
+  --background: hsl(270, 25%, 8%);
+  --foreground: hsl(0, 0%, 92%);
+  --muted: hsl(270, 15%, 15%);
+  --muted-foreground: hsl(0, 0%, 65%);
+  --popover: hsl(270, 20%, 12%);
+  --popover-foreground: hsl(0, 0%, 92%);
+  --card: hsl(270, 18%, 12%);
+  --card-foreground: hsl(0, 0%, 92%);
+  --border: hsl(270, 12%, 24%);
+  --input: hsl(270, 12%, 20%);
+  --secondary: hsl(270, 15%, 18%);
+  --secondary-hover: hsl(270, 15%, 22%);
+  --secondary-foreground: hsl(0, 0%, 92%);
+  --accent: hsl(270, 15%, 18%);
+  --accent-foreground: hsl(0, 0%, 92%);
+  --neutral: hsl(270, 20%, 25%);
+  --ring-offset: hsl(270, 25%, 8%);
+  --sidebar-bg: hsl(270, 20%, 10%);
+  --sidebar-border: hsl(270, 15%, 20%);
+  --footer-bg: hsl(270, 80%, 8%);
 }
 
 @layer base {
@@ -158,7 +186,8 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased text-foreground;
+    background-color: hsl(var(--page-background));
     font-weight: 400;
     transition: background-color 0.2s, color 0.2s;
   }
@@ -208,6 +237,11 @@
 }
 
 @layer components {
+  /* Page Background */
+  .page-bg {
+    background-color: var(--page-background);
+  }
+  
   /* Consistent Card Padding */
   .card-padding {
     @apply p-6;
@@ -232,5 +266,71 @@
   
   .section-spacing-lg {
     @apply space-y-8;
+  }
+  
+  /* Priority Badges */
+  .badge-high-priority {
+    @apply bg-orange-500 text-white text-xs font-medium px-2 py-0.5 rounded;
+  }
+  
+  .badge-medium-priority {
+    @apply bg-yellow-400 text-gray-900 text-xs font-medium px-2 py-0.5 rounded;
+  }
+  
+  .badge-low-priority {
+    @apply bg-green-500 text-white text-xs font-medium px-2 py-0.5 rounded;
+  }
+  
+  /* Sidebar Navigation */
+  .sidebar-nav-item {
+    @apply w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-medium transition-colors;
+    color: hsl(270, 30%, 25%);
+  }
+  
+  .sidebar-nav-item:hover {
+    background-color: var(--sidebar-active-bg);
+  }
+  
+  .sidebar-nav-item.active {
+    background-color: var(--sidebar-active-bg);
+    color: var(--sidebar-active);
+  }
+  
+  .sidebar-nav-item.active .nav-icon {
+    color: var(--sidebar-active);
+  }
+  
+  /* Card Styles */
+  .homebase-card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+  }
+  
+  /* Property Card */
+  .property-card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow;
+  }
+  
+  /* Health Score Circle */
+  .health-score-circle {
+    @apply relative w-20 h-20 rounded-full flex items-center justify-center;
+  }
+  
+  .health-score-circle::before {
+    content: '';
+    @apply absolute inset-0 rounded-full;
+    background: conic-gradient(
+      var(--score-color, hsl(270, 70%, 45%)) calc(var(--score-percent, 0) * 1%),
+      hsl(0, 0%, 90%) 0
+    );
+  }
+  
+  .health-score-circle::after {
+    content: '';
+    @apply absolute inset-2 bg-white rounded-full;
+  }
+  
+  .health-score-value {
+    @apply relative z-10 text-2xl font-bold;
+    color: var(--score-color, hsl(270, 70%, 45%));
   }
 }

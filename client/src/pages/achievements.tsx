@@ -186,10 +186,10 @@ export default function Achievements() {
   if (isLoading) {
     return (
       <>
-        <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
+        <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
           <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
-            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-2 text-white">Achievements</h1>
-            <p className="text-sm sm:text-base text-white mb-6 sm:mb-8">Loading your achievements...</p>
+            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-2 text-gray-900">Achievements</h1>
+            <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">Loading your achievements...</p>
           </div>
         </div>
       </>
@@ -241,18 +241,18 @@ export default function Achievements() {
 
   return (
     <>
-      <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
+      <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
         <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
           {/* Trial Banner */}
           <HomeownerTrialBanner />
           
           {/* Page Header */}
           <div className="mb-6 sm:mb-8">
-            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-2 text-white flex items-center gap-2 sm:gap-3">
+            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-2 text-gray-900 flex items-center gap-2 sm:gap-3">
               <Trophy className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-yellow-400" />
               Achievements
             </h1>
-            <p className="text-sm sm:text-base text-white">
+            <p className="text-sm sm:text-base text-gray-600">
               Track your home maintenance milestones and accomplishments
             </p>
           </div>
@@ -294,7 +294,7 @@ export default function Achievements() {
                         </SelectContent>
                       </Select>
                       {selectedHouseId !== "all" && (
-                        <p className="text-xs sm:text-sm text-white">
+                        <p className="text-xs sm:text-sm text-gray-600">
                           Showing achievements for {houses.find(h => h.id === selectedHouseId)?.name}
                         </p>
                       )}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Users, User as UserIcon, LogOut, MessageCircle, Trophy, Shield, Calendar, Crown, HelpCircle, Menu, Wrench, Building2, Package, LayoutDashboard, FileText, Gift, CreditCard, Download } from "lucide-react";
+import { Menu, Calendar, Crown, LogOut, Wrench, Building2, Package, MessageCircle, Trophy, Gift, User as UserIcon, HelpCircle, FileText, LayoutDashboard, Users, Download, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Notifications } from "@/components/notifications";
@@ -23,11 +23,9 @@ export default function Header() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
 
-  // Check if user is admin
   const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((e: string) => e.trim()).filter(Boolean);
   const isAdmin = typedUser?.email && adminEmails.includes(typedUser.email);
 
-  // Fetch user details for trial info (both homeowners and contractors)
   const { data: userData } = useQuery<User>({
     queryKey: ['/api/user'],
     queryFn: async () => {
@@ -37,45 +35,37 @@ export default function Header() {
     enabled: !!user && (typedUser?.role === 'homeowner' || typedUser?.role === 'contractor'),
   });
 
-  // Fetch unread notifications for tab indicators
   const { data: unreadNotifications = [] } = useQuery<Notification[]>({
     queryKey: ['/api/notifications/unread'],
     enabled: isAuthenticated && (typedUser?.role === 'homeowner' || typedUser?.role === 'contractor'),
-    refetchInterval: 30000, // Check every 30 seconds
+    refetchInterval: 30000,
   });
 
-  // Helper to check if a tab has unread notifications
   const hasNotificationsForTab = (tabName: string) => {
     if (!unreadNotifications.length) return false;
-    
     switch (tabName) {
       case 'messages':
         return unreadNotifications.some(n => n.type === 'message');
       case 'maintenance':
         return unreadNotifications.some(n => n.category === 'maintenance');
       case 'dashboard':
-        // Show for appointment notifications
         return unreadNotifications.some(n => n.category === 'appointment');
       default:
         return false;
     }
   };
 
-  // Calculate trial status (both homeowners and contractors)
   const trialEndsAt = userData?.trialEndsAt ? new Date(userData.trialEndsAt) : null;
   const now = new Date();
   const isTrialActive = trialEndsAt && trialEndsAt > now && userData?.subscriptionStatus === 'trialing';
   const daysRemaining = trialEndsAt ? Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
-  // PWA Install handling
   useEffect(() => {
-    // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstallable(false);
       return;
     }
 
-    // Function to check dismissal status
     const checkDismissal = () => {
       const dismissed = localStorage.getItem('pwa-install-dismissed');
       const dismissedTime = dismissed ? parseInt(dismissed) : 0;
@@ -84,25 +74,18 @@ export default function Header() {
       if (dismissed && Date.now() - dismissedTime < sevenDaysInMs) {
         setIsInstallable(false);
         setDeferredPrompt(null);
-        return true; // Is dismissed
+        return true;
       }
-      return false; // Not dismissed
+      return false;
     };
 
-    // Initial check
-    if (checkDismissal()) {
-      return;
-    }
+    if (checkDismissal()) return;
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       const promptEvent = e as BeforeInstallPromptEvent;
       setDeferredPrompt(promptEvent);
-      
-      // Double-check dismissal before making installable
-      if (!checkDismissal()) {
-        setIsInstallable(true);
-      }
+      if (!checkDismissal()) setIsInstallable(true);
     };
 
     const handleAppInstalled = () => {
@@ -111,17 +94,11 @@ export default function Header() {
       localStorage.removeItem('pwa-install-dismissed');
     };
 
-    // Listen for storage changes (when banner dismisses)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'pwa-install-dismissed') {
-        checkDismissal();
-      }
+      if (e.key === 'pwa-install-dismissed') checkDismissal();
     };
 
-    // Listen for custom event when banner dismisses (for same-tab updates)
-    const handleDismissEvent = () => {
-      checkDismissal();
-    };
+    const handleDismissEvent = () => checkDismissal();
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
@@ -138,18 +115,9 @@ export default function Header() {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
-
-    // Show the native install prompt
     deferredPrompt.prompt();
-
-    // Wait for the user's response
     const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      console.log('PWA installed from menu');
-    }
-
-    // Hide the install option
+    if (outcome === 'accepted') console.log('PWA installed from menu');
     setDeferredPrompt(null);
     setIsInstallable(false);
     setMobileMenuOpen(false);
@@ -163,54 +131,54 @@ export default function Header() {
       });
       
       if (response.ok) {
-        // Clear all cached queries
         queryClient.clear();
-        // Redirect to landing page
         window.location.href = '/';
       }
     } catch (error) {
       console.error('Logout error:', error);
-      // Fallback: redirect to landing page
       window.location.href = '/';
     }
   };
 
+  const mobileNavItemClass = (path: string | string[]) => {
+    const paths = Array.isArray(path) ? path : [path];
+    const isActive = paths.some(p => location === p || location.startsWith(p + '/'));
+    const isContractor = typedUser?.role === 'contractor';
+    return `w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${
+      isActive 
+        ? isContractor ? 'bg-blue-100 text-blue-700 font-medium' : 'bg-purple-50 text-purple-700 font-medium'
+        : 'hover:bg-muted'
+    }`;
+  };
+
   return (
-    <header 
-      className={typedUser?.role === 'contractor' 
-        ? 'bg-[#1560a2] text-white border-b border-white/20 shadow-sm sticky top-0 z-50' 
-        : 'bg-background border-b border-border shadow-sm sticky top-0 z-50'
-      }
-    >
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
         <div className="flex justify-between items-center h-14 sm:h-16">
           <div className="flex items-center gap-2">
-            {/* Hamburger Menu Button - Always Visible */}
             {isAuthenticated && typedUser && (
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className={`p-2 relative ${typedUser?.role === 'contractor' ? 'hover:bg-white/20 text-white' : ''}`}
+                    className="md:hidden p-2 relative"
                     aria-label="Open menu"
                   >
                     <Menu className="h-5 w-5" />
                     {unreadNotifications.length > 0 && (
-                      <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" aria-label={`${unreadNotifications.length} unread notifications`} />
+                      <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
                     )}
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-64 p-0">
-                  <SheetHeader className={`p-4 border-b ${typedUser.role === 'contractor' ? 'bg-[#1560a2] text-white' : 'bg-primary/5'}`}>
-                    <SheetTitle className={typedUser.role === 'contractor' ? 'text-white' : 'text-primary'}>
-                      Menu
-                    </SheetTitle>
+                  <SheetHeader className="p-4 border-b bg-purple-50">
+                    <SheetTitle className="text-purple-700">Menu</SheetTitle>
                   </SheetHeader>
                   <nav className="flex flex-col p-2" aria-label="Mobile navigation">
                     {isAdmin && (
                       <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
-                        <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/admin' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                        <button className={mobileNavItemClass('/admin')} data-testid="mobile-nav-admin">
                           <Shield className="w-4 h-4" />
                           Admin
                         </button>
@@ -219,7 +187,7 @@ export default function Header() {
                     {typedUser.role === 'homeowner' && (
                       <>
                         <Link href="/maintenance" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/maintenance' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/maintenance')}>
                             <Wrench className="w-4 h-4" />
                             Maintenance
                             {hasNotificationsForTab('maintenance') && (
@@ -228,25 +196,25 @@ export default function Header() {
                           </button>
                         </Link>
                         <Link href="/contractors" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/contractors' || location === '/find-contractors' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass(['/contractors', '/find-contractors'])}>
                             <Building2 className="w-4 h-4" />
                             Contractors
                           </button>
                         </Link>
                         <Link href="/service-records" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/service-records' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/service-records')}>
                             <FileText className="w-4 h-4" />
                             Service Records
                           </button>
                         </Link>
                         <Link href="/products" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/products' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/products')}>
                             <Package className="w-4 h-4" />
                             Products
                           </button>
                         </Link>
                         <Link href="/messages" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/messages' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/messages')}>
                             <MessageCircle className="w-4 h-4" />
                             Messages
                             {hasNotificationsForTab('messages') && (
@@ -255,31 +223,29 @@ export default function Header() {
                           </button>
                         </Link>
                         <Link href="/achievements" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/achievements' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/achievements')}>
                             <Trophy className="w-4 h-4" />
                             Achievements
                           </button>
                         </Link>
                         <Link href="/homeowner-referral" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/homeowner-referral' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/homeowner-referral')}>
                             <Gift className="w-4 h-4" />
                             Referral
                           </button>
                         </Link>
                         <Link href="/account" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/account' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/account')}>
                             <UserIcon className="w-4 h-4" />
                             Account
                           </button>
                         </Link>
                         <Link href="/support" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location.startsWith('/support') ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/support')}>
                             <HelpCircle className="w-4 h-4" />
                             Support
                           </button>
                         </Link>
-                        
-                        {/* PWA Install option for homeowners */}
                         {isInstallable && (
                           <button
                             onClick={handleInstallClick}
@@ -295,7 +261,7 @@ export default function Header() {
                     {typedUser.role === 'contractor' && (
                       <>
                         <Link href="/contractor-dashboard" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/contractor-dashboard' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/contractor-dashboard')}>
                             <LayoutDashboard className="w-4 h-4" />
                             Dashboard
                             {hasNotificationsForTab('dashboard') && (
@@ -304,13 +270,13 @@ export default function Header() {
                           </button>
                         </Link>
                         <Link href="/manage-team" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/manage-team' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/manage-team')}>
                             <Users className="w-4 h-4" />
                             Manage Team
                           </button>
                         </Link>
                         <Link href="/messages" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/messages' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/messages')}>
                             <MessageCircle className="w-4 h-4" />
                             Messages
                             {hasNotificationsForTab('messages') && (
@@ -319,31 +285,29 @@ export default function Header() {
                           </button>
                         </Link>
                         <Link href="/crm" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/crm' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/crm')}>
                             <Wrench className="w-4 h-4" />
                             CRM
                           </button>
                         </Link>
                         <Link href="/contractor-referral" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/contractor-referral' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/contractor-referral')}>
                             <Gift className="w-4 h-4" />
                             Referral
                           </button>
                         </Link>
                         <Link href="/contractor-profile" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/contractor-profile' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/contractor-profile')}>
                             <UserIcon className="w-4 h-4" />
                             Account
                           </button>
                         </Link>
                         <Link href="/support" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location.startsWith('/support') ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/support')}>
                             <HelpCircle className="w-4 h-4" />
                             Support
                           </button>
                         </Link>
-                        
-                        {/* PWA Install option for contractors */}
                         {isInstallable && (
                           <button
                             onClick={handleInstallClick}
@@ -359,31 +323,29 @@ export default function Header() {
                     {typedUser.role === 'agent' && (
                       <>
                         <Link href="/agent-dashboard" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/agent-dashboard' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/agent-dashboard')}>
                             <LayoutDashboard className="w-4 h-4" />
                             Dashboard
                           </button>
                         </Link>
                         <Link href="/agent-referral" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/agent-referral' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/agent-referral')}>
                             <Gift className="w-4 h-4" />
                             Referral
                           </button>
                         </Link>
                         <Link href="/agent-account" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location === '/agent-account' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/agent-account')}>
                             <UserIcon className="w-4 h-4" />
                             Account
                           </button>
                         </Link>
                         <Link href="/support" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm ${location.startsWith('/support') ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted'}`}>
+                          <button className={mobileNavItemClass('/support')}>
                             <HelpCircle className="w-4 h-4" />
                             Support
                           </button>
                         </Link>
-                        
-                        {/* PWA Install option for agents */}
                         {isInstallable && (
                           <button
                             onClick={handleInstallClick}
@@ -397,10 +359,8 @@ export default function Header() {
                       </>
                     )}
                     
-                    {/* Divider */}
                     <div className="my-2 border-t border-border" />
                     
-                    {/* Logout Button */}
                     <button
                       onClick={() => {
                         setMobileMenuOpen(false);
@@ -419,13 +379,7 @@ export default function Header() {
             
             <Link href="/" aria-label="Home" data-testid="link-home-logo">
               <button
-                className={`
-                  p-1.5 sm:p-2 rounded-xl transition-all duration-200 
-                  ${typedUser?.role === 'contractor' 
-                    ? 'hover:bg-white/20 active:bg-white/30' 
-                    : 'hover:bg-primary/10 active:bg-primary/20'
-                  }
-                `}
+                className="p-1.5 sm:p-2 rounded-xl transition-all duration-200 hover:bg-gray-100 active:bg-gray-200"
                 aria-label="Return to homepage"
               >
                 <img 
@@ -437,21 +391,16 @@ export default function Header() {
             </Link>
           </div>
           
-          {/* Right Side - Notifications and Sign In */}
           <div className="flex items-center gap-2">
-            {/* Notifications Bell - For homeowners and contractors */}
             {isAuthenticated && (typedUser?.role === 'homeowner' || typedUser?.role === 'contractor') && (
-              <div className={typedUser?.role === 'contractor' ? 'text-white' : ''}>
-                <Notifications />
-              </div>
+              <Notifications />
             )}
             
-              {/* Sign In Button for Unauthenticated Users */}
             {!isAuthenticated && (
               <Button 
                 onClick={() => window.location.href = '/signin'}
                 aria-label="Sign in"
-                className="text-sm h-9 px-3 sm:px-4"
+                className="text-sm h-9 px-3 sm:px-4 bg-purple-600 hover:bg-purple-700"
               >
                 Sign In
               </Button>
@@ -460,14 +409,13 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Trial Countdown Banner - For homeowners and contractors on trial */}
       {isTrialActive && (
-        <div className={typedUser?.role === 'homeowner' ? "bg-purple-50 border-b border-purple-200" : "bg-blue-100 border-b border-blue-200"}>
+        <div className="bg-purple-50 border-b border-purple-200">
           <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-2">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
-                <Calendar className={`h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 ${typedUser?.role === 'homeowner' ? 'text-purple-600' : 'text-blue-700'}`} />
-                <span className={`text-xs sm:text-sm font-medium truncate ${typedUser?.role === 'homeowner' ? 'text-purple-900' : 'text-blue-900'}`}>
+                <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 text-purple-600" />
+                <span className="text-xs sm:text-sm font-medium truncate text-purple-900">
                   <strong>{daysRemaining} day{daysRemaining !== 1 ? 's' : ''}</strong> trial
                 </span>
               </div>
@@ -475,11 +423,11 @@ export default function Header() {
                 variant="outline"
                 size="sm"
                 onClick={() => window.location.href = '/billing'}
-                className={`text-xs h-7 px-2 sm:px-3 flex-shrink-0 ${typedUser?.role === 'homeowner' ? "border-purple-600 text-purple-600 hover:bg-purple-100" : "border-blue-700 text-blue-700 hover:bg-blue-200"}`}
+                className="text-xs h-7 px-2 sm:px-3 flex-shrink-0 border-purple-600 text-purple-600 hover:bg-purple-100"
                 data-testid="button-trial-upgrade"
               >
                 <Crown className="h-3 w-3 mr-1" />
-                <span className="hidden sm:inline">{typedUser?.role === 'homeowner' ? 'Choose Plan' : 'Subscribe'}</span>
+                <span className="hidden sm:inline">Choose Plan</span>
                 <span className="sm:hidden">Upgrade</span>
               </Button>
             </div>

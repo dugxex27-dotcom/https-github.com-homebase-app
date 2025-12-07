@@ -338,11 +338,11 @@ export default function Contractors() {
 
   if (error) {
     return (
-      <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
+      <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">Error Loading Contractors</h2>
-            <p className="text-white">Sorry, we couldn't load the contractors. Please try again later.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Contractors</h2>
+            <p className="text-gray-600">Sorry, we couldn't load the contractors. Please try again later.</p>
           </div>
         </div>
       </div>
@@ -350,15 +350,15 @@ export default function Contractors() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
       {/* Hero Section */}
       <section className="py-8 sm:py-12 lg:py-16" style={{ background: 'transparent' }}>
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
           <div className="text-center">
-            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-4 sm:mb-6" style={{ color: '#ffffff' }}>
+            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-4 sm:mb-6 text-gray-900">
               Find Trusted Contractors
             </h1>
-            <p className="text-sm sm:text-base lg:text-lg max-w-3xl mx-auto" style={{ color: '#ffffff' }}>
+            <p className="text-sm sm:text-base lg:text-lg max-w-3xl mx-auto text-gray-600">
               Connect with verified professionals specializing in niche home services
             </p>
           </div>
@@ -367,7 +367,7 @@ export default function Contractors() {
       <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8">
         {/* Find Contractor Section */}
         <div className="mb-6 sm:mb-8">
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4 sm:mb-6" style={{ color: '#ffffff' }}>
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4 sm:mb-6 text-gray-900">
             Find Contractor
           </h2>
           
@@ -447,7 +447,7 @@ export default function Contractors() {
                     ))}
                   </select>
                 </div>
-                <div className="text-xs text-white mt-1">
+                <div className="text-xs text-gray-600 mt-1">
                   🌍 {userCountry === 'US' ? 'Using miles for US locations' : 'Using kilometers for international locations'}
                 </div>
               </div>
@@ -606,7 +606,7 @@ export default function Contractors() {
         {isAuthenticated && userRole === 'homeowner' && selectedHouseId && contractorsUsedAtHouse.length > 0 && (
           <div className="mb-8">
             <div className="mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: '#ffffff' }}>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900">
                 Your Contractors at {houses.find(h => h.id === selectedHouseId)?.name}
               </h2>
               <p className="text-sm sm:text-base lg:text-lg" style={{ color: '#2c0f5b' }}>
@@ -633,15 +633,15 @@ export default function Contractors() {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
-              <h2 className="text-3xl font-bold mb-2" style={{ color: '#ffffff' }}>
+              <h2 className="text-3xl font-bold mb-2 text-gray-900">
                 Available Contractors
               </h2>
-              <p className="text-lg" style={{ color: '#2c0f5b' }}>
+              <p className="text-lg text-gray-600">
                 {isLoading ? 'Loading...' : `${sortedContractors.length} verified contractors specializing in niche services`}
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="text-sm" style={{ color: '#ffffff' }}>
+              <div className="text-sm text-gray-600">
                 Sort by:
               </div>
               <Select value={sortBy} onValueChange={setSortBy}>
@@ -698,8 +698,8 @@ export default function Contractors() {
               </div>
             ) : sortedContractors.length === 0 ? (
               <div className="text-center py-12">
-                <h3 className="text-lg font-medium mb-2 text-[#ffffff]">No contractors found</h3>
-                <p className="text-white">Try adjusting your filters or search criteria.</p>
+                <h3 className="text-lg font-medium mb-2 text-gray-900">No contractors found</h3>
+                <p className="text-gray-600">Try adjusting your filters or search criteria.</p>
               </div>
             ) : (
               <>
@@ -718,7 +718,7 @@ export default function Contractors() {
                     <Button size="sm" className="hover:bg-[#3c258e]" style={{ backgroundColor: '#b6a6f4', color: '#2c0f5b' }}>1</Button>
                     <Button variant="outline" size="sm" className="hover:bg-[#3c258e]" style={{ color: '#b6a6f4' }}>2</Button>
                     <Button variant="outline" size="sm" className="hover:bg-[#3c258e]" style={{ color: '#b6a6f4' }}>3</Button>
-                    <span className="px-3 py-2 text-white/60">...</span>
+                    <span className="px-3 py-2 text-gray-400">...</span>
                     <Button variant="outline" size="sm" className="hover:bg-[#3c258e]" style={{ color: '#b6a6f4' }}>8</Button>
                     <Button variant="outline" size="sm" className="hover:bg-[#3c258e]">
                       <ChevronRight className="h-4 w-4" style={{ color: '#b6a6f4' }} />

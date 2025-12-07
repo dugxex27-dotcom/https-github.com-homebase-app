@@ -23,10 +23,10 @@ export default function HomeownerPricing() {
   // Show loading state while fetching user data
   if (isLoading) {
     return (
-      <div className="min-h-screen py-8 px-4 flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
+      <div className="min-h-screen py-8 px-4 flex items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white">Loading pricing plans...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading pricing plans...</p>
         </div>
       </div>
     );
@@ -35,7 +35,7 @@ export default function HomeownerPricing() {
   // Show error state if query fails
   if (isError || !userData) {
     return (
-      <div className="min-h-screen py-8 px-4 flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
+      <div className="min-h-screen py-8 px-4 flex items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
         <Card className="max-w-md">
           <CardHeader>
             <CardTitle className="text-red-600">Unable to Load Pricing Plans</CardTitle>
@@ -56,14 +56,14 @@ export default function HomeownerPricing() {
   const maxHouses = (userData as any)?.maxHousesAllowed ?? 2;
 
   return (
-    <div className="min-h-screen py-8 px-4" style={{ background: 'linear-gradient(180deg, #8B70D4 0%, #9B82DC 50%, #8B70D4 100%)' }}>
+    <div className="min-h-screen py-8 px-4" style={{ backgroundColor: '#f5f5f5' }}>
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold" style={{ color: '#ffffff' }}>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
             Choose Your Plan
           </h1>
-          <p className="text-lg max-w-2xl mx-auto" style={{ color: '#ffffff' }}>
+          <p className="text-lg max-w-2xl mx-auto text-gray-600">
             Select the plan that fits your property management needs. Upgrade or downgrade anytime.
           </p>
         </div>

@@ -8,7 +8,7 @@ export default function Footer() {
   const typedUser = user as User | undefined;
 
   return (
-    <footer className="text-white py-8 sm:py-12 lg:py-16" style={{ backgroundColor: '#2c0f5b' }}>
+    <footer className="text-white py-8 sm:py-12 lg:py-16" style={{ backgroundColor: '#1a0a3e' }}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8">
           <div className="text-center sm:text-left md:col-span-2">
@@ -23,7 +23,7 @@ export default function Footer() {
                 </Link>
               </div>
             </div>
-            <p className="text-gray-400 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
+            <p className="text-gray-300 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
               Your trusted partner for connecting with skilled contractors, discovering quality DIY products, and maintaining your home with confidence.
             </p>
           </div>
@@ -31,35 +31,35 @@ export default function Footer() {
           {typedUser?.role === 'homeowner' && (
             <div className="text-center sm:text-left">
               <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">For Homeowners</h4>
-              <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
-                <li><Link href="/contractors" className="hover:text-purple-400 transition-colors">Find Contractors</Link></li>
-                <li><Link href="/products" className="hover:text-purple-400 transition-colors">DIY Products</Link></li>
-                <li><Link href="/maintenance" className="hover:text-purple-400 transition-colors">Maintenance Schedule</Link></li>
-                <li><Link href="/maintenance#service-records" className="hover:text-purple-400 transition-colors">Service History</Link></li>
-                <li><Link href="/homeowner-pricing" className="hover:text-purple-400 transition-colors" data-testid="link-pricing-footer">Pricing Plans</Link></li>
+              <ul className="space-y-2 sm:space-y-3 text-gray-300 text-sm sm:text-base">
+                <li><Link href="/contractors" className="hover:text-white transition-colors" data-testid="link-find-contractors">Find Contractors</Link></li>
+                <li><Link href="/products" className="hover:text-white transition-colors" data-testid="link-diy-products">DIY Products</Link></li>
+                <li><Link href="/maintenance" className="hover:text-white transition-colors" data-testid="link-maintenance">Maintenance Schedule</Link></li>
+                <li><Link href="/service-records" className="hover:text-white transition-colors" data-testid="link-service-history">Service History</Link></li>
+                <li><Link href="/homeowner-pricing" className="hover:text-white transition-colors" data-testid="link-pricing-footer">Pricing Plans</Link></li>
               </ul>
             </div>
           )}
 
           <div className="text-center sm:text-left">
             <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">Support</h4>
-            <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
-              <li><Link href="/support" className="transition-colors hover:text-purple-400">Help Center</Link></li>
-              <li><Link href="/support" className="transition-colors hover:text-purple-400">Contact Us</Link></li>
+            <ul className="space-y-2 sm:space-y-3 text-gray-300 text-sm sm:text-base">
+              <li><Link href="/support" className="transition-colors hover:text-white" data-testid="link-help-center">Help Center</Link></li>
+              <li><Link href="/support" className="transition-colors hover:text-white" data-testid="link-contact-us">Contact Us</Link></li>
             </ul>
           </div>
 
           <div className="text-center sm:text-left">
             <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-white">Legal</h4>
-            <ul className="space-y-2 sm:space-y-3 text-gray-400 text-sm sm:text-base">
-              <li><Link href="/terms-of-service" className="transition-colors hover:text-purple-400">Terms of Service</Link></li>
-              <li><Link href="/privacy-policy" className="transition-colors hover:text-purple-400">Privacy Policy</Link></li>
-              <li><Link href="/legal-disclaimer" className="transition-colors hover:text-purple-400">Legal Disclaimer</Link></li>
+            <ul className="space-y-2 sm:space-y-3 text-gray-300 text-sm sm:text-base">
+              <li><Link href="/terms-of-service" className="transition-colors hover:text-white" data-testid="link-terms">Terms of Service</Link></li>
+              <li><Link href="/privacy-policy" className="transition-colors hover:text-white" data-testid="link-privacy">Privacy Policy</Link></li>
+              <li><Link href="/legal-disclaimer" className="transition-colors hover:text-white" data-testid="link-disclaimer">Legal Disclaimer</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
+        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-700 text-center text-gray-400 text-sm sm:text-base">
           <p>© 2025 HomeBase. All rights reserved.</p>
         </div>
       </div>
