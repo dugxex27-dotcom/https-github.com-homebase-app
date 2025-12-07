@@ -26,7 +26,7 @@ export default function AuthenticatedLayout({ children }: AuthenticatedLayoutPro
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2, ease: 'easeInOut' }}
-          className="flex-1 pb-20 md:pb-0 md:ml-64"
+          className="flex-1 pb-20 md:pb-0 md:ml-44"
         >
           <ErrorBoundary>
             <Suspense fallback={<LoadingFallback variant="inline" />}>
