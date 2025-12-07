@@ -118,22 +118,22 @@ export default function ContractorReferral() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#1560a2' }}>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 p-6 rounded-lg" style={{ background: '#f2f2f2' }}>
-          <h1 className="text-3xl font-bold mb-2" style={{ color: '#1560a2' }}>Referral Program</h1>
-          <p className="text-lg" style={{ color: '#000000' }}>Share HomeBase and earn rewards</p>
+    <div className="min-h-screen bg-[#F5F5F5]">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Referral Program</h1>
+          <p className="text-gray-600 mt-1">Share HomeBase and earn rewards</p>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Referral Stats Card */}
-          <Card style={{ backgroundColor: '#f2f2f2' }}>
+          <Card className="bg-white rounded-xl shadow-sm border border-gray-100">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2" style={{ color: '#1560a2' }}>
-                <TrendingUp className="w-5 h-5" style={{ color: '#1560a2' }} />
+              <CardTitle className="flex items-center gap-2 text-gray-900">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
                 Your Referral Stats
                 {isPro && (
-                  <Badge className="ml-2 bg-red-600 text-white">
+                  <Badge className="ml-2 bg-blue-600 text-white">
                     <Crown className="w-3 h-3 mr-1" />
                     Pro
                   </Badge>
@@ -141,29 +141,29 @@ export default function ContractorReferral() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-lg p-4 text-center">
-                  <div className="text-3xl font-bold" style={{ color: '#1560a2' }}>{referralCount}</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600">{referralCount}</div>
                   <div className="text-sm text-gray-600">Active Referrals</div>
                 </div>
-                <div className="bg-white rounded-lg p-4 text-center">
-                  <div className="text-3xl font-bold" style={{ color: '#1560a2' }}>${earnedCredits}</div>
+                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600">${earnedCredits}</div>
                   <div className="text-sm text-gray-600">Credits Earned</div>
                 </div>
-                <div className="bg-white rounded-lg p-4 text-center">
-                  <div className="text-3xl font-bold text-green-600">${currentCredits}</div>
+                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl sm:text-3xl font-bold text-green-600">${currentCredits}</div>
                   <div className="text-sm text-gray-600">Applied Savings</div>
                 </div>
-                <div className="bg-white rounded-lg p-4 text-center">
-                  <div className="text-3xl font-bold" style={{ color: '#1560a2' }}>${referralCreditCap}</div>
+                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600">${referralCreditCap}</div>
                   <div className="text-sm text-gray-600">Monthly Cap</div>
                 </div>
               </div>
               
               {/* Progress to Cap */}
-              <div className="bg-white rounded-lg p-4">
+              <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium" style={{ color: '#1560a2' }}>Progress to Cap</span>
+                  <span className="text-sm font-medium text-gray-900">Progress to Cap</span>
                   <span className="text-sm text-gray-600">${earnedCredits} earned / ${referralCreditCap} cap</span>
                 </div>
                 <Progress value={Math.min(creditProgress, 100)} className="h-3" />
@@ -178,10 +178,10 @@ export default function ContractorReferral() {
           </Card>
 
           {/* Referral Rewards Card */}
-          <Card style={{ backgroundColor: '#f2f2f2' }}>
+          <Card className="bg-white rounded-xl shadow-sm border border-gray-100">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2" style={{ color: '#1560a2' }}>
-                <Gift className="w-5 h-5" style={{ color: '#1560a2' }} />
+              <CardTitle className="flex items-center gap-2 text-gray-900">
+                <Gift className="w-5 h-5 text-blue-600" />
                 Referral Rewards
               </CardTitle>
             </CardHeader>
@@ -192,23 +192,21 @@ export default function ContractorReferral() {
               
               {/* Referral Code */}
               <div>
-                <Label style={{ color: '#1560a2' }}>Your Referral Code</Label>
+                <Label className="text-gray-700">Your Referral Code</Label>
                 <div className="flex gap-2 mt-2">
                   <Input
                     value={referralCode}
                     readOnly
                     data-testid="input-contractor-referral-code"
-                    className="font-mono text-lg font-bold text-center"
-                    style={{ backgroundColor: 'white', color: '#1560a2' }}
+                    className="font-mono text-lg font-bold text-center bg-gray-50 text-blue-600"
                   />
                   <Button
                     onClick={() => copyToClipboard(referralCode)}
-                    variant="outline"
                     size="icon"
                     data-testid="button-copy-contractor-code"
                     title="Copy referral code"
                     type="button"
-                    style={{ backgroundColor: '#1560a2', color: 'white', borderColor: '#1560a2' }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
@@ -217,16 +215,15 @@ export default function ContractorReferral() {
 
               {/* Share Options */}
               <div>
-                <Label style={{ color: '#1560a2' }}>Share with Your Network</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2 p-3 rounded-lg" style={{ backgroundColor: '#1560a2' }}>
+                <Label className="text-gray-700">Share with Your Network</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2 p-3 rounded-lg bg-gray-50">
                   <Button
                     onClick={shareViaText}
                     variant="outline"
                     size="sm"
                     data-testid="button-contractor-share-text"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 bg-white"
                     type="button"
-                    style={{ backgroundColor: 'white', borderColor: 'white' }}
                   >
                     <MessageSquare className="w-4 h-4" />
                     Text Message
@@ -236,8 +233,7 @@ export default function ContractorReferral() {
                     variant="outline"
                     size="sm"
                     data-testid="button-contractor-share-whatsapp"
-                    className="flex items-center gap-2"
-                    style={{ color: '#25D366', backgroundColor: 'white', borderColor: 'white' }}
+                    className="flex items-center gap-2 bg-white text-[#25D366]"
                     type="button"
                   >
                     <Share2 className="w-4 h-4" />
@@ -248,8 +244,7 @@ export default function ContractorReferral() {
                     variant="outline"
                     size="sm"
                     data-testid="button-contractor-share-facebook"
-                    className="flex items-center gap-2"
-                    style={{ color: '#1877F2', backgroundColor: 'white', borderColor: 'white' }}
+                    className="flex items-center gap-2 bg-white text-[#1877F2]"
                     type="button"
                   >
                     <Share2 className="w-4 h-4" />
@@ -260,8 +255,7 @@ export default function ContractorReferral() {
                     variant="outline"
                     size="sm"
                     data-testid="button-contractor-share-twitter"
-                    className="flex items-center gap-2"
-                    style={{ color: '#1DA1F2', backgroundColor: 'white', borderColor: 'white' }}
+                    className="flex items-center gap-2 bg-white text-[#1DA1F2]"
                     type="button"
                   >
                     <Share2 className="w-4 h-4" />
@@ -272,28 +266,26 @@ export default function ContractorReferral() {
 
               {/* Copy Link */}
               <div>
-                <Label style={{ color: '#1560a2' }}>Referral Link</Label>
+                <Label className="text-gray-700">Referral Link</Label>
                 <div className="flex gap-2 mt-2">
                   <Input
                     value={referralLink}
                     readOnly
                     data-testid="input-contractor-referral-link"
-                    className="text-sm"
-                    style={{ backgroundColor: 'white', color: '#1560a2' }}
+                    className="text-sm bg-gray-50 text-blue-600"
                   />
                   <Button
                     onClick={() => copyToClipboard(referralLink)}
-                    variant="outline"
                     size="icon"
                     data-testid="button-copy-contractor-link"
                     title="Copy referral link"
                     type="button"
-                    style={{ backgroundColor: '#1560a2', color: 'white', borderColor: '#1560a2' }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-500 mt-1">
                   Share with fellow contractors and potential clients. They get the full HomeBase experience while helping you save $1!
                 </p>
               </div>
@@ -301,10 +293,10 @@ export default function ContractorReferral() {
           </Card>
 
           {/* Shareable Graphics */}
-          <Card style={{ backgroundColor: '#f2f2f2' }}>
+          <Card className="bg-white rounded-xl shadow-sm border border-gray-100">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2" style={{ color: '#1560a2' }}>
-                <ImageIcon className="w-5 h-5" style={{ color: '#1560a2' }} />
+              <CardTitle className="flex items-center gap-2 text-gray-900">
+                <ImageIcon className="w-5 h-5 text-blue-600" />
                 Shareable Graphics
               </CardTitle>
               <CardDescription>
@@ -313,23 +305,22 @@ export default function ContractorReferral() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-gray-600 mb-4">
-                Click download on any graphic below to get a personalized version with your referral code <span className="font-mono font-bold" style={{ color: '#1560a2' }}>{referralCode}</span> already included!
+                Click download on any graphic below to get a personalized version with your referral code <span className="font-mono font-bold text-blue-600">{referralCode}</span> already included!
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Instagram Post */}
-                <div className="bg-white rounded-lg p-3 space-y-2">
-                  <div className="aspect-square rounded overflow-hidden border-2 border-gray-200">
+                <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                  <div className="aspect-square rounded overflow-hidden border border-gray-200">
                     <img src={instagramPostImg} alt="Instagram Post Template" className="w-full h-full object-cover" />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-semibold text-sm" style={{ color: '#1560a2' }}>Instagram Post</h4>
-                    <p className="text-xs text-gray-600">Square format - 1080x1080px</p>
+                    <h4 className="font-semibold text-sm text-gray-900">Instagram Post</h4>
+                    <p className="text-xs text-gray-500">Square format - 1080x1080px</p>
                     <Button
                       onClick={() => downloadImageWithCode(instagramPostImg, `homebase-contractor-instagram-${referralCode}.png`, { x: 540, y: 950 })}
                       size="sm"
-                      className="w-full"
-                      style={{ backgroundColor: '#1560a2', color: 'white' }}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                       data-testid="button-download-contractor-instagram-post"
                       type="button"
                     >
@@ -340,18 +331,17 @@ export default function ContractorReferral() {
                 </div>
 
                 {/* Instagram Story */}
-                <div className="bg-white rounded-lg p-3 space-y-2">
-                  <div className="aspect-[9/16] rounded overflow-hidden border-2 border-gray-200 max-h-64">
+                <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                  <div className="aspect-[9/16] rounded overflow-hidden border border-gray-200 max-h-64">
                     <img src={instagramStoryImg} alt="Instagram Story Template" className="w-full h-full object-cover" />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-semibold text-sm" style={{ color: '#1560a2' }}>Instagram Story</h4>
-                    <p className="text-xs text-gray-600">Vertical format - 1080x1920px</p>
+                    <h4 className="font-semibold text-sm text-gray-900">Instagram Story</h4>
+                    <p className="text-xs text-gray-500">Vertical format - 1080x1920px</p>
                     <Button
                       onClick={() => downloadImageWithCode(instagramStoryImg, `homebase-contractor-story-${referralCode}.png`, { x: 540, y: 1750 })}
                       size="sm"
-                      className="w-full"
-                      style={{ backgroundColor: '#1560a2', color: 'white' }}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                       data-testid="button-download-contractor-instagram-story"
                       type="button"
                     >
@@ -362,18 +352,17 @@ export default function ContractorReferral() {
                 </div>
 
                 {/* Facebook/Twitter */}
-                <div className="bg-white rounded-lg p-3 space-y-2">
-                  <div className="aspect-[16/9] rounded overflow-hidden border-2 border-gray-200">
+                <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                  <div className="aspect-[16/9] rounded overflow-hidden border border-gray-200">
                     <img src={facebookTwitterImg} alt="Facebook/Twitter Template" className="w-full h-full object-cover" />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-semibold text-sm" style={{ color: '#1560a2' }}>Facebook/Twitter</h4>
-                    <p className="text-xs text-gray-600">Horizontal - 1200x630px</p>
+                    <h4 className="font-semibold text-sm text-gray-900">Facebook/Twitter</h4>
+                    <p className="text-xs text-gray-500">Horizontal - 1200x630px</p>
                     <Button
                       onClick={() => downloadImageWithCode(facebookTwitterImg, `homebase-contractor-facebook-${referralCode}.png`, { x: 600, y: 580 })}
                       size="sm"
-                      className="w-full"
-                      style={{ backgroundColor: '#1560a2', color: 'white' }}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                       data-testid="button-download-contractor-facebook-twitter"
                       type="button"
                     >
@@ -384,8 +373,8 @@ export default function ContractorReferral() {
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
-                <p className="text-sm text-blue-800">
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mt-4">
+                <p className="text-sm text-blue-700">
                   <strong>Tip:</strong> Download these graphics and share them on your social media. When other contractors or homeowners sign up using your code, you'll earn $1 off your subscription for each referral!
                 </p>
               </div>
