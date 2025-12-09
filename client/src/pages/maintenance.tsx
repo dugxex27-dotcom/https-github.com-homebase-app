@@ -3026,7 +3026,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
             Home Maintenance
           </h2>
-          <p className="text-gray-600">Keep your home in perfect condition with personalized maintenance recommendations.</p>
+          <p className="text-gray-600 max-w-xl mb-4">Keep your home in perfect condition with personalized maintenance recommendations.</p>
           
           {/* Contractor No Properties Onboarding */}
           {userRole === 'contractor' && houses.length === 0 && (
