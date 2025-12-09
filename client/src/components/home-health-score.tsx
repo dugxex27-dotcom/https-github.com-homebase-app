@@ -62,7 +62,7 @@ export default function HomeHealthScore({ houseId, houseName, compact = false }:
 
   if (compact) {
     return (
-      <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+      <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow" style={{ backgroundColor: '#eae6ff' }}>
         <CardContent className="p-4">
           <div className="text-center mb-3">
             <h3 className="font-semibold text-gray-900 text-sm truncate" data-testid={`text-house-name-${houseId}`}>
@@ -123,7 +123,7 @@ export default function HomeHealthScore({ houseId, houseName, compact = false }:
   }
 
   return (
-    <Card className="bg-white border border-gray-200 shadow-sm">
+    <Card className="border border-gray-200 shadow-sm" style={{ backgroundColor: '#eae6ff' }}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
