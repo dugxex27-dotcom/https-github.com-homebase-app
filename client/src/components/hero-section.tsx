@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import type { User } from "@shared/schema";
+import heroImage from "@assets/homebase-hero_1765253147963.png";
 
 export default function HeroSection() {
   const { user } = useAuth();
@@ -13,10 +14,20 @@ export default function HeroSection() {
       background: typedUser?.role === 'homeowner' 
         ? '#ffffff' 
         : '#1560a2', 
-      paddingTop: '40px', 
+      paddingTop: '0', 
       paddingBottom: '40px' 
     }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {typedUser?.role === 'homeowner' && (
+        <div className="w-full" style={{ aspectRatio: '2.5 / 1' }}>
+          <img 
+            src={heroImage} 
+            alt="HomeBase - Your digital home binder" 
+            className="w-full h-full object-cover"
+            data-testid="img-hero-banner"
+          />
+        </div>
+      )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ paddingTop: typedUser?.role === 'homeowner' ? '40px' : '40px' }}>
         <div className="text-center mb-2">
           {typedUser?.role !== 'homeowner' && (
             <Logo className={`h-[40px] sm:h-[48px] w-auto mx-auto block mb-8`} />
