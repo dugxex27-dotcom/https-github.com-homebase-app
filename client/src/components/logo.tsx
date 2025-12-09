@@ -1,5 +1,5 @@
 import { Link } from 'wouter';
-import logoIcon from '@assets/homebase-app-logo_1764513182226.png';
+import logoIcon from '@assets/homebase-app-logo-color_1765291048899.png';
 
 export default function Logo({ className = "h-[28px] sm:h-[32px] w-auto", clickable = true }: { className?: string; clickable?: boolean }) {
   const image = (
