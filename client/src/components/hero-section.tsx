@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import type { User } from "@shared/schema";
-import heroImage from "@assets/homebase-hero_1765253147963.png";
+import heroImage from "@assets/homebase-hero_1765253503208.png";
 
 export default function HeroSection() {
   const { user } = useAuth();
