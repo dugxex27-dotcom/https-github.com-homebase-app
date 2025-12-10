@@ -1,12 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Link } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
-import { Users, DollarSign, TrendingUp, Copy, Share2, CheckCircle, Clock, XCircle, AlertCircle, ArrowRight } from "lucide-react";
+import { Users, DollarSign, TrendingUp, Copy, Share2, CheckCircle, Clock, XCircle, AlertCircle, ArrowRight, CreditCard, ExternalLink, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import QRCode from "qrcode";
 import type { User as UserType } from "@shared/schema";
 
@@ -15,6 +16,30 @@ interface AgentProfile {
   userId: string;
   commissionRate: number;
   stripeAccountId: string | null;
+  stripeConnectAccountId: string | null;
+  stripeOnboardingComplete: boolean;
+}
+
+interface StripeConnectStatus {
+  connected: boolean;
+  accountId?: string;
+  onboardingComplete: boolean;
+  payoutsEnabled: boolean;
+  chargesEnabled: boolean;
+  detailsSubmitted?: boolean;
+}
+
+interface AgentPayout {
+  id: string;
+  affiliateReferralId: string;
+  agentId: string;
+  amount: string;
+  status: string;
+  stripeTransferId: string | null;
+  errorMessage: string | null;
+  paidAt: string | null;
+  createdAt: string;
+  refereeName: string;
 }
 
 interface AgentReferral {
@@ -41,6 +66,24 @@ export default function AgentDashboard() {
   const typedUser = user as UserType | undefined;
   const { toast } = useToast();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+  const [location] = useLocation();
+
+  // Check for Stripe success/refresh query params
+  useEffect(() => {
+    if (location.includes('stripe_success=true')) {
+      toast({
+        title: "Stripe Connected!",
+        description: "Your bank account has been successfully connected. You're ready to receive payouts!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/agent/stripe-connect/status"] });
+    } else if (location.includes('stripe_refresh=true')) {
+      toast({
+        title: "Continue Setup",
+        description: "Please complete your Stripe Connect onboarding to receive payouts.",
+        variant: "destructive",
+      });
+    }
+  }, [location, toast]);
 
   const { data: profile } = useQuery<AgentProfile>({
     queryKey: ["/api/agent/profile"],
@@ -60,6 +103,35 @@ export default function AgentDashboard() {
   const { data: verificationStatus } = useQuery<{ verificationStatus: string; reviewNotes?: string }>({
     queryKey: ["/api/agent/verification-status"],
     enabled: !!typedUser,
+  });
+
+  const { data: stripeStatus } = useQuery<StripeConnectStatus>({
+    queryKey: ["/api/agent/stripe-connect/status"],
+    enabled: !!typedUser,
+  });
+
+  const { data: payouts = [] } = useQuery<AgentPayout[]>({
+    queryKey: ["/api/agent/payouts"],
+    enabled: !!typedUser,
+  });
+
+  const connectStripeMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("/api/agent/stripe-connect/create-account", "POST");
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Connection Failed",
+        description: error.message || "Failed to start Stripe Connect onboarding",
+        variant: "destructive",
+      });
+    },
   });
 
   if (!typedUser) {
@@ -282,11 +354,121 @@ export default function AgentDashboard() {
                 Your referral code: <span className="font-mono font-bold">{typedUser.referralCode}</span>
               </p>
               <p className="text-xs text-muted-foreground">
-                Share this link with homeowners and contractors. You'll earn $10 after they maintain an active subscription for 4 consecutive months.
+                Share this link with homeowners and contractors. You'll earn $15 after they maintain an active subscription for 4 consecutive months.
               </p>
             </div>
           </CardContent>
         </Card>
+
+        {/* Stripe Connect Section */}
+        <Card className="mb-8 bg-white dark:bg-gray-800 border-emerald-200 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+              <CreditCard className="h-5 w-5" />
+              Payout Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {stripeStatus?.onboardingComplete ? (
+              <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+                <div>
+                  <p className="font-medium text-green-800">Bank Account Connected</p>
+                  <p className="text-sm text-green-600">Your payouts will be automatically deposited to your connected bank account.</p>
+                </div>
+              </div>
+            ) : stripeStatus?.connected && !stripeStatus?.onboardingComplete ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <AlertCircle className="h-6 w-6 text-yellow-600" />
+                  <div className="flex-1">
+                    <p className="font-medium text-yellow-800">Complete Your Setup</p>
+                    <p className="text-sm text-yellow-600">You need to finish connecting your bank account to receive payouts.</p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => connectStripeMutation.mutate()}
+                  disabled={connectStripeMutation.isPending}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                  data-testid="button-complete-stripe-setup"
+                >
+                  {connectStripeMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                  )}
+                  Complete Setup
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-muted-foreground">
+                  Connect your bank account to receive automatic $15 payouts when your referrals complete 4 months of paid subscription.
+                </p>
+                <Button 
+                  onClick={() => connectStripeMutation.mutate()}
+                  disabled={connectStripeMutation.isPending}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                  data-testid="button-connect-stripe"
+                >
+                  {connectStripeMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <CreditCard className="h-4 w-4 mr-2" />
+                  )}
+                  Connect Bank Account
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Payout History */}
+        {payouts.length > 0 && (
+          <Card className="mb-8 bg-white dark:bg-gray-800 border-emerald-200 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                <DollarSign className="h-5 w-5" />
+                Payout History
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {payouts.map((payout) => (
+                  <div 
+                    key={payout.id} 
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                    data-testid={`payout-${payout.id}`}
+                  >
+                    <div>
+                      <p className="font-medium">{payout.refereeName}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(payout.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-emerald-600">${parseFloat(payout.amount).toFixed(2)}</p>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        payout.status === 'paid' 
+                          ? 'bg-green-100 text-green-800' 
+                          : payout.status === 'pending' 
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : payout.status === 'failed'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {payout.status === 'paid' ? 'Paid' : 
+                         payout.status === 'pending' ? 'Pending' :
+                         payout.status === 'processing' ? 'Processing' :
+                         payout.status === 'failed' ? 'Failed' : payout.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Referrals List */}
         <Card className="bg-white dark:bg-gray-800 border-emerald-200 shadow-lg">
@@ -340,16 +522,6 @@ export default function AgentDashboard() {
           </CardContent>
         </Card>
 
-        {/* Stripe Connect Notice */}
-        {!profile?.stripeAccountId && (
-          <Card className="mt-6 border-yellow-200 bg-yellow-50">
-            <CardContent className="pt-6">
-              <p className="text-sm text-yellow-800">
-                <strong>Action Required:</strong> Connect your Stripe account to receive payouts. Set up will be available soon.
-              </p>
-            </CardContent>
-          </Card>
-        )}
       </main>
     </div>
   );

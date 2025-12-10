@@ -56,6 +56,9 @@ Preferred communication style: Simple, everyday language.
         - **Pro ($40/month)**: Full CRM access including client management, job scheduling, quotes, invoices, dashboard analytics, $40/month referral credit cap
     - Referral rewards system: $1 per active referral, capped by subscription tier.
 - **Real Estate Agent Affiliate System**: Agents earn referral commissions via unique codes and track earnings through a dedicated dashboard.
+    - **Automatic $15 Payouts**: When a referred user completes 4 consecutive months of paid subscription (after the 14-day trial), the system automatically triggers a $15 payout to the agent's connected bank account via Stripe Connect.
+    - **Stripe Connect Integration**: Agents can onboard their bank account through Stripe Connect Express. The system tracks onboarding completion and only processes payouts when the agent's account is fully set up.
+    - **Payout Tracking**: Database tracks each payout with status (pending, processing, paid, failed), Stripe transfer ID, and error messages. Agent dashboard displays complete payout history.
 - **CRM System for Contractors**: Includes manual lead management (CRUD) and a webhook integration system for automatic lead syncing from external CRMs, with company-scoped access control.
 - **Error Tracking and Monitoring**: Features a React ErrorBoundary, client-side error logger, and a database schema for tracking errors, accessible via an admin-only developer console.
 - **Stripe Billing Reconciliation**: Processes Stripe webhook events for subscription management, tracks subscription cycles, and provides users with a complete billing history UI.

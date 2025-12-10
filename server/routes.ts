@@ -227,6 +227,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           await storage.updateUserSubscriptionStatus(user.id, 'active');
           console.log('[STRIPE WEBHOOK] Invoice paid processed for user:', user.email);
+
+          // Check if this user was referred by an agent and update consecutive months
+          try {
+            const affiliateReferral = await storage.getAffiliateReferralByUserId(user.id);
+            if (affiliateReferral && affiliateReferral.status !== 'paid' && affiliateReferral.status !== 'voided') {
+              const newConsecutiveMonths = affiliateReferral.consecutiveMonthsPaid + 1;
+              
+              // Determine new status based on consecutive months
+              let newStatus = affiliateReferral.status;
+              if (newConsecutiveMonths === 1) newStatus = 'month_1';
+              else if (newConsecutiveMonths === 2) newStatus = 'month_2';
+              else if (newConsecutiveMonths === 3) newStatus = 'month_3';
+              else if (newConsecutiveMonths >= 4) newStatus = 'eligible';
+
+              // Update the affiliate referral
+              await storage.updateAffiliateReferral(affiliateReferral.id, {
+                consecutiveMonthsPaid: newConsecutiveMonths,
+                lastPaymentDate: new Date(),
+                firstPaymentDate: affiliateReferral.firstPaymentDate || new Date(),
+                status: newStatus,
+              });
+
+              console.log(`[AFFILIATE] Updated referral ${affiliateReferral.id}: ${newConsecutiveMonths} months paid, status: ${newStatus}`);
+
+              // Check if eligible for payout (4+ months) and hasn't been paid yet
+              if (newConsecutiveMonths >= 4 && affiliateReferral.status !== 'paid') {
+                // Check if there's already a payout record for this referral
+                const existingPayouts = await storage.getAffiliatePayouts(affiliateReferral.agentId);
+                const existingPayout = existingPayouts.find(p => p.affiliateReferralId === affiliateReferral.id);
+                
+                // Skip if already successfully paid
+                if (existingPayout?.status === 'paid') {
+                  console.log(`[AFFILIATE] Referral ${affiliateReferral.id} already paid, skipping`);
+                } else {
+                  console.log(`[AFFILIATE] Referral ${affiliateReferral.id} eligible for $15 payout (${newConsecutiveMonths} months)`);
+                  
+                  // Get the agent's profile to check Stripe Connect status
+                  const agentProfile = await storage.getAgentProfile(affiliateReferral.agentId);
+                  
+                  if (agentProfile?.stripeConnectAccountId && agentProfile.stripeOnboardingComplete) {
+                    // Create or update payout record
+                    let payout = existingPayout;
+                    if (!payout) {
+                      payout = await storage.createAffiliatePayout({
+                        affiliateReferralId: affiliateReferral.id,
+                        agentId: affiliateReferral.agentId,
+                        amount: "15.00",
+                        status: 'processing',
+                      });
+                    } else {
+                      // Update existing failed/pending payout to processing
+                      await storage.updateAffiliatePayout(payout.id, {
+                        status: 'processing',
+                        errorMessage: null,
+                      });
+                    }
+
+                    // Attempt to transfer to the agent's Stripe Connect account
+                    try {
+                      if (stripe) {
+                        const transfer = await stripe.transfers.create({
+                          amount: 1500, // $15.00 in cents
+                          currency: 'usd',
+                          destination: agentProfile.stripeConnectAccountId,
+                          metadata: {
+                            payoutId: payout.id,
+                            affiliateReferralId: affiliateReferral.id,
+                            agentId: affiliateReferral.agentId,
+                          },
+                        });
+
+                        // Update payout as successful
+                        await storage.updateAffiliatePayout(payout.id, {
+                          status: 'paid',
+                          stripeTransferId: transfer.id,
+                          paidAt: new Date(),
+                        });
+
+                        // Update the referral status
+                        await storage.updateAffiliateReferral(affiliateReferral.id, {
+                          status: 'paid',
+                        });
+
+                        console.log(`[AFFILIATE] Successfully transferred $15 to agent ${affiliateReferral.agentId}, transfer ID: ${transfer.id}`);
+                      }
+                    } catch (transferError: any) {
+                      console.error(`[AFFILIATE] Transfer failed for payout ${payout.id}:`, transferError.message);
+                      await storage.updateAffiliatePayout(payout.id, {
+                        status: 'failed',
+                        errorMessage: transferError.message,
+                      });
+                    }
+                  } else if (!existingPayout) {
+                    // Agent doesn't have Stripe Connect set up - create pending payout (only if not already created)
+                    await storage.createAffiliatePayout({
+                      affiliateReferralId: affiliateReferral.id,
+                      agentId: affiliateReferral.agentId,
+                      amount: "15.00",
+                      status: 'pending',
+                      errorMessage: 'Agent has not completed Stripe Connect onboarding',
+                    });
+
+                    // Update referral status
+                    await storage.updateAffiliateReferral(affiliateReferral.id, {
+                      status: 'payout_pending',
+                    });
+
+                    console.log(`[AFFILIATE] Created pending payout for agent ${affiliateReferral.agentId} - Stripe Connect not set up`);
+                  } else {
+                    console.log(`[AFFILIATE] Pending payout already exists for referral ${affiliateReferral.id}, waiting for agent to complete Stripe onboarding`);
+                  }
+                }
+              }
+            }
+          } catch (affiliateError: any) {
+            console.error('[AFFILIATE] Error processing affiliate referral:', affiliateError.message);
+            // Don't fail the webhook for affiliate errors
+          }
+
           break;
         }
 
@@ -6036,6 +6155,168 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching agent stats:", error);
       res.status(500).json({ message: "Failed to fetch agent stats" });
+    }
+  });
+
+  // Stripe Connect onboarding for agents
+  app.post("/api/agent/stripe-connect/create-account", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      const userRole = req.session?.user?.role;
+
+      if (userRole !== 'agent') {
+        return res.status(403).json({ message: "Forbidden: Agent access only" });
+      }
+
+      if (!stripe) {
+        return res.status(500).json({ message: "Stripe not configured" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const agentProfile = await storage.getAgentProfile(userId);
+      if (!agentProfile) {
+        return res.status(404).json({ message: "Agent profile not found" });
+      }
+
+      // Check if agent already has a Stripe Connect account
+      if (agentProfile.stripeConnectAccountId) {
+        // Create new account link for existing account (in case onboarding wasn't completed)
+        const accountLink = await stripe.accountLinks.create({
+          account: agentProfile.stripeConnectAccountId,
+          refresh_url: `${process.env.REPLIT_DOMAINS?.split(',')[0] ? 'https://' + process.env.REPLIT_DOMAINS.split(',')[0] : 'http://localhost:5000'}/agent-dashboard?stripe_refresh=true`,
+          return_url: `${process.env.REPLIT_DOMAINS?.split(',')[0] ? 'https://' + process.env.REPLIT_DOMAINS.split(',')[0] : 'http://localhost:5000'}/agent-dashboard?stripe_success=true`,
+          type: 'account_onboarding',
+        });
+        return res.json({ url: accountLink.url, accountId: agentProfile.stripeConnectAccountId });
+      }
+
+      // Create a new Stripe Connect Express account
+      const account = await stripe.accounts.create({
+        type: 'express',
+        country: 'US',
+        email: user.email || undefined,
+        capabilities: {
+          transfers: { requested: true },
+        },
+        business_type: 'individual',
+        metadata: {
+          userId: userId,
+          agentProfileId: agentProfile.id,
+        },
+      });
+
+      // Save the Stripe Connect account ID to the agent profile
+      await storage.updateAgentProfile(userId, {
+        stripeConnectAccountId: account.id,
+        stripeOnboardingComplete: false,
+      });
+
+      // Create an account link for onboarding
+      const accountLink = await stripe.accountLinks.create({
+        account: account.id,
+        refresh_url: `${process.env.REPLIT_DOMAINS?.split(',')[0] ? 'https://' + process.env.REPLIT_DOMAINS.split(',')[0] : 'http://localhost:5000'}/agent-dashboard?stripe_refresh=true`,
+        return_url: `${process.env.REPLIT_DOMAINS?.split(',')[0] ? 'https://' + process.env.REPLIT_DOMAINS.split(',')[0] : 'http://localhost:5000'}/agent-dashboard?stripe_success=true`,
+        type: 'account_onboarding',
+      });
+
+      console.log('[STRIPE CONNECT] Created account for agent:', userId, 'Account ID:', account.id);
+      res.json({ url: accountLink.url, accountId: account.id });
+    } catch (error: any) {
+      console.error("Error creating Stripe Connect account:", error);
+      res.status(500).json({ message: "Failed to create Stripe Connect account", error: error.message });
+    }
+  });
+
+  // Check Stripe Connect account status
+  app.get("/api/agent/stripe-connect/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      const userRole = req.session?.user?.role;
+
+      if (userRole !== 'agent') {
+        return res.status(403).json({ message: "Forbidden: Agent access only" });
+      }
+
+      if (!stripe) {
+        return res.status(500).json({ message: "Stripe not configured" });
+      }
+
+      const agentProfile = await storage.getAgentProfile(userId);
+      if (!agentProfile) {
+        return res.status(404).json({ message: "Agent profile not found" });
+      }
+
+      if (!agentProfile.stripeConnectAccountId) {
+        return res.json({ 
+          connected: false, 
+          onboardingComplete: false,
+          payoutsEnabled: false,
+          chargesEnabled: false,
+        });
+      }
+
+      // Get the Stripe account details
+      const account = await stripe.accounts.retrieve(agentProfile.stripeConnectAccountId);
+      
+      const onboardingComplete = account.details_submitted && account.payouts_enabled;
+      
+      // Update the agent profile if onboarding status changed
+      if (onboardingComplete && !agentProfile.stripeOnboardingComplete) {
+        await storage.updateAgentProfile(userId, {
+          stripeOnboardingComplete: true,
+        });
+      }
+
+      res.json({
+        connected: true,
+        accountId: agentProfile.stripeConnectAccountId,
+        onboardingComplete: onboardingComplete,
+        payoutsEnabled: account.payouts_enabled,
+        chargesEnabled: account.charges_enabled,
+        detailsSubmitted: account.details_submitted,
+      });
+    } catch (error: any) {
+      console.error("Error checking Stripe Connect status:", error);
+      res.status(500).json({ message: "Failed to check Stripe Connect status", error: error.message });
+    }
+  });
+
+  // Get agent payout history
+  app.get("/api/agent/payouts", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      const userRole = req.session?.user?.role;
+
+      if (userRole !== 'agent') {
+        return res.status(403).json({ message: "Forbidden: Agent access only" });
+      }
+
+      const payouts = await storage.getAffiliatePayouts(userId);
+      
+      // Join with referral data to get referee details
+      const payoutsWithDetails = await Promise.all(
+        payouts.map(async (payout) => {
+          const referral = await storage.getAffiliateReferral(payout.affiliateReferralId);
+          let refereeName = 'Unknown';
+          if (referral) {
+            const user = await storage.getUser(referral.referredUserId);
+            refereeName = user ? `${user.firstName} ${user.lastName}`.trim() : 'Unknown';
+          }
+          return {
+            ...payout,
+            refereeName,
+          };
+        })
+      );
+
+      res.json(payoutsWithDetails);
+    } catch (error) {
+      console.error("Error fetching agent payouts:", error);
+      res.status(500).json({ message: "Failed to fetch agent payouts" });
     }
   });
 

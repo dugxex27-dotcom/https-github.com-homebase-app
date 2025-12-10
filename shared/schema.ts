@@ -1356,12 +1356,12 @@ export const insertSubscriptionCycleEventSchema = createInsertSchema(subscriptio
 export type InsertSubscriptionCycleEvent = z.infer<typeof insertSubscriptionCycleEventSchema>;
 export type SubscriptionCycleEvent = typeof subscriptionCycleEvents.$inferSelect;
 
-// Affiliate payouts table - tracks $10 payments to agents when referrals hit 4-month milestone
+// Affiliate payouts table - tracks $15 payments to agents when referrals hit 4-month milestone
 export const affiliatePayouts = pgTable("affiliate_payouts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   affiliateReferralId: varchar("affiliate_referral_id").notNull().unique().references(() => affiliateReferrals.id, { onDelete: 'cascade' }),
   agentId: varchar("agent_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull().default("10.00"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull().default("15.00"),
   status: text("status").notNull().default("pending"), // 'pending', 'processing', 'paid', 'failed'
   stripeTransferId: varchar("stripe_transfer_id"),
   errorMessage: text("error_message"),
