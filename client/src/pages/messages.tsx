@@ -65,7 +65,9 @@ export default function Messages() {
     description: z.string().min(1, "Description is required"),
     scope: z.string().min(1, "Scope of work is required"),
     serviceType: z.string().min(1, "Service type is required"),
-    estimatedCost: z.string().min(1, "Estimated cost is required"),
+    estimatedCost: z.string()
+      .min(1, "Estimated cost is required")
+      .refine(val => !isNaN(parseFloat(val)) && parseFloat(val) >= 0, "Must be a valid positive number"),
     estimatedDuration: z.string().min(1, "Estimated duration is required"),
     validUntil: z.string().min(1, "Valid until date is required"),
     materials: z.string().optional(),
