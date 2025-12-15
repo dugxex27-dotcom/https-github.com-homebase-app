@@ -3166,14 +3166,14 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                   </Select>
                 </div>
                 
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 items-center sm:items-start">
                   {/* Contractor constraint message */}
                   {userRole === 'contractor' && houses.length >= 1 && (
                     <div className="text-sm p-3 rounded-lg bg-blue-50 border-2 border-blue-200 text-blue-700 mb-2">
                       Contractors can track maintenance for one personal property
                     </div>
                   )}
-                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-center sm:items-start">
                     {/* Only show Add House button for homeowners or contractors with no houses */}
                     {userRole === 'homeowner' && (
                       <Button 
