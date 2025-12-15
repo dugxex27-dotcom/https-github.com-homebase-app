@@ -3137,8 +3137,8 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
           {/* Property Selector Card - Only show when properties exist */}
           {houses.length > 0 && (
             <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                <div className="flex-1">
+              <div className="flex flex-col gap-4 items-center text-center">
+                <div className="w-full max-w-md">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Building className="inline w-4 h-4 mr-1.5 text-purple-600" />
                     Select Property
@@ -3166,21 +3166,21 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                   </Select>
                 </div>
                 
-                <div className="flex flex-col gap-3 items-center sm:items-start">
+                <div className="flex flex-col gap-3 items-center">
                   {/* Contractor constraint message */}
                   {userRole === 'contractor' && houses.length >= 1 && (
                     <div className="text-sm p-3 rounded-lg bg-blue-50 border-2 border-blue-200 text-blue-700 mb-2">
                       Contractors can track maintenance for one personal property
                     </div>
                   )}
-                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-center sm:items-start">
+                  <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
                     {/* Only show Add House button for homeowners or contractors with no houses */}
                     {userRole === 'homeowner' && (
                       <Button 
                         variant="outline" 
                         size="lg" 
                         onClick={handleAddNewHouse}
-                        className="whitespace-nowrap text-base w-full sm:w-auto" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                        className="whitespace-nowrap text-base" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
                       >
                         <Plus className="w-5 h-5 mr-2" />
                         Add House
@@ -3194,7 +3194,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                           const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
                           if (selectedHouse) handleEditHouse(selectedHouse);
                         }}
-                        className="whitespace-nowrap text-base w-full sm:w-auto" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                        className="whitespace-nowrap text-base" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
                       >
                         <Edit className="w-5 h-5 mr-2" />
                         Edit
@@ -3208,7 +3208,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                           const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
                           if (selectedHouse) handleDeleteHouse(selectedHouse);
                         }}
-                        className="whitespace-nowrap text-base w-full sm:w-auto" style={{ backgroundColor: '#dc2626', color: 'white', borderColor: '#dc2626' }}
+                        className="whitespace-nowrap text-base" style={{ backgroundColor: '#dc2626', color: 'white', borderColor: '#dc2626' }}
                       >
                         <Trash2 className="w-5 h-5 mr-2" />
                         Delete
@@ -3218,13 +3218,13 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                   
                   {selectedHouseId && houses.length > 0 && (
                     <div className="text-base mt-2" style={{ color: '#2c0f5b' }}>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center gap-2">
                         <MapPin className="w-5 h-5" style={{ color: '#2c0f5b' }} />
                         <span className="font-medium" style={{ color: '#2c0f5b' }}>
                           {CLIMATE_ZONES.find(z => z.value === selectedZone)?.label || 'Loading region...'}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center justify-center gap-2 mt-2">
                         <Home className="w-5 h-5" style={{ color: '#2c0f5b' }} />
                         <span className="font-medium" style={{ color: '#2c0f5b' }}>5 systems configured</span>
                       </div>
