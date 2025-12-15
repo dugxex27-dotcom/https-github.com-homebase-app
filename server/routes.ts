@@ -65,6 +65,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.error('REGISTER ROUTES CALLED - NEW CODE VERSION 2025-11-02-21:28');
   console.error('========================================');
   
+  // Health check endpoint for monitoring
+  app.get('/api/health', async (_req, res) => {
+    try {
+      // Quick database connectivity check
+      await pool.query('SELECT 1');
+      res.json({ 
+        status: 'healthy', 
+        timestamp: new Date().toISOString(),
+        database: 'connected'
+      });
+    } catch (error) {
+      res.status(503).json({ 
+        status: 'unhealthy', 
+        timestamp: new Date().toISOString(),
+        database: 'disconnected'
+      });
+    }
+  });
+  
   // Secure logo upload endpoint with authentication
   console.error('[STARTUP] Registering /api/upload-logo-raw endpoint');
   app.post('/api/upload-logo-raw', uploadLimiter, isAuthenticated, requireRole(['contractor']), async (req: any, res) => {
