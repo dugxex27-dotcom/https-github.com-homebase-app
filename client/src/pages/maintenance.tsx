@@ -3530,7 +3530,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                     </div>
                     <div>
                       <h2 className="text-xl font-bold text-center" style={{ color: '#2c0f5b' }}>System-Based Maintenance Recommendations</h2>
-                      <p className="text-sm" style={{ color: '#b6a6f4' }}>
+                      <p className="text-sm text-center" style={{ color: '#b6a6f4' }}>
                         Personalized suggestions based on your equipment age
                       </p>
                     </div>
