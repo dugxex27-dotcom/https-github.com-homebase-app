@@ -3659,13 +3659,11 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
         {/* Appliances Section */}
         {selectedHouseId && (
           <div className="mt-12">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h2 className="text-2xl font-bold mb-2" style={{ color: '#2c0f5b' }}>Home Appliances</h2>
-                <p className="text-lg" style={{ color: '#2c0f5b' }}>
-                  Track appliances, manuals, and maintenance schedules
-                </p>
-              </div>
+            <div className="text-center space-y-3 mb-6">
+              <h2 className="text-2xl font-bold" style={{ color: '#2c0f5b' }}>Home Appliances</h2>
+              <p className="text-lg" style={{ color: '#2c0f5b' }}>
+                Track appliances, manuals, and maintenance schedules
+              </p>
               <Button
                 onClick={() => {
                   setEditingAppliance(null);
