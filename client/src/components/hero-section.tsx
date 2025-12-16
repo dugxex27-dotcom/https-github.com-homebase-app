@@ -48,7 +48,7 @@ export default function HeroSection() {
             {typedUser?.role === 'homeowner' ? (
               <>
                 <span className="hidden md:inline">Welcome! Your Home's<br />Digital Record Starts Here</span>
-                <span className="md:hidden">Welcome! Your Home's Digital<br />Record Starts Here</span>
+                <span className="md:hidden">Welcome! Your Home's<br />Digital Record Starts Here</span>
               </>
             ) : (
               <>Your Business{" "}
