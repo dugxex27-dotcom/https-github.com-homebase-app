@@ -3023,7 +3023,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 text-center">
             Home Maintenance
           </h2>
-          <p className="text-gray-600 max-w-xl mb-4 text-center">Every property you own, every system inside it, and every task that keeps it running — visible at a glance. Track your Home Health Score, log upgrades and appliances, plan tasks, and see exactly what you're saving by doing it yourself.</p>
+          <p className="text-gray-600 max-w-xl mb-4 text-center">Add your property, document systems and features, log appliances, and record maintenance — everything that keeps your home healthy and up to date.</p>
           
           {/* Contractor No Properties Onboarding */}
           {userRole === 'contractor' && houses.length === 0 && (
