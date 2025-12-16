@@ -821,7 +821,7 @@ export default function ContractorProfile() {
       console.log('[LOGO UPLOAD] Using email:', email);
       console.log('[LOGO UPLOAD] Sending POST to /api/upload-logo-raw');
       
-      // DIRECT upload - no session needed, uses email lookup, bypasses ORM
+      // DIRECT upload - with session credentials
       const uploadResponse = await fetch('/api/upload-logo-raw', {
         method: 'POST',
         body: JSON.stringify({ 
@@ -829,6 +829,7 @@ export default function ContractorProfile() {
           email: email
         }),
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
       
       console.log('[LOGO UPLOAD] Response status:', uploadResponse.status);
