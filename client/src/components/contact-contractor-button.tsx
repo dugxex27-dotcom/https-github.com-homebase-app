@@ -131,35 +131,35 @@ export default function ContactContractorButton({
           Contact
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" style={{ backgroundColor: '#f2f2f2' }}>
         <DialogHeader>
-          <DialogTitle style={{ color: '#ffffff' }}>Contact {contractor.name}</DialogTitle>
-          <DialogDescription style={{ color: '#ffffff' }}>
+          <DialogTitle style={{ color: '#2c0f5b' }}>Contact {contractor.name}</DialogTitle>
+          <DialogDescription style={{ color: '#666666' }}>
             Send a message to {contractor.name} from {contractor.company} to discuss your project needs.
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="subject" style={{ color: '#ffffff' }}>Subject</Label>
+            <Label htmlFor="subject" style={{ color: '#2c0f5b' }}>Subject</Label>
             <Input
               id="subject"
               placeholder="What would you like to discuss?"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              style={{ color: '#ffffff' }}
+              style={{ color: '#2c0f5b', backgroundColor: 'white' }}
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="message" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-white text-[#ffffff]">Message</Label>
+            <Label htmlFor="message" style={{ color: '#2c0f5b' }}>Message</Label>
             <Textarea
               id="message"
               placeholder="Describe your project needs, timeline, budget, or any questions you have..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
-              style={{ color: '#ffffff' }}
+              style={{ color: '#2c0f5b', backgroundColor: 'white' }}
             />
           </div>
         </div>
@@ -169,7 +169,7 @@ export default function ContactContractorButton({
             variant="outline" 
             onClick={() => setIsOpen(false)}
             disabled={createConversationMutation.isPending}
-            style={{ color: '#ffffff' }}
+            style={{ color: '#2c0f5b', borderColor: '#2c0f5b' }}
           >
             Cancel
           </Button>
