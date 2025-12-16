@@ -153,7 +153,7 @@ export default function Header() {
 
   return (
     <header className="bg-white border-b border-[#fafafa] sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+      <div className="w-full px-3 sm:px-4 lg:px-6">
         <div className="flex justify-between items-center h-14 sm:h-16">
           <div className="flex items-center gap-2">
             {isAuthenticated && typedUser && (
@@ -411,7 +411,7 @@ export default function Header() {
 
       {isTrialActive && (
         <div className="bg-purple-50 border-b border-purple-200">
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-2">
+          <div className="w-full px-3 sm:px-4 lg:px-6 py-2">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
                 <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 text-purple-600" />
