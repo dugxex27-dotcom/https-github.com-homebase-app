@@ -58,7 +58,7 @@ export default function HeroSection() {
           
           <p className="text-xl mb-4 max-w-3xl mx-auto leading-relaxed font-semibold" style={{ color: typedUser?.role === 'homeowner' ? '#2c0f5b' : '#9ed0ef' }}>
             {typedUser?.role === 'homeowner' ? (
-              'The Carfax-style home history your house has always needed.'
+              'A complete, living record of your home.'
             ) : (
               'Grow your contracting business by connecting with quality clients, showcasing your expertise, and managing your professional reputation in one powerful platform.'
             )}
@@ -66,9 +66,7 @@ export default function HeroSection() {
           
           {typedUser?.role === 'homeowner' && (
             <>
-              <p className="text-lg mb-8 max-w-3xl mx-auto leading-relaxed" style={{ color: '#2c0f5b' }}>
-                Track repairs, upgrades, and maintenance in one simple, organized place — so you always know the true story of your home.
-              </p>
+              <p className="text-lg mb-8 max-w-3xl mx-auto leading-relaxed" style={{ color: '#2c0f5b' }}>Create a clear, living record of your home — from systems and appliances to maintenance, upgrades, and health.</p>
               <Link href="/maintenance">
                 <Button 
                   size="lg"
