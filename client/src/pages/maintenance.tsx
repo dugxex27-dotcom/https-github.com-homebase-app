@@ -3178,14 +3178,14 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                       Contractors can track maintenance for one personal property
                     </div>
                   )}
-                  <div className="flex flex-col sm:flex-row gap-3 items-center justify-center w-full max-w-md sm:max-w-none">
+                  <div className="flex flex-col gap-3 w-full max-w-md">
                     {/* Only show Add House button for homeowners or contractors with no houses */}
                     {userRole === 'homeowner' && (
                       <Button 
                         variant="outline" 
                         size="lg" 
                         onClick={handleAddNewHouse}
-                        className="whitespace-nowrap text-base w-full sm:w-auto" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                        className="whitespace-nowrap text-base w-full" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
                       >
                         <Plus className="w-5 h-5 mr-2" />
                         Add House
@@ -3199,7 +3199,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                           const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
                           if (selectedHouse) handleEditHouse(selectedHouse);
                         }}
-                        className="whitespace-nowrap text-base w-full sm:w-auto" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
+                        className="whitespace-nowrap text-base w-full" style={{ backgroundColor: '#2c0f5b', color: 'white', borderColor: '#2c0f5b' }}
                       >
                         <Edit className="w-5 h-5 mr-2" />
                         Edit
@@ -3213,7 +3213,7 @@ type ApplianceManualFormData = z.infer<typeof applianceManualFormSchema>;
                           const selectedHouse = houses.find((h: House) => h.id === selectedHouseId);
                           if (selectedHouse) handleDeleteHouse(selectedHouse);
                         }}
-                        className="whitespace-nowrap text-base w-full sm:w-auto" style={{ backgroundColor: '#dc2626', color: 'white', borderColor: '#dc2626' }}
+                        className="whitespace-nowrap text-base w-full" style={{ backgroundColor: '#dc2626', color: 'white', borderColor: '#dc2626' }}
                       >
                         <Trash2 className="w-5 h-5 mr-2" />
                         Delete
