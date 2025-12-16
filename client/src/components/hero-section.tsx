@@ -56,13 +56,11 @@ export default function HeroSection() {
             )}
           </h1>
           
-          <p className="text-xl mb-4 max-w-3xl mx-auto leading-relaxed font-semibold" style={{ color: typedUser?.role === 'homeowner' ? '#2c0f5b' : '#9ed0ef' }}>
-            {typedUser?.role === 'homeowner' ? (
-              'A complete, living record of your home.'
-            ) : (
-              'Grow your contracting business by connecting with quality clients, showcasing your expertise, and managing your professional reputation in one powerful platform.'
-            )}
-          </p>
+          {typedUser?.role === 'contractor' && (
+            <p className="text-xl mb-4 max-w-3xl mx-auto leading-relaxed font-semibold" style={{ color: '#9ed0ef' }}>
+              Grow your contracting business by connecting with quality clients, showcasing your expertise, and managing your professional reputation in one powerful platform.
+            </p>
+          )}
           
           {typedUser?.role === 'homeowner' && (
             <>
