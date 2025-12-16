@@ -6269,18 +6269,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('[DEBUG] Company data:', JSON.stringify(company, null, 2));
           if (company) {
             console.log('[DEBUG] Company experience value:', company.experience, 'type:', typeof company.experience);
-            // Build a contractor-like object from user and company data
+            // Try to get contractor record for this user to get correct contact info
+            const contractorRecord = await storage.getContractorByUserId(user.id);
+            console.log('[DEBUG] Contractor record found:', !!contractorRecord, 'phone:', contractorRecord?.phone);
+            // Build a contractor-like object - use contractor record for contact info, company for business profile
             contractor = {
               id: user.id,
-              name: user.name || '',
+              name: contractorRecord?.name || user.name || '',
               company: company.name || user.name || '',
-              email: user.email || '',
-              phone: company.phone || '',
-              address: company.address || '',
-              city: company.city || '',
-              state: company.state || '',
-              postalCode: company.postalCode || '',
-              location: company.location || `${company.city || ''}, ${company.state || ''}`.trim() || '',
+              email: contractorRecord?.email || user.email || '',
+              phone: contractorRecord?.phone || company.phone || '',
+              address: contractorRecord?.address || company.address || '',
+              city: contractorRecord?.city || company.city || '',
+              state: contractorRecord?.state || company.state || '',
+              postalCode: contractorRecord?.postalCode || company.postalCode || '',
+              location: company.location || `${contractorRecord?.city || company.city || ''}, ${contractorRecord?.state || company.state || ''}`.trim() || '',
               services: company.services || [],
               rating: company.rating || '5.0',
               reviewCount: company.reviewCount || 0,
@@ -6330,7 +6333,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const company = await storage.getCompany(companyId);
         if (company) {
           console.log('[DEBUG] Merging company data - experience:', company.experience, 'licenseNumber:', company.licenseNumber);
-          // Company data takes precedence for profile fields
+          // Contractors table is source of truth for contact info (phone, email, address)
+          // Company table is source of truth for business profile (bio, services, photos, etc.)
           contractorWithCompanyData = {
             ...contractor,
             experience: company.experience || (contractor as any).experience || 0,
@@ -6341,11 +6345,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             isLicensed: !!(company.licenseNumber || (contractor as any).licenseNumber),
             bio: company.bio || (contractor as any).bio || '',
             services: company.services || (contractor as any).services || [],
-            phone: company.phone || (contractor as any).phone || '',
-            address: company.address || (contractor as any).address || '',
-            city: company.city || (contractor as any).city || '',
-            state: company.state || (contractor as any).state || '',
-            postalCode: company.postalCode || (contractor as any).postalCode || '',
+            // Contact info: contractors table takes precedence
+            phone: (contractor as any).phone || company.phone || '',
+            address: (contractor as any).address || company.address || '',
+            city: (contractor as any).city || company.city || '',
+            state: (contractor as any).state || company.state || '',
+            postalCode: (contractor as any).postalCode || company.postalCode || '',
             website: company.website || (contractor as any).website || '',
             facebook: company.facebook || (contractor as any).facebook || '',
             instagram: company.instagram || (contractor as any).instagram || '',

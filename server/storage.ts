@@ -79,6 +79,7 @@ export interface IStorage {
     serviceRadius?: number;
   }): Promise<Contractor[]>;
   getContractor(id: string): Promise<Contractor | undefined>;
+  getContractorByUserId(userId: string): Promise<Contractor | undefined>;
   createContractor(contractor: InsertContractor): Promise<Contractor>;
   
   // Contractor license methods
@@ -1139,6 +1140,15 @@ export class MemStorage implements IStorage {
 
   async getContractor(id: string): Promise<Contractor | undefined> {
     return this.contractors.get(id);
+  }
+
+  async getContractorByUserId(userId: string): Promise<Contractor | undefined> {
+    for (const contractor of this.contractors.values()) {
+      if ((contractor as any).userId === userId) {
+        return contractor;
+      }
+    }
+    return undefined;
   }
 
   async createContractor(contractor: InsertContractor): Promise<Contractor> {
@@ -7533,6 +7543,12 @@ class DbStorage implements IStorage {
   // Get contractor by ID - DATABASE BACKED
   async getContractor(id: string): Promise<Contractor | undefined> {
     const result = await db.select().from(contractors).where(eq(contractors.id, id)).limit(1);
+    return result[0];
+  }
+
+  // Get contractor by user ID - DATABASE BACKED
+  async getContractorByUserId(userId: string): Promise<Contractor | undefined> {
+    const result = await db.select().from(contractors).where(eq(contractors.userId, userId)).limit(1);
     return result[0];
   }
 
