@@ -292,7 +292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Secure logo upload endpoint with authentication
   console.error('[STARTUP] Registering /api/upload-logo-raw endpoint');
-  app.post('/api/upload-logo-raw', uploadLimiter, isAuthenticated, requireRole(['contractor']), async (req: any, res) => {
+  app.post('/api/upload-logo-raw', uploadLimiter, isAuthenticated, requireRole('contractor'), async (req: any, res) => {
     try {
       console.error('[SECURE-UPLOAD] Request received from authenticated user:', req.session?.user?.id);
       const { imageData } = req.body;
@@ -776,7 +776,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ========================================
 
   // Create Stripe Connect account for contractor
-  app.post('/api/contractor/stripe-connect/create', isAuthenticated, requireRole(['contractor']), async (req: any, res) => {
+  app.post('/api/contractor/stripe-connect/create', isAuthenticated, requireRole('contractor'), async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: 'Stripe not configured' });
     }
@@ -827,7 +827,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create Stripe Connect onboarding link
-  app.post('/api/contractor/stripe-connect/onboarding-link', isAuthenticated, requireRole(['contractor']), async (req: any, res) => {
+  app.post('/api/contractor/stripe-connect/onboarding-link', isAuthenticated, requireRole('contractor'), async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: 'Stripe not configured' });
     }
@@ -860,7 +860,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get Stripe Connect account status
-  app.get('/api/contractor/stripe-connect/status', isAuthenticated, requireRole(['contractor']), async (req: any, res) => {
+  app.get('/api/contractor/stripe-connect/status', isAuthenticated, requireRole('contractor'), async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: 'Stripe not configured' });
     }
@@ -909,7 +909,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create Stripe Connect dashboard link for contractor
-  app.post('/api/contractor/stripe-connect/dashboard-link', isAuthenticated, requireRole(['contractor']), async (req: any, res) => {
+  app.post('/api/contractor/stripe-connect/dashboard-link', isAuthenticated, requireRole('contractor'), async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: 'Stripe not configured' });
     }
@@ -935,7 +935,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create payment link for invoice (contractor sends to homeowner)
-  app.post('/api/crm/invoices/:invoiceId/payment-link', isAuthenticated, requireRole(['contractor']), async (req: any, res) => {
+  app.post('/api/crm/invoices/:invoiceId/payment-link', isAuthenticated, requireRole('contractor'), async (req: any, res) => {
     if (!stripe) {
       return res.status(500).json({ error: 'Stripe not configured' });
     }
