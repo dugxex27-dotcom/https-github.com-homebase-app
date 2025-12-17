@@ -3,8 +3,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import type { User } from "@shared/schema";
-import heroImage from "@assets/homebase-hp-hero-desktop-nocopy_1765926450284.png";
-import heroImageMobile from "@assets/homebase-homeowner-hero-mobile_1765324886400.png";
 
 export default function HeroSection() {
   const { user } = useAuth();
@@ -18,96 +16,7 @@ export default function HeroSection() {
       paddingTop: '0', 
       paddingBottom: '40px' 
     }}>
-      {typedUser?.role === 'homeowner' && (
-        <>
-          {/* Desktop Hero with Text Overlay */}
-          <div className="w-full hidden md:block relative" style={{ aspectRatio: '2.5 / 1' }}>
-            <img 
-              src={heroImage} 
-              alt="HomeBase - Your digital home fingerprint" 
-              className="w-full h-full object-cover"
-              data-testid="img-hero-banner"
-            />
-            {/* Text Overlay */}
-            <div 
-              className="absolute inset-0 flex flex-col justify-center"
-              style={{ paddingLeft: '5%', paddingRight: '50%' }}
-            >
-              {/* Eyebrow */}
-              <p 
-                className="mb-2"
-                style={{ 
-                  fontFamily: "'Quicksand', sans-serif",
-                  fontWeight: 700,
-                  fontSize: '14px',
-                  color: '#ffffff',
-                  letterSpacing: '0.5px'
-                }}
-                data-testid="text-hero-eyebrow"
-              >
-                Welcome to HomeBase
-              </p>
-              
-              {/* Headline */}
-              <h1 
-                className="mb-4"
-                style={{ 
-                  fontFamily: "'Quicksand', sans-serif",
-                  fontWeight: 700,
-                  fontSize: '32px',
-                  lineHeight: 1.2,
-                  color: '#ffffff'
-                }}
-                data-testid="text-hero-headline"
-              >
-                Your Home's <span style={{ color: '#00D4FF' }}>Digital</span><br />
-                Fingerprint Starts Here
-              </h1>
-              
-              {/* Subcopy */}
-              <p 
-                className="mb-3"
-                style={{ 
-                  fontFamily: "'Quicksand', sans-serif",
-                  fontWeight: 500,
-                  fontSize: '14px',
-                  lineHeight: 1.6,
-                  color: '#ffffff',
-                  maxWidth: '420px'
-                }}
-                data-testid="text-hero-subcopy-1"
-              >
-                A single, living record that keeps a home's systems, maintenance, upgrades, and history organized in one place.
-              </p>
-              
-              <p 
-                style={{ 
-                  fontFamily: "'Quicksand', sans-serif",
-                  fontWeight: 500,
-                  fontSize: '14px',
-                  lineHeight: 1.6,
-                  color: '#ffffff',
-                  maxWidth: '420px'
-                }}
-                data-testid="text-hero-subcopy-2"
-              >
-                Built for homeowners first — and shared seamlessly with contractors and real estate agents when it matters.
-              </p>
-            </div>
-          </div>
-          
-          {/* Mobile Hero */}
-          <div className="w-full md:hidden">
-            <img 
-              src={heroImageMobile} 
-              alt="HomeBase - Your digital home fingerprint" 
-              className="w-full h-auto"
-              data-testid="img-hero-banner-mobile"
-            />
-          </div>
-        </>
-      )}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ paddingTop: typedUser?.role === 'homeowner' ? '40px' : '40px' }}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ paddingTop: typedUser?.role === 'homeowner' ? '40px' : '40px' }}>
         <div className="text-center mb-2">
           {typedUser?.role !== 'homeowner' && (
             <Logo className={`h-[40px] sm:h-[48px] w-auto mx-auto block mb-8`} />
