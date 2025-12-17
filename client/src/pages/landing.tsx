@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Home, Wrench, Building2 } from "lucide-react";
 import heroImageDesktop from "@assets/homebase-hp-hero-desktop-nocopy_1765926450284.png";
 import heroImageTablet from "@assets/homebase-hp-hero-tablet_1765940455985.png";
-import heroImageMobile from "@assets/homebase-hp-hero-mobile_1765940455985.png";
+import heroImageMobile from "@assets/homebase-hp-hero-mobile_1765940883354.png";
 
 export default function Landing() {
   const handleRoleSelection = (role: 'homeowner' | 'contractor' | 'agent') => {
@@ -148,18 +148,18 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* Hero Section - Mobile (<640px) - Text overlaid on purple area of image */}
-      <div className="w-full sm:hidden relative">
+      {/* Hero Section - Mobile (<640px) - Image on top, purple text section below */}
+      <div className="w-full sm:hidden">
         <img 
           src={heroImageMobile} 
           alt="HomeBase - Your digital home fingerprint" 
           className="w-full h-auto"
           data-testid="img-landing-hero-mobile"
         />
-        {/* Text Overlay - Centered on purple area at bottom of image */}
+        {/* Purple Text Section Below Image */}
         <div 
-          className="absolute left-0 right-0 bottom-0 px-6 py-6 text-center"
-          style={{ top: '55%' }}
+          className="px-6 py-8 text-center"
+          style={{ backgroundColor: '#2c0f5b' }}
         >
           <p 
             className="mb-2"
@@ -174,11 +174,11 @@ export default function Landing() {
             Welcome to HomeBase
           </p>
           <h1 
-            className="mb-3"
+            className="mb-4"
             style={{ 
               fontFamily: "'Quicksand', sans-serif",
               fontWeight: 700,
-              fontSize: '22px',
+              fontSize: '24px',
               lineHeight: 1.2,
               color: '#ffffff'
             }}
@@ -187,12 +187,12 @@ export default function Landing() {
             Fingerprint Starts Here
           </h1>
           <p 
-            className="mb-2"
+            className="mb-3"
             style={{ 
               fontFamily: "'Quicksand', sans-serif",
               fontWeight: 500,
-              fontSize: '12px',
-              lineHeight: 1.5,
+              fontSize: '13px',
+              lineHeight: 1.6,
               color: '#ffffff'
             }}
           >
@@ -202,8 +202,8 @@ export default function Landing() {
             style={{ 
               fontFamily: "'Quicksand', sans-serif",
               fontWeight: 500,
-              fontSize: '12px',
-              lineHeight: 1.5,
+              fontSize: '13px',
+              lineHeight: 1.6,
               color: '#ffffff'
             }}
           >
