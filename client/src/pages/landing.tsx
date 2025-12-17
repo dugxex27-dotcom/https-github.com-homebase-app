@@ -155,11 +155,12 @@ export default function Landing() {
           </p>
           <a 
             href="#role-cards"
-            className="inline-block mt-4 px-4 py-2 rounded-lg font-bold text-sm transition-all hover:shadow-lg"
+            className="mt-4 px-4 py-2 rounded-lg font-bold text-sm transition-all hover:shadow-lg"
             style={{ 
               backgroundColor: '#ffffff',
               color: '#2c0f5b',
-              fontFamily: "'Quicksand', sans-serif"
+              fontFamily: "'Quicksand', sans-serif",
+              width: 'fit-content'
             }}
             data-testid="button-choose-role-tablet"
           >
