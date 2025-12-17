@@ -1,7 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Home, Wrench, Building2 } from "lucide-react";
-import heroImage from "@assets/homebase-hp-hero-desktop-nocopy_1765926450284.png";
+import heroImageDesktop from "@assets/homebase-hp-hero-desktop-nocopy_1765926450284.png";
+import heroImageTablet from "@assets/homebase-hp-hero-tablet_1765940455985.png";
+import heroImageMobile from "@assets/homebase-hp-hero-mobile_1765940455985.png";
 
 export default function Landing() {
   const handleRoleSelection = (role: 'homeowner' | 'contractor' | 'agent') => {
@@ -10,20 +12,19 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom, #f8f4fc, #faf9fb)' }}>
-      {/* Hero Section with Background Image */}
-      <div className="w-full relative">
+      {/* Hero Section - Desktop (1024px+) */}
+      <div className="w-full relative hidden lg:block">
         <img 
-          src={heroImage} 
+          src={heroImageDesktop} 
           alt="HomeBase - Your digital home fingerprint" 
           className="w-full h-auto"
-          data-testid="img-landing-hero"
+          data-testid="img-landing-hero-desktop"
         />
-        {/* Text Overlay */}
+        {/* Text Overlay - Left aligned */}
         <div 
           className="absolute inset-0 flex flex-col justify-center"
           style={{ paddingLeft: '5%', paddingRight: '50%' }}
         >
-          {/* Eyebrow */}
           <p 
             className="mb-2"
             style={{ 
@@ -37,8 +38,6 @@ export default function Landing() {
           >
             Welcome to HomeBase
           </p>
-          
-          {/* Headline */}
           <h1 
             className="mb-4"
             style={{ 
@@ -53,8 +52,6 @@ export default function Landing() {
             Your Home's <span style={{ color: '#00D4FF' }}>Digital</span><br />
             Fingerprint Starts Here
           </h1>
-          
-          {/* Subcopy */}
           <p 
             className="mb-3"
             style={{ 
@@ -69,7 +66,6 @@ export default function Landing() {
           >
             A single, living record that keeps a home's systems, maintenance, upgrades, and history organized in one place.
           </p>
-          
           <p 
             style={{ 
               fontFamily: "'Quicksand', sans-serif",
@@ -80,6 +76,136 @@ export default function Landing() {
               maxWidth: '420px'
             }}
             data-testid="text-hero-subcopy-2"
+          >
+            Built for homeowners first — and shared seamlessly with contractors and real estate agents when it matters.
+          </p>
+        </div>
+      </div>
+
+      {/* Hero Section - Tablet (640px - 1023px) */}
+      <div className="w-full relative hidden sm:block lg:hidden">
+        <img 
+          src={heroImageTablet} 
+          alt="HomeBase - Your digital home fingerprint" 
+          className="w-full h-auto"
+          data-testid="img-landing-hero-tablet"
+        />
+        {/* Text Overlay - Left aligned */}
+        <div 
+          className="absolute inset-0 flex flex-col justify-center"
+          style={{ paddingLeft: '5%', paddingRight: '45%' }}
+        >
+          <p 
+            className="mb-2"
+            style={{ 
+              fontFamily: "'Quicksand', sans-serif",
+              fontWeight: 700,
+              fontSize: '12px',
+              color: '#ffffff',
+              letterSpacing: '0.5px'
+            }}
+          >
+            Welcome to HomeBase
+          </p>
+          <h1 
+            className="mb-3"
+            style={{ 
+              fontFamily: "'Quicksand', sans-serif",
+              fontWeight: 700,
+              fontSize: '24px',
+              lineHeight: 1.2,
+              color: '#ffffff'
+            }}
+          >
+            Your Home's <span style={{ color: '#00D4FF' }}>Digital</span><br />
+            Fingerprint Starts Here
+          </h1>
+          <p 
+            className="mb-2"
+            style={{ 
+              fontFamily: "'Quicksand', sans-serif",
+              fontWeight: 500,
+              fontSize: '12px',
+              lineHeight: 1.5,
+              color: '#ffffff',
+              maxWidth: '320px'
+            }}
+          >
+            A single, living record that keeps a home's systems, maintenance, upgrades, and history organized in one place.
+          </p>
+          <p 
+            style={{ 
+              fontFamily: "'Quicksand', sans-serif",
+              fontWeight: 500,
+              fontSize: '12px',
+              lineHeight: 1.5,
+              color: '#ffffff',
+              maxWidth: '320px'
+            }}
+          >
+            Built for homeowners first — and shared seamlessly with contractors and real estate agents when it matters.
+          </p>
+        </div>
+      </div>
+
+      {/* Hero Section - Mobile (<640px) - Image on top, centered text below */}
+      <div className="w-full sm:hidden">
+        <img 
+          src={heroImageMobile} 
+          alt="HomeBase - Your digital home fingerprint" 
+          className="w-full h-auto"
+          data-testid="img-landing-hero-mobile"
+        />
+        {/* Text Below Image - Centered */}
+        <div 
+          className="px-6 py-8 text-center"
+          style={{ backgroundColor: '#2c0f5b' }}
+        >
+          <p 
+            className="mb-2"
+            style={{ 
+              fontFamily: "'Quicksand', sans-serif",
+              fontWeight: 700,
+              fontSize: '12px',
+              color: '#ffffff',
+              letterSpacing: '0.5px'
+            }}
+          >
+            Welcome to HomeBase
+          </p>
+          <h1 
+            className="mb-4"
+            style={{ 
+              fontFamily: "'Quicksand', sans-serif",
+              fontWeight: 700,
+              fontSize: '24px',
+              lineHeight: 1.2,
+              color: '#ffffff'
+            }}
+          >
+            Your Home's <span style={{ color: '#00D4FF' }}>Digital</span><br />
+            Fingerprint Starts Here
+          </h1>
+          <p 
+            className="mb-3"
+            style={{ 
+              fontFamily: "'Quicksand', sans-serif",
+              fontWeight: 500,
+              fontSize: '13px',
+              lineHeight: 1.6,
+              color: '#ffffff'
+            }}
+          >
+            A single, living record that keeps a home's systems, maintenance, upgrades, and history organized in one place.
+          </p>
+          <p 
+            style={{ 
+              fontFamily: "'Quicksand', sans-serif",
+              fontWeight: 500,
+              fontSize: '13px',
+              lineHeight: 1.6,
+              color: '#ffffff'
+            }}
           >
             Built for homeowners first — and shared seamlessly with contractors and real estate agents when it matters.
           </p>
