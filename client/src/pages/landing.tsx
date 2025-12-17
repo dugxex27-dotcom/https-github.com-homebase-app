@@ -246,7 +246,7 @@ export default function Landing() {
       {/* Role Selection Cards */}
       <div id="role-cards" className="max-w-6xl mx-auto px-4 py-12">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold mb-3" style={{ color: '#2c0f5b' }}>Get Started Today</h2>
+          <h2 className="font-bold mb-3 text-[24px]" style={{ color: '#2c0f5b' }}>Homes don’t just belong to one person — they move through many hands.</h2>
           <p className="text-lg text-gray-600">Choose how you'd like to use HomeBase</p>
         </div>
 
