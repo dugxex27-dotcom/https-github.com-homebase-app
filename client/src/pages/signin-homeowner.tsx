@@ -249,7 +249,7 @@ export default function SignInHomeowner() {
           description: "Logged in as demo homeowner.",
         });
         // Use window.location for a full page refresh to ensure session is picked up
-        window.location.href = '/';
+        window.location.href = '/maintenance';
       }
     } catch (error: any) {
       console.error('[Demo Login] Error:', error?.message || error);
