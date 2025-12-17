@@ -81,7 +81,6 @@ export default function Landing() {
           </p>
         </div>
       </div>
-
       {/* Hero Section - Tablet (640px - 1023px) */}
       <div className="w-full relative hidden sm:block lg:hidden">
         <img 
@@ -117,7 +116,7 @@ export default function Landing() {
               color: '#ffffff'
             }}
           >
-            Your Home's <span style={{ color: '#00D4FF' }}>Digital</span><br />
+            Your Home's <span style={{ color: '#00D4FF' }}>Digital</span><br className="text-[#ffffff]" />
             Fingerprint Starts Here
           </h1>
           <p 
@@ -147,7 +146,6 @@ export default function Landing() {
           </p>
         </div>
       </div>
-
       {/* Hero Section - Mobile (<640px) - Image on top, purple text section below */}
       <div className="w-full sm:hidden">
         <img 
@@ -211,7 +209,6 @@ export default function Landing() {
           </p>
         </div>
       </div>
-
       {/* Role Selection Cards */}
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="text-center mb-10">
