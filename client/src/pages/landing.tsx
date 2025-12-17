@@ -148,18 +148,18 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* Hero Section - Mobile (<640px) - Image on top, centered text below */}
-      <div className="w-full sm:hidden">
+      {/* Hero Section - Mobile (<640px) - Text overlaid on purple area of image */}
+      <div className="w-full sm:hidden relative">
         <img 
           src={heroImageMobile} 
           alt="HomeBase - Your digital home fingerprint" 
           className="w-full h-auto"
           data-testid="img-landing-hero-mobile"
         />
-        {/* Text Below Image - Centered */}
+        {/* Text Overlay - Centered on purple area at bottom of image */}
         <div 
-          className="px-6 py-8 text-center"
-          style={{ backgroundColor: '#2c0f5b' }}
+          className="absolute left-0 right-0 bottom-0 px-6 py-6 text-center"
+          style={{ top: '55%' }}
         >
           <p 
             className="mb-2"
@@ -174,11 +174,11 @@ export default function Landing() {
             Welcome to HomeBase
           </p>
           <h1 
-            className="mb-4"
+            className="mb-3"
             style={{ 
               fontFamily: "'Quicksand', sans-serif",
               fontWeight: 700,
-              fontSize: '24px',
+              fontSize: '22px',
               lineHeight: 1.2,
               color: '#ffffff'
             }}
@@ -187,12 +187,12 @@ export default function Landing() {
             Fingerprint Starts Here
           </h1>
           <p 
-            className="mb-3"
+            className="mb-2"
             style={{ 
               fontFamily: "'Quicksand', sans-serif",
               fontWeight: 500,
-              fontSize: '13px',
-              lineHeight: 1.6,
+              fontSize: '12px',
+              lineHeight: 1.5,
               color: '#ffffff'
             }}
           >
@@ -202,8 +202,8 @@ export default function Landing() {
             style={{ 
               fontFamily: "'Quicksand', sans-serif",
               fontWeight: 500,
-              fontSize: '13px',
-              lineHeight: 1.6,
+              fontSize: '12px',
+              lineHeight: 1.5,
               color: '#ffffff'
             }}
           >
