@@ -31,7 +31,7 @@ export default function Landing() {
               fontFamily: "'Quicksand', sans-serif",
               fontWeight: 700,
               fontSize: '14px',
-              color: '#ffffff',
+              color: '#BAACEB',
               letterSpacing: '0.5px'
             }}
             data-testid="text-hero-eyebrow"
@@ -49,8 +49,7 @@ export default function Landing() {
             }}
             data-testid="text-hero-headline"
           >
-            Your Home's <span style={{ color: '#00D4FF' }}>Digital</span><br />
-            Fingerprint Starts Here
+            Your Home's <span style={{ color: '#BAACEB' }}>Digital Record</span> Starts Here
           </h1>
           <p 
             className="mb-3"
@@ -59,7 +58,8 @@ export default function Landing() {
               fontWeight: 500,
               fontSize: '14px',
               lineHeight: 1.6,
-              color: '#ffffff'
+              color: '#ffffff',
+              maxWidth: '420px'
             }}
             data-testid="text-hero-subcopy-1"
           >
@@ -71,7 +71,8 @@ export default function Landing() {
               fontWeight: 500,
               fontSize: '14px',
               lineHeight: 1.6,
-              color: '#ffffff'
+              color: '#ffffff',
+              maxWidth: '420px'
             }}
             data-testid="text-hero-subcopy-2"
           >
@@ -98,7 +99,7 @@ export default function Landing() {
               fontFamily: "'Quicksand', sans-serif",
               fontWeight: 700,
               fontSize: '12px',
-              color: '#ffffff',
+              color: '#BAACEB',
               letterSpacing: '0.5px'
             }}
           >
@@ -114,7 +115,7 @@ export default function Landing() {
               color: '#ffffff'
             }}
           >
-            Your Home's Digital Record Starts Here
+            Your Home's <span style={{ color: '#BAACEB' }}>Digital Record</span> Starts Here
           </h1>
           <p 
             className="mb-2"
@@ -160,7 +161,7 @@ export default function Landing() {
               fontFamily: "'Quicksand', sans-serif",
               fontWeight: 700,
               fontSize: '12px',
-              color: '#ffffff',
+              color: '#BAACEB',
               letterSpacing: '0.5px'
             }}
           >
@@ -176,8 +177,7 @@ export default function Landing() {
               color: '#ffffff'
             }}
           >
-            Your Home's <span style={{ color: '#00D4FF' }}>Digital</span><br />
-            Fingerprint Starts Here
+            Your Home's <span style={{ color: '#BAACEB' }}>Digital Record</span> Starts Here
           </h1>
           <p 
             className="mb-3"
