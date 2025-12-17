@@ -9,7 +9,7 @@ import { z } from "zod";
 import { randomUUID } from "crypto";
 import rateLimit from "express-rate-limit";
 import { eq, and, or, lte, isNull, desc } from "drizzle-orm";
-import { insertHomeApplianceSchema, insertHomeApplianceManualSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema, insertHouseTransferSchema, insertContractorAnalyticsSchema, insertTaskOverrideSchema, insertCountrySchema, insertRegionSchema, insertClimateZoneSchema, insertRegulatoryBodySchema, insertRegionalMaintenanceTaskSchema, insertTaskCompletionSchema, insertAchievementSchema, insertCompanySchema, insertCompanyInviteCodeSchema, updateHouseholdProfileSchema, passwordResetTokens, taskCompletions, maintenanceTasks, customMaintenanceTasks, insertSupportTicketSchema, insertSubscriptionCycleEventSchema, completeTaskSchema, insertCrmClientSchema, insertCrmJobSchema, insertCrmQuoteSchema, insertCrmInvoiceSchema, subscriptionPlans, crmClients, crmJobs, crmQuotes, crmInvoices, securitySessions } from "@shared/schema";
+import { insertHomeApplianceSchema, insertHomeApplianceManualSchema, insertMaintenanceLogSchema, insertContractorAppointmentSchema, insertNotificationSchema, insertConversationSchema, insertMessageSchema, insertContractorReviewSchema, insertCustomMaintenanceTaskSchema, insertProposalSchema, insertHomeSystemSchema, insertContractorBoostSchema, insertHouseSchema, insertHouseTransferSchema, insertContractorAnalyticsSchema, insertTaskOverrideSchema, insertCountrySchema, insertRegionSchema, insertClimateZoneSchema, insertRegulatoryBodySchema, insertRegionalMaintenanceTaskSchema, insertTaskCompletionSchema, insertAchievementSchema, insertCompanySchema, insertCompanyInviteCodeSchema, updateHouseholdProfileSchema, passwordResetTokens, taskCompletions, maintenanceTasks, customMaintenanceTasks, insertSupportTicketSchema, insertSubscriptionCycleEventSchema, completeTaskSchema, insertCrmClientSchema, insertCrmJobSchema, insertCrmQuoteSchema, insertCrmInvoiceSchema, subscriptionPlans, crmClients, crmJobs, crmQuotes, crmInvoices, securitySessions, referralCredits } from "@shared/schema";
 import { calculateDIYSavingsAmount } from "@shared/cost-helpers";
 import pushRoutes from "./push-routes";
 import { pushService } from "./push-service";
@@ -769,6 +769,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               console.log('[STRIPE WEBHOOK] Payment intent succeeded for invoice:', invoiceId);
             }
+          }
+          break;
+        }
+
+        // Handle upcoming invoice - apply referral credits as discount
+        case 'invoice.upcoming': {
+          const invoice = event.data.object as Stripe.Invoice;
+          const customerId = invoice.customer as string;
+
+          // Only process subscription invoices
+          if (!invoice.subscription) {
+            console.log('[REFERRAL CREDITS] Skipping non-subscription invoice');
+            break;
+          }
+
+          const user = await storage.getUserByStripeCustomerId(customerId);
+          if (!user) {
+            console.log('[REFERRAL CREDITS] User not found for customer:', customerId);
+            break;
+          }
+
+          // Calculate referral credits for this user
+          try {
+            const referralCount = user.referralCount || 0;
+            if (referralCount === 0) {
+              console.log('[REFERRAL CREDITS] No referrals for user:', user.email);
+              break;
+            }
+
+            // Get referral cap based on subscription tier
+            let referralCreditCap = 5; // Default cap
+            if (user.subscriptionPlanId) {
+              const plans = await db.select().from(subscriptionPlans)
+                .where(eq(subscriptionPlans.id, user.subscriptionPlanId))
+                .limit(1);
+              if (plans.length > 0 && plans[0].referralCreditCap) {
+                referralCreditCap = parseFloat(plans[0].referralCreditCap);
+              } else if (plans.length > 0 && plans[0].monthlyPrice) {
+                referralCreditCap = parseFloat(plans[0].monthlyPrice);
+              }
+            }
+
+            // Calculate credit: $1 per active referral, capped by tier
+            const earnedCredits = referralCount * 1;
+            const creditToApply = Math.min(earnedCredits, referralCreditCap);
+
+            if (creditToApply <= 0) {
+              console.log('[REFERRAL CREDITS] No credits to apply for user:', user.email);
+              break;
+            }
+
+            console.log(`[REFERRAL CREDITS] Applying $${creditToApply} credit for ${referralCount} referrals (cap: $${referralCreditCap}) for user: ${user.email}`);
+
+            // Create or find a coupon for this amount
+            const couponId = `referral_credit_${user.id.replace(/[^a-zA-Z0-9]/g, '_')}_${creditToApply.toFixed(0)}`;
+            
+            try {
+              // Try to retrieve existing coupon
+              await stripe.coupons.retrieve(couponId);
+              console.log('[REFERRAL CREDITS] Using existing coupon:', couponId);
+            } catch (couponErr: any) {
+              // Coupon doesn't exist, create it
+              if (couponErr.code === 'resource_missing') {
+                await stripe.coupons.create({
+                  id: couponId,
+                  amount_off: Math.round(creditToApply * 100), // Convert to cents
+                  currency: 'usd',
+                  duration: 'once',
+                  name: `Referral Credit - $${creditToApply.toFixed(2)} (${referralCount} referrals)`,
+                  metadata: {
+                    userId: user.id,
+                    referralCount: referralCount.toString(),
+                    creditCap: referralCreditCap.toString(),
+                  },
+                });
+                console.log('[REFERRAL CREDITS] Created new coupon:', couponId);
+              } else {
+                throw couponErr;
+              }
+            }
+
+            // Apply the coupon to the subscription using discounts array
+            const subscriptionId = invoice.subscription as string;
+            await stripe.subscriptions.update(subscriptionId, {
+              discounts: [{ coupon: couponId }],
+            });
+
+            console.log(`[REFERRAL CREDITS] Successfully applied $${creditToApply} referral credit to subscription ${subscriptionId} for user ${user.email}`);
+
+            // Record the credit application
+            await db.update(referralCredits)
+              .set({
+                status: 'applied',
+                appliedAt: new Date(),
+                appliedToInvoiceId: invoice.id || null,
+                appliedAmount: creditToApply.toFixed(2),
+              })
+              .where(eq(referralCredits.referrerUserId, user.id));
+
+          } catch (creditError: any) {
+            console.error('[REFERRAL CREDITS] Error applying credits:', creditError.message);
+            // Don't fail the webhook for credit errors
           }
           break;
         }
