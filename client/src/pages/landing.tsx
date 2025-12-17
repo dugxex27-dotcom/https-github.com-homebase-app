@@ -59,8 +59,7 @@ export default function Landing() {
               fontWeight: 500,
               fontSize: '14px',
               lineHeight: 1.6,
-              color: '#ffffff',
-              maxWidth: '420px'
+              color: '#ffffff'
             }}
             data-testid="text-hero-subcopy-1"
           >
@@ -72,8 +71,7 @@ export default function Landing() {
               fontWeight: 500,
               fontSize: '14px',
               lineHeight: 1.6,
-              color: '#ffffff',
-              maxWidth: '420px'
+              color: '#ffffff'
             }}
             data-testid="text-hero-subcopy-2"
           >
@@ -125,8 +123,7 @@ export default function Landing() {
               fontWeight: 500,
               fontSize: '12px',
               lineHeight: 1.5,
-              color: '#ffffff',
-              maxWidth: '320px'
+              color: '#ffffff'
             }}
           >
             A single, living record that keeps a home's systems, maintenance, upgrades, and history organized in one place.
@@ -137,8 +134,7 @@ export default function Landing() {
               fontWeight: 500,
               fontSize: '12px',
               lineHeight: 1.5,
-              color: '#ffffff',
-              maxWidth: '320px'
+              color: '#ffffff'
             }}
           >
             Built for homeowners first — and shared seamlessly with contractors and real estate agents when it matters.
