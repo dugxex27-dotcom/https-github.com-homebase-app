@@ -656,6 +656,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Don't fail the webhook for affiliate errors
           }
 
+          // Handle user-to-user referral credits (Option 1: automatic credit system)
+          try {
+            // Check if this user was referred by another user (not an agent)
+            if (user.referredBy) {
+              // Find the referrer by their referral code
+              const referrer = await storage.getUserByReferralCode(user.referredBy);
+              
+              if (referrer && referrer.id !== user.id) {
+                // Check if we've already created a credit for this referral pair
+                const existingCredit = await db.select()
+                  .from(referralCredits)
+                  .where(and(
+                    eq(referralCredits.referrerUserId, referrer.id),
+                    eq(referralCredits.referredUserId, user.id)
+                  ))
+                  .limit(1);
+
+                if (existingCredit.length === 0) {
+                  // First payment from this referred user - create $1 credit for referrer
+                  await db.insert(referralCredits).values({
+                    referrerUserId: referrer.id,
+                    referredUserId: user.id,
+                    creditAmount: "1.00",
+                    status: "earned",
+                    earnedAt: new Date(),
+                    source: "referral",
+                    notes: `Credit earned from referral of ${user.email}`,
+                  });
+
+                  // Update referrer's referralCount
+                  const currentCount = referrer.referralCount || 0;
+                  await storage.upsertUser({
+                    ...referrer,
+                    referralCount: currentCount + 1,
+                  });
+
+                  console.log(`[REFERRAL CREDITS] Created $1 credit for referrer ${referrer.email} (referred: ${user.email})`);
+                } else {
+                  console.log(`[REFERRAL CREDITS] Credit already exists for referral pair: ${referrer.email} -> ${user.email}`);
+                }
+              }
+            }
+          } catch (referralError: any) {
+            console.error('[REFERRAL CREDITS] Error creating referral credit:', referralError.message);
+            // Don't fail the webhook for referral errors
+          }
+
           break;
         }
 
@@ -2964,11 +3011,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Validate referral code if provided (for homeowners/contractors)
+      // Supports both agent referrals (for affiliate payouts) and user-to-user referrals (for subscription credits)
       let referringAgent = null;
+      let referringUser = null;
       if (referralCode && (role === 'homeowner' || role === 'contractor')) {
-        referringAgent = await storage.getUserByReferralCode(referralCode);
-        if (!referringAgent || referringAgent.role !== 'agent') {
+        const referrer = await storage.getUserByReferralCode(referralCode);
+        if (!referrer) {
           return res.status(400).json({ message: "Invalid referral code" });
+        }
+        
+        if (referrer.role === 'agent') {
+          referringAgent = referrer; // Agent referral - for affiliate payouts
+        } else {
+          referringUser = referrer; // User-to-user referral - for subscription credits
         }
       }
 
@@ -3016,7 +3071,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           zipCode,
           trialEndsAt,
           maxHousesAllowed: role === 'homeowner' ? 2 : undefined, // Base plan: 2 houses during trial
-          subscriptionStatus: 'trialing'
+          subscriptionStatus: 'trialing',
+          referredBy: referralCode || undefined, // Store referral code for credit tracking
         });
 
         // Handle contractor company setup - always create a new company
