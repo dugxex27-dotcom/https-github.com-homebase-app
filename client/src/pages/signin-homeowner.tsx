@@ -124,7 +124,7 @@ export default function SignInHomeowner() {
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-      setLocation('/');
+      setLocation('/maintenance');
     },
     onError: (error: Error) => {
       toast({
@@ -149,7 +149,7 @@ export default function SignInHomeowner() {
         title: "Account created!",
         description: "Welcome to HomeBase. Your account has been created successfully.",
       });
-      setLocation('/');
+      setLocation('/maintenance');
     },
     onError: (error: Error) => {
       toast({
