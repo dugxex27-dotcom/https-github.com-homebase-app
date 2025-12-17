@@ -21,6 +21,7 @@ import Stripe from "stripe";
 import { geocodeAddress, calculateDistance } from "./geocoding-service";
 import { auditLogger, sessionManager, AuditEventTypes } from "./security-audit";
 import { smsService } from "./sms-service";
+import { notificationOrchestrator } from "./notification-orchestrator";
 
 const stripe = process.env.STRIPE_SECRET_KEY 
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" })
@@ -3261,6 +3262,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           referringAgent: referringAgent?.id || null,
         },
       });
+
+      // Send welcome SMS and email (non-blocking)
+      const userName = `${firstName || ''} ${lastName || ''}`.trim() || undefined;
+      notificationOrchestrator.sendWelcomeNotifications(user.id, userName || 'there', role)
+        .catch(err => console.error('[REGISTRATION] Error sending welcome notifications:', err));
 
       res.json({ success: true, user });
     } catch (error) {
