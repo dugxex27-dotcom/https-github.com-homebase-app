@@ -45,7 +45,8 @@ export default function Landing() {
               fontWeight: 700,
               fontSize: '32px',
               lineHeight: 1.2,
-              color: '#ffffff'
+              color: '#ffffff',
+              maxWidth: '420px'
             }}
             data-testid="text-hero-headline"
           >
