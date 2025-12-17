@@ -774,6 +774,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case 'checkout.session.completed': {
           const session = event.data.object as Stripe.Checkout.Session;
           
+          // Handle subscription checkout completions
+          if (session.mode === 'subscription' && session.metadata?.userId) {
+            const userId = session.metadata.userId;
+            const plan = session.metadata.plan;
+            const maxHouses = session.metadata.maxHouses ? parseInt(session.metadata.maxHouses) : undefined;
+            
+            const user = await storage.getUser(userId);
+            if (user) {
+              // Update user subscription status
+              const subscriptionId = session.subscription as string;
+              await storage.updateUserStripeSubscription(userId, subscriptionId, '');
+              await storage.updateUserSubscriptionStatus(userId, 'active');
+              
+              // Update max houses for homeowners
+              if (maxHouses && user.role === 'homeowner') {
+                await storage.upsertUser({
+                  ...user,
+                  maxHousesAllowed: maxHouses === 999 ? null : maxHouses, // null = unlimited
+                  subscriptionStatus: 'active',
+                });
+              }
+              
+              // Update contractor tier
+              if (user.role === 'contractor') {
+                await storage.upsertUser({
+                  ...user,
+                  subscriptionStatus: 'active',
+                  subscriptionTierName: plan === 'pro' ? 'contractor_pro' : 'contractor_basic',
+                });
+              }
+              
+              console.log(`[STRIPE WEBHOOK] Subscription activated for user: ${user.email}, plan: ${plan}`);
+            }
+          }
+          
           // Check if this is a CRM invoice payment
           if (session.metadata?.type === 'crm_invoice_payment') {
             const invoiceId = session.metadata.invoiceId;
@@ -1714,6 +1749,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Error fetching billing history:', error);
       return res.status(500).json({ message: "Failed to fetch billing history" });
+    }
+  });
+
+  // Create Stripe Checkout Session for subscription
+  app.post('/api/create-subscription-checkout', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.user.id;
+      const userRole = req.session.user.role;
+      const { plan } = req.body;
+
+      // Validate plan
+      const validHomeownerPlans = ['base', 'premium', 'premium_plus'];
+      const validContractorPlans = ['basic', 'pro'];
+      
+      if (userRole === 'homeowner' && !validHomeownerPlans.includes(plan)) {
+        return res.status(400).json({ message: "Invalid plan for homeowner" });
+      }
+      if (userRole === 'contractor' && !validContractorPlans.includes(plan)) {
+        return res.status(400).json({ message: "Invalid plan for contractor" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Define pricing for each plan
+      const pricing: Record<string, { price: number; name: string; maxHouses?: number }> = {
+        base: { price: 500, name: 'HomeBase Base Plan', maxHouses: 2 },
+        premium: { price: 2000, name: 'HomeBase Premium Plan', maxHouses: 6 },
+        premium_plus: { price: 4000, name: 'HomeBase Premium Plus Plan', maxHouses: 999 },
+        basic: { price: 2000, name: 'HomeBase Contractor Basic Plan' },
+        pro: { price: 4000, name: 'HomeBase Contractor Pro Plan' },
+      };
+
+      const selectedPlan = pricing[plan];
+      if (!selectedPlan) {
+        return res.status(400).json({ message: "Invalid plan" });
+      }
+
+      // Get or create Stripe customer
+      let stripeCustomerId = user.stripeCustomerId;
+      if (!stripeCustomerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+          metadata: { userId: user.id },
+        });
+        stripeCustomerId = customer.id;
+        await storage.upsertUser({ ...user, stripeCustomerId });
+      }
+
+      // Determine base URL for redirect
+      const baseUrl = req.headers.origin || `https://${req.headers.host}`;
+
+      // Create Stripe Checkout Session for subscription
+      const session = await stripe.checkout.sessions.create({
+        customer: stripeCustomerId,
+        mode: 'subscription',
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: selectedPlan.name,
+                description: userRole === 'homeowner' 
+                  ? `Manage up to ${selectedPlan.maxHouses === 999 ? 'unlimited' : selectedPlan.maxHouses} properties`
+                  : plan === 'pro' ? 'Full CRM access with analytics' : 'Lead management and basic CRM',
+              },
+              unit_amount: selectedPlan.price,
+              recurring: {
+                interval: 'month',
+              },
+            },
+            quantity: 1,
+          },
+        ],
+        metadata: {
+          userId: user.id,
+          plan: plan,
+          maxHouses: selectedPlan.maxHouses?.toString() || '',
+        },
+        success_url: `${baseUrl}/${userRole === 'homeowner' ? 'homeowner-account' : 'contractor-dashboard'}?subscription=success`,
+        cancel_url: `${baseUrl}/${userRole === 'homeowner' ? 'homeowner-pricing' : 'contractor-dashboard'}?subscription=cancelled`,
+      });
+
+      console.log(`[SUBSCRIPTION] Created checkout session for user ${user.email}, plan: ${plan}`);
+      return res.json({ url: session.url });
+    } catch (error: any) {
+      console.error('[SUBSCRIPTION] Error creating checkout session:', error);
+      return res.status(500).json({ message: "Failed to create checkout session" });
     }
   });
 

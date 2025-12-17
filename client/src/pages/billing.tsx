@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Check, Home, Calendar, ArrowLeft, CheckCircle, XCircle, Clock, Users, FileText, Receipt, Briefcase } from "lucide-react";
+import { Crown, Check, Home, Calendar, ArrowLeft, CheckCircle, XCircle, Clock, Users, FileText, Receipt, Briefcase, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { User, SubscriptionCycleEvent } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 type Plan = 'trial' | 'base' | 'premium' | 'premium_plus' | 'contractor' | 'contractor_pro' | 'grandfathered';
 
@@ -17,6 +18,7 @@ export default function Billing() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedPlan, setSelectedPlan] = useState<'base' | 'premium' | 'premium_plus'>('base');
+  const { toast } = useToast();
 
   // Fetch user details to get trial and subscription info
   const { data: userData } = useQuery<User>({
@@ -36,6 +38,26 @@ export default function Billing() {
       return res.json();
     },
     enabled: !!user,
+  });
+
+  // Subscription checkout mutation
+  const subscriptionMutation = useMutation({
+    mutationFn: async (plan: string) => {
+      const res = await apiRequest('/api/create-subscription-checkout', 'POST', { plan });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Subscription Error",
+        description: error.message || "Failed to start subscription. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   // Calculate trial status
@@ -69,9 +91,13 @@ export default function Billing() {
   const currentPlan = getCurrentPlan();
 
   const handleSubscribe = (plan: 'base' | 'premium' | 'premium_plus' | 'contractor' | 'contractor_pro') => {
-    // TODO: Implement Stripe checkout when keys are available
-    console.log('Subscribe to plan:', plan);
-    // This will be replaced with Stripe integration
+    // Map contractor plan names to API expected values
+    const planMap: Record<string, string> = {
+      'contractor': 'basic',
+      'contractor_pro': 'pro',
+    };
+    const apiPlan = planMap[plan] || plan;
+    subscriptionMutation.mutate(apiPlan);
   };
 
   return (
