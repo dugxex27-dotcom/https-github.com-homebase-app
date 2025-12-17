@@ -790,11 +790,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             break;
           }
 
-          // Calculate referral credits for this user
+          // Calculate referral credits for this user from the referralCredits table
           try {
-            const referralCount = user.referralCount || 0;
-            if (referralCount === 0) {
-              console.log('[REFERRAL CREDITS] No referrals for user:', user.email);
+            // Query only "earned" status credits for this referrer (not yet applied)
+            const earnedCreditsRows = await db.select()
+              .from(referralCredits)
+              .where(and(
+                eq(referralCredits.referrerUserId, user.id),
+                eq(referralCredits.status, 'earned')
+              ))
+              .orderBy(referralCredits.earnedAt); // FIFO - oldest first
+
+            if (earnedCreditsRows.length === 0) {
+              console.log('[REFERRAL CREDITS] No earned credits for user:', user.email);
               break;
             }
 
@@ -811,19 +819,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             }
 
-            // Calculate credit: $1 per active referral, capped by tier
-            const earnedCredits = referralCount * 1;
-            const creditToApply = Math.min(earnedCredits, referralCreditCap);
+            // Sum up available credits, respecting the cap (with partial support)
+            let totalCreditsToApply = 0;
+            const creditsToConsume: { id: string; fullAmount: number; appliedAmount: number }[] = [];
+            
+            for (const credit of earnedCreditsRows) {
+              const creditAmount = parseFloat(credit.creditAmount || "1.00");
+              const remainingCap = referralCreditCap - totalCreditsToApply;
+              
+              if (remainingCap <= 0) break; // Cap reached
+              
+              if (creditAmount <= remainingCap) {
+                // Full credit can be applied
+                totalCreditsToApply += creditAmount;
+                creditsToConsume.push({ id: credit.id, fullAmount: creditAmount, appliedAmount: creditAmount });
+              } else {
+                // Partial credit application - apply only what fits in remaining cap
+                totalCreditsToApply += remainingCap;
+                creditsToConsume.push({ id: credit.id, fullAmount: creditAmount, appliedAmount: remainingCap });
+                break; // Cap now fully used
+              }
+            }
 
-            if (creditToApply <= 0) {
+            if (totalCreditsToApply <= 0) {
               console.log('[REFERRAL CREDITS] No credits to apply for user:', user.email);
               break;
             }
 
-            console.log(`[REFERRAL CREDITS] Applying $${creditToApply} credit for ${referralCount} referrals (cap: $${referralCreditCap}) for user: ${user.email}`);
+            console.log(`[REFERRAL CREDITS] Applying $${totalCreditsToApply.toFixed(2)} credit from ${creditsToConsume.length} referrals (cap: $${referralCreditCap}) for user: ${user.email}`);
 
-            // Create or find a coupon for this amount
-            const couponId = `referral_credit_${user.id.replace(/[^a-zA-Z0-9]/g, '_')}_${creditToApply.toFixed(0)}`;
+            // Create a unique coupon ID for this billing cycle
+            const billingCycleId = invoice.id || new Date().toISOString().slice(0, 7);
+            const couponId = `ref_${user.id.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 20)}_${Math.round(totalCreditsToApply * 100)}`;
             
             try {
               // Try to retrieve existing coupon
@@ -834,13 +861,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (couponErr.code === 'resource_missing') {
                 await stripe.coupons.create({
                   id: couponId,
-                  amount_off: Math.round(creditToApply * 100), // Convert to cents
+                  amount_off: Math.round(totalCreditsToApply * 100), // Convert to cents
                   currency: 'usd',
                   duration: 'once',
-                  name: `Referral Credit - $${creditToApply.toFixed(2)} (${referralCount} referrals)`,
+                  name: `Referral Credit - $${totalCreditsToApply.toFixed(2)} (${creditsToConsume.length} referrals)`,
                   metadata: {
                     userId: user.id,
-                    referralCount: referralCount.toString(),
+                    creditIds: creditsToConsume.map(c => c.id).join(','),
+                    referralCount: creditsToConsume.length.toString(),
                     creditCap: referralCreditCap.toString(),
                   },
                 });
@@ -856,17 +884,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
               discounts: [{ coupon: couponId }],
             });
 
-            console.log(`[REFERRAL CREDITS] Successfully applied $${creditToApply} referral credit to subscription ${subscriptionId} for user ${user.email}`);
+            console.log(`[REFERRAL CREDITS] Successfully applied $${totalCreditsToApply.toFixed(2)} referral credit to subscription ${subscriptionId} for user ${user.email}`);
 
-            // Record the credit application
-            await db.update(referralCredits)
-              .set({
-                status: 'applied',
-                appliedAt: new Date(),
-                appliedToInvoiceId: invoice.id || null,
-                appliedAmount: creditToApply.toFixed(2),
-              })
-              .where(eq(referralCredits.referrerUserId, user.id));
+            // Get billing period from invoice lines (more accurate than invoice-level period)
+            let periodStart: Date | null = null;
+            let periodEnd: Date | null = null;
+            const invoiceLines = (invoice as any).lines?.data;
+            if (invoiceLines && invoiceLines.length > 0 && invoiceLines[0].period) {
+              periodStart = invoiceLines[0].period.start ? new Date(invoiceLines[0].period.start * 1000) : null;
+              periodEnd = invoiceLines[0].period.end ? new Date(invoiceLines[0].period.end * 1000) : null;
+            } else if (invoice.period_start && invoice.period_end) {
+              periodStart = new Date(invoice.period_start * 1000);
+              periodEnd = new Date(invoice.period_end * 1000);
+            }
+
+            // Mark consumed credits with per-credit applied amounts
+            const now = new Date();
+            for (const creditEntry of creditsToConsume) {
+              const isFullyConsumed = creditEntry.appliedAmount === creditEntry.fullAmount;
+              
+              await db.update(referralCredits)
+                .set({
+                  status: isFullyConsumed ? 'applied' : 'partial', // Mark partial if not fully consumed
+                  appliedAt: now,
+                  appliedToInvoiceId: invoice.id || null,
+                  appliedAmount: creditEntry.appliedAmount.toFixed(2), // Actual amount applied from this credit
+                  billingPeriodStart: periodStart,
+                  billingPeriodEnd: periodEnd,
+                  // If partial, update creditAmount to remaining balance
+                  ...(isFullyConsumed ? {} : { creditAmount: (creditEntry.fullAmount - creditEntry.appliedAmount).toFixed(2) }),
+                })
+                .where(eq(referralCredits.id, creditEntry.id));
+            }
+
+            console.log(`[REFERRAL CREDITS] Marked ${creditsToConsume.length} credits as applied/partial`);
 
           } catch (creditError: any) {
             console.error('[REFERRAL CREDITS] Error applying credits:', creditError.message);
