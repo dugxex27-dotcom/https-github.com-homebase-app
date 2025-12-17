@@ -91,7 +91,7 @@ export async function sendWelcomeEmail(userId: string, userName: string, userRol
     : `
       <p>As a homeowner on HomeBase, you can:</p>
       <ul>
-        <li>Track your home's maintenance history like a Carfax</li>
+        <li>Track your home maintenance history (think CARFAX for your home)</li>
         <li>Get seasonal maintenance reminders</li>
         <li>Find trusted contractors in your area</li>
         <li>Monitor your home's health score</li>
@@ -117,7 +117,7 @@ export async function sendWelcomeEmail(userId: string, userName: string, userRol
     </div>
   `;
 
-  const text = `Welcome to HomeBase, ${userName || 'there'}! Thanks for joining. You have a 14-day free trial to explore all our premium features. Visit gotohomebase.com to get started.`;
+  const text = `Welcome to HomeBase, ${userName || 'there'}! Thanks for joining - think of us as CARFAX for your home. You have a 14-day free trial to explore all our premium features. Visit gotohomebase.com to get started.`;
 
   return sendEmail({
     to: user.email,
